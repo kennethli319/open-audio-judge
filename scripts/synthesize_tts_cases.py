@@ -142,6 +142,7 @@ def synthesize_cases(
         derived_case["id"] = f"{case.id}-local-tts"
         derived_case.pop("audio_url", None)
         derived_case["audio_path"] = manifest_audio_path
+        text_context_fields = _text_context_fields(EvaluationCase.model_validate(derived_case))
         metadata = dict(derived_case.get("metadata", {}))
         metadata.update(
             {
@@ -152,6 +153,7 @@ def synthesize_cases(
                 "synthesis_lang_code": lang_code,
                 "source_case_id": case.id,
                 "reference_text_sha256": _sha256_text(target_text),
+                "text_context_fields": text_context_fields,
                 "text_sidecar_written": keep_text_sidecars,
                 **audio_metadata,
             }
@@ -195,6 +197,10 @@ def summarize_synthesized_cases(cases: Iterable[dict[str, Any]]) -> dict[str, An
         ),
         "by_sample_kind": _sorted_counts(
             str(metadata.get("sample_kind") or "unknown") for metadata in metadata_list
+        ),
+        "by_text_context_fields": _sorted_counts(
+            _text_context_field_key(metadata.get("text_context_fields"))
+            for metadata in metadata_list
         ),
         "audio_duration_seconds": _numeric_summary(durations),
         "audio_bytes": _numeric_summary(byte_counts),
@@ -273,6 +279,24 @@ def _duplicate_case_ids(values: Iterable[str]) -> list[str]:
             duplicates.add(value)
         seen.add(value)
     return sorted(duplicates)
+
+
+def _text_context_fields(case: EvaluationCase) -> list[str]:
+    fields: list[str] = []
+    if (case.reference_text or "").strip():
+        fields.append("reference_text")
+    if (case.candidate_text or "").strip():
+        fields.append("candidate_text")
+    if any(turn.content.strip() for turn in case.turns):
+        fields.append("turns")
+    return fields
+
+
+def _text_context_field_key(value: Any) -> str:
+    if not isinstance(value, list):
+        return "unknown"
+    fields = sorted(str(item) for item in value if str(item).strip())
+    return "+".join(fields) if fields else "none"
 
 
 def _sorted_counts(values: Iterable[str]) -> dict[str, int]:

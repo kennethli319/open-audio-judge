@@ -48,6 +48,7 @@ def test_synthesize_cases_dry_run_writes_local_audio_manifest(tmp_path: Path) ->
     assert written[0]["reference_text"] == "Call me at 09:45."
     assert written[0]["metadata"]["sample_kind"] == "local_synthetic_tts"
     assert written[0]["metadata"]["source_case_id"] == "tts eval/001"
+    assert written[0]["metadata"]["text_context_fields"] == ["reference_text", "turns"]
     assert written[0]["metadata"]["text_sidecar_written"] is True
     assert written[0]["metadata"]["reference_text_sha256"] == (
         "836983522ec15bbf2ce214aa8c1cdb1d3dc4dc7bbce25cc950909cc5dfaa56bf"
@@ -94,6 +95,7 @@ def test_write_synthesis_summary_is_metadata_only_for_dry_run(tmp_path: Path) ->
         "by_sample_kind": {"local_synthetic_tts": 1},
         "by_slice": {"dates_times": 1},
         "by_source_category": {"instruction_constraints": 1},
+        "by_text_context_fields": {"reference_text": 1},
         "total_cases": 1,
         "with_audio_sha256": 0,
     }
@@ -130,6 +132,49 @@ def test_synthesize_cases_can_skip_text_sidecars_in_dry_run(tmp_path: Path) -> N
     assert derived[0]["metadata"]["text_sidecar_written"] is False
     assert not (tmp_path / "out" / "text" / "tts-private.txt").exists()
     assert (tmp_path / "out" / "tts_audio_cases.jsonl").exists()
+
+
+def test_synthesis_summary_counts_text_context_field_combinations(
+    tmp_path: Path,
+) -> None:
+    cases_path = tmp_path / "tts_cases.jsonl"
+    cases_path.write_text(
+        "\n".join(
+            json.dumps(case)
+            for case in [
+                {
+                    "id": "reference-only",
+                    "task": "tts_naturalness",
+                    "reference_text": "Read this.",
+                },
+                {
+                    "id": "candidate-and-turns",
+                    "task": "tts_naturalness",
+                    "turns": [{"role": "user", "content": "Answer tersely."}],
+                    "reference_text": "Yes.",
+                    "candidate_text": "Yes.",
+                },
+            ]
+        )
+        + "\n",
+        encoding="utf-8",
+    )
+
+    derived = synthesize_cases(
+        cases_path=cases_path,
+        out_dir=tmp_path / "out",
+        tts_bin=Path("/missing/local-tts-speak"),
+        model="mlx-community/chatterbox-turbo-6bit",
+        voice="af_heart",
+        lang_code="en",
+        audio_format="wav",
+        dry_run=True,
+    )
+
+    assert summarize_synthesized_cases(derived)["by_text_context_fields"] == {
+        "candidate_text+reference_text+turns": 1,
+        "reference_text": 1,
+    }
 
 
 def test_synthesize_cases_uses_reported_tts_output_path(
