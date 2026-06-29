@@ -66,6 +66,10 @@ def build_tts_cases_command(
         int | None,
         typer.Option("--per-slice-limit", help="Maximum cases to keep for each TTS slice."),
     ] = None,
+    hash_source_ids: Annotated[
+        bool,
+        typer.Option("--hash-source-ids", help="Hash source row ids in generated case metadata."),
+    ] = False,
     summary_out: Annotated[
         Optional[Path],
         typer.Option("--summary-out", help="Optional metadata-only JSON summary path."),
@@ -81,6 +85,7 @@ def build_tts_cases_command(
         category_filter=category_filter,
         slice_filter=slice_filter,
         per_slice_limit=per_slice_limit,
+        hash_source_ids=hash_source_ids,
     )
     write_cases_jsonl(cases, out)
     summary = summarize_tts_cases(cases)

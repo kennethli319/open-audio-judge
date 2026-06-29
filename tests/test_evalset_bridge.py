@@ -1,3 +1,4 @@
+import hashlib
 import json
 from pathlib import Path
 
@@ -77,6 +78,25 @@ def test_build_tts_cases_normalizes_scalar_and_empty_tags() -> None:
     assert cases[0].metadata["source_tags"] == ["privacy"]
     assert cases[0].metadata["tts_slice"] == "safety_privacy"
     assert cases[1].metadata["source_tags"] == ["json"]
+
+
+def test_build_tts_cases_can_hash_private_source_ids() -> None:
+    records = [
+        {
+            "id": "customer-session-2026-06-29-private-row",
+            "category": "structured_output",
+            "task": "json_decision",
+            "ideal_answer": '{"decision":"approve"}',
+        }
+    ]
+
+    cases = build_tts_cases(records, source_name="fixture", hash_source_ids=True)
+
+    expected_hash = hashlib.sha256(records[0]["id"].encode("utf-8")).hexdigest()
+    assert cases[0].id == f"tts-fixture-source-{expected_hash[:12]}"
+    assert cases[0].metadata["source_id"] == f"source-{expected_hash[:12]}"
+    assert cases[0].metadata["source_id_sha256"] == expected_hash
+    assert records[0]["id"] not in json.dumps(cases[0].model_dump(), ensure_ascii=False)
 
 
 def test_build_tts_cases_supports_category_filter_and_limit() -> None:

@@ -52,8 +52,12 @@ oaj build-tts-cases \
   --source /path/to/evalset/seed_v0.jsonl \
   --source-name ome \
   --limit 25 \
+  --hash-source-ids \
   --out runs/tts-evalset/cases.jsonl
 ```
+
+Use `--hash-source-ids` for private evalsets when row ids may reveal source details. The generated
+cases keep a deterministic `source_id_sha256` for local traceability without writing the raw row id.
 
 For a small synthesis batch with deliberate coverage, filter or cap classified slices:
 

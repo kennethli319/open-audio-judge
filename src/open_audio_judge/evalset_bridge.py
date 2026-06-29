@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import hashlib
 import json
 import re
 from collections import Counter
@@ -93,6 +94,7 @@ def build_tts_cases(
     category_filter: set[str] | None = None,
     slice_filter: set[str] | None = None,
     per_slice_limit: int | None = None,
+    hash_source_ids: bool = False,
 ) -> list[EvaluationCase]:
     cases: list[EvaluationCase] = []
     slice_counts: Counter[str] = Counter()
@@ -101,7 +103,11 @@ def build_tts_cases(
             continue
         if not is_tts_slice_candidate(record):
             continue
-        case = tts_case_from_evalset_record(record, source_name=source_name)
+        case = tts_case_from_evalset_record(
+            record,
+            source_name=source_name,
+            hash_source_id=hash_source_ids,
+        )
         if case is None:
             continue
         tts_slice = str(case.metadata.get("tts_slice", "general_response"))
@@ -139,12 +145,14 @@ def tts_case_from_evalset_record(
     record: dict[str, Any],
     *,
     source_name: str,
+    hash_source_id: bool = False,
 ) -> EvaluationCase | None:
     target_text = str(record.get("ideal_answer") or "").strip()
     if not target_text:
         return None
 
-    source_id = str(record.get("id") or "unknown")
+    raw_source_id = str(record.get("id") or "unknown")
+    source_id = _hashed_source_id(raw_source_id) if hash_source_id else raw_source_id
     turns = record.get("turns") if isinstance(record.get("turns"), list) else []
     normalized_turns = [
         {
@@ -169,6 +177,8 @@ def tts_case_from_evalset_record(
         "tts_slice": classify_tts_slice(record, target_text),
         "requires_synthesis": True,
     }
+    if hash_source_id:
+        case_metadata["source_id_sha256"] = _sha256_text(raw_source_id)
 
     return EvaluationCase(
         id=f"tts-{source_name}-{_slugify(source_id)}",
@@ -259,6 +269,14 @@ def _metadata_tags(metadata: dict[str, Any]) -> list[str]:
 def _slugify(value: str) -> str:
     slug = re.sub(r"[^a-zA-Z0-9]+", "-", value.strip().lower()).strip("-")
     return slug or "unknown"
+
+
+def _hashed_source_id(source_id: str) -> str:
+    return f"source-{_sha256_text(source_id)[:12]}"
+
+
+def _sha256_text(text: str) -> str:
+    return hashlib.sha256(text.encode("utf-8")).hexdigest()
 
 
 def _sorted_counts(values: Iterable[str]) -> dict[str, int]:
