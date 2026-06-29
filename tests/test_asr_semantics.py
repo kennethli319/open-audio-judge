@@ -20,3 +20,23 @@ def test_negation_change_is_high_impact() -> None:
 
     assert diff.score <= 40
     assert "negation_error" in diff.error_categories
+
+
+def test_equivalent_digit_and_word_number_is_not_high_impact() -> None:
+    diff = analyze_reference_candidate(
+        "Please transfer fifteen dollars to Maya before Friday.",
+        "Please transfer 15 dollars to Maya before Friday.",
+    )
+
+    assert diff.score > 80
+    assert "number_error" not in diff.error_categories
+
+
+def test_multiword_number_change_is_high_impact() -> None:
+    diff = analyze_reference_candidate(
+        "The invoice total is twenty one dollars.",
+        "The invoice total is twenty two dollars.",
+    )
+
+    assert diff.score <= 55
+    assert "number_error" in diff.error_categories

@@ -58,6 +58,44 @@ NUMBER_WORDS = {
     "billion",
 }
 
+NUMBER_WORD_VALUES = {
+    "zero": 0,
+    "one": 1,
+    "two": 2,
+    "three": 3,
+    "four": 4,
+    "five": 5,
+    "six": 6,
+    "seven": 7,
+    "eight": 8,
+    "nine": 9,
+    "ten": 10,
+    "eleven": 11,
+    "twelve": 12,
+    "thirteen": 13,
+    "fourteen": 14,
+    "fifteen": 15,
+    "sixteen": 16,
+    "seventeen": 17,
+    "eighteen": 18,
+    "nineteen": 19,
+    "twenty": 20,
+    "thirty": 30,
+    "forty": 40,
+    "fifty": 50,
+    "sixty": 60,
+    "seventy": 70,
+    "eighty": 80,
+    "ninety": 90,
+}
+
+NUMBER_SCALE_VALUES = {
+    "hundred": 100,
+    "thousand": 1_000,
+    "million": 1_000_000,
+    "billion": 1_000_000_000,
+}
+
 
 @dataclass(frozen=True)
 class SemanticAsrDiff:
@@ -118,7 +156,7 @@ def analyze_reference_candidate(reference: str, candidate: str) -> SemanticAsrDi
         notes.append("Prioritize negation and polarity robustness; these errors often reverse user intent.")
         score_caps.append(40)
 
-    if token_family_changed(ref_words, cand_words, NUMBER_WORDS) or digit_tokens(ref_words) != digit_tokens(cand_words):
+    if number_values(ref_words) != number_values(cand_words):
         categories.append("number_error")
         differences.append("numeric content changed")
         notes.append("Add targeted evaluation and augmentation for numbers, quantities, dates, and currencies.")
@@ -167,8 +205,42 @@ def token_family_changed(left: list[str], right: list[str], family: set[str]) ->
     return [token for token in left if token in family] != [token for token in right if token in family]
 
 
-def digit_tokens(words: list[str]) -> list[str]:
-    return [word for word in words if any(char.isdigit() for char in word)]
+def number_values(words: list[str]) -> list[str]:
+    values: list[str] = []
+    index = 0
+    while index < len(words):
+        word = words[index]
+        if any(char.isdigit() for char in word):
+            values.append(normalize_digit_token(word))
+            index += 1
+            continue
+        if word in NUMBER_WORDS:
+            value, index = parse_number_words(words, index)
+            values.append(str(value))
+            continue
+        index += 1
+    return values
+
+
+def normalize_digit_token(word: str) -> str:
+    return word.replace(",", "")
+
+
+def parse_number_words(words: list[str], start: int) -> tuple[int, int]:
+    total = 0
+    current = 0
+    index = start
+    while index < len(words) and words[index] in NUMBER_WORDS:
+        word = words[index]
+        if word in NUMBER_WORD_VALUES:
+            current += NUMBER_WORD_VALUES[word]
+        elif word == "hundred":
+            current = max(current, 1) * NUMBER_SCALE_VALUES[word]
+        else:
+            total += max(current, 1) * NUMBER_SCALE_VALUES[word]
+            current = 0
+        index += 1
+    return total + current, index
 
 
 def entity_like_tokens(text: str) -> list[str]:
