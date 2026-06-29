@@ -81,10 +81,18 @@ def _string_list(value: Any) -> list[str]:
 
 
 def _parse_score(value: Any) -> int:
-    try:
-        score = int(value)
-    except (TypeError, ValueError) as exc:
-        raise ValueError("Judge JSON overall_score must be an integer from 1 to 100.") from exc
+    if isinstance(value, bool):
+        raise ValueError("Judge JSON overall_score must be an integer from 1 to 100.")
+
+    if isinstance(value, int):
+        score = value
+    elif isinstance(value, str):
+        cleaned = value.strip()
+        if not re.fullmatch(r"[+-]?\d+", cleaned):
+            raise ValueError("Judge JSON overall_score must be an integer from 1 to 100.")
+        score = int(cleaned)
+    else:
+        raise ValueError("Judge JSON overall_score must be an integer from 1 to 100.")
 
     if not 1 <= score <= 100:
         raise ValueError("Judge JSON overall_score must be an integer from 1 to 100.")

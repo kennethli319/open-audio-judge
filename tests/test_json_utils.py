@@ -1,3 +1,5 @@
+import json
+
 import pytest
 
 from open_audio_judge.json_utils import extract_json_object, parse_judge_output
@@ -52,3 +54,9 @@ def test_parse_rejects_out_of_range_score() -> None:
 def test_parse_rejects_non_integer_score() -> None:
     with pytest.raises(ValueError, match="overall_score must be an integer from 1 to 100"):
         parse_judge_output('{"overall_score": "high", "reason": "Not numeric."}')
+
+
+@pytest.mark.parametrize("score", ["88.5", 88.5, True])
+def test_parse_rejects_fractional_and_bool_scores(score: object) -> None:
+    with pytest.raises(ValueError, match="overall_score must be an integer from 1 to 100"):
+        parse_judge_output(json.dumps({"overall_score": score, "reason": "Not an integer."}))
