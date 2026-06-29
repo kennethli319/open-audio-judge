@@ -37,6 +37,8 @@ def test_write_html_report(tmp_path: Path) -> None:
     assert "preserved" in html
     assert "Error Categories" in html
     assert "no error" in html
+    assert "High-Impact Errors" in html
+    assert "No high-impact semantic errors" in html
     assert "No action needed." in html
 
 
@@ -76,4 +78,5 @@ def test_write_html_report_highlights_priority_semantic_cases(tmp_path: Path) ->
     assert "Priority Cases" in html
     assert "low-wer-negation" in html
     assert "negation error" in html
+    assert "High-Impact Errors" in html
     assert "The transcript reverses the operational instruction." in html

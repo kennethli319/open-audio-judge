@@ -31,6 +31,7 @@ def render_html_report(results: list[EvaluationResult]) -> str:
     buckets = _bucket_counts(scores)
     meaning_counts = _field_counts(result.meaning_preservation for result in results)
     category_counts = _category_counts(results)
+    high_impact_counts = _high_impact_category_counts(results)
     priority_cases = _priority_cases(results)
 
     rows = "\n".join(_render_row(result) for result in results)
@@ -42,6 +43,10 @@ def render_html_report(results: list[EvaluationResult]) -> str:
     )
     meaning_markup = _render_count_list(meaning_counts, empty_label="No meaning diagnostics")
     category_markup = _render_count_list(category_counts, empty_label="No error categories")
+    high_impact_markup = _render_count_list(
+        high_impact_counts,
+        empty_label="No high-impact semantic errors",
+    )
     priority_markup = _render_priority_cases(priority_cases)
 
     return f"""<!doctype html>
@@ -161,6 +166,7 @@ def render_html_report(results: list[EvaluationResult]) -> str:
     <section class="summary">
       <div class="metric"><span>Meaning Preservation</span>{meaning_markup}</div>
       <div class="metric"><span>Error Categories</span>{category_markup}</div>
+      <div class="metric"><span>High-Impact Errors</span>{high_impact_markup}</div>
     </section>
 
     <h2>Priority Cases</h2>
@@ -227,6 +233,17 @@ def _category_counts(results: list[EvaluationResult]) -> list[tuple[str, int]]:
     counts: Counter[str] = Counter()
     for result in results:
         counts.update(result.error_categories)
+    return counts.most_common()
+
+
+def _high_impact_category_counts(results: list[EvaluationResult]) -> list[tuple[str, int]]:
+    counts: Counter[str] = Counter()
+    for result in results:
+        counts.update(
+            category
+            for category in result.error_categories
+            if category in HIGH_IMPACT_CATEGORIES
+        )
     return counts.most_common()
 
 
