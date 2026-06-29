@@ -101,13 +101,16 @@ def synthesize_cases(
                 lang_code=lang_code,
                 audio_format=audio_format,
             )
+            manifest_audio_path = _manifest_audio_path(audio_path, out_dir)
             if not audio_path.exists() or audio_path.stat().st_size == 0:
                 raise FileNotFoundError(f"Expected synthesized audio at {audio_path}")
+        else:
+            manifest_audio_path = _manifest_audio_path(audio_path, out_dir)
 
         derived_case = case.model_dump(exclude_none=True)
         derived_case["id"] = f"{case.id}-local-tts"
         derived_case.pop("audio_url", None)
-        derived_case["audio_path"] = str(audio_path.relative_to(out_dir))
+        derived_case["audio_path"] = manifest_audio_path
         metadata = dict(derived_case.get("metadata", {}))
         metadata.update(
             {
@@ -172,6 +175,15 @@ def _run_tts(
 
 def _safe_stem(value: str) -> str:
     return "".join(char if char.isalnum() or char in {"-", "_"} else "-" for char in value).strip("-") or "case"
+
+
+def _manifest_audio_path(audio_path: Path, out_dir: Path) -> str:
+    try:
+        return str(audio_path.resolve().relative_to(out_dir.resolve()))
+    except ValueError as exc:
+        raise ValueError(
+            f"Synthesized audio output must be under the output directory: {audio_path}"
+        ) from exc
 
 
 if __name__ == "__main__":

@@ -91,6 +91,47 @@ def test_synthesize_cases_uses_reported_tts_output_path(
     assert written[0]["audio_path"] == "audio/tts-001_0001.wav"
 
 
+def test_synthesize_cases_rejects_reported_audio_outside_output_dir(
+    tmp_path: Path, monkeypatch
+) -> None:
+    cases_path = tmp_path / "tts_cases.jsonl"
+    cases_path.write_text(
+        json.dumps(
+            {
+                "id": "tts-001",
+                "task": "tts_naturalness",
+                "reference_text": "Synthetic sample.",
+            }
+        )
+        + "\n",
+        encoding="utf-8",
+    )
+    generated = tmp_path / "elsewhere" / "tts-001.wav"
+    tts_bin = tmp_path / "bin" / "local-tts-speak"
+    tts_bin.parent.mkdir()
+    tts_bin.write_text("#!/bin/sh\n", encoding="utf-8")
+
+    def fake_run(*args, **kwargs):
+        generated.parent.mkdir(parents=True, exist_ok=True)
+        generated.write_bytes(b"RIFF....WAVE")
+        return subprocess.CompletedProcess(args[0], 0, stdout=json.dumps({"output": str(generated)}))
+
+    monkeypatch.setattr("scripts.synthesize_tts_cases.subprocess.run", fake_run)
+
+    with pytest.raises(ValueError, match="under the output directory"):
+        synthesize_cases(
+            cases_path=cases_path,
+            out_dir=tmp_path / "out",
+            tts_bin=tts_bin,
+            model="mlx-community/chatterbox-turbo-6bit",
+            voice="af_heart",
+            lang_code="en",
+            audio_format="wav",
+        )
+
+    assert not (tmp_path / "out" / "tts_audio_cases.jsonl").exists()
+
+
 def test_synthesize_cases_rejects_cases_without_reference_text(tmp_path: Path) -> None:
     cases_path = tmp_path / "tts_cases.jsonl"
     cases_path.write_text(
