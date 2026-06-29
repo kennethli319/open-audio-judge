@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import json
 from pathlib import Path
 
 import pytest
@@ -90,4 +91,43 @@ def test_gemini_sample_record_issues_explain_rerun_reason(
     assert [(issue.case_id, issue.reason) for issue in issues] == [
         ("asr-open-armstrong-small-step", "changed_fingerprint"),
         ("asr-open-jfk-moon", "missing_record"),
+    ]
+
+
+def test_gemini_sample_record_issues_detect_duplicate_records(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    records_path = tmp_path / "records.jsonl"
+    record = {
+        "base_case_id": "asr-open-armstrong-small-step",
+        "case_id": "asr-open-armstrong-small-step-wav",
+        "provider": "gemini",
+        "model": "gemini-3.5-flash",
+        "sample_fingerprint": "current",
+        "status": "ok",
+    }
+    records_path.write_text(
+        "\n".join([json.dumps(record), json.dumps(record)]) + "\n",
+        encoding="utf-8",
+    )
+
+    def current_fingerprints(provider: str, model: str) -> dict[str, str]:
+        assert provider == "gemini"
+        assert model == "gemini-3.5-flash"
+        return {"asr-open-armstrong-small-step": "current"}
+
+    monkeypatch.setattr(
+        "scripts.gemini_sample_records.expected_fingerprints",
+        current_fingerprints,
+    )
+
+    issues = record_issues(
+        records_path,
+        provider="gemini",
+        model="gemini-3.5-flash",
+    )
+
+    assert [(issue.case_id, issue.reason) for issue in issues] == [
+        ("asr-open-armstrong-small-step", "duplicate_record"),
     ]

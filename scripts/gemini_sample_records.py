@@ -70,20 +70,25 @@ def missing_records(records_path: Path, provider: str, model: str) -> list[str]:
 
 def record_issues(records_path: Path, provider: str, model: str) -> list[SampleRecordIssue]:
     expected = expected_fingerprints(provider, model)
-    records = {
-        record["base_case_id"]: record
-        for record in read_jsonl(records_path)
-        if record.get("provider") == provider and record.get("model") == model
-    }
+    records_by_case: dict[str, list[dict[str, Any]]] = {}
+    for record in read_jsonl(records_path):
+        if record.get("provider") != provider or record.get("model") != model:
+            continue
+        base_case_id = record.get("base_case_id")
+        if not isinstance(base_case_id, str):
+            continue
+        records_by_case.setdefault(base_case_id, []).append(record)
 
     issues: list[SampleRecordIssue] = []
     for case_id, fingerprint in expected.items():
-        record = records.get(case_id)
-        if not record:
+        records = records_by_case.get(case_id, [])
+        if not records:
             issues.append(SampleRecordIssue(case_id=case_id, reason="missing_record"))
-        elif record.get("sample_fingerprint") != fingerprint:
+        elif len(records) > 1:
+            issues.append(SampleRecordIssue(case_id=case_id, reason="duplicate_record"))
+        elif records[0].get("sample_fingerprint") != fingerprint:
             issues.append(SampleRecordIssue(case_id=case_id, reason="changed_fingerprint"))
-        elif record.get("status") != "ok":
+        elif records[0].get("status") != "ok":
             issues.append(SampleRecordIssue(case_id=case_id, reason="non_ok_status"))
     return issues
 

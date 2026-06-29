@@ -46,7 +46,7 @@ python scripts/gemini_sample_records.py check
 ```
 
 This check fingerprints the sample manifest data, judge id/version, provider, and model. Rerun Gemini only when the check reports a missing/changed sample, such as after editing an open sample manifest or judge prompt.
-The check output labels the rerun reason as `missing_record`, `changed_fingerprint`, or `non_ok_status`.
+The check output labels the rerun reason as `missing_record`, `changed_fingerprint`, `non_ok_status`, or `duplicate_record`.
 
 ## Running A Smoke
 
