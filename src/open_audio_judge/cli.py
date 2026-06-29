@@ -81,6 +81,13 @@ def build_tts_cases_command(
         Optional[Path],
         typer.Option("--summary-out", help="Optional metadata-only JSON summary path."),
     ] = None,
+    summary_source_examples: Annotated[
+        bool,
+        typer.Option(
+            "--summary-source-examples/--no-summary-source-examples",
+            help="Include capped example source ids in the optional summary.",
+        ),
+    ] = True,
 ) -> None:
     category_filter = {item.strip() for item in categories.split(",") if item.strip()} or None
     slice_filter = {item.strip() for item in slice_labels.split(",") if item.strip()} or None
@@ -96,12 +103,16 @@ def build_tts_cases_command(
         include_source_task=include_source_task,
     )
     write_cases_jsonl(cases, out)
-    summary = summarize_tts_cases(cases)
+    summary = summarize_tts_cases(cases, include_example_source_ids=summary_source_examples)
     console.print(f"[bold]Wrote {len(cases)} TTS cases[/bold]")
     console.print(f"Cases: {out}")
     console.print(f"Slices: {summary.by_slice}")
     if summary_out is not None:
-        write_tts_summary_json(cases, summary_out)
+        write_tts_summary_json(
+            cases,
+            summary_out,
+            include_example_source_ids=summary_source_examples,
+        )
         console.print(f"Summary: {summary_out}")
 
 

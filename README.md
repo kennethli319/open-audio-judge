@@ -70,6 +70,7 @@ oaj build-tts-cases \
   --slices numbers,dates_times,code_like,punctuation_format \
   --per-slice-limit 2 \
   --summary-out runs/tts-evalset/smoke-summary.json \
+  --no-summary-source-examples \
   --out runs/tts-evalset/smoke-cases.jsonl
 ```
 
@@ -78,7 +79,8 @@ The resulting draft cases use `reference_text` as the target text to synthesize 
 Do not pass draft text-only cases to hosted audio judges until an `audio_path` or `audio_url` has
 been attached. The optional summary is metadata-only: counts by classified TTS slice and source
 category, text-length min/max/average, capped example source ids by slice, and the number of cases
-still requiring synthesis.
+still requiring synthesis. Pass `--no-summary-source-examples` when even source row ids should stay
+out of local summary artifacts.
 
 To synthesize a small local Chatterbox sample set from a private manifest, write artifacts under
 `runs/` and keep only the derived local manifest there:

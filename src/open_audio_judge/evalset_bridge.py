@@ -201,7 +201,11 @@ def write_cases_jsonl(cases: Iterable[EvaluationCase], path: Path) -> Path:
     return path
 
 
-def summarize_tts_cases(cases: Iterable[EvaluationCase]) -> TtsCaseSummary:
+def summarize_tts_cases(
+    cases: Iterable[EvaluationCase],
+    *,
+    include_example_source_ids: bool = True,
+) -> TtsCaseSummary:
     case_list = list(cases)
     return TtsCaseSummary(
         total_cases=len(case_list),
@@ -215,13 +219,20 @@ def summarize_tts_cases(cases: Iterable[EvaluationCase]) -> TtsCaseSummary:
         ),
         requires_synthesis=sum(1 for case in case_list if case.metadata.get("requires_synthesis") is True),
         text_length=_text_length_summary(case.reference_text or "" for case in case_list),
-        example_source_ids_by_slice=_example_source_ids_by_slice(case_list),
+        example_source_ids_by_slice=(
+            _example_source_ids_by_slice(case_list) if include_example_source_ids else {}
+        ),
     )
 
 
-def write_tts_summary_json(cases: Iterable[EvaluationCase], path: Path) -> Path:
+def write_tts_summary_json(
+    cases: Iterable[EvaluationCase],
+    path: Path,
+    *,
+    include_example_source_ids: bool = True,
+) -> Path:
     path.parent.mkdir(parents=True, exist_ok=True)
-    summary = summarize_tts_cases(cases)
+    summary = summarize_tts_cases(cases, include_example_source_ids=include_example_source_ids)
     path.write_text(json.dumps(summary.as_dict(), indent=2, sort_keys=True) + "\n", encoding="utf-8")
     return path
 

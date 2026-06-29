@@ -322,3 +322,27 @@ def test_summarize_tts_cases_caps_example_source_ids_per_slice() -> None:
     assert summary.example_source_ids_by_slice == {
         "code_like": ["json-0", "json-1", "json-2"]
     }
+
+
+def test_summarize_tts_cases_can_omit_example_source_ids(tmp_path: Path) -> None:
+    records = [
+        {
+            "id": "private-user-request-row-2026-06-29",
+            "category": "structured_output",
+            "task": "json_decision",
+            "ideal_answer": '{"decision":"approve"}',
+        }
+    ]
+    cases = build_tts_cases(records, source_name="fixture")
+
+    summary = summarize_tts_cases(cases, include_example_source_ids=False)
+    out = write_tts_summary_json(
+        cases,
+        tmp_path / "summary.json",
+        include_example_source_ids=False,
+    )
+    summary_text = out.read_text(encoding="utf-8")
+
+    assert summary.example_source_ids_by_slice == {}
+    assert json.loads(summary_text)["example_source_ids_by_slice"] == {}
+    assert "private-user-request-row" not in summary_text
