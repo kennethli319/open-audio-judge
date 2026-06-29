@@ -36,6 +36,17 @@ This writes:
 
 Use those derived manifests when a provider works more reliably with inline local audio than remote URLs.
 
+## Gemini Sample Records
+
+Gemini smoke results for these development samples are committed in `examples/gemini_sample_records.jsonl`.
+Before rerunning the same samples, check whether the recorded result is still current:
+
+```bash
+python scripts/gemini_sample_records.py check
+```
+
+This check fingerprints the sample manifest data, judge id/version, provider, and model. Rerun Gemini only when the check reports a missing/changed sample, such as after editing an open sample manifest or judge prompt.
+
 ## Running A Smoke
 
 ```bash
@@ -43,6 +54,7 @@ oaj eval --provider mock --judge asr_error --cases examples/asr_open_samples.jso
 oaj eval --provider gemini --judge tts_naturalness --cases examples/tts_open_samples.jsonl --out runs/tts-open-samples
 oaj eval --provider gemini --judge asr_error --cases runs/open-audio-samples/asr_wav_cases.jsonl --out runs/gemini-asr-open-wav-samples
 oaj eval --provider gemini --judge tts_naturalness --cases runs/open-audio-samples/tts_wav_cases.jsonl --out runs/gemini-tts-open-wav-samples
+python scripts/gemini_sample_records.py update --results runs/gemini-asr-open-wav-samples/results.jsonl --results runs/gemini-tts-open-wav-samples/results.jsonl
 ```
 
 Gemini runs require `GEMINI_API_KEY` to be supplied at runtime.

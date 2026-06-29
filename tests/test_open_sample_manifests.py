@@ -2,7 +2,10 @@ from __future__ import annotations
 
 from pathlib import Path
 
+import pytest
+
 from open_audio_judge.runner import load_cases
+from scripts.gemini_sample_records import missing_records
 
 
 OPEN_SAMPLE_MANIFESTS = [
@@ -34,3 +37,29 @@ def test_open_sample_docs_list_every_case_id() -> None:
 
     for case_id in case_ids:
         assert case_id in sample_docs
+
+
+def test_gemini_sample_records_are_current() -> None:
+    assert missing_records(
+        Path("examples/gemini_sample_records.jsonl"),
+        provider="gemini",
+        model="gemini-3.5-flash",
+    ) == []
+
+
+def test_gemini_sample_records_detect_prompt_changes(monkeypatch: pytest.MonkeyPatch) -> None:
+    def changed_fingerprints(provider: str, model: str) -> dict[str, str]:
+        assert provider == "gemini"
+        assert model == "gemini-3.5-flash"
+        return {"asr-open-armstrong-small-step": "changed"}
+
+    monkeypatch.setattr(
+        "scripts.gemini_sample_records.expected_fingerprints",
+        changed_fingerprints,
+    )
+
+    assert missing_records(
+        Path("examples/gemini_sample_records.jsonl"),
+        provider="gemini",
+        model="gemini-3.5-flash",
+    ) == ["asr-open-armstrong-small-step"]
