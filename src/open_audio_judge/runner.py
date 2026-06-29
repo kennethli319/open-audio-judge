@@ -59,7 +59,7 @@ def evaluate_case(
     else:
         raw_response = provider_response.raw
         try:
-            judge_output = parse_judge_output(provider_response.content)
+            judge_output = parse_judge_output(provider_response.content, prompt.response_schema)
             status = "ok"
             error = None
         except (ValidationError, ValueError) as exc:

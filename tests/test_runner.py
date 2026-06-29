@@ -16,6 +16,16 @@ class MalformedJsonProvider:
         )
 
 
+class PartialJsonProvider:
+    name = "partial-json-provider"
+
+    def generate(self, case: EvaluationCase, prompt: RenderedPrompt) -> ProviderResponse:
+        return ProviderResponse(
+            content='{"overall_score": 80, "reason": "Natural enough."}',
+            raw={"usage": {"total_tokens": 17}},
+        )
+
+
 class FailingProvider:
     name = "failing-provider"
 
@@ -59,6 +69,24 @@ def test_parse_error_preserves_provider_raw_response() -> None:
     assert result.status == "parse_error"
     assert result.raw_response == {"usage": {"total_tokens": 42}, "status": "completed"}
     assert "No JSON object found" in (result.error or "")
+
+
+def test_parse_error_uses_prompt_response_schema_for_diagnostics() -> None:
+    prompt = load_prompt("tts_naturalness")
+    result = evaluate_case(
+        EvaluationCase(
+            id="partial-json",
+            task="tts_naturalness",
+            audio_url="https://example.test/audio.wav",
+            reference_text="hello",
+        ),
+        prompt,
+        PartialJsonProvider(),
+    )
+
+    assert result.status == "parse_error"
+    assert result.raw_response == {"usage": {"total_tokens": 17}}
+    assert "semantic_error_summary" in (result.error or "")
 
 
 def test_provider_error_preserves_bounded_diagnostic_metadata() -> None:

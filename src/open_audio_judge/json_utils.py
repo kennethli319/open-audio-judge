@@ -26,8 +26,10 @@ def extract_json_object(text: str) -> dict[str, Any]:
     return parsed
 
 
-def parse_judge_output(text: str) -> JudgeOutput:
+def parse_judge_output(text: str, response_schema: dict[str, Any] | None = None) -> JudgeOutput:
     data = extract_json_object(text)
+    if response_schema:
+        _validate_response_schema(data, response_schema)
 
     raw_score = (
         data.get("overall_score")
@@ -97,6 +99,68 @@ def _parse_score(value: Any) -> int:
     if not 1 <= score <= 100:
         raise ValueError("Judge JSON overall_score must be an integer from 1 to 100.")
     return score
+
+
+def _validate_response_schema(data: dict[str, Any], schema: dict[str, Any]) -> None:
+    required = schema.get("required", [])
+    if isinstance(required, list):
+        missing = [field for field in required if isinstance(field, str) and field not in data]
+        if missing:
+            joined = ", ".join(missing)
+            raise ValueError(f"Judge JSON is missing required field(s): {joined}.")
+
+    if schema.get("additionalProperties") is False:
+        properties = schema.get("properties", {})
+        if isinstance(properties, dict):
+            extra = sorted(key for key in data if key not in properties)
+            if extra:
+                joined = ", ".join(extra)
+                raise ValueError(f"Judge JSON includes unsupported field(s): {joined}.")
+
+    properties = schema.get("properties", {})
+    if not isinstance(properties, dict):
+        return
+    for field, field_schema in properties.items():
+        if field not in data or not isinstance(field_schema, dict):
+            continue
+        _validate_field_type(field, data[field], field_schema)
+
+
+def _validate_field_type(field: str, value: Any, schema: dict[str, Any]) -> None:
+    if "enum" in schema and value not in schema["enum"]:
+        allowed = ", ".join(str(item) for item in schema["enum"])
+        raise ValueError(f"Judge JSON {field} must be one of: {allowed}.")
+
+    if "anyOf" in schema and isinstance(schema["anyOf"], list):
+        if any(_matches_schema_type(value, option) for option in schema["anyOf"]):
+            return
+        raise ValueError(f"Judge JSON {field} does not match the response schema.")
+
+    if not _matches_schema_type(value, schema):
+        expected_type = schema.get("type", "the response schema")
+        raise ValueError(f"Judge JSON {field} must match {expected_type}.")
+
+
+def _matches_schema_type(value: Any, schema: dict[str, Any]) -> bool:
+    expected_type = schema.get("type")
+    if expected_type is None:
+        return True
+    if expected_type == "null":
+        return value is None
+    if expected_type == "string":
+        return isinstance(value, str)
+    if expected_type == "integer":
+        return isinstance(value, int) and not isinstance(value, bool)
+    if expected_type == "array":
+        if not isinstance(value, list):
+            return False
+        item_schema = schema.get("items")
+        if not isinstance(item_schema, dict):
+            return True
+        return all(_matches_schema_type(item, item_schema) for item in value)
+    if expected_type == "object":
+        return isinstance(value, dict)
+    return True
 
 
 def _first_balanced_object(text: str) -> str:
