@@ -171,14 +171,7 @@ def tts_case_from_evalset_record(
         raw_source_id = f"row-{row_index}" if row_index is not None else "unknown"
     source_id = _hashed_source_id(raw_source_id) if hash_source_id else raw_source_id
     turns = record.get("turns") if isinstance(record.get("turns"), list) else []
-    normalized_turns = [
-        {
-            "role": str(turn.get("role", "user")),
-            "content": str(turn.get("content", "")),
-        }
-        for turn in turns
-        if isinstance(turn, dict) and str(turn.get("content", "")).strip()
-    ]
+    normalized_turns = _normalize_turns(turns)
     turn_context_source = "source_turns"
     if not normalized_turns:
         normalized_turns = [{"role": "user", "content": "Read the target text aloud exactly."}]
@@ -311,6 +304,19 @@ def _metadata_tags(metadata: dict[str, Any]) -> list[str]:
         return []
     tag = str(raw_tags).strip()
     return [tag] if tag else []
+
+
+def _normalize_turns(turns: Iterable[Any]) -> list[dict[str, str]]:
+    normalized_turns: list[dict[str, str]] = []
+    for turn in turns:
+        if not isinstance(turn, dict):
+            continue
+        content = str(turn.get("content", "")).strip()
+        if not content:
+            continue
+        role = str(turn.get("role") or "user").strip().lower() or "user"
+        normalized_turns.append({"role": role, "content": content})
+    return normalized_turns
 
 
 def _slugify(value: str) -> str:

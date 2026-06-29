@@ -81,6 +81,34 @@ def test_build_tts_cases_records_multiturn_role_metadata() -> None:
     assert cases[0].metadata["text_context_fields"] == ["reference_text", "turns"]
 
 
+def test_build_tts_cases_normalizes_source_turn_roles_and_content() -> None:
+    records = [
+        {
+            "id": "role-cleanup",
+            "category": "multi_turn_state",
+            "task": "remember_context",
+            "turns": [
+                {"role": " User ", "content": "  Remember the code.  "},
+                {"role": "", "content": "Stored."},
+                {"role": "AGENT", "content": " Ready. "},
+                {"role": "assistant", "content": "   "},
+                "not-a-turn",
+            ],
+            "ideal_answer": "The code is 7294.",
+        }
+    ]
+
+    cases = build_tts_cases(records, source_name="ome")
+
+    assert [turn.model_dump() for turn in cases[0].turns] == [
+        {"role": "user", "content": "Remember the code."},
+        {"role": "user", "content": "Stored."},
+        {"role": "agent", "content": "Ready."},
+    ]
+    assert cases[0].metadata["turn_count"] == 3
+    assert cases[0].metadata["turn_roles"] == ["user", "user", "agent"]
+
+
 def test_build_tts_cases_marks_fallback_turn_context() -> None:
     records = [
         {
