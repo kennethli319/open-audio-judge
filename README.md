@@ -44,8 +44,8 @@ semantic impact, such as negation, amount, unit, appointment/deadline, and entit
 ## Build Local TTS Case Manifests
 
 Use `build-tts-cases` to transform a local text evalset JSONL into a TTS naturalness case manifest.
-The command preserves multi-turn context and records only source ids/categories/tags in metadata; write
-outputs under `runs/` unless the source text is safe to publish.
+The command preserves multi-turn context and records only source ids/categories/tags in metadata by
+default; write outputs under `runs/` unless the source text is safe to publish.
 
 ```bash
 oaj build-tts-cases \
@@ -58,6 +58,8 @@ oaj build-tts-cases \
 
 Use `--hash-source-ids` for private evalsets when row ids may reveal source details. The generated
 cases keep a deterministic `source_id_sha256` for local traceability without writing the raw row id.
+Raw source task labels are omitted by default because private evalsets sometimes use prompt-like task
+names; pass `--include-source-task` only when those labels are safe and useful for local debugging.
 
 For a small synthesis batch with deliberate coverage, filter or cap classified slices:
 

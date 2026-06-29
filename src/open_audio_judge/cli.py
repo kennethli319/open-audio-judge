@@ -70,6 +70,13 @@ def build_tts_cases_command(
         bool,
         typer.Option("--hash-source-ids", help="Hash source row ids in generated case metadata."),
     ] = False,
+    include_source_task: Annotated[
+        bool,
+        typer.Option(
+            "--include-source-task",
+            help="Include raw source task labels in generated case metadata.",
+        ),
+    ] = False,
     summary_out: Annotated[
         Optional[Path],
         typer.Option("--summary-out", help="Optional metadata-only JSON summary path."),
@@ -86,6 +93,7 @@ def build_tts_cases_command(
         slice_filter=slice_filter,
         per_slice_limit=per_slice_limit,
         hash_source_ids=hash_source_ids,
+        include_source_task=include_source_task,
     )
     write_cases_jsonl(cases, out)
     summary = summarize_tts_cases(cases)

@@ -45,9 +45,25 @@ def test_build_tts_cases_preserves_multiturn_context_and_metadata() -> None:
     assert case.metadata["source_id"] == "ome_0001"
     assert case.metadata["source_version"] == "0.1.0"
     assert case.metadata["source_category"] == "instruction_constraints"
+    assert "source_task" not in case.metadata
     assert case.metadata["source_tags"] == ["format", "constraints"]
     assert case.metadata["tts_slice"] == "punctuation_format"
     assert case.metadata["requires_synthesis"] is True
+
+
+def test_build_tts_cases_can_include_source_task_when_requested() -> None:
+    records = [
+        {
+            "id": "ome_0001",
+            "category": "structured_output",
+            "task": "json_decision_private_label",
+            "ideal_answer": '{"decision":"approve"}',
+        }
+    ]
+
+    cases = build_tts_cases(records, source_name="fixture", include_source_task=True)
+
+    assert cases[0].metadata["source_task"] == "json_decision_private_label"
 
 
 def test_build_tts_cases_normalizes_scalar_and_empty_tags() -> None:
