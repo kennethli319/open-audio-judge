@@ -275,6 +275,15 @@ def validate_synthesized_manifest(
             issues.append(SynthesisValidationIssue(case_id=case.id, reason=str(exc)))
             continue
 
+        if not case.audio_path:
+            issues.append(
+                SynthesisValidationIssue(
+                    case_id=case.id,
+                    reason="Synthesized TTS manifests require local audio_path.",
+                )
+            )
+            continue
+
         if require_local_audio and case.audio_path:
             audio_path = Path(case.audio_path)
             if not audio_path.is_absolute():

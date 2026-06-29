@@ -241,6 +241,30 @@ def test_validate_synthesized_manifest_can_allow_missing_dry_run_audio(
     assert validate_synthesized_manifest(cases_path=cases_path, require_local_audio=False) == []
 
 
+def test_validate_synthesized_manifest_rejects_url_only_audio(
+    tmp_path: Path,
+) -> None:
+    cases_path = tmp_path / "tts_audio_cases.jsonl"
+    cases_path.write_text(
+        json.dumps(
+            {
+                "id": "url-only-case",
+                "task": "tts_naturalness",
+                "audio_url": "https://example.test/audio.wav",
+                "reference_text": "Synthetic sample.",
+            }
+        )
+        + "\n",
+        encoding="utf-8",
+    )
+
+    issues = validate_synthesized_manifest(cases_path=cases_path, require_local_audio=False)
+
+    assert [(issue.case_id, issue.reason) for issue in issues] == [
+        ("url-only-case", "Synthesized TTS manifests require local audio_path.")
+    ]
+
+
 def test_validate_synthesized_manifest_reports_stale_text_context_metadata(
     tmp_path: Path,
 ) -> None:
