@@ -31,6 +31,7 @@ class RenderedPrompt(BaseModel):
     judge_version: str
     system: str
     user: str
+    response_schema: dict[str, Any] = Field(default_factory=dict)
 
 
 class ProviderResponse(BaseModel):

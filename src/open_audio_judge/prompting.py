@@ -63,4 +63,5 @@ def render_prompt(prompt: JudgePrompt, case: EvaluationCase) -> RenderedPrompt:
         judge_version=prompt.version,
         system=system_text,
         user=user_text,
+        response_schema=prompt.response_schema,
     )

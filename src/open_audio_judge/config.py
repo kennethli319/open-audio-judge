@@ -27,6 +27,10 @@ def load_provider_config(name: str | None = None) -> ProviderConfig:
         default_base_url = "http://localhost:8091/v1"
         default_model = "Qwen/Qwen3-Omni-30B-A3B-Instruct"
         default_api_key = "EMPTY"
+    elif provider_name == "gemini":
+        default_base_url = "https://generativelanguage.googleapis.com/v1beta"
+        default_model = "gemini-3.5-flash"
+        default_api_key = os.getenv("GEMINI_API_KEY", "")
     else:
         default_base_url = "http://localhost:8000/v1"
         default_model = "audio-judge"

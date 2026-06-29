@@ -57,6 +57,17 @@ open runs/qwen-asr/report.html
 
 Audio can be passed as `audio_url` in the case file or as `audio_path`. Local paths are encoded as data URLs for OpenAI-compatible multimodal endpoints by default.
 
+## Run With Gemini
+
+Gemini hosted audio judging is available through the `gemini` provider. Provide the API key at runtime only:
+
+```bash
+export GEMINI_API_KEY=...
+oaj eval --provider gemini --judge asr_error --cases examples/asr_cases.jsonl --out runs/gemini-asr
+```
+
+The default Gemini model is `gemini-3.5-flash`. See [docs/provider-gemini.md](docs/provider-gemini.md).
+
 ## REST API
 
 ```bash
