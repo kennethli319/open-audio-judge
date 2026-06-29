@@ -1,5 +1,6 @@
 import json
 import subprocess
+import wave
 from pathlib import Path
 
 import pytest
@@ -43,6 +44,10 @@ def test_synthesize_cases_dry_run_writes_local_audio_manifest(tmp_path: Path) ->
     assert written[0]["reference_text"] == "Call me at 09:45."
     assert written[0]["metadata"]["sample_kind"] == "local_synthetic_tts"
     assert written[0]["metadata"]["source_case_id"] == "tts eval/001"
+    assert written[0]["metadata"]["reference_text_sha256"] == (
+        "836983522ec15bbf2ce214aa8c1cdb1d3dc4dc7bbce25cc950909cc5dfaa56bf"
+    )
+    assert "audio_sha256" not in written[0]["metadata"]
     assert (tmp_path / "out" / "text" / "tts-eval-001.txt").read_text(encoding="utf-8") == "Call me at 09:45."
 
 
@@ -68,7 +73,11 @@ def test_synthesize_cases_uses_reported_tts_output_path(
 
     def fake_run(*args, **kwargs):
         generated.parent.mkdir(parents=True, exist_ok=True)
-        generated.write_bytes(b"RIFF....WAVE")
+        with wave.open(str(generated), "wb") as handle:
+            handle.setnchannels(1)
+            handle.setsampwidth(2)
+            handle.setframerate(16000)
+            handle.writeframes(b"\x00\x00" * 8000)
         return subprocess.CompletedProcess(args[0], 0, stdout=json.dumps({"output": str(generated)}))
 
     monkeypatch.setattr("scripts.synthesize_tts_cases.subprocess.run", fake_run)
@@ -89,6 +98,9 @@ def test_synthesize_cases_uses_reported_tts_output_path(
     ]
 
     assert written[0]["audio_path"] == "audio/tts-001_0001.wav"
+    assert written[0]["metadata"]["audio_bytes"] == generated.stat().st_size
+    assert written[0]["metadata"]["audio_duration_seconds"] == 0.5
+    assert written[0]["metadata"]["audio_sha256"]
 
 
 def test_synthesize_cases_rejects_reported_audio_outside_output_dir(

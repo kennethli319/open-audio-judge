@@ -8,8 +8,11 @@ derived case manifest that points at ignored audio artifacts under ``runs/``.
 from __future__ import annotations
 
 import argparse
+import contextlib
+import hashlib
 import json
 import subprocess
+import wave
 from pathlib import Path
 
 from open_audio_judge.case_contract import require_audio_and_text
@@ -104,8 +107,10 @@ def synthesize_cases(
             manifest_audio_path = _manifest_audio_path(audio_path, out_dir)
             if not audio_path.exists() or audio_path.stat().st_size == 0:
                 raise FileNotFoundError(f"Expected synthesized audio at {audio_path}")
+            audio_metadata = _audio_metadata(audio_path)
         else:
             manifest_audio_path = _manifest_audio_path(audio_path, out_dir)
+            audio_metadata = {}
 
         derived_case = case.model_dump(exclude_none=True)
         derived_case["id"] = f"{case.id}-local-tts"
@@ -120,6 +125,8 @@ def synthesize_cases(
                 "synthesis_voice": voice,
                 "synthesis_lang_code": lang_code,
                 "source_case_id": case.id,
+                "reference_text_sha256": _sha256_text(target_text),
+                **audio_metadata,
             }
         )
         derived_case["metadata"] = metadata
@@ -184,6 +191,39 @@ def _manifest_audio_path(audio_path: Path, out_dir: Path) -> str:
         raise ValueError(
             f"Synthesized audio output must be under the output directory: {audio_path}"
         ) from exc
+
+
+def _audio_metadata(audio_path: Path) -> dict[str, int | float | str]:
+    metadata: dict[str, int | float | str] = {
+        "audio_sha256": _sha256_file(audio_path),
+        "audio_bytes": audio_path.stat().st_size,
+    }
+    if audio_path.suffix.lower() == ".wav":
+        duration = _wav_duration_seconds(audio_path)
+        if duration is not None:
+            metadata["audio_duration_seconds"] = duration
+    return metadata
+
+
+def _sha256_text(text: str) -> str:
+    return hashlib.sha256(text.encode("utf-8")).hexdigest()
+
+
+def _sha256_file(path: Path) -> str:
+    digest = hashlib.sha256()
+    with path.open("rb") as handle:
+        for chunk in iter(lambda: handle.read(1024 * 1024), b""):
+            digest.update(chunk)
+    return digest.hexdigest()
+
+
+def _wav_duration_seconds(path: Path) -> float | None:
+    with contextlib.suppress(wave.Error, EOFError):
+        with wave.open(str(path), "rb") as handle:
+            frame_rate = handle.getframerate()
+            if frame_rate > 0:
+                return round(handle.getnframes() / frame_rate, 3)
+    return None
 
 
 if __name__ == "__main__":
