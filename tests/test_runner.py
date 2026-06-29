@@ -10,9 +10,12 @@ def test_evaluate_cases_with_mock(tmp_path: Path) -> None:
     prompt = load_prompt("asr_error")
     results = evaluate_cases(cases, prompt, MockProvider(), tmp_path)
 
-    assert len(results) == 2
+    assert len(results) == 4
     assert (tmp_path / "results.jsonl").exists()
     assert (tmp_path / "report.html").exists()
     assert all(result.status == "ok" for result in results)
     assert results[1].overall_score <= 55
     assert "number_error" in results[1].error_categories
+    assert results[2].overall_score <= 40
+    assert "negation_error" in results[2].error_categories
+    assert "entity_error" in results[3].error_categories

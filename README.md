@@ -37,6 +37,8 @@ For ASR cases with a reference transcript, the mock provider now uses a lightwei
 it still considers edit distance, but caps scores for high-impact meaning changes such as negation,
 numbers, and entity-like terms. This keeps local smoke reports aligned with the project goal of going
 beyond WER before a real audio LLM judge is connected.
+The bundled ASR examples include synthetic calibration cases where a small token change has high
+semantic impact, such as negation, amount, and entity substitutions.
 
 ## Run With Local Qwen/Qwen3-Omni
 
