@@ -55,6 +55,8 @@ class TtsCaseSummary:
     total_cases: int
     by_slice: dict[str, int]
     by_source_category: dict[str, int]
+    by_turn_role_sequence: dict[str, int]
+    multi_turn_cases: int
     requires_synthesis: int
     text_length: dict[str, int | None]
     example_source_ids_by_slice: dict[str, list[str]]
@@ -64,6 +66,8 @@ class TtsCaseSummary:
             "total_cases": self.total_cases,
             "by_slice": self.by_slice,
             "by_source_category": self.by_source_category,
+            "by_turn_role_sequence": self.by_turn_role_sequence,
+            "multi_turn_cases": self.multi_turn_cases,
             "requires_synthesis": self.requires_synthesis,
             "text_length": self.text_length,
             "example_source_ids_by_slice": self.example_source_ids_by_slice,
@@ -183,6 +187,8 @@ def tts_case_from_evalset_record(
         "source_category": record.get("category"),
         "source_tags": tags,
         "tts_slice": classify_tts_slice(record, target_text),
+        "turn_count": len(normalized_turns),
+        "turn_roles": [turn["role"] for turn in normalized_turns],
         "requires_synthesis": True,
     }
     if hash_source_id:
@@ -223,6 +229,8 @@ def summarize_tts_cases(
             str(case.metadata.get("source_category") or "unknown")
             for case in case_list
         ),
+        by_turn_role_sequence=_sorted_counts(_turn_role_sequence(case) for case in case_list),
+        multi_turn_cases=sum(1 for case in case_list if _turn_count(case) > 1),
         requires_synthesis=sum(1 for case in case_list if case.metadata.get("requires_synthesis") is True),
         text_length=_text_length_summary(case.reference_text or "" for case in case_list),
         example_source_ids_by_slice=(
@@ -339,3 +347,19 @@ def _example_source_ids_by_slice(
         if len(examples.setdefault(tts_slice, [])) < limit_per_slice:
             examples[tts_slice].append(source_id)
     return {key: examples[key] for key in sorted(examples)}
+
+
+def _turn_role_sequence(case: EvaluationCase) -> str:
+    roles = case.metadata.get("turn_roles")
+    if isinstance(roles, list):
+        normalized_roles = [str(role).strip() for role in roles if str(role).strip()]
+    else:
+        normalized_roles = [turn.role for turn in case.turns if turn.role.strip()]
+    return "+".join(normalized_roles) if normalized_roles else "none"
+
+
+def _turn_count(case: EvaluationCase) -> int:
+    raw_count = case.metadata.get("turn_count")
+    if isinstance(raw_count, int):
+        return raw_count
+    return len([turn for turn in case.turns if turn.content.strip()])

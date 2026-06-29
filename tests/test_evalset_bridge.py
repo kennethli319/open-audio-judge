@@ -48,7 +48,30 @@ def test_build_tts_cases_preserves_multiturn_context_and_metadata() -> None:
     assert "source_task" not in case.metadata
     assert case.metadata["source_tags"] == ["format", "constraints"]
     assert case.metadata["tts_slice"] == "punctuation_format"
+    assert case.metadata["turn_count"] == 1
+    assert case.metadata["turn_roles"] == ["user"]
     assert case.metadata["requires_synthesis"] is True
+
+
+def test_build_tts_cases_records_multiturn_role_metadata() -> None:
+    records = [
+        {
+            "id": "ome_multiturn",
+            "category": "multi_turn_state",
+            "task": "remember_context",
+            "turns": [
+                {"role": "user", "content": "Remember the callback code."},
+                {"role": "assistant", "content": "Stored."},
+                {"role": "user", "content": "Read the final response aloud."},
+            ],
+            "ideal_answer": "The callback code is 7294.",
+        }
+    ]
+
+    cases = build_tts_cases(records, source_name="ome")
+
+    assert cases[0].metadata["turn_count"] == 3
+    assert cases[0].metadata["turn_roles"] == ["user", "assistant", "user"]
 
 
 def test_build_tts_cases_can_include_source_task_when_requested() -> None:
@@ -360,10 +383,12 @@ def test_summarize_tts_cases_is_metadata_only(tmp_path: Path) -> None:
             "instruction_constraints": 1,
             "structured_output": 1,
         },
+        "by_turn_role_sequence": {"user": 2},
         "example_source_ids_by_slice": {
             "code_like": ["json-one"],
             "dates_times": ["time-one"],
         },
+        "multi_turn_cases": 0,
         "requires_synthesis": 2,
         "text_length": {"average": 18, "max": 22, "min": 14},
     }
@@ -411,3 +436,34 @@ def test_summarize_tts_cases_can_omit_example_source_ids(tmp_path: Path) -> None
     assert summary.example_source_ids_by_slice == {}
     assert json.loads(summary_text)["example_source_ids_by_slice"] == {}
     assert "private-user-request-row" not in summary_text
+
+
+def test_summarize_tts_cases_counts_turn_role_sequences() -> None:
+    records = [
+        {
+            "id": "single",
+            "category": "structured_output",
+            "task": "json_decision",
+            "turns": [{"role": "user", "content": "Return JSON."}],
+            "ideal_answer": '{"decision":"approve"}',
+        },
+        {
+            "id": "multi",
+            "category": "multi_turn_state",
+            "task": "remember_context",
+            "turns": [
+                {"role": "user", "content": "Remember 42."},
+                {"role": "assistant", "content": "Stored."},
+                {"role": "user", "content": "Read the final answer."},
+            ],
+            "ideal_answer": "The stored number is 42.",
+        },
+    ]
+
+    summary = summarize_tts_cases(build_tts_cases(records, source_name="fixture"))
+
+    assert summary.by_turn_role_sequence == {
+        "user": 1,
+        "user+assistant+user": 1,
+    }
+    assert summary.multi_turn_cases == 1
