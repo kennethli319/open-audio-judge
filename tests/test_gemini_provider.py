@@ -128,6 +128,56 @@ def test_gemini_provider_extracts_steps_model_output() -> None:
     assert response.content == '{"overall_score": 82, "reason": "Meaning preserved."}'
 
 
+def test_gemini_provider_extracts_nested_output_content_parts() -> None:
+    def handler(request: httpx.Request) -> httpx.Response:
+        return httpx.Response(
+            200,
+            json={
+                "output": [
+                    {
+                        "type": "message",
+                        "content": [
+                            {
+                                "type": "output_text",
+                                "parts": [
+                                    {"text": '{"overall_score": 76, '},
+                                    {"text": '"reason": "Audible but buzzy."}'},
+                                ],
+                            }
+                        ],
+                    }
+                ],
+            },
+        )
+
+    provider = GeminiProvider(
+        ProviderConfig(
+            name="gemini",
+            base_url="https://generativelanguage.googleapis.com/v1beta",
+            api_key="test-key",
+            model="gemini-3.5-flash",
+        ),
+        transport=httpx.MockTransport(handler),
+    )
+
+    response = provider.generate(
+        EvaluationCase(
+            id="case",
+            task="tts_naturalness",
+            audio_url="https://example.test/a.wav",
+            reference_text="Audible but buzzy.",
+        ),
+        RenderedPrompt(
+            judge_id="tts_naturalness",
+            judge_version="0.1.0",
+            system="system rubric",
+            user="user case",
+        ),
+    )
+
+    assert response.content == '{"overall_score": 76, "reason": "Audible but buzzy."}'
+
+
 def test_gemini_provider_extracts_candidate_parts() -> None:
     def handler(request: httpx.Request) -> httpx.Response:
         return httpx.Response(

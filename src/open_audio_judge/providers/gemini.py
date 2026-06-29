@@ -111,7 +111,9 @@ def _text_parts_from_items(items: list[Any]) -> list[str]:
             continue
         content = item.get("content")
         if isinstance(content, list):
-            text_parts.extend(part.get("text", "") for part in content if isinstance(part, dict))
+            text_parts.append("".join(_text_parts_from_content(content)))
+        elif isinstance(content, dict):
+            text_parts.append("".join(_text_parts_from_content([content])))
         elif isinstance(item.get("text"), str):
             text_parts.append(item["text"])
     return [part for part in text_parts if part]
@@ -128,9 +130,25 @@ def _text_parts_from_candidates(candidates: list[Any]) -> list[str]:
         parts = content.get("parts")
         if not isinstance(parts, list):
             continue
-        candidate_text = "".join(part.get("text", "") for part in parts if isinstance(part, dict))
+        candidate_text = "".join(_text_parts_from_content(parts))
         text_parts.append(candidate_text)
     return [part for part in text_parts if part]
+
+
+def _text_parts_from_content(content: list[Any]) -> list[str]:
+    text_parts: list[str] = []
+    for part in content:
+        if not isinstance(part, dict):
+            continue
+        if isinstance(part.get("text"), str):
+            text_parts.append(part["text"])
+        nested_parts = part.get("parts")
+        if isinstance(nested_parts, list):
+            text_parts.extend(_text_parts_from_content(nested_parts))
+        nested_content = part.get("content")
+        if isinstance(nested_content, list):
+            text_parts.extend(_text_parts_from_content(nested_content))
+    return text_parts
 
 
 def _mime_type_from_name(name: str) -> str:
