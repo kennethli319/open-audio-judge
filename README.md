@@ -41,6 +41,23 @@ project goal of going beyond WER before a real audio LLM judge is connected.
 The bundled ASR examples include synthetic calibration cases where a small token change has high
 semantic impact, such as negation, amount, unit, appointment/deadline, and entity substitutions.
 
+## Build Local TTS Case Manifests
+
+Use `build-tts-cases` to transform a local text evalset JSONL into a TTS naturalness case manifest.
+The command preserves multi-turn context and records only source ids/categories/tags in metadata; write
+outputs under `runs/` unless the source text is safe to publish.
+
+```bash
+oaj build-tts-cases \
+  --source /path/to/evalset/seed_v0.jsonl \
+  --source-name ome \
+  --limit 25 \
+  --out runs/tts-evalset/cases.jsonl
+```
+
+The resulting cases use `reference_text` as the target text to synthesize and include
+`metadata.requires_synthesis=true` so a later local TTS step can attach ignored audio artifacts.
+
 ## Run With Local Qwen/Qwen3-Omni
 
 Start a local Qwen/Qwen3-Omni server that exposes an OpenAI-compatible chat-completions endpoint. For vLLM-Omni, the upstream examples use `http://localhost:8091/v1/chat/completions` with `modalities: ["text"]` for text-only judge output.
