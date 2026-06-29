@@ -236,6 +236,41 @@ def test_validate_synthesized_manifest_reports_missing_audio_and_text_contract(
     }
 
 
+def test_validate_synthesized_manifest_can_require_relative_audio_paths(
+    tmp_path: Path,
+) -> None:
+    audio_path = tmp_path / "out" / "audio" / "sample.wav"
+    audio_path.parent.mkdir(parents=True)
+    with wave.open(str(audio_path), "wb") as handle:
+        handle.setnchannels(1)
+        handle.setsampwidth(2)
+        handle.setframerate(16000)
+        handle.writeframes(b"\x00\x00" * 1600)
+    cases_path = tmp_path / "out" / "tts_audio_cases.jsonl"
+    cases_path.write_text(
+        json.dumps(
+            {
+                "id": "absolute-audio",
+                "task": "tts_naturalness",
+                "audio_path": str(audio_path),
+                "reference_text": "Synthetic sample.",
+            }
+        )
+        + "\n",
+        encoding="utf-8",
+    )
+
+    assert validate_synthesized_manifest(cases_path=cases_path) == []
+    issues = validate_synthesized_manifest(
+        cases_path=cases_path,
+        require_relative_audio_path=True,
+    )
+
+    assert [(issue.case_id, issue.reason) for issue in issues] == [
+        ("absolute-audio", "audio_path must be relative to the synthesized manifest."),
+    ]
+
+
 def test_validation_summary_can_hash_private_case_ids(tmp_path: Path) -> None:
     issues = [
         validate_issue

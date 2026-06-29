@@ -114,6 +114,7 @@ audio-plus-text contract and that relative local audio files exist:
 python scripts/synthesize_tts_cases.py \
   --cases runs/tts-synthesis/tts_audio_cases.jsonl \
   --validate-only \
+  --require-relative-audio-path \
   --redact-summary-case-ids \
   --summary-out runs/tts-synthesis/validation-summary.json
 ```

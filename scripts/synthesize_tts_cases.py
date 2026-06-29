@@ -80,6 +80,11 @@ def main() -> None:
         help="With --validate-only, require local synthesis traceability metadata.",
     )
     parser.add_argument(
+        "--require-relative-audio-path",
+        action="store_true",
+        help="With --validate-only, require portable relative audio_path values.",
+    )
+    parser.add_argument(
         "--redact-summary-case-ids",
         action="store_true",
         help="With --validate-only and --summary-out, hash case ids in the JSON summary artifact.",
@@ -93,6 +98,7 @@ def main() -> None:
             require_local_audio=not args.allow_missing_audio,
             require_text_context_metadata=args.require_text_context_metadata,
             require_synthesis_metadata=args.require_synthesis_metadata,
+            require_relative_audio_path=args.require_relative_audio_path,
         )
         validation_cases = load_cases(args.cases)
         summary = summarize_validation_issues(issues, cases=validation_cases)
@@ -285,6 +291,7 @@ def validate_synthesized_manifest(
     require_local_audio: bool = True,
     require_text_context_metadata: bool = False,
     require_synthesis_metadata: bool = False,
+    require_relative_audio_path: bool = False,
 ) -> list[SynthesisValidationIssue]:
     issues: list[SynthesisValidationIssue] = []
     for case in load_cases(cases_path):
@@ -307,6 +314,13 @@ def validate_synthesized_manifest(
                 SynthesisValidationIssue(
                     case_id=case.id,
                     reason="Synthesized TTS manifests must not include audio_url.",
+                )
+            )
+        if require_relative_audio_path and Path(case.audio_path).is_absolute():
+            issues.append(
+                SynthesisValidationIssue(
+                    case_id=case.id,
+                    reason="audio_path must be relative to the synthesized manifest.",
                 )
             )
 
