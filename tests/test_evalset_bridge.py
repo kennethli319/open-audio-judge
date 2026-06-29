@@ -71,6 +71,62 @@ def test_build_tts_cases_supports_category_filter_and_limit() -> None:
     assert [case.id for case in cases] == ["tts-fixture-one"]
 
 
+def test_build_tts_cases_supports_slice_filter() -> None:
+    records = [
+        {
+            "id": "json",
+            "category": "structured_output",
+            "task": "json_decision",
+            "ideal_answer": '{"decision":"approve"}',
+        },
+        {
+            "id": "time",
+            "category": "instruction_constraints",
+            "task": "read_time",
+            "ideal_answer": "Meet at 09:45.",
+        },
+    ]
+
+    cases = build_tts_cases(records, source_name="fixture", slice_filter={"dates_times"})
+
+    assert [case.id for case in cases] == ["tts-fixture-time"]
+    assert cases[0].metadata["tts_slice"] == "dates_times"
+
+
+def test_build_tts_cases_supports_per_slice_limit() -> None:
+    records = [
+        {
+            "id": "json-one",
+            "category": "structured_output",
+            "task": "json_decision",
+            "ideal_answer": '{"decision":"approve"}',
+        },
+        {
+            "id": "json-two",
+            "category": "structured_output",
+            "task": "json_decision",
+            "ideal_answer": '{"decision":"deny"}',
+        },
+        {
+            "id": "time-one",
+            "category": "instruction_constraints",
+            "task": "read_time",
+            "ideal_answer": "Meet at 09:45.",
+        },
+        {
+            "id": "time-two",
+            "category": "instruction_constraints",
+            "task": "read_time",
+            "ideal_answer": "Meet at 10:15.",
+        },
+    ]
+
+    cases = build_tts_cases(records, source_name="fixture", per_slice_limit=1)
+
+    assert [case.id for case in cases] == ["tts-fixture-json-one", "tts-fixture-time-one"]
+    assert [case.metadata["tts_slice"] for case in cases] == ["code_like", "dates_times"]
+
+
 def test_classify_tts_slice() -> None:
     assert classify_tts_slice({"category": "structured_output", "task": "json_decision"}, "{}") == "code_like"
     assert classify_tts_slice({"category": "calendar", "task": "time"}, "Meet at 09:45") == "dates_times"

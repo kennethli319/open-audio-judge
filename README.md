@@ -55,6 +55,17 @@ oaj build-tts-cases \
   --out runs/tts-evalset/cases.jsonl
 ```
 
+For a small synthesis batch with deliberate coverage, filter or cap classified slices:
+
+```bash
+oaj build-tts-cases \
+  --source /path/to/evalset/seed_v0.jsonl \
+  --source-name ome \
+  --slices numbers,dates_times,code_like,punctuation_format \
+  --per-slice-limit 2 \
+  --out runs/tts-evalset/smoke-cases.jsonl
+```
+
 The resulting draft cases use `reference_text` as the target text to synthesize and include
 `metadata.requires_synthesis=true` so a later local TTS step can attach ignored audio artifacts.
 Do not pass draft text-only cases to hosted audio judges until an `audio_path` or `audio_url` has

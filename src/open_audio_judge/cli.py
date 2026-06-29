@@ -49,14 +49,28 @@ def build_tts_cases_command(
             help="Optional comma-separated source categories to include before TTS slicing.",
         ),
     ] = "",
+    slices: Annotated[
+        str,
+        typer.Option(
+            "--slices",
+            help="Optional comma-separated TTS slice labels to include after classification.",
+        ),
+    ] = "",
+    per_slice_limit: Annotated[
+        int | None,
+        typer.Option("--per-slice-limit", help="Maximum cases to keep for each TTS slice."),
+    ] = None,
 ) -> None:
     category_filter = {item.strip() for item in categories.split(",") if item.strip()} or None
+    slice_filter = {item.strip() for item in slices.split(",") if item.strip()} or None
     records = load_evalset_records(source)
     cases = build_tts_cases(
         records,
         source_name=source_name,
         limit=limit,
         category_filter=category_filter,
+        slice_filter=slice_filter,
+        per_slice_limit=per_slice_limit,
     )
     write_cases_jsonl(cases, out)
     console.print(f"[bold]Wrote {len(cases)} TTS cases[/bold]")

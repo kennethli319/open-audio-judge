@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import json
 import re
+from collections import Counter
 from collections.abc import Iterable
 from pathlib import Path
 from typing import Any
@@ -56,8 +57,11 @@ def build_tts_cases(
     source_name: str,
     limit: int | None = None,
     category_filter: set[str] | None = None,
+    slice_filter: set[str] | None = None,
+    per_slice_limit: int | None = None,
 ) -> list[EvaluationCase]:
     cases: list[EvaluationCase] = []
+    slice_counts: Counter[str] = Counter()
     for record in records:
         if category_filter and str(record.get("category", "")) not in category_filter:
             continue
@@ -66,7 +70,13 @@ def build_tts_cases(
         case = tts_case_from_evalset_record(record, source_name=source_name)
         if case is None:
             continue
+        tts_slice = str(case.metadata.get("tts_slice", "general_response"))
+        if slice_filter and tts_slice not in slice_filter:
+            continue
+        if per_slice_limit is not None and slice_counts[tts_slice] >= per_slice_limit:
+            continue
         cases.append(case)
+        slice_counts[tts_slice] += 1
         if limit is not None and len(cases) >= limit:
             break
     return cases
