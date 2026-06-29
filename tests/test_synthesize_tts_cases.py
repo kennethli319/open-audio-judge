@@ -1,3 +1,4 @@
+import hashlib
 import json
 import subprocess
 import wave
@@ -93,6 +94,82 @@ def test_validate_synthesized_manifest_accepts_relative_audio_and_text_context(
         "issue_count": 0,
         "valid": True,
     }
+
+
+def test_validate_synthesized_manifest_accepts_matching_audio_metadata(
+    tmp_path: Path,
+) -> None:
+    audio_path = tmp_path / "out" / "audio" / "sample.wav"
+    audio_path.parent.mkdir(parents=True)
+    with wave.open(str(audio_path), "wb") as handle:
+        handle.setnchannels(1)
+        handle.setsampwidth(2)
+        handle.setframerate(16000)
+        handle.writeframes(b"\x00\x00" * 1600)
+    cases_path = tmp_path / "out" / "tts_audio_cases.jsonl"
+    cases_path.write_text(
+        json.dumps(
+            {
+                "id": "tts-audio",
+                "task": "tts_naturalness",
+                "audio_path": "audio/sample.wav",
+                "reference_text": "Synthetic sample.",
+                "metadata": {
+                    "audio_bytes": audio_path.stat().st_size,
+                    "audio_duration_seconds": 0.1,
+                    "audio_sha256": hashlib.sha256(audio_path.read_bytes()).hexdigest(),
+                },
+            }
+        )
+        + "\n",
+        encoding="utf-8",
+    )
+
+    assert validate_synthesized_manifest(cases_path=cases_path) == []
+
+
+def test_validate_synthesized_manifest_reports_stale_audio_metadata(
+    tmp_path: Path,
+) -> None:
+    audio_path = tmp_path / "out" / "audio" / "sample.wav"
+    audio_path.parent.mkdir(parents=True)
+    with wave.open(str(audio_path), "wb") as handle:
+        handle.setnchannels(1)
+        handle.setsampwidth(2)
+        handle.setframerate(16000)
+        handle.writeframes(b"\x00\x00" * 1600)
+    cases_path = tmp_path / "out" / "tts_audio_cases.jsonl"
+    cases_path.write_text(
+        json.dumps(
+            {
+                "id": "tts-audio",
+                "task": "tts_naturalness",
+                "audio_path": "audio/sample.wav",
+                "reference_text": "Synthetic sample.",
+                "metadata": {
+                    "audio_bytes": 1,
+                    "audio_duration_seconds": 9.9,
+                    "audio_sha256": "stale",
+                },
+            }
+        )
+        + "\n",
+        encoding="utf-8",
+    )
+
+    issues = validate_synthesized_manifest(cases_path=cases_path)
+
+    assert [(issue.case_id, issue.reason) for issue in issues] == [
+        (
+            "tts-audio",
+            f"metadata.audio_bytes does not match audio_path file: expected {audio_path.stat().st_size}, got 1.",
+        ),
+        ("tts-audio", "metadata.audio_sha256 does not match audio_path file."),
+        (
+            "tts-audio",
+            "metadata.audio_duration_seconds does not match audio_path file: expected 0.1, got 9.9.",
+        ),
+    ]
 
 
 def test_validate_synthesized_manifest_reports_missing_audio_and_text_contract(

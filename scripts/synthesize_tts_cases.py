@@ -285,6 +285,8 @@ def validate_synthesized_manifest(
                         reason=f"audio_path file is empty: {_display_audio_path(audio_path, cases_path)}",
                     )
                 )
+            else:
+                issues.extend(_validate_audio_metadata(case, audio_path))
         actual_text_context_fields = _text_context_fields(case)
         metadata_text_context_fields = case.metadata.get("text_context_fields")
         if metadata_text_context_fields is None:
@@ -304,6 +306,49 @@ def validate_synthesized_manifest(
                     reason=(
                         "metadata.text_context_fields does not match case text context: "
                         f"expected {expected}, got {observed}."
+                    ),
+                )
+            )
+    return issues
+
+
+def _validate_audio_metadata(
+    case: EvaluationCase,
+    audio_path: Path,
+) -> list[SynthesisValidationIssue]:
+    issues: list[SynthesisValidationIssue] = []
+    metadata = case.metadata
+    expected_bytes = metadata.get("audio_bytes")
+    if expected_bytes is not None and expected_bytes != audio_path.stat().st_size:
+        issues.append(
+            SynthesisValidationIssue(
+                case_id=case.id,
+                reason=(
+                    "metadata.audio_bytes does not match audio_path file: "
+                    f"expected {audio_path.stat().st_size}, got {expected_bytes}."
+                ),
+            )
+        )
+    expected_sha256 = metadata.get("audio_sha256")
+    if expected_sha256 is not None:
+        actual_sha256 = _sha256_file(audio_path)
+        if expected_sha256 != actual_sha256:
+            issues.append(
+                SynthesisValidationIssue(
+                    case_id=case.id,
+                    reason="metadata.audio_sha256 does not match audio_path file.",
+                )
+            )
+    expected_duration = metadata.get("audio_duration_seconds")
+    if expected_duration is not None and audio_path.suffix.lower() == ".wav":
+        actual_duration = _wav_duration_seconds(audio_path)
+        if actual_duration is not None and expected_duration != actual_duration:
+            issues.append(
+                SynthesisValidationIssue(
+                    case_id=case.id,
+                    reason=(
+                        "metadata.audio_duration_seconds does not match audio_path file: "
+                        f"expected {actual_duration}, got {expected_duration}."
                     ),
                 )
             )
