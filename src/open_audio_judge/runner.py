@@ -51,25 +51,21 @@ def evaluate_case(
     rendered = render_prompt(prompt, case)
     try:
         provider_response = provider.generate(case, rendered)
-        judge_output = parse_judge_output(provider_response.content)
-        status = "ok"
-        error = None
-        raw_response = provider_response.raw
-    except ValidationError as exc:
-        judge_output = None
-        status = "parse_error"
-        error = str(exc)
-        raw_response = {}
-    except ValueError as exc:
-        judge_output = None
-        status = "parse_error"
-        error = str(exc)
-        raw_response = {}
     except Exception as exc:
         judge_output = None
         status = "provider_error"
         error = str(exc)
         raw_response = {}
+    else:
+        raw_response = provider_response.raw
+        try:
+            judge_output = parse_judge_output(provider_response.content)
+            status = "ok"
+            error = None
+        except (ValidationError, ValueError) as exc:
+            judge_output = None
+            status = "parse_error"
+            error = str(exc)
 
     score = judge_output.overall_score if judge_output else 1
     reason = judge_output.reason if judge_output else f"Evaluation failed: {error}"
