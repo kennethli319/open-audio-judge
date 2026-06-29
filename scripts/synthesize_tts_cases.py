@@ -83,7 +83,7 @@ def synthesize_cases(
         text_path.write_text(target_text, encoding="utf-8")
 
         if not dry_run:
-            _run_tts(
+            audio_path = _run_tts(
                 tts_bin=tts_bin,
                 text_path=text_path,
                 audio_dir=audio_dir,
@@ -132,8 +132,8 @@ def _run_tts(
     voice: str,
     lang_code: str,
     audio_format: str,
-) -> None:
-    subprocess.run(
+) -> Path:
+    completed = subprocess.run(
         [
             str(tts_bin),
             "--text-file",
@@ -151,9 +151,14 @@ def _run_tts(
             "--lang-code",
             lang_code,
             "--quiet",
+            "--json",
         ],
         check=True,
+        capture_output=True,
+        text=True,
     )
+    result = json.loads(completed.stdout)
+    return Path(result["output"]).resolve()
 
 
 def _safe_stem(value: str) -> str:
