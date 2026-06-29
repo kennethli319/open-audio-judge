@@ -57,6 +57,7 @@ class TtsCaseSummary:
     by_source_category: dict[str, int]
     by_source_modality: dict[str, int]
     by_source_scoring_type: dict[str, int]
+    by_text_context_fields: dict[str, int]
     by_turn_role_sequence: dict[str, int]
     by_turn_context_source: dict[str, int]
     multi_turn_cases: int
@@ -72,6 +73,7 @@ class TtsCaseSummary:
             "by_source_category": self.by_source_category,
             "by_source_modality": self.by_source_modality,
             "by_source_scoring_type": self.by_source_scoring_type,
+            "by_text_context_fields": self.by_text_context_fields,
             "by_turn_role_sequence": self.by_turn_role_sequence,
             "by_turn_context_source": self.by_turn_context_source,
             "multi_turn_cases": self.multi_turn_cases,
@@ -251,6 +253,7 @@ def summarize_tts_cases(
             str(case.metadata.get("source_scoring_type") or "unknown")
             for case in case_list
         ),
+        by_text_context_fields=_sorted_counts(_text_context_field_sequence(case) for case in case_list),
         by_turn_role_sequence=_sorted_counts(_turn_role_sequence(case) for case in case_list),
         by_turn_context_source=_sorted_counts(
             str(case.metadata.get("turn_context_source") or "unknown")
@@ -415,6 +418,19 @@ def _turn_role_sequence(case: EvaluationCase) -> str:
     else:
         normalized_roles = [turn.role for turn in case.turns if turn.role.strip()]
     return "+".join(normalized_roles) if normalized_roles else "none"
+
+
+def _text_context_field_sequence(case: EvaluationCase) -> str:
+    fields = case.metadata.get("text_context_fields")
+    if isinstance(fields, list):
+        normalized_fields = [str(field).strip() for field in fields if str(field).strip()]
+    else:
+        normalized_fields = _text_context_fields(
+            reference_text=case.reference_text,
+            candidate_text=case.candidate_text,
+            turns=[turn.model_dump() for turn in case.turns],
+        )
+    return "+".join(normalized_fields) if normalized_fields else "none"
 
 
 def _turn_count(case: EvaluationCase) -> int:

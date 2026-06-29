@@ -483,6 +483,7 @@ def test_summarize_tts_cases_is_metadata_only(tmp_path: Path) -> None:
         },
         "by_source_modality": {"unknown": 2},
         "by_source_scoring_type": {"unknown": 2},
+        "by_text_context_fields": {"reference_text+turns": 2},
         "by_turn_context_source": {"fallback_instruction": 2},
         "by_turn_role_sequence": {"user": 2},
         "example_source_ids_by_slice": {
@@ -574,6 +575,28 @@ def test_summarize_tts_cases_counts_turn_role_sequences() -> None:
     }
     assert summary.by_turn_context_source == {"source_turns": 2}
     assert summary.multi_turn_cases == 1
+
+
+def test_summarize_tts_cases_counts_text_context_field_combinations() -> None:
+    records = [
+        {
+            "id": "source-turns",
+            "category": "structured_output",
+            "task": "json_decision",
+            "turns": [{"role": "user", "content": "Return JSON."}],
+            "ideal_answer": '{"decision":"approve"}',
+        },
+        {
+            "id": "fallback-turn",
+            "category": "instruction_constraints",
+            "task": "read_time",
+            "ideal_answer": "Read 09:45 aloud.",
+        },
+    ]
+
+    summary = summarize_tts_cases(build_tts_cases(records, source_name="fixture"))
+
+    assert summary.by_text_context_fields == {"reference_text+turns": 2}
 
 
 def test_summarize_tts_cases_counts_duplicate_target_text_hashes() -> None:
