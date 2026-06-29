@@ -142,6 +142,78 @@ def test_parse_with_response_schema_allows_nullable_judge_transcript() -> None:
     assert output.judge_transcript is None
 
 
+def test_parse_with_response_schema_rejects_nested_missing_required_fields() -> None:
+    schema = {
+        "type": "object",
+        "additionalProperties": False,
+        "required": ["overall_score", "reason", "diagnostics"],
+        "properties": {
+            "overall_score": {"type": "integer"},
+            "reason": {"type": "string"},
+            "diagnostics": {
+                "type": "object",
+                "additionalProperties": False,
+                "required": ["artifact_count"],
+                "properties": {
+                    "artifact_count": {"type": "integer", "minimum": 0, "maximum": 10},
+                    "notes": {"type": "array", "items": {"type": "string"}},
+                },
+            },
+        },
+    }
+
+    with pytest.raises(ValueError, match="diagnostics is missing required field"):
+        parse_judge_output(
+            '{"overall_score": 88, "reason": "Mostly natural.", "diagnostics": {}}',
+            schema,
+        )
+
+
+def test_parse_with_response_schema_rejects_nested_extra_fields() -> None:
+    schema = {
+        "type": "object",
+        "additionalProperties": False,
+        "required": ["overall_score", "reason", "diagnostics"],
+        "properties": {
+            "overall_score": {"type": "integer"},
+            "reason": {"type": "string"},
+            "diagnostics": {
+                "type": "object",
+                "additionalProperties": False,
+                "properties": {"artifact_count": {"type": "integer"}},
+            },
+        },
+    }
+
+    with pytest.raises(ValueError, match="diagnostics includes unsupported field"):
+        parse_judge_output(
+            (
+                '{"overall_score": 88, "reason": "Mostly natural.", '
+                '"diagnostics": {"artifact_count": 1, "hidden": "x"}}'
+            ),
+            schema,
+        )
+
+
+def test_parse_with_response_schema_rejects_integer_bounds() -> None:
+    schema = {
+        "type": "object",
+        "additionalProperties": False,
+        "required": ["overall_score", "reason", "confidence"],
+        "properties": {
+            "overall_score": {"type": "integer"},
+            "reason": {"type": "string"},
+            "confidence": {"type": "integer", "minimum": 0, "maximum": 5},
+        },
+    }
+
+    with pytest.raises(ValueError, match="confidence must be at most 5"):
+        parse_judge_output(
+            '{"overall_score": 88, "reason": "Mostly natural.", "confidence": 6}',
+            schema,
+        )
+
+
 def test_parse_rejects_empty_reason() -> None:
     with pytest.raises(ValueError, match="reason must not be empty"):
         parse_judge_output('{"overall_score": 88, "reason": "   "}')

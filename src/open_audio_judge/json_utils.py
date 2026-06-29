@@ -102,12 +102,18 @@ def _parse_score(value: Any) -> int:
 
 
 def _validate_response_schema(data: dict[str, Any], schema: dict[str, Any]) -> None:
+    _validate_object_schema("response", data, schema)
+
+
+def _validate_object_schema(field: str, data: dict[str, Any], schema: dict[str, Any]) -> None:
     required = schema.get("required", [])
     if isinstance(required, list):
         missing = [field for field in required if isinstance(field, str) and field not in data]
         if missing:
             joined = ", ".join(missing)
-            raise ValueError(f"Judge JSON is missing required field(s): {joined}.")
+            if field == "response":
+                raise ValueError(f"Judge JSON is missing required field(s): {joined}.")
+            raise ValueError(f"Judge JSON {field} is missing required field(s): {joined}.")
 
     if schema.get("additionalProperties") is False:
         properties = schema.get("properties", {})
@@ -115,7 +121,9 @@ def _validate_response_schema(data: dict[str, Any], schema: dict[str, Any]) -> N
             extra = sorted(key for key in data if key not in properties)
             if extra:
                 joined = ", ".join(extra)
-                raise ValueError(f"Judge JSON includes unsupported field(s): {joined}.")
+                if field == "response":
+                    raise ValueError(f"Judge JSON includes unsupported field(s): {joined}.")
+                raise ValueError(f"Judge JSON {field} includes unsupported field(s): {joined}.")
 
     properties = schema.get("properties", {})
     if not isinstance(properties, dict):
@@ -140,6 +148,11 @@ def _validate_field_type(field: str, value: Any, schema: dict[str, Any]) -> None
         expected_type = schema.get("type", "the response schema")
         raise ValueError(f"Judge JSON {field} must match {expected_type}.")
 
+    if schema.get("type") == "object" and isinstance(value, dict):
+        _validate_object_schema(field, value, schema)
+
+    _validate_numeric_bounds(field, value, schema)
+
 
 def _matches_schema_type(value: Any, schema: dict[str, Any]) -> bool:
     expected_type = schema.get("type")
@@ -161,6 +174,19 @@ def _matches_schema_type(value: Any, schema: dict[str, Any]) -> bool:
     if expected_type == "object":
         return isinstance(value, dict)
     return True
+
+
+def _validate_numeric_bounds(field: str, value: Any, schema: dict[str, Any]) -> None:
+    if schema.get("type") != "integer" or not isinstance(value, int) or isinstance(value, bool):
+        return
+
+    minimum = schema.get("minimum")
+    if isinstance(minimum, int | float) and value < minimum:
+        raise ValueError(f"Judge JSON {field} must be at least {minimum}.")
+
+    maximum = schema.get("maximum")
+    if isinstance(maximum, int | float) and value > maximum:
+        raise ValueError(f"Judge JSON {field} must be at most {maximum}.")
 
 
 def _first_balanced_object(text: str) -> str:
