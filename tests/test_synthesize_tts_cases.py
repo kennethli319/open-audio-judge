@@ -53,6 +53,8 @@ def test_synthesize_cases_dry_run_writes_local_audio_manifest(tmp_path: Path) ->
     assert written[0]["metadata"]["sample_kind"] == "local_synthetic_tts"
     assert written[0]["metadata"]["source_case_id"] == "tts eval/001"
     assert written[0]["metadata"]["text_context_fields"] == ["reference_text", "turns"]
+    assert written[0]["metadata"]["turn_count"] == 1
+    assert written[0]["metadata"]["turn_roles"] == ["user"]
     assert written[0]["metadata"]["text_sidecar_written"] is True
     assert written[0]["metadata"]["reference_text_sha256"] == (
         "836983522ec15bbf2ce214aa8c1cdb1d3dc4dc7bbce25cc950909cc5dfaa56bf"
@@ -336,6 +338,8 @@ def test_write_synthesis_summary_is_metadata_only_for_dry_run(tmp_path: Path) ->
         "by_slice": {"dates_times": 1},
         "by_source_category": {"instruction_constraints": 1},
         "by_text_context_fields": {"reference_text": 1},
+        "by_turn_role_sequence": {"none": 1},
+        "multi_turn_cases": 0,
         "total_cases": 1,
         "with_audio_sha256": 0,
     }
@@ -415,6 +419,57 @@ def test_synthesis_summary_counts_text_context_field_combinations(
         "candidate_text+reference_text+turns": 1,
         "reference_text": 1,
     }
+
+
+def test_synthesis_summary_counts_turn_role_sequences(tmp_path: Path) -> None:
+    cases_path = tmp_path / "tts_cases.jsonl"
+    cases_path.write_text(
+        "\n".join(
+            json.dumps(case)
+            for case in [
+                {
+                    "id": "reference-only",
+                    "task": "tts_naturalness",
+                    "reference_text": "Read this.",
+                },
+                {
+                    "id": "multi-turn",
+                    "task": "tts_naturalness",
+                    "turns": [
+                        {"role": "user", "content": "Remember 7294."},
+                        {"role": "assistant", "content": "Stored."},
+                        {"role": "user", "content": "Read it back."},
+                    ],
+                    "reference_text": "The code is 7294.",
+                },
+            ]
+        )
+        + "\n",
+        encoding="utf-8",
+    )
+
+    derived = synthesize_cases(
+        cases_path=cases_path,
+        out_dir=tmp_path / "out",
+        tts_bin=Path("/missing/local-tts-speak"),
+        model="mlx-community/chatterbox-turbo-6bit",
+        voice="af_heart",
+        lang_code="en",
+        audio_format="wav",
+        dry_run=True,
+    )
+
+    summary = summarize_synthesized_cases(derived)
+
+    assert derived[0]["metadata"]["turn_count"] == 0
+    assert derived[0]["metadata"]["turn_roles"] == []
+    assert derived[1]["metadata"]["turn_count"] == 3
+    assert derived[1]["metadata"]["turn_roles"] == ["user", "assistant", "user"]
+    assert summary["by_turn_role_sequence"] == {
+        "none": 1,
+        "user+assistant+user": 1,
+    }
+    assert summary["multi_turn_cases"] == 1
 
 
 def test_synthesize_cases_uses_reported_tts_output_path(

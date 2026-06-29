@@ -190,6 +190,8 @@ def synthesize_cases(
                 "source_case_id": case.id,
                 "reference_text_sha256": _sha256_text(target_text),
                 "text_context_fields": text_context_fields,
+                "turn_count": metadata.get("turn_count", len(case.turns)),
+                "turn_roles": metadata.get("turn_roles", _turn_roles(case)),
                 "text_sidecar_written": keep_text_sidecars,
                 **audio_metadata,
             }
@@ -237,6 +239,12 @@ def summarize_synthesized_cases(cases: Iterable[dict[str, Any]]) -> dict[str, An
         "by_text_context_fields": _sorted_counts(
             _text_context_field_key(metadata.get("text_context_fields"))
             for metadata in metadata_list
+        ),
+        "by_turn_role_sequence": _sorted_counts(
+            _turn_role_sequence_from_metadata(metadata) for metadata in metadata_list
+        ),
+        "multi_turn_cases": sum(
+            1 for metadata in metadata_list if _metadata_turn_count(metadata) > 1
         ),
         "audio_duration_seconds": _numeric_summary(durations),
         "audio_bytes": _numeric_summary(byte_counts),
@@ -470,6 +478,31 @@ def _normalize_text_context_fields(value: Any) -> list[str]:
         return []
     ordered_fields = ["reference_text", "candidate_text", "turns"]
     return [field for field in ordered_fields if field in fields]
+
+
+def _turn_roles(case: EvaluationCase) -> list[str]:
+    return [turn.role for turn in case.turns if turn.role.strip()]
+
+
+def _turn_role_sequence_from_metadata(metadata: dict[str, Any]) -> str:
+    roles = metadata.get("turn_roles")
+    if isinstance(roles, list):
+        normalized_roles = [str(role).strip() for role in roles if str(role).strip()]
+    else:
+        normalized_roles = []
+    return "+".join(normalized_roles) if normalized_roles else "none"
+
+
+def _metadata_turn_count(metadata: dict[str, Any]) -> int:
+    turn_count = metadata.get("turn_count")
+    if isinstance(turn_count, int):
+        return turn_count
+    if isinstance(turn_count, float):
+        return int(turn_count)
+    roles = metadata.get("turn_roles")
+    if isinstance(roles, list):
+        return len([role for role in roles if str(role).strip()])
+    return 0
 
 
 def _sorted_counts(values: Iterable[str]) -> dict[str, int]:
