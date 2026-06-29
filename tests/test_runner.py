@@ -16,6 +16,13 @@ class MalformedJsonProvider:
         )
 
 
+class FailingProvider:
+    name = "failing-provider"
+
+    def generate(self, case: EvaluationCase, prompt: RenderedPrompt) -> ProviderResponse:
+        raise RuntimeError(f"temporary outage\n{'x' * 600}")
+
+
 def test_evaluate_cases_with_mock(tmp_path: Path) -> None:
     cases = load_cases(Path("examples/asr_cases.jsonl"))
     prompt = load_prompt("asr_error")
@@ -52,3 +59,23 @@ def test_parse_error_preserves_provider_raw_response() -> None:
     assert result.status == "parse_error"
     assert result.raw_response == {"usage": {"total_tokens": 42}, "status": "completed"}
     assert "No JSON object found" in (result.error or "")
+
+
+def test_provider_error_preserves_bounded_diagnostic_metadata() -> None:
+    prompt = load_prompt("tts_naturalness")
+    result = evaluate_case(
+        EvaluationCase(
+            id="provider-error",
+            task="tts_naturalness",
+            audio_url="https://example.test/audio.wav",
+            reference_text="hello",
+        ),
+        prompt,
+        FailingProvider(),
+    )
+
+    assert result.status == "provider_error"
+    assert result.raw_response["error_type"] == "RuntimeError"
+    assert result.raw_response["message"].startswith("temporary outage x")
+    assert "\n" not in result.raw_response["message"]
+    assert len(result.raw_response["message"]) <= 503

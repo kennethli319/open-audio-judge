@@ -55,7 +55,7 @@ def evaluate_case(
         judge_output = None
         status = "provider_error"
         error = str(exc)
-        raw_response = {}
+        raw_response = _provider_error_metadata(exc)
     else:
         raw_response = provider_response.raw
         try:
@@ -97,6 +97,16 @@ def write_results_jsonl(results: list[EvaluationResult], path: Path) -> Path:
         for result in results:
             handle.write(json.dumps(result.model_dump(), ensure_ascii=False) + "\n")
     return path
+
+
+def _provider_error_metadata(exc: Exception) -> dict[str, str]:
+    message = str(exc).strip().replace("\n", " ")
+    if len(message) > 500:
+        message = f"{message[:500]}..."
+    return {
+        "error_type": type(exc).__name__,
+        "message": message,
+    }
 
 
 def _resolve_audio_path(case: EvaluationCase, base_dir: Path) -> EvaluationCase:
