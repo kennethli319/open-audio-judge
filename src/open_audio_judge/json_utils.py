@@ -29,21 +29,26 @@ def extract_json_object(text: str) -> dict[str, Any]:
 def parse_judge_output(text: str) -> JudgeOutput:
     data = extract_json_object(text)
 
-    score = (
+    raw_score = (
         data.get("overall_score")
         if "overall_score" in data
         else data.get("overallScore", data.get("score"))
     )
-    reason = data.get("reason", data.get("rationale", data.get("explanation")))
+    raw_reason = data.get("reason", data.get("rationale", data.get("explanation")))
 
-    if score is None:
+    if raw_score is None:
         raise ValueError("Judge JSON is missing overall_score.")
-    if reason is None:
+    score = _parse_score(raw_score)
+
+    if raw_reason is None:
         raise ValueError("Judge JSON is missing reason.")
+    reason = str(raw_reason).strip()
+    if not reason:
+        raise ValueError("Judge JSON reason must not be empty.")
 
     return JudgeOutput(
-        overall_score=int(score),
-        reason=str(reason).strip(),
+        overall_score=score,
+        reason=reason,
         judge_transcript=_optional_string(
             data.get("judge_transcript", data.get("judgeTranscript", data.get("own_transcript")))
         ),
@@ -73,6 +78,17 @@ def _string_list(value: Any) -> list[str]:
         return [str(item).strip() for item in value if str(item).strip()]
     text = str(value).strip()
     return [text] if text else []
+
+
+def _parse_score(value: Any) -> int:
+    try:
+        score = int(value)
+    except (TypeError, ValueError) as exc:
+        raise ValueError("Judge JSON overall_score must be an integer from 1 to 100.") from exc
+
+    if not 1 <= score <= 100:
+        raise ValueError("Judge JSON overall_score must be an integer from 1 to 100.")
+    return score
 
 
 def _first_balanced_object(text: str) -> str:

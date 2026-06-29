@@ -1,3 +1,5 @@
+import pytest
+
 from open_audio_judge.json_utils import extract_json_object, parse_judge_output
 
 
@@ -35,3 +37,18 @@ def test_parse_asr_diagnostics() -> None:
     assert output.meaning_preservation == "partial_loss"
     assert output.key_differences == ["fifteen became fifty"]
     assert output.error_categories == ["number_error", "substitution"]
+
+
+def test_parse_rejects_empty_reason() -> None:
+    with pytest.raises(ValueError, match="reason must not be empty"):
+        parse_judge_output('{"overall_score": 88, "reason": "   "}')
+
+
+def test_parse_rejects_out_of_range_score() -> None:
+    with pytest.raises(ValueError, match="overall_score must be an integer from 1 to 100"):
+        parse_judge_output('{"overall_score": 101, "reason": "Too high."}')
+
+
+def test_parse_rejects_non_integer_score() -> None:
+    with pytest.raises(ValueError, match="overall_score must be an integer from 1 to 100"):
+        parse_judge_output('{"overall_score": "high", "reason": "Not numeric."}')
