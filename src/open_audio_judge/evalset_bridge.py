@@ -110,6 +110,7 @@ def build_tts_cases(
     per_slice_limit: int | None = None,
     hash_source_ids: bool = False,
     include_source_task: bool = False,
+    prioritize_slice_coverage: bool = False,
 ) -> list[EvaluationCase]:
     cases: list[EvaluationCase] = []
     slice_counts: Counter[str] = Counter()
@@ -136,8 +137,12 @@ def build_tts_cases(
         case = _with_unique_case_id(case, case_id_counts)
         cases.append(case)
         slice_counts[tts_slice] += 1
-        if limit is not None and len(cases) >= limit:
+        if limit is not None and len(cases) >= limit and not prioritize_slice_coverage:
             break
+    if prioritize_slice_coverage:
+        cases = _interleave_cases_by_slice(cases)
+        if limit is not None:
+            cases = cases[:limit]
     return cases
 
 
@@ -360,6 +365,24 @@ def _with_unique_case_id(case: EvaluationCase, case_id_counts: Counter[str]) -> 
     metadata = dict(case.metadata)
     metadata["case_id_collision_index"] = collision_index
     return case.model_copy(update={"id": f"{case.id}-{collision_index}", "metadata": metadata})
+
+
+def _interleave_cases_by_slice(cases: Iterable[EvaluationCase]) -> list[EvaluationCase]:
+    by_slice: dict[str, list[EvaluationCase]] = {}
+    slice_order: list[str] = []
+    for case in cases:
+        tts_slice = str(case.metadata.get("tts_slice") or "general_response")
+        if tts_slice not in by_slice:
+            by_slice[tts_slice] = []
+            slice_order.append(tts_slice)
+        by_slice[tts_slice].append(case)
+
+    interleaved: list[EvaluationCase] = []
+    while any(by_slice.values()):
+        for tts_slice in slice_order:
+            if by_slice[tts_slice]:
+                interleaved.append(by_slice[tts_slice].pop(0))
+    return interleaved
 
 
 def _hashed_source_id(source_id: str) -> str:

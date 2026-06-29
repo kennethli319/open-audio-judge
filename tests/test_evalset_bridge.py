@@ -383,6 +383,56 @@ def test_build_tts_cases_supports_per_slice_limit() -> None:
     assert [case.metadata["tts_slice"] for case in cases] == ["code_like", "dates_times"]
 
 
+def test_build_tts_cases_can_prioritize_slice_coverage_before_limit() -> None:
+    records = [
+        {
+            "id": "json-one",
+            "category": "structured_output",
+            "task": "json_decision",
+            "ideal_answer": '{"decision":"approve"}',
+        },
+        {
+            "id": "json-two",
+            "category": "structured_output",
+            "task": "json_decision",
+            "ideal_answer": '{"decision":"deny"}',
+        },
+        {
+            "id": "time-one",
+            "category": "instruction_constraints",
+            "task": "read_time",
+            "ideal_answer": "Meet at 09:45.",
+        },
+        {
+            "id": "privacy-one",
+            "category": "privacy_redaction",
+            "task": "redaction_prompt",
+            "ideal_answer": "The account number is redacted.",
+        },
+    ]
+
+    default_cases = build_tts_cases(records, source_name="fixture", limit=2)
+    balanced_cases = build_tts_cases(
+        records,
+        source_name="fixture",
+        limit=2,
+        prioritize_slice_coverage=True,
+    )
+
+    assert [case.id for case in default_cases] == [
+        "tts-fixture-json-one",
+        "tts-fixture-json-two",
+    ]
+    assert [case.id for case in balanced_cases] == [
+        "tts-fixture-json-one",
+        "tts-fixture-time-one",
+    ]
+    assert [case.metadata["tts_slice"] for case in balanced_cases] == [
+        "code_like",
+        "dates_times",
+    ]
+
+
 def test_classify_tts_slice() -> None:
     assert classify_tts_slice({"category": "structured_output", "task": "json_decision"}, "{}") == "code_like"
     assert classify_tts_slice({"category": "calendar", "task": "time"}, "Meet at 09:45") == "dates_times"

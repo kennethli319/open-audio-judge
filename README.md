@@ -69,6 +69,7 @@ oaj build-tts-cases \
   --source-name ome \
   --slices numbers,dates_times,code_like,punctuation_format \
   --per-slice-limit 2 \
+  --prioritize-slice-coverage \
   --summary-out runs/tts-evalset/smoke-summary.json \
   --no-summary-source-examples \
   --out runs/tts-evalset/smoke-cases.jsonl
@@ -80,6 +81,8 @@ can attach ignored audio artifacts and audit target-text identity without commit
 Each case also records `metadata.turn_context_source` as either `source_turns` or
 `fallback_instruction`, which makes it clear whether multi-turn context came from the source eval row
 or from the bridge's generic "read this aloud" fallback.
+Use `--prioritize-slice-coverage` with small `--limit` values when the source evalset is ordered by
+category and you want the draft manifest to cover more TTS slices before truncation.
 Do not pass draft text-only cases to hosted audio judges until an `audio_path` or `audio_url` has
 been attached. The optional summary is metadata-only: counts by classified TTS slice and source
 category, source modality, source scoring type, turn-role sequence and turn-context-source coverage,

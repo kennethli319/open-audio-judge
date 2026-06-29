@@ -77,6 +77,13 @@ def build_tts_cases_command(
             help="Include raw source task labels in generated case metadata.",
         ),
     ] = False,
+    prioritize_slice_coverage: Annotated[
+        bool,
+        typer.Option(
+            "--prioritize-slice-coverage",
+            help="When --limit is set, interleave slices before truncating for broader smoke coverage.",
+        ),
+    ] = False,
     summary_out: Annotated[
         Optional[Path],
         typer.Option("--summary-out", help="Optional metadata-only JSON summary path."),
@@ -104,6 +111,7 @@ def build_tts_cases_command(
         per_slice_limit=per_slice_limit,
         hash_source_ids=hash_source_ids,
         include_source_task=include_source_task,
+        prioritize_slice_coverage=prioritize_slice_coverage,
     )
     write_cases_jsonl(cases, out)
     include_summary_examples = (

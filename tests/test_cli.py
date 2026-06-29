@@ -90,6 +90,59 @@ def test_build_tts_cases_cli_can_include_source_task(tmp_path: Path) -> None:
     assert written_case["metadata"]["source_task"] == "json_decision"
 
 
+def test_build_tts_cases_cli_can_prioritize_slice_coverage(tmp_path: Path) -> None:
+    source = tmp_path / "source.jsonl"
+    out = tmp_path / "cases.jsonl"
+    source.write_text(
+        "\n".join(
+            json.dumps(record)
+            for record in [
+                {
+                    "id": "json-one",
+                    "category": "structured_output",
+                    "task": "json_decision",
+                    "ideal_answer": '{"decision":"approve"}',
+                },
+                {
+                    "id": "json-two",
+                    "category": "structured_output",
+                    "task": "json_decision",
+                    "ideal_answer": '{"decision":"deny"}',
+                },
+                {
+                    "id": "time-one",
+                    "category": "instruction_constraints",
+                    "task": "read_time",
+                    "ideal_answer": "Meet at 09:45.",
+                },
+            ]
+        )
+        + "\n",
+        encoding="utf-8",
+    )
+
+    result = CliRunner().invoke(
+        app,
+        [
+            "build-tts-cases",
+            "--source",
+            str(source),
+            "--limit",
+            "2",
+            "--prioritize-slice-coverage",
+            "--out",
+            str(out),
+        ],
+    )
+
+    assert result.exit_code == 0
+    written_cases = [json.loads(line) for line in out.read_text(encoding="utf-8").splitlines()]
+    assert [case["id"] for case in written_cases] == [
+        "tts-evalset-json-one",
+        "tts-evalset-time-one",
+    ]
+
+
 def test_build_tts_cases_can_hash_source_ids(tmp_path: Path) -> None:
     private_source_id = "private-user-request-row-2026-06-29"
     source = tmp_path / "source.jsonl"
