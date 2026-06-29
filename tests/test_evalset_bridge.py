@@ -50,6 +50,9 @@ def test_build_tts_cases_preserves_multiturn_context_and_metadata() -> None:
     assert case.metadata["tts_slice"] == "punctuation_format"
     assert case.metadata["turn_count"] == 1
     assert case.metadata["turn_roles"] == ["user"]
+    assert case.metadata["reference_text_sha256"] == hashlib.sha256(
+        "- cobalt\n- ledger\n- orbit".encode("utf-8")
+    ).hexdigest()
     assert case.metadata["text_context_fields"] == ["reference_text", "turns"]
     assert case.metadata["requires_synthesis"] is True
 
@@ -138,6 +141,23 @@ def test_build_tts_cases_can_hash_private_source_ids() -> None:
     assert cases[0].metadata["source_id"] == f"source-{expected_hash[:12]}"
     assert cases[0].metadata["source_id_sha256"] == expected_hash
     assert records[0]["id"] not in json.dumps(cases[0].model_dump(), ensure_ascii=False)
+
+
+def test_build_tts_cases_records_target_text_hash_for_private_traceability() -> None:
+    records = [
+        {
+            "id": "private-row",
+            "category": "instruction_constraints",
+            "task": "read_date",
+            "ideal_answer": "Your follow-up is on 2026-07-03 at 09:45.",
+        }
+    ]
+
+    cases = build_tts_cases(records, source_name="fixture", hash_source_ids=True)
+
+    expected_hash = hashlib.sha256(records[0]["ideal_answer"].encode("utf-8")).hexdigest()
+    assert cases[0].metadata["reference_text_sha256"] == expected_hash
+    assert records[0]["ideal_answer"] in cases[0].reference_text
 
 
 def test_build_tts_cases_keeps_duplicate_source_ids_unique() -> None:
@@ -391,6 +411,11 @@ def test_summarize_tts_cases_is_metadata_only(tmp_path: Path) -> None:
             "dates_times": ["time-one"],
         },
         "multi_turn_cases": 0,
+        "reference_text_sha256": {
+            "duplicate_cases": 0,
+            "duplicate_hashes": 0,
+            "unique": 2,
+        },
         "requires_synthesis": 2,
         "text_length": {"average": 18, "max": 22, "min": 14},
     }
@@ -469,3 +494,34 @@ def test_summarize_tts_cases_counts_turn_role_sequences() -> None:
         "user+assistant+user": 1,
     }
     assert summary.multi_turn_cases == 1
+
+
+def test_summarize_tts_cases_counts_duplicate_target_text_hashes() -> None:
+    records = [
+        {
+            "id": "first",
+            "category": "instruction_constraints",
+            "task": "read_date",
+            "ideal_answer": "Meeting moved to 09:45.",
+        },
+        {
+            "id": "second",
+            "category": "instruction_constraints",
+            "task": "read_time",
+            "ideal_answer": "Meeting moved to 09:45.",
+        },
+        {
+            "id": "third",
+            "category": "structured_output",
+            "task": "json_decision",
+            "ideal_answer": '{"decision":"approve"}',
+        },
+    ]
+
+    summary = summarize_tts_cases(build_tts_cases(records, source_name="fixture"))
+
+    assert summary.reference_text_sha256 == {
+        "duplicate_cases": 2,
+        "duplicate_hashes": 1,
+        "unique": 2,
+    }

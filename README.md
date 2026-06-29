@@ -75,12 +75,14 @@ oaj build-tts-cases \
 ```
 
 The resulting draft cases use `reference_text` as the target text to synthesize and include
-`metadata.requires_synthesis=true` so a later local TTS step can attach ignored audio artifacts.
+`metadata.requires_synthesis=true` plus `metadata.reference_text_sha256`, so a later local TTS step
+can attach ignored audio artifacts and audit target-text identity without committing private rows.
 Do not pass draft text-only cases to hosted audio judges until an `audio_path` or `audio_url` has
 been attached. The optional summary is metadata-only: counts by classified TTS slice and source
-category, turn-role sequence coverage, multi-turn case count, text-length min/max/average, capped
-example source ids by slice, and the number of cases still requiring synthesis. Pass
-`--no-summary-source-examples` when even source row ids should stay out of local summary artifacts.
+category, turn-role sequence coverage, multi-turn case count, text-length min/max/average,
+unique/duplicate target-text hash counts, capped example source ids by slice, and the number of cases
+still requiring synthesis. Pass `--no-summary-source-examples` when even source row ids should stay
+out of local summary artifacts.
 
 To synthesize a small local Chatterbox sample set from a private manifest, write artifacts under
 `runs/` and keep only the derived local manifest there:

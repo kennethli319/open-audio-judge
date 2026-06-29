@@ -46,8 +46,14 @@ def test_build_tts_cases_writes_metadata_summary(tmp_path: Path) -> None:
     written_summary = json.loads(summary.read_text(encoding="utf-8"))
     assert written_summary["total_cases"] == 1
     assert written_summary["by_slice"] == {"code_like": 1}
+    assert written_summary["reference_text_sha256"] == {
+        "duplicate_cases": 0,
+        "duplicate_hashes": 0,
+        "unique": 1,
+    }
     assert "approve" not in summary.read_text(encoding="utf-8")
     written_case = json.loads(out.read_text(encoding="utf-8").splitlines()[0])
+    assert "reference_text_sha256" in written_case["metadata"]
     assert "source_task" not in written_case["metadata"]
 
 
