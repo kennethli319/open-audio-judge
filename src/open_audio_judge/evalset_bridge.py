@@ -4,6 +4,7 @@ import json
 import re
 from collections import Counter
 from collections.abc import Iterable
+from dataclasses import dataclass
 from pathlib import Path
 from typing import Any
 
@@ -46,6 +47,22 @@ DEFAULT_TTS_KEYWORD_HINTS = {
     "translation",
     "time",
 }
+
+
+@dataclass(frozen=True)
+class TtsCaseSummary:
+    total_cases: int
+    by_slice: dict[str, int]
+    by_source_category: dict[str, int]
+    requires_synthesis: int
+
+    def as_dict(self) -> dict[str, Any]:
+        return {
+            "total_cases": self.total_cases,
+            "by_slice": self.by_slice,
+            "by_source_category": self.by_source_category,
+            "requires_synthesis": self.requires_synthesis,
+        }
 
 
 def load_evalset_records(path: Path) -> list[dict[str, Any]]:
@@ -166,6 +183,29 @@ def write_cases_jsonl(cases: Iterable[EvaluationCase], path: Path) -> Path:
     return path
 
 
+def summarize_tts_cases(cases: Iterable[EvaluationCase]) -> TtsCaseSummary:
+    case_list = list(cases)
+    return TtsCaseSummary(
+        total_cases=len(case_list),
+        by_slice=_sorted_counts(
+            str(case.metadata.get("tts_slice") or "unknown")
+            for case in case_list
+        ),
+        by_source_category=_sorted_counts(
+            str(case.metadata.get("source_category") or "unknown")
+            for case in case_list
+        ),
+        requires_synthesis=sum(1 for case in case_list if case.metadata.get("requires_synthesis") is True),
+    )
+
+
+def write_tts_summary_json(cases: Iterable[EvaluationCase], path: Path) -> Path:
+    path.parent.mkdir(parents=True, exist_ok=True)
+    summary = summarize_tts_cases(cases)
+    path.write_text(json.dumps(summary.as_dict(), indent=2, sort_keys=True) + "\n", encoding="utf-8")
+    return path
+
+
 def classify_tts_slice(record: dict[str, Any], target_text: str) -> str:
     category = str(record.get("category", "")).lower()
     task = str(record.get("task", "")).lower()
@@ -203,3 +243,8 @@ def _looks_code_like(text: str) -> bool:
 def _slugify(value: str) -> str:
     slug = re.sub(r"[^a-zA-Z0-9]+", "-", value.strip().lower()).strip("-")
     return slug or "unknown"
+
+
+def _sorted_counts(values: Iterable[str]) -> dict[str, int]:
+    counts = Counter(values)
+    return {key: counts[key] for key in sorted(counts)}

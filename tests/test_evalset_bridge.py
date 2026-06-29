@@ -5,7 +5,9 @@ from open_audio_judge.evalset_bridge import (
     build_tts_cases,
     classify_tts_slice,
     load_evalset_records,
+    summarize_tts_cases,
     write_cases_jsonl,
+    write_tts_summary_json,
 )
 
 
@@ -196,3 +198,38 @@ def test_load_and_write_cases_jsonl(tmp_path: Path) -> None:
     written = [json.loads(line) for line in out.read_text(encoding="utf-8").splitlines()]
     assert written[0]["id"] == "tts-ome-ome-0002"
     assert written[0]["metadata"]["tts_slice"] == "code_like"
+
+
+def test_summarize_tts_cases_is_metadata_only(tmp_path: Path) -> None:
+    records = [
+        {
+            "id": "json-one",
+            "category": "structured_output",
+            "task": "json_decision",
+            "ideal_answer": '{"decision":"approve"}',
+        },
+        {
+            "id": "time-one",
+            "category": "instruction_constraints",
+            "task": "read_time",
+            "ideal_answer": "Meet at 09:45.",
+        },
+    ]
+
+    cases = build_tts_cases(records, source_name="fixture")
+    summary = summarize_tts_cases(cases)
+    out = write_tts_summary_json(cases, tmp_path / "summary.json")
+    written = json.loads(out.read_text(encoding="utf-8"))
+
+    assert summary.as_dict() == written
+    assert written == {
+        "total_cases": 2,
+        "by_slice": {"code_like": 1, "dates_times": 1},
+        "by_source_category": {
+            "instruction_constraints": 1,
+            "structured_output": 1,
+        },
+        "requires_synthesis": 2,
+    }
+    assert "approve" not in out.read_text(encoding="utf-8")
+    assert "09:45" not in out.read_text(encoding="utf-8")

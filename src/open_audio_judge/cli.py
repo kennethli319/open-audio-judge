@@ -6,7 +6,13 @@ from typing import Annotated
 import typer
 from rich.console import Console
 
-from open_audio_judge.evalset_bridge import build_tts_cases, load_evalset_records, write_cases_jsonl
+from open_audio_judge.evalset_bridge import (
+    build_tts_cases,
+    load_evalset_records,
+    summarize_tts_cases,
+    write_cases_jsonl,
+    write_tts_summary_json,
+)
 from open_audio_judge.prompting import load_prompt
 from open_audio_judge.providers import build_provider
 from open_audio_judge.runner import evaluate_cases, load_cases
@@ -60,6 +66,10 @@ def build_tts_cases_command(
         int | None,
         typer.Option("--per-slice-limit", help="Maximum cases to keep for each TTS slice."),
     ] = None,
+    summary_out: Annotated[
+        Path | None,
+        typer.Option("--summary-out", help="Optional metadata-only JSON summary path."),
+    ] = None,
 ) -> None:
     category_filter = {item.strip() for item in categories.split(",") if item.strip()} or None
     slice_filter = {item.strip() for item in slice_labels.split(",") if item.strip()} or None
@@ -73,8 +83,13 @@ def build_tts_cases_command(
         per_slice_limit=per_slice_limit,
     )
     write_cases_jsonl(cases, out)
+    summary = summarize_tts_cases(cases)
     console.print(f"[bold]Wrote {len(cases)} TTS cases[/bold]")
     console.print(f"Cases: {out}")
+    console.print(f"Slices: {summary.by_slice}")
+    if summary_out is not None:
+        write_tts_summary_json(cases, summary_out)
+        console.print(f"Summary: {summary_out}")
 
 
 @app.command("serve")
