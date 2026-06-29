@@ -108,6 +108,8 @@ audio files under the ignored output directory, and emits `runs/tts-synthesis/tt
 with local `audio_path` fields for provider smoke tests. With `--discard-text-sidecars`, temporary
 text files are deleted after synthesis, or skipped entirely during `--dry-run`, while the manifest
 keeps only the target text hash and non-secret synthesis metadata.
+When sidecars are kept for local review, the manifest records a relative `metadata.text_sidecar_path`
+so validation can later confirm the sidecar still matches `reference_text`.
 The optional synthesis summary is metadata-only: counts by TTS slice, source category, sample kind,
 audio bytes/duration aggregates when audio exists, and the number of cases with audio hashes.
 Before passing a derived manifest to a hosted judge, validate that every case still satisfies the
@@ -123,8 +125,9 @@ python scripts/synthesize_tts_cases.py \
 ```
 
 Use `--allow-missing-audio` only for dry-run manifests that intentionally point at future audio
-paths. Validation summaries contain issue classes plus metadata-only manifest coverage such as TTS
-slice, source category, sample kind, text-context fields, turn-role sequences, audio
+paths. Add `--require-text-sidecars` when validating a local review manifest that intentionally kept
+sidecar text files. Validation summaries contain issue classes plus metadata-only manifest coverage
+such as TTS slice, source category, sample kind, text-context fields, turn-role sequences, audio
 bytes/duration aggregates, and audio-hash coverage. They do not include prompt text; pass
 `--redact-summary-case-ids` when case ids may reveal private source details.
 

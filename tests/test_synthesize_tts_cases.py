@@ -62,6 +62,7 @@ def test_synthesize_cases_dry_run_writes_local_audio_manifest(tmp_path: Path) ->
     assert written[0]["metadata"]["turn_count"] == 1
     assert written[0]["metadata"]["turn_roles"] == ["user"]
     assert written[0]["metadata"]["text_sidecar_written"] is True
+    assert written[0]["metadata"]["text_sidecar_path"] == "text/tts-eval-001.txt"
     assert written[0]["metadata"]["reference_text_sha256"] == (
         "836983522ec15bbf2ce214aa8c1cdb1d3dc4dc7bbce25cc950909cc5dfaa56bf"
     )
@@ -73,6 +74,7 @@ def test_synthesize_cases_dry_run_writes_local_audio_manifest(tmp_path: Path) ->
             require_local_audio=False,
             require_text_context_metadata=True,
             require_synthesis_metadata=True,
+            require_text_sidecars=True,
         )
         == []
     )
@@ -749,8 +751,116 @@ def test_synthesize_cases_can_skip_text_sidecars_in_dry_run(tmp_path: Path) -> N
     )
 
     assert derived[0]["metadata"]["text_sidecar_written"] is False
+    assert "text_sidecar_path" not in derived[0]["metadata"]
     assert not (tmp_path / "out" / "text" / "tts-private.txt").exists()
     assert (tmp_path / "out" / "tts_audio_cases.jsonl").exists()
+
+
+def test_validate_synthesized_manifest_can_require_matching_text_sidecars(
+    tmp_path: Path,
+) -> None:
+    cases_path = tmp_path / "tts_cases.jsonl"
+    cases_path.write_text(
+        json.dumps(
+            {
+                "id": "tts-private",
+                "task": "tts_naturalness",
+                "reference_text": "Keep this sidecar aligned.",
+            }
+        )
+        + "\n",
+        encoding="utf-8",
+    )
+
+    synthesize_cases(
+        cases_path=cases_path,
+        out_dir=tmp_path / "out",
+        tts_bin=Path("/missing/local-tts-speak"),
+        model="mlx-community/chatterbox-turbo-6bit",
+        voice="af_heart",
+        lang_code="en",
+        audio_format="wav",
+        dry_run=True,
+    )
+
+    assert (
+        validate_synthesized_manifest(
+            cases_path=tmp_path / "out" / "tts_audio_cases.jsonl",
+            require_local_audio=False,
+            require_text_sidecars=True,
+        )
+        == []
+    )
+
+
+def test_validate_synthesized_manifest_reports_stale_text_sidecar(
+    tmp_path: Path,
+) -> None:
+    text_path = tmp_path / "out" / "text" / "sample.txt"
+    text_path.parent.mkdir(parents=True)
+    text_path.write_text("Stale sidecar text.", encoding="utf-8")
+    cases_path = tmp_path / "out" / "tts_audio_cases.jsonl"
+    cases_path.write_text(
+        json.dumps(
+            {
+                "id": "tts-private-local-tts",
+                "task": "tts_naturalness",
+                "audio_path": "audio/future.wav",
+                "reference_text": "Current target text.",
+                "metadata": {
+                    "text_sidecar_written": True,
+                    "text_sidecar_path": "text/sample.txt",
+                },
+            }
+        )
+        + "\n",
+        encoding="utf-8",
+    )
+
+    issues = validate_synthesized_manifest(
+        cases_path=cases_path,
+        require_local_audio=False,
+        require_text_sidecars=True,
+    )
+
+    assert [(issue.case_id, issue.reason) for issue in issues] == [
+        ("tts-private-local-tts", "text sidecar does not match reference_text.")
+    ]
+
+
+def test_validate_synthesized_manifest_reports_missing_required_text_sidecar(
+    tmp_path: Path,
+) -> None:
+    cases_path = tmp_path / "out" / "tts_audio_cases.jsonl"
+    cases_path.parent.mkdir(parents=True)
+    cases_path.write_text(
+        json.dumps(
+            {
+                "id": "tts-private-local-tts",
+                "task": "tts_naturalness",
+                "audio_path": "audio/future.wav",
+                "reference_text": "Current target text.",
+                "metadata": {
+                    "text_sidecar_written": False,
+                },
+            }
+        )
+        + "\n",
+        encoding="utf-8",
+    )
+
+    issues = validate_synthesized_manifest(
+        cases_path=cases_path,
+        require_local_audio=False,
+        require_text_sidecars=True,
+    )
+
+    assert [(issue.case_id, issue.reason) for issue in issues] == [
+        (
+            "tts-private-local-tts",
+            "metadata.text_sidecar_written is false but text sidecars are required.",
+        )
+    ]
 
 
 def test_synthesis_summary_counts_text_context_field_combinations(

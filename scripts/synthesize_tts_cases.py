@@ -85,6 +85,11 @@ def main() -> None:
         help="With --validate-only, require portable relative audio_path values.",
     )
     parser.add_argument(
+        "--require-text-sidecars",
+        action="store_true",
+        help="With --validate-only, require kept text sidecars to exist and match reference_text.",
+    )
+    parser.add_argument(
         "--redact-summary-case-ids",
         action="store_true",
         help="With --validate-only and --summary-out, hash case ids in the JSON summary artifact.",
@@ -99,6 +104,7 @@ def main() -> None:
             require_text_context_metadata=args.require_text_context_metadata,
             require_synthesis_metadata=args.require_synthesis_metadata,
             require_relative_audio_path=args.require_relative_audio_path,
+            require_text_sidecars=args.require_text_sidecars,
         )
         validation_cases = load_cases(args.cases)
         summary = summarize_validation_issues(issues, cases=validation_cases)
@@ -203,6 +209,7 @@ def synthesize_cases(
         derived_case["audio_path"] = manifest_audio_path
         text_context_fields = _text_context_fields(EvaluationCase.model_validate(derived_case))
         metadata = dict(derived_case.get("metadata", {}))
+        text_sidecar_path = _manifest_text_path(text_path, out_dir) if keep_text_sidecars else None
         metadata.update(
             {
                 "sample_kind": "local_synthetic_tts",
@@ -217,6 +224,7 @@ def synthesize_cases(
                 "turn_count": metadata.get("turn_count", len(case.turns)),
                 "turn_roles": metadata.get("turn_roles", _turn_roles(case)),
                 "text_sidecar_written": keep_text_sidecars,
+                **({"text_sidecar_path": text_sidecar_path} if text_sidecar_path else {}),
                 **audio_metadata,
             }
         )
@@ -292,6 +300,7 @@ def validate_synthesized_manifest(
     require_text_context_metadata: bool = False,
     require_synthesis_metadata: bool = False,
     require_relative_audio_path: bool = False,
+    require_text_sidecars: bool = False,
 ) -> list[SynthesisValidationIssue]:
     issues: list[SynthesisValidationIssue] = []
     raw_audio_paths = _raw_audio_paths_by_case_id(cases_path)
@@ -374,6 +383,8 @@ def validate_synthesized_manifest(
                 require_synthesis_metadata=require_synthesis_metadata,
             )
         )
+        if require_text_sidecars:
+            issues.extend(_validate_text_sidecar(case, cases_path))
     return issues
 
 
@@ -540,6 +551,58 @@ def _validate_audio_metadata(
                 )
             )
     return issues
+
+
+def _validate_text_sidecar(
+    case: EvaluationCase,
+    cases_path: Path,
+) -> list[SynthesisValidationIssue]:
+    metadata = case.metadata
+    if metadata.get("text_sidecar_written") is False:
+        return [
+            SynthesisValidationIssue(
+                case_id=case.id,
+                reason="metadata.text_sidecar_written is false but text sidecars are required.",
+            )
+        ]
+
+    text_sidecar_path = _resolve_text_sidecar_path(case, cases_path)
+    if text_sidecar_path is None:
+        return [
+            SynthesisValidationIssue(
+                case_id=case.id,
+                reason="metadata.text_sidecar_path is missing.",
+            )
+        ]
+    if not text_sidecar_path.is_file():
+        return [
+            SynthesisValidationIssue(
+                case_id=case.id,
+                reason=(
+                    "text sidecar file not found: "
+                    f"{_display_audio_path(text_sidecar_path, cases_path)}"
+                ),
+            )
+        ]
+
+    expected_text = case.reference_text or ""
+    observed_text = text_sidecar_path.read_text(encoding="utf-8")
+    if observed_text != expected_text:
+        return [
+            SynthesisValidationIssue(
+                case_id=case.id,
+                reason="text sidecar does not match reference_text.",
+            )
+        ]
+    return []
+
+
+def _resolve_text_sidecar_path(case: EvaluationCase, cases_path: Path) -> Path | None:
+    raw_path = case.metadata.get("text_sidecar_path")
+    if isinstance(raw_path, str) and raw_path.strip():
+        text_path = Path(raw_path)
+        return text_path if text_path.is_absolute() else cases_path.parent / text_path
+    return None
 
 
 def summarize_validation_issues(
@@ -736,6 +799,15 @@ def _manifest_audio_path(audio_path: Path, out_dir: Path) -> str:
     except ValueError as exc:
         raise ValueError(
             f"Synthesized audio output must be under the output directory: {audio_path}"
+        ) from exc
+
+
+def _manifest_text_path(text_path: Path, out_dir: Path) -> str:
+    try:
+        return str(text_path.resolve().relative_to(out_dir.resolve()))
+    except ValueError as exc:
+        raise ValueError(
+            f"Synthesis text sidecar must be under the output directory: {text_path}"
         ) from exc
 
 
