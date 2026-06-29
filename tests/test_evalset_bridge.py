@@ -49,6 +49,36 @@ def test_build_tts_cases_preserves_multiturn_context_and_metadata() -> None:
     assert case.metadata["requires_synthesis"] is True
 
 
+def test_build_tts_cases_normalizes_scalar_and_empty_tags() -> None:
+    records = [
+        {
+            "id": "privacy-one",
+            "category": "custom",
+            "task": "redaction_prompt",
+            "turns": [{"role": "user", "content": "Read the redaction aloud."}],
+            "ideal_answer": "The secret phrase is redacted.",
+            "metadata": {"tags": "privacy"},
+        },
+        {
+            "id": "json-one",
+            "category": "structured_output",
+            "task": "json_decision",
+            "ideal_answer": '{"decision":"approve"}',
+            "metadata": {"tags": ["json", "", None]},
+        },
+    ]
+
+    cases = build_tts_cases(records, source_name="fixture")
+
+    assert [case.id for case in cases] == [
+        "tts-fixture-privacy-one",
+        "tts-fixture-json-one",
+    ]
+    assert cases[0].metadata["source_tags"] == ["privacy"]
+    assert cases[0].metadata["tts_slice"] == "safety_privacy"
+    assert cases[1].metadata["source_tags"] == ["json"]
+
+
 def test_build_tts_cases_supports_category_filter_and_limit() -> None:
     records = [
         {

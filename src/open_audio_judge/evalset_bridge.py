@@ -122,7 +122,7 @@ def is_tts_slice_candidate(record: dict[str, Any]) -> bool:
         return True
 
     metadata = record.get("metadata") if isinstance(record.get("metadata"), dict) else {}
-    tags = metadata.get("tags", []) if isinstance(metadata, dict) else []
+    tags = _metadata_tags(metadata)
     joined_hints = " ".join(
         str(value).lower()
         for value in [
@@ -158,7 +158,7 @@ def tts_case_from_evalset_record(
         normalized_turns = [{"role": "user", "content": "Read the target text aloud exactly."}]
 
     metadata = record.get("metadata") if isinstance(record.get("metadata"), dict) else {}
-    tags = metadata.get("tags", []) if isinstance(metadata, dict) else []
+    tags = _metadata_tags(metadata)
     case_metadata = {
         "source": source_name,
         "source_id": source_id,
@@ -216,7 +216,7 @@ def classify_tts_slice(record: dict[str, Any], target_text: str) -> str:
     category = str(record.get("category", "")).lower()
     task = str(record.get("task", "")).lower()
     metadata = record.get("metadata") if isinstance(record.get("metadata"), dict) else {}
-    tags = [str(tag).lower() for tag in metadata.get("tags", [])] if metadata else []
+    tags = [tag.lower() for tag in _metadata_tags(metadata)]
     hints = " ".join([category, task, *tags, target_text.lower()])
 
     if (
@@ -244,6 +244,16 @@ def classify_tts_slice(record: dict[str, Any], target_text: str) -> str:
 
 def _looks_code_like(text: str) -> bool:
     return bool(re.search(r"[{}()[\]_;=]|```|</?[a-zA-Z][^>]*>", text))
+
+
+def _metadata_tags(metadata: dict[str, Any]) -> list[str]:
+    raw_tags = metadata.get("tags", [])
+    if isinstance(raw_tags, list):
+        return [str(tag).strip() for tag in raw_tags if tag is not None and str(tag).strip()]
+    if raw_tags is None:
+        return []
+    tag = str(raw_tags).strip()
+    return [tag] if tag else []
 
 
 def _slugify(value: str) -> str:
