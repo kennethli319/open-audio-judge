@@ -4,7 +4,6 @@ from pathlib import Path
 from typing import Annotated
 
 import typer
-import uvicorn
 from rich.console import Console
 
 from open_audio_judge.prompting import load_prompt
@@ -38,6 +37,8 @@ def serve_command(
     port: Annotated[int, typer.Option("--port", help="Bind port.")] = 8000,
     reload: Annotated[bool, typer.Option("--reload", help="Enable development reload.")] = False,
 ) -> None:
+    import uvicorn
+
     uvicorn.run("open_audio_judge.api:app", host=host, port=port, reload=reload)
 
 

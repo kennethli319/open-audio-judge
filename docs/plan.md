@@ -51,7 +51,7 @@ These labels are deliberately generic and should be renamed per task in later re
 
 Version 0.1:
 
-- `mock`: deterministic local scoring.
+- `mock`: deterministic local scoring with a lightweight semantic ASR baseline for reference/candidate cases. It is non-audio and non-authoritative, but it flags high-impact number, negation, and entity-like changes so offline smoke reports do not behave like pure WER.
 - `qwen`: OpenAI-compatible `/v1/chat/completions`, defaulting to `http://localhost:8091/v1`.
 - `openai-compatible`: same transport with a generic model/base URL.
 
@@ -73,6 +73,17 @@ Near-term report additions:
 - Calibration report comparing audio LLM judge scores to human labels or legacy metrics.
 - Failure taxonomy: substitutions, deletions, insertions, entity errors, number errors, negation errors, speaker-turn errors, acoustic artifacts.
 - ASR semantic slices: meaning preservation class, critical-token error type, and downstream-impact buckets.
+
+## Calibration Direction
+
+The ASR judge should be calibrated on cases where WER-like overlap and semantic severity disagree:
+
+- `fifteen dollars` versus `fifty dollars`: small edit distance, large downstream payment impact.
+- Deleted negation such as `do not take` versus `do take`: low word error count, reversed intent.
+- Wrong location, name, medication, account, or product entity: one-token error with high task impact.
+- Harmless formatting and normalization such as `twenty one` versus `21`: lexical difference with preserved meaning.
+
+These cases should appear in both the prompt examples and report-level slice analysis so researchers can see whether an ASR model is improving on meaning preservation rather than only aggregate WER.
 
 ## Open Questions
 
