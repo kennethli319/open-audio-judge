@@ -115,6 +115,71 @@ def test_build_tts_cases_can_hash_private_source_ids() -> None:
     assert records[0]["id"] not in json.dumps(cases[0].model_dump(), ensure_ascii=False)
 
 
+def test_build_tts_cases_keeps_duplicate_source_ids_unique() -> None:
+    records = [
+        {
+            "id": "duplicate-row",
+            "category": "structured_output",
+            "task": "json_decision",
+            "ideal_answer": '{"decision":"approve"}',
+        },
+        {
+            "id": "duplicate-row",
+            "category": "structured_output",
+            "task": "json_decision",
+            "ideal_answer": '{"decision":"deny"}',
+        },
+    ]
+
+    cases = build_tts_cases(records, source_name="fixture")
+
+    assert [case.id for case in cases] == [
+        "tts-fixture-duplicate-row",
+        "tts-fixture-duplicate-row-2",
+    ]
+    assert "case_id_collision_index" not in cases[0].metadata
+    assert cases[1].metadata["case_id_collision_index"] == 2
+
+
+def test_build_tts_cases_uses_stable_row_ids_for_missing_source_ids() -> None:
+    records = [
+        {
+            "id": "",
+            "category": "structured_output",
+            "task": "json_decision",
+            "ideal_answer": '{"decision":"approve"}',
+        },
+        {
+            "category": "instruction_constraints",
+            "task": "read_time",
+            "ideal_answer": "Meet at 09:45.",
+        },
+    ]
+
+    cases = build_tts_cases(records, source_name="fixture")
+
+    assert [case.id for case in cases] == ["tts-fixture-row-1", "tts-fixture-row-2"]
+    assert [case.metadata["source_id"] for case in cases] == ["row-1", "row-2"]
+
+
+def test_build_tts_cases_hashes_missing_source_ids_without_raw_text() -> None:
+    records = [
+        {
+            "category": "structured_output",
+            "task": "json_decision",
+            "ideal_answer": '{"decision":"approve"}',
+        }
+    ]
+
+    cases = build_tts_cases(records, source_name="fixture", hash_source_ids=True)
+
+    expected_hash = hashlib.sha256("row-1".encode("utf-8")).hexdigest()
+    assert cases[0].id == f"tts-fixture-source-{expected_hash[:12]}"
+    assert cases[0].metadata["source_id"] == f"source-{expected_hash[:12]}"
+    assert cases[0].metadata["source_id_sha256"] == expected_hash
+    assert "row-1" not in json.dumps(cases[0].model_dump(), ensure_ascii=False)
+
+
 def test_build_tts_cases_supports_category_filter_and_limit() -> None:
     records = [
         {

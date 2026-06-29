@@ -99,7 +99,8 @@ def build_tts_cases(
 ) -> list[EvaluationCase]:
     cases: list[EvaluationCase] = []
     slice_counts: Counter[str] = Counter()
-    for record in records:
+    case_id_counts: Counter[str] = Counter()
+    for row_index, record in enumerate(records, start=1):
         if category_filter and str(record.get("category", "")) not in category_filter:
             continue
         if not is_tts_slice_candidate(record):
@@ -109,6 +110,7 @@ def build_tts_cases(
             source_name=source_name,
             hash_source_id=hash_source_ids,
             include_source_task=include_source_task,
+            row_index=row_index,
         )
         if case is None:
             continue
@@ -117,6 +119,7 @@ def build_tts_cases(
             continue
         if per_slice_limit is not None and slice_counts[tts_slice] >= per_slice_limit:
             continue
+        case = _with_unique_case_id(case, case_id_counts)
         cases.append(case)
         slice_counts[tts_slice] += 1
         if limit is not None and len(cases) >= limit:
@@ -149,12 +152,15 @@ def tts_case_from_evalset_record(
     source_name: str,
     hash_source_id: bool = False,
     include_source_task: bool = False,
+    row_index: int | None = None,
 ) -> EvaluationCase | None:
     target_text = str(record.get("ideal_answer") or "").strip()
     if not target_text:
         return None
 
-    raw_source_id = str(record.get("id") or "unknown")
+    raw_source_id = str(record.get("id") or "").strip()
+    if not raw_source_id:
+        raw_source_id = f"row-{row_index}" if row_index is not None else "unknown"
     source_id = _hashed_source_id(raw_source_id) if hash_source_id else raw_source_id
     turns = record.get("turns") if isinstance(record.get("turns"), list) else []
     normalized_turns = [
@@ -284,6 +290,17 @@ def _metadata_tags(metadata: dict[str, Any]) -> list[str]:
 def _slugify(value: str) -> str:
     slug = re.sub(r"[^a-zA-Z0-9]+", "-", value.strip().lower()).strip("-")
     return slug or "unknown"
+
+
+def _with_unique_case_id(case: EvaluationCase, case_id_counts: Counter[str]) -> EvaluationCase:
+    case_id_counts[case.id] += 1
+    collision_index = case_id_counts[case.id]
+    if collision_index == 1:
+        return case
+
+    metadata = dict(case.metadata)
+    metadata["case_id_collision_index"] = collision_index
+    return case.model_copy(update={"id": f"{case.id}-{collision_index}", "metadata": metadata})
 
 
 def _hashed_source_id(source_id: str) -> str:
