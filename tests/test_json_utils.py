@@ -15,3 +15,23 @@ def test_parse_alternate_score_key() -> None:
     output = parse_judge_output('{"score": 88, "explanation": "Meaning preserved."}')
     assert output.overall_score == 88
     assert output.reason == "Meaning preserved."
+
+
+def test_parse_asr_diagnostics() -> None:
+    output = parse_judge_output(
+        """{
+          "overall_score": 52,
+          "reason": "A key amount changed.",
+          "judge_transcript": "Please transfer fifteen dollars.",
+          "meaning_preservation": "partial_loss",
+          "semantic_error_summary": "The amount is wrong.",
+          "key_differences": ["fifteen became fifty"],
+          "error_categories": ["number_error", "substitution"],
+          "researcher_notes": ["Improve numeric robustness."]
+        }"""
+    )
+
+    assert output.judge_transcript == "Please transfer fifteen dollars."
+    assert output.meaning_preservation == "partial_loss"
+    assert output.key_differences == ["fifteen became fifty"]
+    assert output.error_categories == ["number_error", "substitution"]

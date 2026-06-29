@@ -82,6 +82,12 @@ def evaluate_case(
         provider=provider.name,
         overall_score=score,
         reason=reason,
+        judge_transcript=judge_output.judge_transcript if judge_output else None,
+        meaning_preservation=judge_output.meaning_preservation if judge_output else None,
+        semantic_error_summary=judge_output.semantic_error_summary if judge_output else None,
+        key_differences=judge_output.key_differences if judge_output else [],
+        error_categories=judge_output.error_categories if judge_output else [],
+        researcher_notes=judge_output.researcher_notes if judge_output else [],
         label=label_for_score(score),  # type: ignore[arg-type]
         status=status,  # type: ignore[arg-type]
         error=error,

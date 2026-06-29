@@ -41,7 +41,38 @@ def parse_judge_output(text: str) -> JudgeOutput:
     if reason is None:
         raise ValueError("Judge JSON is missing reason.")
 
-    return JudgeOutput(overall_score=int(score), reason=str(reason).strip())
+    return JudgeOutput(
+        overall_score=int(score),
+        reason=str(reason).strip(),
+        judge_transcript=_optional_string(
+            data.get("judge_transcript", data.get("judgeTranscript", data.get("own_transcript")))
+        ),
+        meaning_preservation=_optional_string(
+            data.get("meaning_preservation", data.get("meaningPreservation"))
+        ),
+        semantic_error_summary=_optional_string(
+            data.get("semantic_error_summary", data.get("semanticErrorSummary"))
+        ),
+        key_differences=_string_list(data.get("key_differences", data.get("keyDifferences"))),
+        error_categories=_string_list(data.get("error_categories", data.get("errorCategories"))),
+        researcher_notes=_string_list(data.get("researcher_notes", data.get("researcherNotes"))),
+    )
+
+
+def _optional_string(value: Any) -> str | None:
+    if value is None:
+        return None
+    text = str(value).strip()
+    return text or None
+
+
+def _string_list(value: Any) -> list[str]:
+    if value is None:
+        return []
+    if isinstance(value, list):
+        return [str(item).strip() for item in value if str(item).strip()]
+    text = str(value).strip()
+    return [text] if text else []
 
 
 def _first_balanced_object(text: str) -> str:

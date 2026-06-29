@@ -14,3 +14,4 @@ def test_evaluate_cases_with_mock(tmp_path: Path) -> None:
     assert (tmp_path / "results.jsonl").exists()
     assert (tmp_path / "report.html").exists()
     assert all(result.status == "ok" for result in results)
+    assert all(result.meaning_preservation == "uncertain" for result in results)

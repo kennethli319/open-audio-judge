@@ -16,6 +16,8 @@ def test_load_and_render_asr_prompt() -> None:
     )
 
     assert prompt.id == "asr_error"
+    assert prompt.version == "0.2.0"
     assert "Transfer fifteen dollars." in rendered.user
     assert "Transfer fifty dollars." in rendered.user
+    assert "your own concise best-effort transcript" in rendered.system
     assert "Return only valid JSON" in rendered.system

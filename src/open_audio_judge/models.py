@@ -41,6 +41,12 @@ class ProviderResponse(BaseModel):
 class JudgeOutput(BaseModel):
     overall_score: int = Field(ge=1, le=100)
     reason: str
+    judge_transcript: str | None = None
+    meaning_preservation: str | None = None
+    semantic_error_summary: str | None = None
+    key_differences: list[str] = Field(default_factory=list)
+    error_categories: list[str] = Field(default_factory=list)
+    researcher_notes: list[str] = Field(default_factory=list)
 
 
 class EvaluationResult(BaseModel):
@@ -51,6 +57,12 @@ class EvaluationResult(BaseModel):
     provider: str
     overall_score: int = Field(ge=1, le=100)
     reason: str
+    judge_transcript: str | None = None
+    meaning_preservation: str | None = None
+    semantic_error_summary: str | None = None
+    key_differences: list[str] = Field(default_factory=list)
+    error_categories: list[str] = Field(default_factory=list)
+    researcher_notes: list[str] = Field(default_factory=list)
     label: Literal["accurate", "needs_review", "inaccurate"]
     status: Literal["ok", "parse_error", "provider_error"] = "ok"
     error: str | None = None

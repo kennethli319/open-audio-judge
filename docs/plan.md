@@ -9,14 +9,14 @@ Open Audio Judge should become a standard protocol for prompt-based audio LLM ev
 The first implementation includes:
 
 - Prompt registry with versioned YAML prompts.
-- ASR error judge prompt following the requested three-stage structure.
+- ASR error judge prompt following the requested three-stage structure, with audio-derived judge transcription and semantic diagnostics.
 - TTS naturalness prompt as the starter example.
 - Case schema for audio path/URL, reference text, candidate text, and metadata.
 - Local Qwen/Qwen3-Omni provider through OpenAI-compatible chat completions.
 - Mock provider for tests and offline demos.
 - CLI batch runner.
 - FastAPI REST API for single-case and batch judging.
-- HTML report with average score, score distribution, accurate/needs-review/inaccurate labels, and per-case reasons.
+- HTML report with average score, score distribution, accurate/needs-review/inaccurate labels, per-case reasons, and optional diagnostic fields.
 
 ## Prompt Contract
 
@@ -27,15 +27,16 @@ Every judge prompt should contain:
 - Stage 2: task definition and scoring rubric.
 - Stage 3: private checklist and strict output rules.
 - A user prompt template rendered with the case fields.
-- Stable JSON result fields: `overall_score` and `reason`.
+- Stable core JSON result fields: `overall_score` and `reason`.
+- Optional task-specific diagnostics such as `judge_transcript`, `meaning_preservation`, `semantic_error_summary`, `key_differences`, `error_categories`, and `researcher_notes`.
 
-The judge may internally inspect detailed dimensions, but the public output stays concise. This avoids leaking chain-of-thought while preserving useful diagnostic reasoning in the `reason`.
+The judge may internally inspect detailed dimensions, but it should not expose hidden chain-of-thought. Diagnostic fields should be concise observations that help researchers improve models.
 
 ## Scoring Direction
 
 All first-version prompts use `1` to `100`, where higher is better:
 
-- ASR error judge: 100 means the candidate transcript faithfully preserves what was spoken.
+- ASR error judge: 100 means the candidate transcript faithfully preserves the spoken meaning, as judged from the audio plus any reference transcript.
 - TTS naturalness judge: 100 means highly natural, intelligible, artifact-free synthesized speech.
 
 Reports can map scores into labels with configurable thresholds:
@@ -71,6 +72,7 @@ Near-term report additions:
 - Confidence intervals via bootstrap resampling.
 - Calibration report comparing audio LLM judge scores to human labels or legacy metrics.
 - Failure taxonomy: substitutions, deletions, insertions, entity errors, number errors, negation errors, speaker-turn errors, acoustic artifacts.
+- ASR semantic slices: meaning preservation class, critical-token error type, and downstream-impact buckets.
 
 ## Open Questions
 

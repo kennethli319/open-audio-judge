@@ -114,6 +114,10 @@ def render_html_report(results: list[EvaluationResult]) -> str:
     .inaccurate-fill {{ background: var(--bad); }}
     .reason {{ color: var(--ink); line-height: 1.45; }}
     .muted {{ color: var(--muted); }}
+    details {{ margin-top: 8px; }}
+    summary {{ cursor: pointer; color: var(--accent); }}
+    ul {{ margin: 6px 0 10px 18px; padding: 0; }}
+    li {{ margin: 3px 0; }}
     @media (max-width: 760px) {{
       header {{ padding: 22px 18px 16px; }}
       main {{ padding: 18px 12px 28px; }}
@@ -151,6 +155,7 @@ def render_html_report(results: list[EvaluationResult]) -> str:
           <th>Score</th>
           <th>Label</th>
           <th>Reason</th>
+          <th>Diagnostics</th>
           <th>Status</th>
         </tr>
       </thead>
@@ -176,6 +181,7 @@ def _render_row(result: EvaluationResult) -> str:
   </td>
   <td data-label="Label" class="{label}">{html.escape(label.replace("_", " "))}</td>
   <td data-label="Reason" class="reason">{html.escape(result.reason)}</td>
+  <td data-label="Diagnostics">{_render_diagnostics(result)}</td>
   <td data-label="Status">{html.escape(result.status)}</td>
 </tr>"""
 
@@ -183,6 +189,37 @@ def _render_row(result: EvaluationResult) -> str:
 def _bucket_counts(scores: list[int]) -> list[tuple[str, int]]:
     ranges = [(1, 20), (21, 40), (41, 60), (61, 80), (81, 100)]
     return [(f"{low}-{high}", sum(1 for score in scores if low <= score <= high)) for low, high in ranges]
+
+
+def _render_diagnostics(result: EvaluationResult) -> str:
+    parts: list[str] = []
+    if result.meaning_preservation:
+        parts.append(
+            f'<div><span class="muted">Meaning</span><br>{html.escape(result.meaning_preservation)}</div>'
+        )
+    if result.semantic_error_summary:
+        parts.append(
+            f'<div><span class="muted">Semantic impact</span><br>'
+            f"{html.escape(result.semantic_error_summary)}</div>"
+        )
+    if result.judge_transcript:
+        parts.append(
+            f'<details><summary>Judge transcript</summary>'
+            f"{html.escape(result.judge_transcript)}</details>"
+        )
+    if result.key_differences:
+        parts.append(_render_list("Key differences", result.key_differences))
+    if result.error_categories:
+        categories = ", ".join(result.error_categories)
+        parts.append(f'<div><span class="muted">Categories</span><br>{html.escape(categories)}</div>')
+    if result.researcher_notes:
+        parts.append(_render_list("Researcher notes", result.researcher_notes))
+    return "".join(parts) if parts else '<span class="muted">None</span>'
+
+
+def _render_list(title: str, items: list[str]) -> str:
+    rendered_items = "".join(f"<li>{html.escape(item)}</li>" for item in items)
+    return f'<div><span class="muted">{html.escape(title)}</span><ul>{rendered_items}</ul></div>'
 
 
 def _pct(count: int, total: int) -> int:

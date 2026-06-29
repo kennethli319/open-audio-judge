@@ -20,7 +20,18 @@ class MockProvider:
             score = 75
             reason = "Mock score used because reference or candidate text was missing."
 
-        content = json.dumps({"overall_score": score, "reason": reason})
+        content = json.dumps(
+            {
+                "overall_score": score,
+                "reason": reason,
+                "judge_transcript": case.reference_text,
+                "meaning_preservation": "uncertain",
+                "semantic_error_summary": "Mock provider does not listen to audio or infer semantics.",
+                "key_differences": [],
+                "error_categories": ["mock"],
+                "researcher_notes": ["Use qwen or another audio LLM provider for real ASR diagnostics."],
+            }
+        )
         return ProviderResponse(content=content, raw={"provider": self.name, "judge": prompt.judge_id})
 
 

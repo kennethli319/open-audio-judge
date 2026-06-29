@@ -22,7 +22,7 @@ TRACE, from "Hearing Between the Lines," separates speech-to-speech evaluation i
 
 ## ASR Evaluation Implications
 
-WER remains useful but incomplete. Recent ASR-evaluation papers and Google Research's meaning-preservation work emphasize that lexical edit distance can treat harmless formatting differences and meaning-changing substitutions as equally severe. For Open Audio Judge, ASR prompts should score meaning preservation, named entities, numbers, negation, omissions, insertions, speaker turns, and downstream task impact. Sources: [Google Research meaning preservation](https://research.google/blog/assessing-asr-performance-with-meaning-preservation/), [Evaluation of Automatic Speech Recognition Using Generative Large Language Models](https://arxiv.org/html/2604.21928v3), and [An Approach to Measuring ASR Performance for LLM Applications](https://www.isca-archive.org/interspeech_2025/pulikodan25_interspeech.pdf).
+WER remains useful but incomplete. Recent ASR-evaluation papers and Google Research's meaning-preservation work emphasize that lexical edit distance can treat harmless formatting differences and meaning-changing substitutions as equally severe. For Open Audio Judge, ASR prompts should score meaning preservation, named entities, numbers, negation, omissions, insertions, speaker turns, and downstream task impact. The ASR judge should also form its own concise best-effort transcript from the audio so it can triangulate candidate-vs-audio, candidate-vs-reference, and candidate-vs-judge-transcript differences. Sources: [Google Research meaning preservation](https://research.google/blog/assessing-asr-performance-with-meaning-preservation/), [Evaluation of Automatic Speech Recognition Using Generative Large Language Models](https://arxiv.org/html/2604.21928v3), and [An Approach to Measuring ASR Performance for LLM Applications](https://www.isca-archive.org/interspeech_2025/pulikodan25_interspeech.pdf).
 
 The ASR judge should support both reference-based and audio-direct judging. If a reference transcript is available, the judge compares the candidate to both the audio and reference. If no reference is available, the judge listens to the audio and estimates transcript fidelity directly, while clearly reducing confidence in the reason.
 
@@ -35,7 +35,7 @@ Gemini's official docs expose audio understanding for transcription, translation
 ## Design Requirements Derived From Research
 
 1. Version every prompt and include the prompt id/version in every result.
-2. Keep the judge output schema small and stable: `overall_score` and `reason`.
+2. Keep core judge fields stable: `overall_score` and `reason`; add task-specific diagnostics only when they improve model-development feedback.
 3. Store the raw response for audits and parser improvements.
 4. Do not expose private chain-of-thought in outputs; ask models to reason internally and summarize evidence.
 5. Support auxiliary metrics later, but do not require them for the first protocol.

@@ -19,6 +19,12 @@ def test_write_html_report(tmp_path: Path) -> None:
         provider="mock",
         overall_score=82,
         reason="Mostly correct.",
+        judge_transcript="Transfer fifteen dollars.",
+        meaning_preservation="preserved",
+        semantic_error_summary="Meaning is preserved.",
+        key_differences=["No meaningful difference."],
+        error_categories=["no_error"],
+        researcher_notes=["No action needed."],
         label="accurate",
     )
     output = write_html_report([result], tmp_path / "report.html")
@@ -26,3 +32,5 @@ def test_write_html_report(tmp_path: Path) -> None:
 
     assert "Open Audio Judge Report" in html
     assert "Mostly correct." in html
+    assert "Meaning is preserved." in html
+    assert "No action needed." in html

@@ -6,9 +6,9 @@ The first MVP focuses on:
 
 - A reusable judge protocol: audio sample + task context + prompt rubric + strict JSON result.
 - A local Qwen/Qwen3-Omni-compatible provider through an OpenAI-style `/v1/chat/completions` endpoint.
-- Two initial prompts: TTS naturalness and ASR error severity.
+- Two initial prompts: TTS naturalness and semantic ASR transcription quality.
 - CLI and REST API entry points.
-- HTML reports with score bars, labels, and per-case reasons instead of only raw JSON.
+- HTML reports with score bars, labels, reasons, and per-case diagnostics instead of only raw JSON.
 
 ## Why This Shape
 
@@ -73,14 +73,22 @@ curl -X POST http://127.0.0.1:8000/v1/evaluate \
   }'
 ```
 
-The judge result always normalizes to:
+The judge result always includes the core score fields and may include task-specific diagnostics:
 
 ```json
 {
   "overall_score": 62,
-  "reason": "The transcript is mostly fluent but changes a key amount from fifteen to fifty."
+  "reason": "The transcript is mostly fluent but changes a key amount from fifteen to fifty.",
+  "judge_transcript": "Please transfer fifteen dollars to Maya.",
+  "meaning_preservation": "partial_loss",
+  "semantic_error_summary": "The candidate preserves the request but changes the payment amount.",
+  "key_differences": ["fifteen dollars was transcribed as fifty dollars"],
+  "error_categories": ["number_error", "substitution"],
+  "researcher_notes": ["Prioritize numeric amount robustness in payment-like utterances."]
 }
 ```
+
+For ASR, the judge is instructed to listen to the audio, form its own concise best-effort transcript, and compare the submitted transcript against both that audio-derived transcript and any provided reference. The score is based on semantic preservation and downstream impact, not raw word edit distance.
 
 ## Case Format
 
