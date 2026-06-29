@@ -15,6 +15,7 @@ import subprocess
 import wave
 from collections import Counter
 from collections.abc import Iterable
+from dataclasses import dataclass
 from pathlib import Path
 from typing import Any
 
@@ -29,6 +30,12 @@ DEFAULT_TTS = Path(
 )
 DEFAULT_OUT = ROOT / "runs" / "tts-synthesis"
 DEFAULT_MODEL = "mlx-community/chatterbox-turbo-6bit"
+
+
+@dataclass(frozen=True)
+class SynthesisValidationIssue:
+    case_id: str
+    reason: str
 
 
 def main() -> None:
@@ -52,8 +59,31 @@ def main() -> None:
         action="store_true",
         help="Delete per-case text sidecars after synthesis, or skip them in dry-run mode.",
     )
+    parser.add_argument(
+        "--validate-only",
+        action="store_true",
+        help="Validate an existing synthesized manifest instead of invoking TTS.",
+    )
+    parser.add_argument(
+        "--allow-missing-audio",
+        action="store_true",
+        help="With --validate-only, allow relative audio_path files that do not exist yet.",
+    )
     parser.add_argument("--dry-run", action="store_true", help="Write manifest without invoking TTS.")
     args = parser.parse_args()
+
+    if args.validate_only:
+        issues = validate_synthesized_manifest(
+            cases_path=args.cases,
+            require_local_audio=not args.allow_missing_audio,
+        )
+        summary = summarize_validation_issues(issues)
+        if args.summary_out is not None:
+            write_validation_summary_json(issues, args.summary_out)
+        print(json.dumps(summary, sort_keys=True))
+        if issues:
+            raise SystemExit(1)
+        return
 
     derived = synthesize_cases(
         cases_path=args.cases,
@@ -217,6 +247,64 @@ def write_synthesis_summary_json(cases: Iterable[dict[str, Any]], path: Path) ->
     return path
 
 
+def validate_synthesized_manifest(
+    *,
+    cases_path: Path,
+    require_local_audio: bool = True,
+) -> list[SynthesisValidationIssue]:
+    issues: list[SynthesisValidationIssue] = []
+    for case in load_cases(cases_path):
+        try:
+            require_audio_and_text(case)
+        except ValueError as exc:
+            issues.append(SynthesisValidationIssue(case_id=case.id, reason=str(exc)))
+            continue
+
+        if require_local_audio and case.audio_path:
+            audio_path = Path(case.audio_path)
+            if not audio_path.is_absolute():
+                audio_path = cases_path.parent / audio_path
+            if not audio_path.is_file():
+                issues.append(
+                    SynthesisValidationIssue(
+                        case_id=case.id,
+                        reason=f"audio_path file not found: {_display_audio_path(audio_path, cases_path)}",
+                    )
+                )
+            elif audio_path.stat().st_size == 0:
+                issues.append(
+                    SynthesisValidationIssue(
+                        case_id=case.id,
+                        reason=f"audio_path file is empty: {_display_audio_path(audio_path, cases_path)}",
+                    )
+                )
+    return issues
+
+
+def summarize_validation_issues(
+    issues: Iterable[SynthesisValidationIssue],
+) -> dict[str, Any]:
+    issue_list = list(issues)
+    return {
+        "valid": not issue_list,
+        "issue_count": len(issue_list),
+        "by_reason": _sorted_counts(issue.reason for issue in issue_list),
+        "case_ids": [issue.case_id for issue in issue_list],
+    }
+
+
+def write_validation_summary_json(
+    issues: Iterable[SynthesisValidationIssue],
+    path: Path,
+) -> Path:
+    path.parent.mkdir(parents=True, exist_ok=True)
+    path.write_text(
+        json.dumps(summarize_validation_issues(issues), indent=2, sort_keys=True) + "\n",
+        encoding="utf-8",
+    )
+    return path
+
+
 def _run_tts(
     *,
     tts_bin: Path,
@@ -325,6 +413,13 @@ def _manifest_audio_path(audio_path: Path, out_dir: Path) -> str:
         raise ValueError(
             f"Synthesized audio output must be under the output directory: {audio_path}"
         ) from exc
+
+
+def _display_audio_path(audio_path: Path, cases_path: Path) -> str:
+    try:
+        return str(audio_path.resolve().relative_to(cases_path.parent.resolve()))
+    except ValueError:
+        return str(audio_path)
 
 
 def _audio_metadata(audio_path: Path) -> dict[str, int | float | str]:

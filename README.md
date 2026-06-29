@@ -101,6 +101,18 @@ text files are deleted after synthesis, or skipped entirely during `--dry-run`, 
 keeps only the target text hash and non-secret synthesis metadata.
 The optional synthesis summary is metadata-only: counts by TTS slice, source category, sample kind,
 audio bytes/duration aggregates when audio exists, and the number of cases with audio hashes.
+Before passing a derived manifest to a hosted judge, validate that every case still satisfies the
+audio-plus-text contract and that relative local audio files exist:
+
+```bash
+python scripts/synthesize_tts_cases.py \
+  --cases runs/tts-synthesis/tts_audio_cases.jsonl \
+  --validate-only \
+  --summary-out runs/tts-synthesis/validation-summary.json
+```
+
+Use `--allow-missing-audio` only for dry-run manifests that intentionally point at future audio
+paths. Validation summaries contain case ids and issue classes, not prompt text.
 
 ## Run With Local Qwen/Qwen3-Omni
 

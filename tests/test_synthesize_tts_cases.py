@@ -7,8 +7,11 @@ import pytest
 
 from scripts.synthesize_tts_cases import (
     summarize_synthesized_cases,
+    summarize_validation_issues,
     synthesize_cases,
+    validate_synthesized_manifest,
     write_synthesis_summary_json,
+    write_validation_summary_json,
 )
 
 
@@ -55,6 +58,108 @@ def test_synthesize_cases_dry_run_writes_local_audio_manifest(tmp_path: Path) ->
     )
     assert "audio_sha256" not in written[0]["metadata"]
     assert (tmp_path / "out" / "text" / "tts-eval-001.txt").read_text(encoding="utf-8") == "Call me at 09:45."
+
+
+def test_validate_synthesized_manifest_accepts_relative_audio_and_text_context(
+    tmp_path: Path,
+) -> None:
+    audio_path = tmp_path / "out" / "audio" / "sample.wav"
+    audio_path.parent.mkdir(parents=True)
+    with wave.open(str(audio_path), "wb") as handle:
+        handle.setnchannels(1)
+        handle.setsampwidth(2)
+        handle.setframerate(16000)
+        handle.writeframes(b"\x00\x00" * 1600)
+    cases_path = tmp_path / "out" / "tts_audio_cases.jsonl"
+    cases_path.write_text(
+        json.dumps(
+            {
+                "id": "tts-audio",
+                "task": "tts_naturalness",
+                "audio_path": "audio/sample.wav",
+                "reference_text": "Synthetic sample.",
+            }
+        )
+        + "\n",
+        encoding="utf-8",
+    )
+
+    issues = validate_synthesized_manifest(cases_path=cases_path)
+
+    assert issues == []
+    assert summarize_validation_issues(issues) == {
+        "by_reason": {},
+        "case_ids": [],
+        "issue_count": 0,
+        "valid": True,
+    }
+
+
+def test_validate_synthesized_manifest_reports_missing_audio_and_text_contract(
+    tmp_path: Path,
+) -> None:
+    cases_path = tmp_path / "tts_audio_cases.jsonl"
+    cases_path.write_text(
+        "\n".join(
+            json.dumps(case)
+            for case in [
+                {
+                    "id": "missing-audio",
+                    "task": "tts_naturalness",
+                    "audio_path": "audio/missing.wav",
+                    "reference_text": "Synthetic sample.",
+                },
+                {
+                    "id": "missing-text",
+                    "task": "tts_naturalness",
+                    "audio_url": "https://example.test/audio.wav",
+                },
+            ]
+        )
+        + "\n",
+        encoding="utf-8",
+    )
+
+    issues = validate_synthesized_manifest(cases_path=cases_path)
+    summary_path = write_validation_summary_json(issues, tmp_path / "summary.json")
+    summary = json.loads(summary_path.read_text(encoding="utf-8"))
+
+    assert [(issue.case_id, issue.reason) for issue in issues] == [
+        ("missing-audio", "audio_path file not found: audio/missing.wav"),
+        (
+            "missing-text",
+            "Audio judge cases require textual context via reference_text, candidate_text, or turns.",
+        ),
+    ]
+    assert summary == {
+        "by_reason": {
+            "Audio judge cases require textual context via reference_text, candidate_text, or turns.": 1,
+            "audio_path file not found: audio/missing.wav": 1,
+        },
+        "case_ids": ["missing-audio", "missing-text"],
+        "issue_count": 2,
+        "valid": False,
+    }
+
+
+def test_validate_synthesized_manifest_can_allow_missing_dry_run_audio(
+    tmp_path: Path,
+) -> None:
+    cases_path = tmp_path / "tts_audio_cases.jsonl"
+    cases_path.write_text(
+        json.dumps(
+            {
+                "id": "dry-run-case",
+                "task": "tts_naturalness",
+                "audio_path": "audio/future.wav",
+                "reference_text": "Future synthetic sample.",
+            }
+        )
+        + "\n",
+        encoding="utf-8",
+    )
+
+    assert validate_synthesized_manifest(cases_path=cases_path, require_local_audio=False) == []
 
 
 def test_write_synthesis_summary_is_metadata_only_for_dry_run(tmp_path: Path) -> None:
