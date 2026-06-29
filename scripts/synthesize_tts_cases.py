@@ -13,8 +13,10 @@ import hashlib
 import json
 import subprocess
 import wave
+from collections import Counter
 from collections.abc import Iterable
 from pathlib import Path
+from typing import Any
 
 from open_audio_judge.case_contract import require_audio_and_text
 from open_audio_judge.models import EvaluationCase
@@ -39,6 +41,12 @@ def main() -> None:
     parser.add_argument("--lang-code", default="en")
     parser.add_argument("--audio-format", choices=("wav", "flac", "mp3"), default="wav")
     parser.add_argument("--limit", type=int, default=None)
+    parser.add_argument(
+        "--summary-out",
+        type=Path,
+        default=None,
+        help="Optional metadata-only JSON summary path.",
+    )
     parser.add_argument("--dry-run", action="store_true", help="Write manifest without invoking TTS.")
     args = parser.parse_args()
 
@@ -53,6 +61,8 @@ def main() -> None:
         limit=args.limit,
         dry_run=args.dry_run,
     )
+    if args.summary_out is not None:
+        write_synthesis_summary_json(derived, args.summary_out)
     print(f"Wrote {len(derived)} derived TTS cases to {args.out / 'tts_audio_cases.jsonl'}")
 
 
@@ -147,6 +157,49 @@ def synthesize_cases(
     return derived
 
 
+def summarize_synthesized_cases(cases: Iterable[dict[str, Any]]) -> dict[str, Any]:
+    case_list = list(cases)
+    metadata_list = [
+        case.get("metadata", {})
+        for case in case_list
+        if isinstance(case.get("metadata", {}), dict)
+    ]
+    durations = [
+        float(metadata["audio_duration_seconds"])
+        for metadata in metadata_list
+        if isinstance(metadata.get("audio_duration_seconds"), int | float)
+    ]
+    byte_counts = [
+        int(metadata["audio_bytes"])
+        for metadata in metadata_list
+        if isinstance(metadata.get("audio_bytes"), int)
+    ]
+    return {
+        "total_cases": len(case_list),
+        "by_slice": _sorted_counts(
+            str(metadata.get("tts_slice") or "unknown") for metadata in metadata_list
+        ),
+        "by_source_category": _sorted_counts(
+            str(metadata.get("source_category") or "unknown") for metadata in metadata_list
+        ),
+        "by_sample_kind": _sorted_counts(
+            str(metadata.get("sample_kind") or "unknown") for metadata in metadata_list
+        ),
+        "audio_duration_seconds": _numeric_summary(durations),
+        "audio_bytes": _numeric_summary(byte_counts),
+        "with_audio_sha256": sum(1 for metadata in metadata_list if metadata.get("audio_sha256")),
+    }
+
+
+def write_synthesis_summary_json(cases: Iterable[dict[str, Any]], path: Path) -> Path:
+    path.parent.mkdir(parents=True, exist_ok=True)
+    path.write_text(
+        json.dumps(summarize_synthesized_cases(cases), indent=2, sort_keys=True) + "\n",
+        encoding="utf-8",
+    )
+    return path
+
+
 def _run_tts(
     *,
     tts_bin: Path,
@@ -209,6 +262,25 @@ def _duplicate_case_ids(values: Iterable[str]) -> list[str]:
             duplicates.add(value)
         seen.add(value)
     return sorted(duplicates)
+
+
+def _sorted_counts(values: Iterable[str]) -> dict[str, int]:
+    counts = Counter(values)
+    return {key: counts[key] for key in sorted(counts)}
+
+
+def _numeric_summary(values: Iterable[int | float]) -> dict[str, int | float | None]:
+    value_list = list(values)
+    if not value_list:
+        return {"min": None, "max": None, "average": None, "total": None}
+    total = sum(value_list)
+    average = total / len(value_list)
+    return {
+        "min": min(value_list),
+        "max": max(value_list),
+        "average": round(average, 3),
+        "total": round(total, 3),
+    }
 
 
 def _manifest_audio_path(audio_path: Path, out_dir: Path) -> str:

@@ -5,7 +5,11 @@ from pathlib import Path
 
 import pytest
 
-from scripts.synthesize_tts_cases import synthesize_cases
+from scripts.synthesize_tts_cases import (
+    summarize_synthesized_cases,
+    synthesize_cases,
+    write_synthesis_summary_json,
+)
 
 
 def test_synthesize_cases_dry_run_writes_local_audio_manifest(tmp_path: Path) -> None:
@@ -49,6 +53,51 @@ def test_synthesize_cases_dry_run_writes_local_audio_manifest(tmp_path: Path) ->
     )
     assert "audio_sha256" not in written[0]["metadata"]
     assert (tmp_path / "out" / "text" / "tts-eval-001.txt").read_text(encoding="utf-8") == "Call me at 09:45."
+
+
+def test_write_synthesis_summary_is_metadata_only_for_dry_run(tmp_path: Path) -> None:
+    cases_path = tmp_path / "tts_cases.jsonl"
+    cases_path.write_text(
+        json.dumps(
+            {
+                "id": "tts-private",
+                "task": "tts_naturalness",
+                "reference_text": "Private phrase: call me at 09:45.",
+                "metadata": {
+                    "source_category": "instruction_constraints",
+                    "tts_slice": "dates_times",
+                },
+            }
+        )
+        + "\n",
+        encoding="utf-8",
+    )
+
+    derived = synthesize_cases(
+        cases_path=cases_path,
+        out_dir=tmp_path / "out",
+        tts_bin=Path("/missing/local-tts-speak"),
+        model="mlx-community/chatterbox-turbo-6bit",
+        voice="af_heart",
+        lang_code="en",
+        audio_format="wav",
+        dry_run=True,
+    )
+    summary_path = write_synthesis_summary_json(derived, tmp_path / "out" / "summary.json")
+    summary_text = summary_path.read_text(encoding="utf-8")
+    summary = json.loads(summary_text)
+
+    assert summary == {
+        "audio_bytes": {"average": None, "max": None, "min": None, "total": None},
+        "audio_duration_seconds": {"average": None, "max": None, "min": None, "total": None},
+        "by_sample_kind": {"local_synthetic_tts": 1},
+        "by_slice": {"dates_times": 1},
+        "by_source_category": {"instruction_constraints": 1},
+        "total_cases": 1,
+        "with_audio_sha256": 0,
+    }
+    assert "Private phrase" not in summary_text
+    assert "09:45" not in summary_text
 
 
 def test_synthesize_cases_uses_reported_tts_output_path(
@@ -101,6 +150,12 @@ def test_synthesize_cases_uses_reported_tts_output_path(
     assert written[0]["metadata"]["audio_bytes"] == generated.stat().st_size
     assert written[0]["metadata"]["audio_duration_seconds"] == 0.5
     assert written[0]["metadata"]["audio_sha256"]
+    assert summarize_synthesized_cases(written)["audio_duration_seconds"] == {
+        "average": 0.5,
+        "max": 0.5,
+        "min": 0.5,
+        "total": 0.5,
+    }
 
 
 def test_synthesize_cases_rejects_reported_audio_outside_output_dir(

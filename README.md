@@ -85,12 +85,15 @@ To synthesize a small local Chatterbox sample set from a private manifest, write
 python scripts/synthesize_tts_cases.py \
   --cases runs/tts-evalset/cases.jsonl \
   --limit 5 \
+  --summary-out runs/tts-synthesis/summary.json \
   --out runs/tts-synthesis
 ```
 
 This calls `local-tts-speak` with `mlx-community/chatterbox-turbo-6bit` by default, writes per-case
 text sidecars and audio files under the ignored output directory, and emits
 `runs/tts-synthesis/tts_audio_cases.jsonl` with local `audio_path` fields for provider smoke tests.
+The optional synthesis summary is metadata-only: counts by TTS slice, source category, sample kind,
+audio bytes/duration aggregates when audio exists, and the number of cases with audio hashes.
 
 ## Run With Local Qwen/Qwen3-Omni
 
