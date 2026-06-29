@@ -95,6 +95,12 @@ def _extract_output_text(data: dict[str, Any]) -> str:
         if joined.strip():
             return joined
 
+    candidates = data.get("candidates")
+    if isinstance(candidates, list):
+        joined = "\n".join(_text_parts_from_candidates(candidates))
+        if joined.strip():
+            return joined
+
     raise ValueError("Gemini response did not include output_text.")
 
 
@@ -108,6 +114,22 @@ def _text_parts_from_items(items: list[Any]) -> list[str]:
             text_parts.extend(part.get("text", "") for part in content if isinstance(part, dict))
         elif isinstance(item.get("text"), str):
             text_parts.append(item["text"])
+    return [part for part in text_parts if part]
+
+
+def _text_parts_from_candidates(candidates: list[Any]) -> list[str]:
+    text_parts: list[str] = []
+    for candidate in candidates:
+        if not isinstance(candidate, dict):
+            continue
+        content = candidate.get("content")
+        if not isinstance(content, dict):
+            continue
+        parts = content.get("parts")
+        if not isinstance(parts, list):
+            continue
+        candidate_text = "".join(part.get("text", "") for part in parts if isinstance(part, dict))
+        text_parts.append(candidate_text)
     return [part for part in text_parts if part]
 
 
