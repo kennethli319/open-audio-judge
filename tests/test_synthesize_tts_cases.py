@@ -57,6 +57,7 @@ def test_synthesize_cases_dry_run_writes_local_audio_manifest(tmp_path: Path) ->
     assert written[0]["reference_text"] == "Call me at 09:45."
     assert written[0]["metadata"]["sample_kind"] == "local_synthetic_tts"
     assert written[0]["metadata"]["source_case_id"] == "tts eval/001"
+    assert written[0]["metadata"]["synthesis_audio_format"] == "wav"
     assert written[0]["metadata"]["text_context_fields"] == ["reference_text", "turns"]
     assert written[0]["metadata"]["requires_synthesis"] is False
     assert written[0]["metadata"]["turn_count"] == 1
@@ -380,6 +381,7 @@ def test_validation_summary_can_include_metadata_only_manifest_coverage(
     ).hexdigest()
     assert summary["case_ids"] == [f"case-{expected_hash[:12]}"]
     assert summary["manifest"]["by_sample_kind"] == {"local_synthetic_tts": 1}
+    assert summary["manifest"]["by_synthesis_audio_format"] == {"unknown": 1}
     assert summary["manifest"]["by_slice"] == {"dates_times": 1}
     assert summary["manifest"]["by_source_category"] == {"instruction_constraints": 1}
     assert summary["manifest"]["by_text_context_fields"] == {"reference_text+turns": 1}
@@ -553,6 +555,7 @@ def test_validate_synthesized_manifest_can_require_synthesis_metadata(
         ("missing-synthesis-metadata-local-tts", "metadata.synthesis_model is missing."),
         ("missing-synthesis-metadata-local-tts", "metadata.synthesis_voice is missing."),
         ("missing-synthesis-metadata-local-tts", "metadata.synthesis_lang_code is missing."),
+        ("missing-synthesis-metadata-local-tts", "metadata.synthesis_audio_format is missing."),
         ("missing-synthesis-metadata-local-tts", "metadata.source_case_id is missing."),
         ("missing-synthesis-metadata-local-tts", "metadata.reference_text_sha256 is missing."),
     ]
@@ -621,6 +624,7 @@ def test_validate_synthesized_manifest_rejects_empty_synthesis_trace_fields(
                     "synthesis_model": " ",
                     "synthesis_voice": "",
                     "synthesis_lang_code": "en",
+                    "synthesis_audio_format": "",
                     "source_case_id": "tts-source",
                     "reference_text_sha256": (
                         "0d988c7d994421014d1fa0145748fafbef20b4c64112207c609a449b1feeb739"
@@ -637,6 +641,38 @@ def test_validate_synthesized_manifest_rejects_empty_synthesis_trace_fields(
     assert [(issue.case_id, issue.reason) for issue in issues] == [
         ("tts-source-local-tts", "metadata.synthesis_model must not be empty."),
         ("tts-source-local-tts", "metadata.synthesis_voice must not be empty."),
+        ("tts-source-local-tts", "metadata.synthesis_audio_format must not be empty."),
+    ]
+
+
+def test_validate_synthesized_manifest_reports_stale_audio_format_metadata(
+    tmp_path: Path,
+) -> None:
+    cases_path = tmp_path / "tts_audio_cases.jsonl"
+    cases_path.write_text(
+        json.dumps(
+            {
+                "id": "tts-source-local-tts",
+                "task": "tts_naturalness",
+                "audio_path": "audio/future.wav",
+                "reference_text": "Synthetic sample.",
+                "metadata": {
+                    "synthesis_audio_format": "mp3",
+                },
+            }
+        )
+        + "\n",
+        encoding="utf-8",
+    )
+
+    issues = validate_synthesized_manifest(cases_path=cases_path, require_local_audio=False)
+
+    assert [(issue.case_id, issue.reason) for issue in issues] == [
+        (
+            "tts-source-local-tts",
+            "metadata.synthesis_audio_format does not match audio_path suffix: "
+            "expected wav, got mp3.",
+        ),
     ]
 
 
@@ -712,6 +748,7 @@ def test_write_synthesis_summary_is_metadata_only_for_dry_run(tmp_path: Path) ->
         "audio_bytes": {"average": None, "max": None, "min": None, "total": None},
         "audio_duration_seconds": {"average": None, "max": None, "min": None, "total": None},
         "by_sample_kind": {"local_synthetic_tts": 1},
+        "by_synthesis_audio_format": {"wav": 1},
         "by_slice": {"dates_times": 1},
         "by_source_category": {"instruction_constraints": 1},
         "by_text_context_fields": {"reference_text": 1},

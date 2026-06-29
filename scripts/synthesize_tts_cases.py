@@ -217,6 +217,7 @@ def synthesize_cases(
                 "synthesis_model": model,
                 "synthesis_voice": voice,
                 "synthesis_lang_code": lang_code,
+                "synthesis_audio_format": audio_format,
                 "source_case_id": case.id,
                 "reference_text_sha256": _sha256_text(target_text),
                 "text_context_fields": text_context_fields,
@@ -267,6 +268,9 @@ def summarize_synthesized_cases(cases: Iterable[dict[str, Any]]) -> dict[str, An
         ),
         "by_sample_kind": _sorted_counts(
             str(metadata.get("sample_kind") or "unknown") for metadata in metadata_list
+        ),
+        "by_synthesis_audio_format": _sorted_counts(
+            str(metadata.get("synthesis_audio_format") or "unknown") for metadata in metadata_list
         ),
         "by_text_context_fields": _sorted_counts(
             _text_context_field_key(metadata.get("text_context_fields"))
@@ -445,7 +449,12 @@ def _validate_synthesis_metadata(
                 )
             )
 
-    for field in ["synthesis_model", "synthesis_voice", "synthesis_lang_code"]:
+    for field in [
+        "synthesis_model",
+        "synthesis_voice",
+        "synthesis_lang_code",
+        "synthesis_audio_format",
+    ]:
         observed_value = metadata.get(field)
         if observed_value is None:
             if require_synthesis_metadata:
@@ -460,6 +469,19 @@ def _validate_synthesis_metadata(
                 SynthesisValidationIssue(
                     case_id=case.id,
                     reason=f"metadata.{field} must not be empty.",
+                )
+            )
+    observed_audio_format = metadata.get("synthesis_audio_format")
+    if observed_audio_format is not None and str(observed_audio_format).strip() and case.audio_path:
+        audio_suffix = Path(case.audio_path).suffix.lower().lstrip(".")
+        if audio_suffix and str(observed_audio_format).strip().lower() != audio_suffix:
+            issues.append(
+                SynthesisValidationIssue(
+                    case_id=case.id,
+                    reason=(
+                        "metadata.synthesis_audio_format does not match audio_path suffix: "
+                        f"expected {audio_suffix}, got {observed_audio_format}."
+                    ),
                 )
             )
 
