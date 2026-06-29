@@ -189,6 +189,11 @@ def tts_case_from_evalset_record(
         "tts_slice": classify_tts_slice(record, target_text),
         "turn_count": len(normalized_turns),
         "turn_roles": [turn["role"] for turn in normalized_turns],
+        "text_context_fields": _text_context_fields(
+            reference_text=target_text,
+            candidate_text=None,
+            turns=normalized_turns,
+        ),
         "requires_synthesis": True,
     }
     if hash_source_id:
@@ -363,3 +368,19 @@ def _turn_count(case: EvaluationCase) -> int:
     if isinstance(raw_count, int):
         return raw_count
     return len([turn for turn in case.turns if turn.content.strip()])
+
+
+def _text_context_fields(
+    *,
+    reference_text: str | None,
+    candidate_text: str | None,
+    turns: Iterable[dict[str, str]],
+) -> list[str]:
+    fields: list[str] = []
+    if (reference_text or "").strip():
+        fields.append("reference_text")
+    if (candidate_text or "").strip():
+        fields.append("candidate_text")
+    if any(str(turn.get("content", "")).strip() for turn in turns):
+        fields.append("turns")
+    return fields

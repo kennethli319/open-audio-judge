@@ -50,6 +50,7 @@ def test_build_tts_cases_preserves_multiturn_context_and_metadata() -> None:
     assert case.metadata["tts_slice"] == "punctuation_format"
     assert case.metadata["turn_count"] == 1
     assert case.metadata["turn_roles"] == ["user"]
+    assert case.metadata["text_context_fields"] == ["reference_text", "turns"]
     assert case.metadata["requires_synthesis"] is True
 
 
@@ -72,6 +73,7 @@ def test_build_tts_cases_records_multiturn_role_metadata() -> None:
 
     assert cases[0].metadata["turn_count"] == 3
     assert cases[0].metadata["turn_roles"] == ["user", "assistant", "user"]
+    assert cases[0].metadata["text_context_fields"] == ["reference_text", "turns"]
 
 
 def test_build_tts_cases_can_include_source_task_when_requested() -> None:
