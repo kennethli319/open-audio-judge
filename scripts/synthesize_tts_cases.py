@@ -12,6 +12,8 @@ import json
 import subprocess
 from pathlib import Path
 
+from open_audio_judge.case_contract import require_audio_and_text
+from open_audio_judge.models import EvaluationCase
 from open_audio_judge.runner import load_cases
 
 
@@ -65,6 +67,10 @@ def synthesize_cases(
     cases = load_cases(cases_path)
     if limit is not None:
         cases = cases[:limit]
+    missing_reference = [case.id for case in cases if not (case.reference_text or "").strip()]
+    if missing_reference:
+        missing = ", ".join(missing_reference)
+        raise ValueError(f"TTS synthesis cases require reference_text; missing for: {missing}")
 
     text_dir = out_dir / "text"
     audio_dir = out_dir / "audio"
@@ -74,8 +80,6 @@ def synthesize_cases(
     derived: list[dict] = []
     for case in cases:
         target_text = (case.reference_text or "").strip()
-        if not target_text:
-            continue
 
         output_stem = _safe_stem(case.id)
         text_path = text_dir / f"{output_stem}.txt"
@@ -112,6 +116,7 @@ def synthesize_cases(
             }
         )
         derived_case["metadata"] = metadata
+        require_audio_and_text(EvaluationCase.model_validate(derived_case))
         derived.append(derived_case)
 
     manifest_path = out_dir / "tts_audio_cases.jsonl"

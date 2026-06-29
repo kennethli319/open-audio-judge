@@ -2,6 +2,8 @@ import json
 import subprocess
 from pathlib import Path
 
+import pytest
+
 from scripts.synthesize_tts_cases import synthesize_cases
 
 
@@ -84,3 +86,32 @@ def test_synthesize_cases_uses_reported_tts_output_path(
     ]
 
     assert written[0]["audio_path"] == "audio/tts-001_0001.wav"
+
+
+def test_synthesize_cases_rejects_cases_without_reference_text(tmp_path: Path) -> None:
+    cases_path = tmp_path / "tts_cases.jsonl"
+    cases_path.write_text(
+        json.dumps(
+            {
+                "id": "tts-missing-text",
+                "task": "tts_naturalness",
+                "turns": [{"role": "user", "content": "Read this aloud."}],
+            }
+        )
+        + "\n",
+        encoding="utf-8",
+    )
+
+    with pytest.raises(ValueError, match="TTS synthesis cases require reference_text"):
+        synthesize_cases(
+            cases_path=cases_path,
+            out_dir=tmp_path / "out",
+            tts_bin=Path("/missing/local-tts-speak"),
+            model="mlx-community/chatterbox-turbo-6bit",
+            voice="af_heart",
+            lang_code="en",
+            audio_format="wav",
+            dry_run=True,
+        )
+
+    assert not (tmp_path / "out" / "tts_audio_cases.jsonl").exists()
