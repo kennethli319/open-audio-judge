@@ -1,0 +1,104 @@
+# Open Audio Judge
+
+Open Audio Judge is a prompt-based evaluation harness for audio LLM judges. The goal is to make ASR, TTS, VAD, diarization, speech translation, and speech-event evaluations comparable even when teams run the judge on private datasets.
+
+The first MVP focuses on:
+
+- A reusable judge protocol: audio sample + task context + prompt rubric + strict JSON result.
+- A local Qwen/Qwen3-Omni-compatible provider through an OpenAI-style `/v1/chat/completions` endpoint.
+- Two initial prompts: TTS naturalness and ASR error severity.
+- CLI and REST API entry points.
+- HTML reports with score bars, labels, and per-case reasons instead of only raw JSON.
+
+## Why This Shape
+
+Recent work supports a few design choices:
+
+- LLM-as-judge systems need explicit criteria, structured outputs, and meta-evaluation because prompts can bias results ([Li et al., 2024](https://arxiv.org/html/2412.05579v2)).
+- Audio LLM benchmarks now cover speech, audio-scene, and paralinguistic understanding, so the protocol should be task-extensible rather than ASR-only ([AudioBench, NAACL 2025](https://aclanthology.org/2025.naacl-long.218/)).
+- ASR evaluation should not rely on WER alone because WER misses meaning preservation and downstream impact ([Google Research, 2024](https://research.google/blog/assessing-asr-performance-with-meaning-preservation/); [Pulikodan et al., Interspeech 2025](https://www.isca-archive.org/interspeech_2025/pulikodan25_interspeech.pdf)).
+- Audio-aware judges can align with humans on some speech qualities, but the evidence is task-specific, so prompts should name the exact criterion being judged ([Chiang et al., 2025](https://arxiv.org/html/2506.05984v1)).
+- Speech-quality judge research is moving toward structured, explanation-rich outputs, not scalar-only MOS predictions ([SpeechLLM-as-Judges, 2025](https://arxiv.org/html/2510.14664v1)).
+
+See [docs/research.md](docs/research.md) and [docs/plan.md](docs/plan.md) for the full research notes and project plan.
+
+## Quick Start
+
+```bash
+python3 -m venv .venv
+source .venv/bin/activate
+pip install -e ".[dev]"
+oaj eval --provider mock --judge asr_error --cases examples/asr_cases.jsonl --out runs/asr-demo
+open runs/asr-demo/report.html
+```
+
+The mock provider is deterministic and useful for testing the pipeline without a model.
+
+## Run With Local Qwen/Qwen3-Omni
+
+Start a local Qwen/Qwen3-Omni server that exposes an OpenAI-compatible chat-completions endpoint. For vLLM-Omni, the upstream examples use `http://localhost:8091/v1/chat/completions` with `modalities: ["text"]` for text-only judge output.
+
+```bash
+export OAJ_PROVIDER=qwen
+export OAJ_BASE_URL=http://localhost:8091/v1
+export OAJ_MODEL=Qwen/Qwen3-Omni-30B-A3B-Instruct
+export OAJ_API_KEY=EMPTY
+
+oaj eval --provider qwen --judge asr_error --cases examples/asr_cases.jsonl --out runs/qwen-asr
+open runs/qwen-asr/report.html
+```
+
+Audio can be passed as `audio_url` in the case file or as `audio_path`. Local paths are encoded as data URLs for OpenAI-compatible multimodal endpoints by default.
+
+## REST API
+
+```bash
+oaj serve --host 127.0.0.1 --port 8000
+```
+
+Example request:
+
+```bash
+curl -X POST http://127.0.0.1:8000/v1/evaluate \
+  -H "Content-Type: application/json" \
+  -d '{
+    "judge": "asr_error",
+    "provider": "mock",
+    "case": {
+      "id": "demo",
+      "task": "asr_error",
+      "reference_text": "Please transfer fifteen dollars to Maya.",
+      "candidate_text": "Please transfer fifty dollars to Maya."
+    }
+  }'
+```
+
+The judge result always normalizes to:
+
+```json
+{
+  "overall_score": 62,
+  "reason": "The transcript is mostly fluent but changes a key amount from fifteen to fifty."
+}
+```
+
+## Case Format
+
+Cases are JSONL records:
+
+```json
+{"id":"asr-001","task":"asr_error","audio_path":"audio/sample.wav","reference_text":"...","candidate_text":"...","metadata":{"language":"en"}}
+```
+
+Fields:
+
+- `id`: stable case identifier.
+- `task`: prompt family, such as `asr_error` or `tts_naturalness`.
+- `audio_path` or `audio_url`: optional for text-only smoke tests, required for true audio judging.
+- `reference_text`: expected transcript or target text, when available.
+- `candidate_text`: model output transcript, translation, or synthesis text.
+- `metadata`: language, domain, speaker notes, expected events, or proprietary labels.
+
+## Current Scope
+
+The first version is intentionally small: one provider implementation, one mock provider, two prompts, CLI/API execution, and HTML reporting. Next steps are Gemini provider support, calibration sets, pairwise judging, bootstrap confidence intervals, and prompt version governance.

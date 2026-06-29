@@ -1,0 +1,1 @@
+{"id":"tts-demo-001","task":"tts_naturalness","audio_url":"https://vllm-public-assets.s3.us-west-2.amazonaws.com/multimodal_asset/mary_had_lamb.ogg","reference_text":"Mary had a little lamb whose fleece was white as snow.","metadata":{"language":"en","voice":"demo-public-audio"}}
