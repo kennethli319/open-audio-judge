@@ -85,13 +85,16 @@ To synthesize a small local Chatterbox sample set from a private manifest, write
 python scripts/synthesize_tts_cases.py \
   --cases runs/tts-evalset/cases.jsonl \
   --limit 5 \
+  --discard-text-sidecars \
   --summary-out runs/tts-synthesis/summary.json \
   --out runs/tts-synthesis
 ```
 
 This calls `local-tts-speak` with `mlx-community/chatterbox-turbo-6bit` by default, writes per-case
-text sidecars and audio files under the ignored output directory, and emits
-`runs/tts-synthesis/tts_audio_cases.jsonl` with local `audio_path` fields for provider smoke tests.
+audio files under the ignored output directory, and emits `runs/tts-synthesis/tts_audio_cases.jsonl`
+with local `audio_path` fields for provider smoke tests. With `--discard-text-sidecars`, temporary
+text files are deleted after synthesis, or skipped entirely during `--dry-run`, while the manifest
+keeps only the target text hash and non-secret synthesis metadata.
 The optional synthesis summary is metadata-only: counts by TTS slice, source category, sample kind,
 audio bytes/duration aggregates when audio exists, and the number of cases with audio hashes.
 

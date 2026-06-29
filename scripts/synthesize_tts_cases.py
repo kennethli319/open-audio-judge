@@ -47,6 +47,11 @@ def main() -> None:
         default=None,
         help="Optional metadata-only JSON summary path.",
     )
+    parser.add_argument(
+        "--discard-text-sidecars",
+        action="store_true",
+        help="Delete per-case text sidecars after synthesis, or skip them in dry-run mode.",
+    )
     parser.add_argument("--dry-run", action="store_true", help="Write manifest without invoking TTS.")
     args = parser.parse_args()
 
@@ -59,6 +64,7 @@ def main() -> None:
         lang_code=args.lang_code,
         audio_format=args.audio_format,
         limit=args.limit,
+        keep_text_sidecars=not args.discard_text_sidecars,
         dry_run=args.dry_run,
     )
     if args.summary_out is not None:
@@ -76,6 +82,7 @@ def synthesize_cases(
     lang_code: str,
     audio_format: str,
     limit: int | None = None,
+    keep_text_sidecars: bool = True,
     dry_run: bool = False,
 ) -> list[dict]:
     cases = load_cases(cases_path)
@@ -107,7 +114,8 @@ def synthesize_cases(
         output_stem = _unique_stem(case.id, used_stems)
         text_path = text_dir / f"{output_stem}.txt"
         audio_path = audio_dir / f"{output_stem}.{audio_format}"
-        text_path.write_text(target_text, encoding="utf-8")
+        if keep_text_sidecars or not dry_run:
+            text_path.write_text(target_text, encoding="utf-8")
 
         if not dry_run:
             audio_path = _run_tts(
@@ -124,6 +132,8 @@ def synthesize_cases(
             if not audio_path.exists() or audio_path.stat().st_size == 0:
                 raise FileNotFoundError(f"Expected synthesized audio at {audio_path}")
             audio_metadata = _audio_metadata(audio_path)
+            if not keep_text_sidecars:
+                text_path.unlink(missing_ok=True)
         else:
             manifest_audio_path = _manifest_audio_path(audio_path, out_dir)
             audio_metadata = {}
@@ -142,6 +152,7 @@ def synthesize_cases(
                 "synthesis_lang_code": lang_code,
                 "source_case_id": case.id,
                 "reference_text_sha256": _sha256_text(target_text),
+                "text_sidecar_written": keep_text_sidecars,
                 **audio_metadata,
             }
         )

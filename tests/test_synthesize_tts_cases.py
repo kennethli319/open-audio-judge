@@ -48,6 +48,7 @@ def test_synthesize_cases_dry_run_writes_local_audio_manifest(tmp_path: Path) ->
     assert written[0]["reference_text"] == "Call me at 09:45."
     assert written[0]["metadata"]["sample_kind"] == "local_synthetic_tts"
     assert written[0]["metadata"]["source_case_id"] == "tts eval/001"
+    assert written[0]["metadata"]["text_sidecar_written"] is True
     assert written[0]["metadata"]["reference_text_sha256"] == (
         "836983522ec15bbf2ce214aa8c1cdb1d3dc4dc7bbce25cc950909cc5dfaa56bf"
     )
@@ -98,6 +99,37 @@ def test_write_synthesis_summary_is_metadata_only_for_dry_run(tmp_path: Path) ->
     }
     assert "Private phrase" not in summary_text
     assert "09:45" not in summary_text
+
+
+def test_synthesize_cases_can_skip_text_sidecars_in_dry_run(tmp_path: Path) -> None:
+    cases_path = tmp_path / "tts_cases.jsonl"
+    cases_path.write_text(
+        json.dumps(
+            {
+                "id": "tts-private",
+                "task": "tts_naturalness",
+                "reference_text": "Do not persist this text sidecar.",
+            }
+        )
+        + "\n",
+        encoding="utf-8",
+    )
+
+    derived = synthesize_cases(
+        cases_path=cases_path,
+        out_dir=tmp_path / "out",
+        tts_bin=Path("/missing/local-tts-speak"),
+        model="mlx-community/chatterbox-turbo-6bit",
+        voice="af_heart",
+        lang_code="en",
+        audio_format="wav",
+        keep_text_sidecars=False,
+        dry_run=True,
+    )
+
+    assert derived[0]["metadata"]["text_sidecar_written"] is False
+    assert not (tmp_path / "out" / "text" / "tts-private.txt").exists()
+    assert (tmp_path / "out" / "tts_audio_cases.jsonl").exists()
 
 
 def test_synthesize_cases_uses_reported_tts_output_path(
@@ -156,6 +188,55 @@ def test_synthesize_cases_uses_reported_tts_output_path(
         "min": 0.5,
         "total": 0.5,
     }
+
+
+def test_synthesize_cases_can_delete_text_sidecars_after_synthesis(
+    tmp_path: Path, monkeypatch
+) -> None:
+    cases_path = tmp_path / "tts_cases.jsonl"
+    cases_path.write_text(
+        json.dumps(
+            {
+                "id": "tts-private",
+                "task": "tts_naturalness",
+                "reference_text": "Temporary text file only.",
+            }
+        )
+        + "\n",
+        encoding="utf-8",
+    )
+    generated = tmp_path / "out" / "audio" / "tts-private.wav"
+    tts_bin = tmp_path / "bin" / "local-tts-speak"
+    tts_bin.parent.mkdir()
+    tts_bin.write_text("#!/bin/sh\n", encoding="utf-8")
+
+    def fake_run(*args, **kwargs):
+        text_path = Path(args[0][args[0].index("--text-file") + 1])
+        assert text_path.read_text(encoding="utf-8") == "Temporary text file only."
+        generated.parent.mkdir(parents=True, exist_ok=True)
+        with wave.open(str(generated), "wb") as handle:
+            handle.setnchannels(1)
+            handle.setsampwidth(2)
+            handle.setframerate(16000)
+            handle.writeframes(b"\x00\x00" * 8000)
+        return subprocess.CompletedProcess(args[0], 0, stdout=json.dumps({"output": str(generated)}))
+
+    monkeypatch.setattr("scripts.synthesize_tts_cases.subprocess.run", fake_run)
+
+    derived = synthesize_cases(
+        cases_path=cases_path,
+        out_dir=tmp_path / "out",
+        tts_bin=tts_bin,
+        model="mlx-community/chatterbox-turbo-6bit",
+        voice="af_heart",
+        lang_code="en",
+        audio_format="wav",
+        keep_text_sidecars=False,
+    )
+
+    assert derived[0]["metadata"]["text_sidecar_written"] is False
+    assert not (tmp_path / "out" / "text" / "tts-private.txt").exists()
+    assert (tmp_path / "out" / "audio" / "tts-private.wav").exists()
 
 
 def test_synthesize_cases_rejects_reported_audio_outside_output_dir(
