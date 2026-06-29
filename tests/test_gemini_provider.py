@@ -48,6 +48,8 @@ def test_gemini_provider_extracts_output_text() -> None:
             200,
             json={
                 "output_text": '{"overall_score": 90, "reason": "Clean transcript."}',
+                "usage": {"total_tokens": 12},
+                "steps": [{"signature": "large-opaque-value"}],
             },
         )
 
@@ -72,3 +74,45 @@ def test_gemini_provider_extracts_output_text() -> None:
     )
 
     assert response.content == '{"overall_score": 90, "reason": "Clean transcript."}'
+    assert response.raw == {"usage": {"total_tokens": 12}}
+
+
+def test_gemini_provider_extracts_steps_model_output() -> None:
+    def handler(request: httpx.Request) -> httpx.Response:
+        return httpx.Response(
+            200,
+            json={
+                "status": "completed",
+                "steps": [
+                    {"type": "thinking", "content": [{"text": "internal"}]},
+                    {
+                        "type": "model_output",
+                        "content": [
+                            {"text": '{"overall_score": 82, "reason": "Meaning preserved."}'}
+                        ],
+                    },
+                ],
+            },
+        )
+
+    provider = GeminiProvider(
+        ProviderConfig(
+            name="gemini",
+            base_url="https://generativelanguage.googleapis.com/v1beta",
+            api_key="test-key",
+            model="gemini-3.5-flash",
+        ),
+        transport=httpx.MockTransport(handler),
+    )
+
+    response = provider.generate(
+        EvaluationCase(id="case", task="asr_error"),
+        RenderedPrompt(
+            judge_id="asr_error",
+            judge_version="0.2.0",
+            system="system rubric",
+            user="user case",
+        ),
+    )
+
+    assert response.content == '{"overall_score": 82, "reason": "Meaning preserved."}'

@@ -29,7 +29,7 @@ class GeminiProvider:
             response.raise_for_status()
             data = response.json()
 
-        return ProviderResponse(content=_extract_output_text(data), raw=data)
+        return ProviderResponse(content=_extract_output_text(data), raw=_sanitize_raw_response(data))
 
     def _build_payload(self, case: EvaluationCase, prompt: RenderedPrompt) -> dict[str, Any]:
         input_parts: list[dict[str, Any]] = [
@@ -75,22 +75,35 @@ def _extract_output_text(data: dict[str, Any]) -> str:
 
     output = data.get("output")
     if isinstance(output, list):
-        text_parts: list[str] = []
-        for item in output:
-            if not isinstance(item, dict):
-                continue
-            content = item.get("content")
-            if isinstance(content, list):
-                text_parts.extend(
-                    part.get("text", "") for part in content if isinstance(part, dict)
-                )
-            elif isinstance(item.get("text"), str):
-                text_parts.append(item["text"])
-        joined = "\n".join(part for part in text_parts if part)
+        joined = "\n".join(_text_parts_from_items(output))
+        if joined.strip():
+            return joined
+
+    steps = data.get("steps")
+    if isinstance(steps, list):
+        model_outputs = [
+            step
+            for step in steps
+            if isinstance(step, dict) and step.get("type") in {None, "model_output"}
+        ]
+        joined = "\n".join(_text_parts_from_items(model_outputs))
         if joined.strip():
             return joined
 
     raise ValueError("Gemini response did not include output_text.")
+
+
+def _text_parts_from_items(items: list[Any]) -> list[str]:
+    text_parts: list[str] = []
+    for item in items:
+        if not isinstance(item, dict):
+            continue
+        content = item.get("content")
+        if isinstance(content, list):
+            text_parts.extend(part.get("text", "") for part in content if isinstance(part, dict))
+        elif isinstance(item.get("text"), str):
+            text_parts.append(item["text"])
+    return [part for part in text_parts if part]
 
 
 def _mime_type_from_name(name: str) -> str:
@@ -98,3 +111,17 @@ def _mime_type_from_name(name: str) -> str:
     if mime_type == "audio/x-wav":
         return "audio/wav"
     return mime_type
+
+
+def _sanitize_raw_response(data: dict[str, Any]) -> dict[str, Any]:
+    allowed = {
+        "id",
+        "status",
+        "model",
+        "object",
+        "service_tier",
+        "created",
+        "updated",
+        "usage",
+    }
+    return {key: value for key, value in data.items() if key in allowed}
