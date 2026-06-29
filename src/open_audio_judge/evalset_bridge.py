@@ -56,6 +56,7 @@ class TtsCaseSummary:
     by_slice: dict[str, int]
     by_source_category: dict[str, int]
     by_turn_role_sequence: dict[str, int]
+    by_turn_context_source: dict[str, int]
     multi_turn_cases: int
     requires_synthesis: int
     text_length: dict[str, int | None]
@@ -68,6 +69,7 @@ class TtsCaseSummary:
             "by_slice": self.by_slice,
             "by_source_category": self.by_source_category,
             "by_turn_role_sequence": self.by_turn_role_sequence,
+            "by_turn_context_source": self.by_turn_context_source,
             "multi_turn_cases": self.multi_turn_cases,
             "requires_synthesis": self.requires_synthesis,
             "text_length": self.text_length,
@@ -177,8 +179,10 @@ def tts_case_from_evalset_record(
         for turn in turns
         if isinstance(turn, dict) and str(turn.get("content", "")).strip()
     ]
+    turn_context_source = "source_turns"
     if not normalized_turns:
         normalized_turns = [{"role": "user", "content": "Read the target text aloud exactly."}]
+        turn_context_source = "fallback_instruction"
 
     metadata = record.get("metadata") if isinstance(record.get("metadata"), dict) else {}
     tags = _metadata_tags(metadata)
@@ -191,6 +195,7 @@ def tts_case_from_evalset_record(
         "tts_slice": classify_tts_slice(record, target_text),
         "turn_count": len(normalized_turns),
         "turn_roles": [turn["role"] for turn in normalized_turns],
+        "turn_context_source": turn_context_source,
         "reference_text_sha256": _sha256_text(target_text),
         "text_context_fields": _text_context_fields(
             reference_text=target_text,
@@ -238,6 +243,10 @@ def summarize_tts_cases(
             for case in case_list
         ),
         by_turn_role_sequence=_sorted_counts(_turn_role_sequence(case) for case in case_list),
+        by_turn_context_source=_sorted_counts(
+            str(case.metadata.get("turn_context_source") or "unknown")
+            for case in case_list
+        ),
         multi_turn_cases=sum(1 for case in case_list if _turn_count(case) > 1),
         requires_synthesis=sum(1 for case in case_list if case.metadata.get("requires_synthesis") is True),
         text_length=_text_length_summary(case.reference_text or "" for case in case_list),

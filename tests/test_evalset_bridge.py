@@ -50,6 +50,7 @@ def test_build_tts_cases_preserves_multiturn_context_and_metadata() -> None:
     assert case.metadata["tts_slice"] == "punctuation_format"
     assert case.metadata["turn_count"] == 1
     assert case.metadata["turn_roles"] == ["user"]
+    assert case.metadata["turn_context_source"] == "source_turns"
     assert case.metadata["reference_text_sha256"] == hashlib.sha256(
         "- cobalt\n- ledger\n- orbit".encode("utf-8")
     ).hexdigest()
@@ -76,7 +77,25 @@ def test_build_tts_cases_records_multiturn_role_metadata() -> None:
 
     assert cases[0].metadata["turn_count"] == 3
     assert cases[0].metadata["turn_roles"] == ["user", "assistant", "user"]
+    assert cases[0].metadata["turn_context_source"] == "source_turns"
     assert cases[0].metadata["text_context_fields"] == ["reference_text", "turns"]
+
+
+def test_build_tts_cases_marks_fallback_turn_context() -> None:
+    records = [
+        {
+            "id": "missing-turns",
+            "category": "structured_output",
+            "task": "json_decision",
+            "turns": [{"role": "user", "content": "   "}],
+            "ideal_answer": '{"decision":"approve"}',
+        }
+    ]
+
+    cases = build_tts_cases(records, source_name="fixture")
+
+    assert cases[0].turns[0].content == "Read the target text aloud exactly."
+    assert cases[0].metadata["turn_context_source"] == "fallback_instruction"
 
 
 def test_build_tts_cases_can_include_source_task_when_requested() -> None:
@@ -405,6 +424,7 @@ def test_summarize_tts_cases_is_metadata_only(tmp_path: Path) -> None:
             "instruction_constraints": 1,
             "structured_output": 1,
         },
+        "by_turn_context_source": {"fallback_instruction": 2},
         "by_turn_role_sequence": {"user": 2},
         "example_source_ids_by_slice": {
             "code_like": ["json-one"],
@@ -493,6 +513,7 @@ def test_summarize_tts_cases_counts_turn_role_sequences() -> None:
         "user": 1,
         "user+assistant+user": 1,
     }
+    assert summary.by_turn_context_source == {"source_turns": 2}
     assert summary.multi_turn_cases == 1
 
 
