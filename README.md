@@ -121,6 +121,7 @@ Fields:
 - `id`: stable case identifier.
 - `task`: prompt family, such as `asr_error` or `tts_naturalness`.
 - `audio_path` or `audio_url`: optional for text-only smoke tests, required for true audio judging.
+- `turns`: optional multi-turn context as `{"role": "user|assistant|agent|system", "content": "..."}` records. Use this when judging whether an ASR/TTS output matches a prior user request and agent response in context.
 - `reference_text`: expected transcript or target text, when available.
 - `candidate_text`: model output transcript, translation, or synthesis text.
 - `metadata`: language, domain, speaker notes, expected events, or proprietary labels.

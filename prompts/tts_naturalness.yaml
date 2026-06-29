@@ -36,6 +36,11 @@ user: |-
   Language: {{ metadata.language | default("unknown") }}
   Voice or speaker notes: {{ metadata.voice | default("unknown") }}
 
+  {% if conversation_text -%}
+  Conversation context:
+  {{ conversation_text }}
+
+  {% endif -%}
   {% if reference_text -%}
   Target text:
   {{ reference_text }}

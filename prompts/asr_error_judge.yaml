@@ -54,6 +54,11 @@ user: |-
   Language: {{ metadata.language | default("unknown") }}
   Domain: {{ metadata.domain | default("unknown") }}
 
+  {% if conversation_text -%}
+  Conversation context:
+  {{ conversation_text }}
+
+  {% endif -%}
   {% if reference_text -%}
   Reference transcript:
   {{ reference_text }}

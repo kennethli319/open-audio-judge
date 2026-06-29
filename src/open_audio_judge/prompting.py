@@ -56,6 +56,7 @@ def load_prompt(judge_or_path: str | Path) -> JudgePrompt:
 def render_prompt(prompt: JudgePrompt, case: EvaluationCase) -> RenderedPrompt:
     env = Environment(undefined=StrictUndefined, autoescape=False, trim_blocks=True, lstrip_blocks=True)
     context: dict[str, Any] = case.model_dump()
+    context["conversation_text"] = format_turns(case.turns)
     user_text = env.from_string(prompt.user).render(**context)
     system_text = env.from_string(prompt.system).render(**context)
     return RenderedPrompt(
@@ -65,3 +66,12 @@ def render_prompt(prompt: JudgePrompt, case: EvaluationCase) -> RenderedPrompt:
         user=user_text,
         response_schema=prompt.response_schema,
     )
+
+
+def format_turns(turns: list[Any]) -> str:
+    lines: list[str] = []
+    for turn in turns:
+        role = getattr(turn, "role", None) or turn.get("role", "unknown")
+        content = getattr(turn, "content", None) or turn.get("content", "")
+        lines.append(f"{role.upper()}: {content}")
+    return "\n".join(lines)

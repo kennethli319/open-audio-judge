@@ -6,11 +6,17 @@ from typing import Any, Literal
 from pydantic import BaseModel, Field
 
 
+class ConversationTurn(BaseModel):
+    role: str
+    content: str
+
+
 class EvaluationCase(BaseModel):
     id: str
     task: str
     audio_path: str | None = None
     audio_url: str | None = None
+    turns: list[ConversationTurn] = Field(default_factory=list)
     reference_text: str | None = None
     candidate_text: str | None = None
     metadata: dict[str, Any] = Field(default_factory=dict)
