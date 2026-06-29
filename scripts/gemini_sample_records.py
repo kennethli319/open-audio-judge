@@ -10,6 +10,7 @@ from __future__ import annotations
 import argparse
 import hashlib
 import json
+from dataclasses import dataclass
 from pathlib import Path
 from typing import Any
 
@@ -30,6 +31,12 @@ PROMPTS_BY_TASK = {
 }
 
 
+@dataclass(frozen=True)
+class SampleRecordIssue:
+    case_id: str
+    reason: str
+
+
 def main() -> None:
     parser = argparse.ArgumentParser()
     subparsers = parser.add_subparsers(dest="command", required=True)
@@ -47,10 +54,10 @@ def main() -> None:
 
     args = parser.parse_args()
     if args.command == "check":
-        missing = missing_records(args.records, args.provider, args.model)
-        if missing:
-            for case_id in missing:
-                print(f"missing_or_changed: {case_id}")
+        issues = record_issues(args.records, args.provider, args.model)
+        if issues:
+            for issue in issues:
+                print(f"{issue.reason}: {issue.case_id}")
             raise SystemExit(1)
         print("All Gemini sample records are current.")
     elif args.command == "update":
@@ -58,6 +65,10 @@ def main() -> None:
 
 
 def missing_records(records_path: Path, provider: str, model: str) -> list[str]:
+    return [issue.case_id for issue in record_issues(records_path, provider, model)]
+
+
+def record_issues(records_path: Path, provider: str, model: str) -> list[SampleRecordIssue]:
     expected = expected_fingerprints(provider, model)
     records = {
         record["base_case_id"]: record
@@ -65,12 +76,16 @@ def missing_records(records_path: Path, provider: str, model: str) -> list[str]:
         if record.get("provider") == provider and record.get("model") == model
     }
 
-    missing: list[str] = []
+    issues: list[SampleRecordIssue] = []
     for case_id, fingerprint in expected.items():
         record = records.get(case_id)
-        if not record or record.get("sample_fingerprint") != fingerprint or record.get("status") != "ok":
-            missing.append(case_id)
-    return missing
+        if not record:
+            issues.append(SampleRecordIssue(case_id=case_id, reason="missing_record"))
+        elif record.get("sample_fingerprint") != fingerprint:
+            issues.append(SampleRecordIssue(case_id=case_id, reason="changed_fingerprint"))
+        elif record.get("status") != "ok":
+            issues.append(SampleRecordIssue(case_id=case_id, reason="non_ok_status"))
+    return issues
 
 
 def update_records(

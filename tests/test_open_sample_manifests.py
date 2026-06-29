@@ -5,7 +5,7 @@ from pathlib import Path
 import pytest
 
 from open_audio_judge.runner import load_cases
-from scripts.gemini_sample_records import missing_records
+from scripts.gemini_sample_records import missing_records, record_issues
 
 
 OPEN_SAMPLE_MANIFESTS = [
@@ -63,3 +63,31 @@ def test_gemini_sample_records_detect_prompt_changes(monkeypatch: pytest.MonkeyP
         provider="gemini",
         model="gemini-3.5-flash",
     ) == ["asr-open-armstrong-small-step"]
+
+
+def test_gemini_sample_record_issues_explain_rerun_reason(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    def changed_fingerprints(provider: str, model: str) -> dict[str, str]:
+        assert provider == "gemini"
+        assert model == "gemini-3.5-flash"
+        return {
+            "asr-open-armstrong-small-step": "changed",
+            "asr-open-jfk-moon": "missing",
+        }
+
+    monkeypatch.setattr(
+        "scripts.gemini_sample_records.expected_fingerprints",
+        changed_fingerprints,
+    )
+
+    issues = record_issues(
+        Path("examples/gemini_sample_records.jsonl"),
+        provider="gemini",
+        model="gemini-3.5-flash",
+    )
+
+    assert [(issue.case_id, issue.reason) for issue in issues] == [
+        ("asr-open-armstrong-small-step", "changed_fingerprint"),
+        ("asr-open-jfk-moon", "missing_record"),
+    ]
