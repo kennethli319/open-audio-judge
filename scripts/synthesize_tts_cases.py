@@ -299,6 +299,13 @@ def validate_synthesized_manifest(
                 )
             )
             continue
+        if case.audio_url:
+            issues.append(
+                SynthesisValidationIssue(
+                    case_id=case.id,
+                    reason="Synthesized TTS manifests must not include audio_url.",
+                )
+            )
 
         if require_local_audio and case.audio_path:
             audio_path = Path(case.audio_path)

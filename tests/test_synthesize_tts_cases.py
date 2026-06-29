@@ -289,6 +289,38 @@ def test_validate_synthesized_manifest_rejects_url_only_audio(
     ]
 
 
+def test_validate_synthesized_manifest_rejects_mixed_local_and_url_audio(
+    tmp_path: Path,
+) -> None:
+    audio_path = tmp_path / "out" / "audio" / "sample.wav"
+    audio_path.parent.mkdir(parents=True)
+    with wave.open(str(audio_path), "wb") as handle:
+        handle.setnchannels(1)
+        handle.setsampwidth(2)
+        handle.setframerate(16000)
+        handle.writeframes(b"\x00\x00" * 1600)
+    cases_path = tmp_path / "out" / "tts_audio_cases.jsonl"
+    cases_path.write_text(
+        json.dumps(
+            {
+                "id": "mixed-audio-case",
+                "task": "tts_naturalness",
+                "audio_path": "audio/sample.wav",
+                "audio_url": "https://example.test/audio.wav",
+                "reference_text": "Synthetic sample.",
+            }
+        )
+        + "\n",
+        encoding="utf-8",
+    )
+
+    issues = validate_synthesized_manifest(cases_path=cases_path)
+
+    assert [(issue.case_id, issue.reason) for issue in issues] == [
+        ("mixed-audio-case", "Synthesized TTS manifests must not include audio_url.")
+    ]
+
+
 def test_validate_synthesized_manifest_reports_stale_text_context_metadata(
     tmp_path: Path,
 ) -> None:
