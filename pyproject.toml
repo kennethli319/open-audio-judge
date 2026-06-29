@@ -34,6 +34,7 @@ oaj = "open_audio_judge.cli:main"
 
 [tool.hatch.build.targets.wheel]
 packages = ["src/open_audio_judge"]
+sources = ["src"]
 
 [tool.ruff]
 line-length = 100

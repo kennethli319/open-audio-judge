@@ -49,7 +49,7 @@ def build_tts_cases_command(
             help="Optional comma-separated source categories to include before TTS slicing.",
         ),
     ] = "",
-    slices: Annotated[
+    slice_labels: Annotated[
         str,
         typer.Option(
             "--slices",
@@ -62,7 +62,7 @@ def build_tts_cases_command(
     ] = None,
 ) -> None:
     category_filter = {item.strip() for item in categories.split(",") if item.strip()} or None
-    slice_filter = {item.strip() for item in slices.split(",") if item.strip()} or None
+    slice_filter = {item.strip() for item in slice_labels.split(",") if item.strip()} or None
     records = load_evalset_records(source)
     cases = build_tts_cases(
         records,

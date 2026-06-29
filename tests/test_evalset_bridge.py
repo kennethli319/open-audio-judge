@@ -13,6 +13,7 @@ def test_build_tts_cases_preserves_multiturn_context_and_metadata() -> None:
     records = [
         {
             "id": "ome_0001",
+            "version": "0.1.0",
             "category": "instruction_constraints",
             "task": "format_keywords",
             "turns": [{"role": "user", "content": "Reply with exactly three bullet lines."}],
@@ -39,6 +40,7 @@ def test_build_tts_cases_preserves_multiturn_context_and_metadata() -> None:
     assert case.turns[0].role == "user"
     assert case.metadata["source"] == "ome"
     assert case.metadata["source_id"] == "ome_0001"
+    assert case.metadata["source_version"] == "0.1.0"
     assert case.metadata["source_category"] == "instruction_constraints"
     assert case.metadata["source_tags"] == ["format", "constraints"]
     assert case.metadata["tts_slice"] == "punctuation_format"
@@ -131,6 +133,44 @@ def test_classify_tts_slice() -> None:
     assert classify_tts_slice({"category": "structured_output", "task": "json_decision"}, "{}") == "code_like"
     assert classify_tts_slice({"category": "calendar", "task": "time"}, "Meet at 09:45") == "dates_times"
     assert classify_tts_slice({"metadata": {"tags": ["privacy"]}}, "Please redact the email.") == "safety_privacy"
+    assert classify_tts_slice({"category": "cross_lingual_transfer"}, "tomorrow at 3 PM") == "multilingual"
+
+
+def test_build_tts_cases_includes_cross_lingual_and_numeric_evalset_rows() -> None:
+    records = [
+        {
+            "id": "spanish-date",
+            "category": "multilingual_understanding",
+            "task": "spanish_date",
+            "turns": [{"role": "user", "content": "Translate the weekday from Spanish."}],
+            "ideal_answer": "Thursday",
+            "metadata": {"tags": ["spanish", "translation"]},
+        },
+        {
+            "id": "linear-equation",
+            "category": "quantitative_math",
+            "task": "linear_equation",
+            "turns": [{"role": "user", "content": "Solve for x."}],
+            "ideal_answer": "6",
+            "metadata": {"tags": ["math", "algebra"]},
+        },
+        {
+            "id": "factual",
+            "category": "short_factuality",
+            "task": "capital_city",
+            "turns": [{"role": "user", "content": "What is the capital of France?"}],
+            "ideal_answer": "Paris",
+            "metadata": {"tags": ["factuality"]},
+        },
+    ]
+
+    cases = build_tts_cases(records, source_name="fixture")
+
+    assert [case.id for case in cases] == [
+        "tts-fixture-spanish-date",
+        "tts-fixture-linear-equation",
+    ]
+    assert [case.metadata["tts_slice"] for case in cases] == ["multilingual", "numbers"]
 
 
 def test_load_and_write_cases_jsonl(tmp_path: Path) -> None:

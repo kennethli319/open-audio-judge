@@ -12,14 +12,26 @@ from open_audio_judge.models import EvaluationCase
 
 DEFAULT_TTS_CATEGORY_HINTS = {
     "ambiguity_clarification",
+    "benign_safety_helpfulness",
+    "calibration_confidence",
     "context_synthesis",
+    "cross_lingual_transfer",
+    "function_calling",
     "instruction_constraints",
     "long_context_retrieval",
+    "multilingual_understanding",
     "multi_turn_state",
+    "privacy_redaction",
+    "quantitative_math",
+    "safety_refusal",
     "structured_output",
+    "temporal_reasoning",
+    "unknown_handling",
 }
 
 DEFAULT_TTS_KEYWORD_HINTS = {
+    "arithmetic",
+    "calendar",
     "code",
     "date",
     "format",
@@ -31,6 +43,7 @@ DEFAULT_TTS_KEYWORD_HINTS = {
     "privacy",
     "punctuation",
     "safety",
+    "translation",
     "time",
 }
 
@@ -128,6 +141,7 @@ def tts_case_from_evalset_record(
     case_metadata = {
         "source": source_name,
         "source_id": source_id,
+        "source_version": record.get("version"),
         "source_category": record.get("category"),
         "source_task": record.get("task"),
         "source_tags": tags,
@@ -159,7 +173,13 @@ def classify_tts_slice(record: dict[str, Any], target_text: str) -> str:
     tags = [str(tag).lower() for tag in metadata.get("tags", [])] if metadata else []
     hints = " ".join([category, task, *tags, target_text.lower()])
 
-    if "multilingual" in hints:
+    if (
+        "multilingual" in hints
+        or "cross_lingual" in hints
+        or "translation" in hints
+        or "spanish" in hints
+        or "chinese" in hints
+    ):
         return "multilingual"
     if "json" in hints or "code" in hints or _looks_code_like(target_text):
         return "code_like"
