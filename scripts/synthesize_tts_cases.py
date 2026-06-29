@@ -205,6 +205,7 @@ def synthesize_cases(
                 "source_case_id": case.id,
                 "reference_text_sha256": _sha256_text(target_text),
                 "text_context_fields": text_context_fields,
+                "requires_synthesis": False,
                 "turn_count": metadata.get("turn_count", len(case.turns)),
                 "turn_roles": metadata.get("turn_roles", _turn_roles(case)),
                 "text_sidecar_written": keep_text_sidecars,

@@ -25,7 +25,11 @@ def test_synthesize_cases_dry_run_writes_local_audio_manifest(tmp_path: Path) ->
                 "task": "tts_naturalness",
                 "turns": [{"role": "user", "content": "Read the answer aloud."}],
                 "reference_text": "Call me at 09:45.",
-                "metadata": {"source_id": "private-001", "tts_slice": "dates_times"},
+                "metadata": {
+                    "source_id": "private-001",
+                    "tts_slice": "dates_times",
+                    "requires_synthesis": True,
+                },
             }
         )
         + "\n",
@@ -53,6 +57,7 @@ def test_synthesize_cases_dry_run_writes_local_audio_manifest(tmp_path: Path) ->
     assert written[0]["metadata"]["sample_kind"] == "local_synthetic_tts"
     assert written[0]["metadata"]["source_case_id"] == "tts eval/001"
     assert written[0]["metadata"]["text_context_fields"] == ["reference_text", "turns"]
+    assert written[0]["metadata"]["requires_synthesis"] is False
     assert written[0]["metadata"]["turn_count"] == 1
     assert written[0]["metadata"]["turn_roles"] == ["user"]
     assert written[0]["metadata"]["text_sidecar_written"] is True
@@ -61,6 +66,15 @@ def test_synthesize_cases_dry_run_writes_local_audio_manifest(tmp_path: Path) ->
     )
     assert "audio_sha256" not in written[0]["metadata"]
     assert (tmp_path / "out" / "text" / "tts-eval-001.txt").read_text(encoding="utf-8") == "Call me at 09:45."
+    assert (
+        validate_synthesized_manifest(
+            cases_path=manifest,
+            require_local_audio=False,
+            require_text_context_metadata=True,
+            require_synthesis_metadata=True,
+        )
+        == []
+    )
 
 
 def test_validate_synthesized_manifest_accepts_relative_audio_and_text_context(
