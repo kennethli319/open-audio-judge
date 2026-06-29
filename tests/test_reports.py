@@ -39,9 +39,45 @@ def test_write_html_report(tmp_path: Path) -> None:
     assert "no error" in html
     assert "High-Impact Errors" in html
     assert "No high-impact semantic errors" in html
+    assert "Actionable Notes" in html
     assert "Calibration Checks" in html
     assert "All calibration expectations matched" in html
     assert "No action needed." in html
+
+
+def test_write_html_report_aggregates_researcher_notes(tmp_path: Path) -> None:
+    results = [
+        EvaluationResult(
+            case_id="amount-1",
+            task="asr_error",
+            judge_id="asr_error",
+            judge_version="0.1.0",
+            provider="mock",
+            overall_score=52,
+            reason="The amount changed.",
+            researcher_notes=["Improve numeric robustness.", "Audit payment-domain numbers."],
+            label="inaccurate",
+        ),
+        EvaluationResult(
+            case_id="amount-2",
+            task="asr_error",
+            judge_id="asr_error",
+            judge_version="0.1.0",
+            provider="mock",
+            overall_score=55,
+            reason="The date changed.",
+            researcher_notes=["Improve numeric robustness."],
+            label="inaccurate",
+        ),
+    ]
+
+    output = write_html_report(results, tmp_path / "report.html")
+    html = output.read_text(encoding="utf-8")
+
+    assert "Actionable Notes" in html
+    assert "Improve numeric robustness." in html
+    assert "<strong>2</strong>" in html
+    assert "Audit payment-domain numbers." in html
 
 
 def test_write_html_report_highlights_priority_semantic_cases(tmp_path: Path) -> None:

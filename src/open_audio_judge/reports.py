@@ -32,6 +32,7 @@ def render_html_report(results: list[EvaluationResult]) -> str:
     meaning_counts = _field_counts(result.meaning_preservation for result in results)
     category_counts = _category_counts(results)
     high_impact_counts = _high_impact_category_counts(results)
+    researcher_note_counts = _researcher_note_counts(results)
     priority_cases = _priority_cases(results)
     calibration_checks = _calibration_checks(results)
 
@@ -47,6 +48,10 @@ def render_html_report(results: list[EvaluationResult]) -> str:
     high_impact_markup = _render_count_list(
         high_impact_counts,
         empty_label="No high-impact semantic errors",
+    )
+    researcher_note_markup = _render_count_list(
+        researcher_note_counts,
+        empty_label="No researcher notes",
     )
     priority_markup = _render_priority_cases(priority_cases)
     calibration_markup = _render_calibration_checks(calibration_checks)
@@ -169,6 +174,7 @@ def render_html_report(results: list[EvaluationResult]) -> str:
       <div class="metric"><span>Meaning Preservation</span>{meaning_markup}</div>
       <div class="metric"><span>Error Categories</span>{category_markup}</div>
       <div class="metric"><span>High-Impact Errors</span>{high_impact_markup}</div>
+      <div class="metric"><span>Actionable Notes</span>{researcher_note_markup}</div>
     </section>
 
     <h2>Calibration Checks</h2>
@@ -250,6 +256,13 @@ def _high_impact_category_counts(results: list[EvaluationResult]) -> list[tuple[
             if category in HIGH_IMPACT_CATEGORIES
         )
     return counts.most_common()
+
+
+def _researcher_note_counts(results: list[EvaluationResult]) -> list[tuple[str, int]]:
+    counts: Counter[str] = Counter()
+    for result in results:
+        counts.update(result.researcher_notes)
+    return counts.most_common(6)
 
 
 def _render_count_list(items: list[tuple[str, int]], empty_label: str) -> str:
