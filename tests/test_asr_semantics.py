@@ -40,3 +40,23 @@ def test_multiword_number_change_is_high_impact() -> None:
 
     assert diff.score <= 55
     assert "number_error" in diff.error_categories
+
+
+def test_weekday_change_is_high_impact_temporal_error() -> None:
+    diff = analyze_reference_candidate(
+        "The cardiology appointment moved from Monday morning to Friday afternoon.",
+        "The cardiology appointment moved from Tuesday morning to Friday afternoon.",
+    )
+
+    assert diff.score <= 55
+    assert "date_time_error" in diff.error_categories
+
+
+def test_time_marker_change_is_high_impact_temporal_error() -> None:
+    diff = analyze_reference_candidate(
+        "Start the batch job at 9 am after the backup completes.",
+        "Start the batch job at 9 pm after the backup completes.",
+    )
+
+    assert diff.score <= 55
+    assert "date_time_error" in diff.error_categories

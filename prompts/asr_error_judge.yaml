@@ -44,7 +44,7 @@ system: |-
     "meaning_preservation": "<preserved | minor_loss | partial_loss | major_loss | not_preserved | uncertain>",
     "semantic_error_summary": "<one sentence summarizing meaning impact>",
     "key_differences": ["<important candidate-vs-audio/reference difference>", "..."],
-    "error_categories": ["substitution | deletion | insertion | hallucination | entity_error | number_error | negation_error | speaker_error | truncation | formatting_only | no_error | uncertain", "..."],
+    "error_categories": ["substitution | deletion | insertion | hallucination | entity_error | number_error | date_time_error | negation_error | speaker_error | truncation | formatting_only | no_error | uncertain", "..."],
     "researcher_notes": ["<actionable note for ASR model improvement>", "..."]
   }
 user: |-

@@ -96,6 +96,35 @@ NUMBER_SCALE_VALUES = {
     "billion": 1_000_000_000,
 }
 
+TEMPORAL_TERMS = {
+    "today",
+    "tonight",
+    "tomorrow",
+    "yesterday",
+    "morning",
+    "afternoon",
+    "evening",
+    "monday",
+    "tuesday",
+    "wednesday",
+    "thursday",
+    "friday",
+    "saturday",
+    "sunday",
+    "january",
+    "february",
+    "march",
+    "april",
+    "may",
+    "june",
+    "july",
+    "august",
+    "september",
+    "october",
+    "november",
+    "december",
+}
+
 
 @dataclass(frozen=True)
 class SemanticAsrDiff:
@@ -160,6 +189,12 @@ def analyze_reference_candidate(reference: str, candidate: str) -> SemanticAsrDi
         categories.append("number_error")
         differences.append("numeric content changed")
         notes.append("Add targeted evaluation and augmentation for numbers, quantities, dates, and currencies.")
+        score_caps.append(55)
+
+    if temporal_values(ref_words) != temporal_values(cand_words):
+        categories.append("date_time_error")
+        differences.append("date, day, or time expression changed")
+        notes.append("Add targeted slices for appointments, deadlines, and other time-sensitive speech.")
         score_caps.append(55)
 
     ref_entities = entity_like_tokens(reference)
@@ -241,6 +276,16 @@ def parse_number_words(words: list[str], start: int) -> tuple[int, int]:
             current = 0
         index += 1
     return total + current, index
+
+
+def temporal_values(words: list[str]) -> list[str]:
+    values: list[str] = []
+    for index, word in enumerate(words):
+        if word in TEMPORAL_TERMS:
+            values.append(word)
+        if word in {"am", "pm"} and index > 0:
+            values.append(f"{words[index - 1]} {word}")
+    return values
 
 
 def entity_like_tokens(text: str) -> list[str]:

@@ -35,11 +35,11 @@ open runs/asr-demo/report.html
 The mock provider is deterministic and useful for testing the pipeline without a model.
 For ASR cases with a reference transcript, the mock provider now uses a lightweight semantic baseline:
 it still considers edit distance, but caps scores for high-impact meaning changes such as negation,
-numbers, and entity-like terms. Basic digit and number-word equivalents, such as `15` and `fifteen`,
+numbers, dates/times, and entity-like terms. Basic digit and number-word equivalents, such as `15` and `fifteen`,
 are normalized before applying the number-error cap. This keeps local smoke reports aligned with the
 project goal of going beyond WER before a real audio LLM judge is connected.
 The bundled ASR examples include synthetic calibration cases where a small token change has high
-semantic impact, such as negation, amount, and entity substitutions.
+semantic impact, such as negation, amount, appointment/deadline, and entity substitutions.
 
 ## Run With Local Qwen/Qwen3-Omni
 

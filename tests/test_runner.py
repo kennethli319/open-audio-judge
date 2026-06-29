@@ -10,12 +10,15 @@ def test_evaluate_cases_with_mock(tmp_path: Path) -> None:
     prompt = load_prompt("asr_error")
     results = evaluate_cases(cases, prompt, MockProvider(), tmp_path)
 
-    assert len(results) == 4
+    assert len(results) == len(cases)
     assert (tmp_path / "results.jsonl").exists()
     assert (tmp_path / "report.html").exists()
     assert all(result.status == "ok" for result in results)
-    assert results[1].overall_score <= 55
-    assert "number_error" in results[1].error_categories
-    assert results[2].overall_score <= 40
-    assert "negation_error" in results[2].error_categories
-    assert "entity_error" in results[3].error_categories
+    by_id = {result.case_id: result for result in results}
+    assert by_id["asr-demo-002"].overall_score <= 55
+    assert "number_error" in by_id["asr-demo-002"].error_categories
+    assert by_id["asr-calibration-negation-001"].overall_score <= 40
+    assert "negation_error" in by_id["asr-calibration-negation-001"].error_categories
+    assert "entity_error" in by_id["asr-calibration-entity-001"].error_categories
+    assert "date_time_error" in by_id["asr-calibration-date-001"].error_categories
+    assert "date_time_error" in by_id["asr-calibration-time-001"].error_categories

@@ -205,7 +205,7 @@ def render_html_report(results: list[EvaluationResult]) -> str:
 
 
 LABELS = ("accurate", "needs_review", "inaccurate")
-HIGH_IMPACT_CATEGORIES = {"negation_error", "number_error", "entity_error"}
+HIGH_IMPACT_CATEGORIES = {"negation_error", "number_error", "entity_error", "date_time_error"}
 MEANING_SEVERITY = {
     "not_preserved": 5,
     "major_loss": 4,
