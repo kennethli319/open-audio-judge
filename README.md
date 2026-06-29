@@ -220,6 +220,6 @@ mock calibration, but they are not valid hosted audio-judge inputs.
 
 ## Current Scope
 
-The first version is intentionally small: one provider implementation, one mock provider, two prompts, CLI/API execution, and HTML reporting. Next steps are Gemini provider support, calibration sets, pairwise judging, bootstrap confidence intervals, and prompt version governance.
+The current version includes Qwen/OpenAI-compatible judging, Gemini hosted judging, a deterministic mock provider, ASR/TTS prompt families, semantic ASR diagnostics, TTS naturalness diagnostics, CLI/API execution, local TTS manifest tooling, open development sample manifests, and HTML reporting. Next steps are provider smoke automation, calibration-set governance, pairwise judging, bootstrap confidence intervals, and prompt version release policy.
 
 Development audio sample manifests are listed in [docs/sample-audio.md](docs/sample-audio.md). Each current judge family has at least three linked open-source/free-license audio samples for smoke testing, plus a helper to materialize local WAV fixtures under ignored `runs/`. Gemini sample smoke results are recorded in `examples/gemini_sample_records.jsonl` and should be reused unless the sample, prompt, provider, or model changes.

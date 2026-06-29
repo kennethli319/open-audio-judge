@@ -4,19 +4,21 @@
 
 Open Audio Judge should become a standard protocol for prompt-based audio LLM evaluation across private and public datasets. People should be able to bring their own audio, labels, and judge model while keeping prompt versions, scoring, result schemas, and reports comparable.
 
-## MVP Scope
+## Current Scope
 
-The first implementation includes:
+The current implementation includes:
 
 - Prompt registry with versioned YAML prompts.
 - ASR error judge prompt following the requested three-stage structure, with audio-derived judge transcription and semantic diagnostics.
-- TTS naturalness prompt as the starter example.
+- TTS naturalness prompt with naturalness, artifact, text-faithfulness, and researcher-note diagnostics.
 - Case schema for audio path/URL, reference text, candidate text, multi-turn context, and metadata.
 - Provider-backed judge calls require audio plus text context; transcript/reference fields complement
   the audio but do not replace it.
 - Local Qwen/Qwen3-Omni provider through OpenAI-compatible chat completions.
+- Gemini hosted provider through the Interactions API.
 - Mock provider for tests and offline demos.
 - CLI batch runner.
+- TTS evalset bridge and local synthesis manifest tooling.
 - FastAPI REST API for single-case and batch judging.
 - HTML report with average score, score distribution, accurate/needs-review/inaccurate labels, per-case reasons, and optional diagnostic fields.
 
@@ -49,24 +51,24 @@ Reports can map scores into labels with configurable thresholds:
 
 These labels are deliberately generic and should be renamed per task in later report templates.
 
-## Provider Roadmap
+## Provider Status
 
-Version 0.1:
+Implemented:
 
 - `mock`: deterministic local scoring with a lightweight semantic ASR baseline for reference/candidate cases. It is non-audio and non-authoritative, but it flags high-impact number, negation, and entity-like changes so offline smoke reports do not behave like pure WER.
 - `qwen`: OpenAI-compatible `/v1/chat/completions`, defaulting to `http://localhost:8091/v1`.
 - `openai-compatible`: same transport with a generic model/base URL.
+- `gemini`: hosted audio understanding using the Gemini Interactions API.
 
 Near-term:
 
-- `gemini`: hosted audio understanding using Gemini file upload and structured output.
 - `transformers-qwen`: direct local inference for users who do not expose a REST server.
 - `ensemble`: multiple judges with median/trimmed-mean aggregation.
 - `pairwise`: A/B audio comparison protocols for TTS, speech-to-speech translation, and dialogue systems, informed by AudioJudge and MTalk-Bench.
 
-## Report Roadmap
+## Report Status
 
-Version 0.1 emits an HTML report plus `results.jsonl`.
+The runner emits an HTML report plus `results.jsonl`. Current reports summarize score distribution, semantic diagnostics, high-impact ASR errors, researcher notes, calibration mismatches, priority cases, and per-case details.
 
 Near-term report additions:
 
