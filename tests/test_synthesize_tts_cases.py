@@ -173,6 +173,83 @@ def test_synthesize_cases_rejects_cases_without_reference_text(tmp_path: Path) -
     assert not (tmp_path / "out" / "tts_audio_cases.jsonl").exists()
 
 
+def test_synthesize_cases_keeps_slug_collision_outputs_distinct(tmp_path: Path) -> None:
+    cases_path = tmp_path / "tts_cases.jsonl"
+    cases_path.write_text(
+        "\n".join(
+            json.dumps(case)
+            for case in [
+                {
+                    "id": "tts eval/001",
+                    "task": "tts_naturalness",
+                    "reference_text": "First sample.",
+                },
+                {
+                    "id": "tts eval 001",
+                    "task": "tts_naturalness",
+                    "reference_text": "Second sample.",
+                },
+            ]
+        )
+        + "\n",
+        encoding="utf-8",
+    )
+
+    synthesize_cases(
+        cases_path=cases_path,
+        out_dir=tmp_path / "out",
+        tts_bin=Path("/missing/local-tts-speak"),
+        model="mlx-community/chatterbox-turbo-6bit",
+        voice="af_heart",
+        lang_code="en",
+        audio_format="wav",
+        dry_run=True,
+    )
+
+    written = [
+        json.loads(line)
+        for line in (tmp_path / "out" / "tts_audio_cases.jsonl").read_text(encoding="utf-8").splitlines()
+    ]
+
+    assert written[0]["audio_path"] == "audio/tts-eval-001.wav"
+    assert written[1]["audio_path"].startswith("audio/tts-eval-001-")
+    assert written[1]["audio_path"].endswith(".wav")
+    assert (tmp_path / "out" / "text" / "tts-eval-001.txt").read_text(encoding="utf-8") == "First sample."
+    assert len(list((tmp_path / "out" / "text").glob("tts-eval-001*.txt"))) == 2
+
+
+def test_synthesize_cases_rejects_duplicate_case_ids(tmp_path: Path) -> None:
+    cases_path = tmp_path / "tts_cases.jsonl"
+    cases_path.write_text(
+        "\n".join(
+            json.dumps(
+                {
+                    "id": "tts-duplicate",
+                    "task": "tts_naturalness",
+                    "reference_text": text,
+                }
+            )
+            for text in ["First sample.", "Second sample."]
+        )
+        + "\n",
+        encoding="utf-8",
+    )
+
+    with pytest.raises(ValueError, match="unique case ids"):
+        synthesize_cases(
+            cases_path=cases_path,
+            out_dir=tmp_path / "out",
+            tts_bin=Path("/missing/local-tts-speak"),
+            model="mlx-community/chatterbox-turbo-6bit",
+            voice="af_heart",
+            lang_code="en",
+            audio_format="wav",
+            dry_run=True,
+        )
+
+    assert not (tmp_path / "out").exists()
+
+
 def test_synthesize_cases_preflights_missing_tts_binary_before_writing_text(
     tmp_path: Path,
 ) -> None:

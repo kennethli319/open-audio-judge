@@ -13,6 +13,7 @@ import hashlib
 import json
 import subprocess
 import wave
+from collections.abc import Iterable
 from pathlib import Path
 
 from open_audio_judge.case_contract import require_audio_and_text
@@ -74,6 +75,10 @@ def synthesize_cases(
     if missing_reference:
         missing = ", ".join(missing_reference)
         raise ValueError(f"TTS synthesis cases require reference_text; missing for: {missing}")
+    duplicate_ids = _duplicate_case_ids(case.id for case in cases)
+    if duplicate_ids:
+        duplicates = ", ".join(duplicate_ids)
+        raise ValueError(f"TTS synthesis cases require unique case ids; duplicates: {duplicates}")
     if not dry_run and not tts_bin.is_file():
         raise FileNotFoundError(
             f"local TTS binary not found at {tts_bin}; pass --tts-bin or use --dry-run."
@@ -85,10 +90,11 @@ def synthesize_cases(
     audio_dir.mkdir(parents=True, exist_ok=True)
 
     derived: list[dict] = []
+    used_stems: set[str] = set()
     for case in cases:
         target_text = (case.reference_text or "").strip()
 
-        output_stem = _safe_stem(case.id)
+        output_stem = _unique_stem(case.id, used_stems)
         text_path = text_dir / f"{output_stem}.txt"
         audio_path = audio_dir / f"{output_stem}.{audio_format}"
         text_path.write_text(target_text, encoding="utf-8")
@@ -182,6 +188,27 @@ def _run_tts(
 
 def _safe_stem(value: str) -> str:
     return "".join(char if char.isalnum() or char in {"-", "_"} else "-" for char in value).strip("-") or "case"
+
+
+def _unique_stem(value: str, used_stems: set[str]) -> str:
+    base_stem = _safe_stem(value)
+    stem = base_stem
+    if stem in used_stems:
+        stem = f"{base_stem}-{_sha256_text(value)[:8]}"
+    while stem in used_stems:
+        stem = f"{base_stem}-{_sha256_text(stem)[:8]}"
+    used_stems.add(stem)
+    return stem
+
+
+def _duplicate_case_ids(values: Iterable[str]) -> list[str]:
+    seen: set[str] = set()
+    duplicates: set[str] = set()
+    for value in values:
+        if value in seen:
+            duplicates.add(value)
+        seen.add(value)
+    return sorted(duplicates)
 
 
 def _manifest_audio_path(audio_path: Path, out_dir: Path) -> str:
