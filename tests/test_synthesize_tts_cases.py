@@ -62,6 +62,9 @@ def test_synthesize_cases_uses_reported_tts_output_path(
         encoding="utf-8",
     )
     generated = tmp_path / "out" / "audio" / "tts-001_0001.wav"
+    tts_bin = tmp_path / "bin" / "local-tts-speak"
+    tts_bin.parent.mkdir()
+    tts_bin.write_text("#!/bin/sh\n", encoding="utf-8")
 
     def fake_run(*args, **kwargs):
         generated.parent.mkdir(parents=True, exist_ok=True)
@@ -73,7 +76,7 @@ def test_synthesize_cases_uses_reported_tts_output_path(
     synthesize_cases(
         cases_path=cases_path,
         out_dir=tmp_path / "out",
-        tts_bin=Path("/fake/local-tts-speak"),
+        tts_bin=tts_bin,
         model="mlx-community/chatterbox-turbo-6bit",
         voice="af_heart",
         lang_code="en",
@@ -114,4 +117,35 @@ def test_synthesize_cases_rejects_cases_without_reference_text(tmp_path: Path) -
             dry_run=True,
         )
 
+    assert not (tmp_path / "out" / "tts_audio_cases.jsonl").exists()
+
+
+def test_synthesize_cases_preflights_missing_tts_binary_before_writing_text(
+    tmp_path: Path,
+) -> None:
+    cases_path = tmp_path / "tts_cases.jsonl"
+    cases_path.write_text(
+        json.dumps(
+            {
+                "id": "tts-private-text",
+                "task": "tts_naturalness",
+                "reference_text": "Keep this local.",
+            }
+        )
+        + "\n",
+        encoding="utf-8",
+    )
+
+    with pytest.raises(FileNotFoundError, match="local TTS binary not found"):
+        synthesize_cases(
+            cases_path=cases_path,
+            out_dir=tmp_path / "out",
+            tts_bin=Path("/missing/local-tts-speak"),
+            model="mlx-community/chatterbox-turbo-6bit",
+            voice="af_heart",
+            lang_code="en",
+            audio_format="wav",
+        )
+
+    assert not (tmp_path / "out" / "text").exists()
     assert not (tmp_path / "out" / "tts_audio_cases.jsonl").exists()

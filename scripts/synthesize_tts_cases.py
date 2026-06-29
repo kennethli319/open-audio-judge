@@ -71,6 +71,10 @@ def synthesize_cases(
     if missing_reference:
         missing = ", ".join(missing_reference)
         raise ValueError(f"TTS synthesis cases require reference_text; missing for: {missing}")
+    if not dry_run and not tts_bin.is_file():
+        raise FileNotFoundError(
+            f"local TTS binary not found at {tts_bin}; pass --tts-bin or use --dry-run."
+        )
 
     text_dir = out_dir / "text"
     audio_dir = out_dir / "audio"
