@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 from pathlib import Path
-from typing import Annotated
+from typing import Annotated, Optional
 
 import typer
 from rich.console import Console
@@ -67,7 +67,7 @@ def build_tts_cases_command(
         typer.Option("--per-slice-limit", help="Maximum cases to keep for each TTS slice."),
     ] = None,
     summary_out: Annotated[
-        Path | None,
+        Optional[Path],
         typer.Option("--summary-out", help="Optional metadata-only JSON summary path."),
     ] = None,
 ) -> None:
