@@ -55,6 +55,8 @@ class TtsCaseSummary:
     by_slice: dict[str, int]
     by_source_category: dict[str, int]
     requires_synthesis: int
+    text_length: dict[str, int | None]
+    example_source_ids_by_slice: dict[str, list[str]]
 
     def as_dict(self) -> dict[str, Any]:
         return {
@@ -62,6 +64,8 @@ class TtsCaseSummary:
             "by_slice": self.by_slice,
             "by_source_category": self.by_source_category,
             "requires_synthesis": self.requires_synthesis,
+            "text_length": self.text_length,
+            "example_source_ids_by_slice": self.example_source_ids_by_slice,
         }
 
 
@@ -196,6 +200,8 @@ def summarize_tts_cases(cases: Iterable[EvaluationCase]) -> TtsCaseSummary:
             for case in case_list
         ),
         requires_synthesis=sum(1 for case in case_list if case.metadata.get("requires_synthesis") is True),
+        text_length=_text_length_summary(case.reference_text or "" for case in case_list),
+        example_source_ids_by_slice=_example_source_ids_by_slice(case_list),
     )
 
 
@@ -248,3 +254,28 @@ def _slugify(value: str) -> str:
 def _sorted_counts(values: Iterable[str]) -> dict[str, int]:
     counts = Counter(values)
     return {key: counts[key] for key in sorted(counts)}
+
+
+def _text_length_summary(values: Iterable[str]) -> dict[str, int | None]:
+    lengths = [len(value) for value in values]
+    if not lengths:
+        return {"min": None, "max": None, "average": None}
+    return {
+        "min": min(lengths),
+        "max": max(lengths),
+        "average": round(sum(lengths) / len(lengths)),
+    }
+
+
+def _example_source_ids_by_slice(
+    cases: Iterable[EvaluationCase],
+    *,
+    limit_per_slice: int = 3,
+) -> dict[str, list[str]]:
+    examples: dict[str, list[str]] = {}
+    for case in cases:
+        tts_slice = str(case.metadata.get("tts_slice") or "unknown")
+        source_id = str(case.metadata.get("source_id") or case.id)
+        if len(examples.setdefault(tts_slice, [])) < limit_per_slice:
+            examples[tts_slice].append(source_id)
+    return {key: examples[key] for key in sorted(examples)}

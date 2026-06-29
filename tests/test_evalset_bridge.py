@@ -229,7 +229,30 @@ def test_summarize_tts_cases_is_metadata_only(tmp_path: Path) -> None:
             "instruction_constraints": 1,
             "structured_output": 1,
         },
+        "example_source_ids_by_slice": {
+            "code_like": ["json-one"],
+            "dates_times": ["time-one"],
+        },
         "requires_synthesis": 2,
+        "text_length": {"average": 18, "max": 22, "min": 14},
     }
     assert "approve" not in out.read_text(encoding="utf-8")
     assert "09:45" not in out.read_text(encoding="utf-8")
+
+
+def test_summarize_tts_cases_caps_example_source_ids_per_slice() -> None:
+    records = [
+        {
+            "id": f"json-{index}",
+            "category": "structured_output",
+            "task": "json_decision",
+            "ideal_answer": f'{{"decision":"{index}"}}',
+        }
+        for index in range(5)
+    ]
+
+    summary = summarize_tts_cases(build_tts_cases(records, source_name="fixture"))
+
+    assert summary.example_source_ids_by_slice == {
+        "code_like": ["json-0", "json-1", "json-2"]
+    }
