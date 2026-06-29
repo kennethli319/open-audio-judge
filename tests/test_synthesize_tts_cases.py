@@ -162,6 +162,64 @@ def test_validate_synthesized_manifest_can_allow_missing_dry_run_audio(
     assert validate_synthesized_manifest(cases_path=cases_path, require_local_audio=False) == []
 
 
+def test_validate_synthesized_manifest_reports_stale_text_context_metadata(
+    tmp_path: Path,
+) -> None:
+    cases_path = tmp_path / "tts_audio_cases.jsonl"
+    cases_path.write_text(
+        json.dumps(
+            {
+                "id": "stale-context-fields",
+                "task": "tts_naturalness",
+                "audio_path": "audio/future.wav",
+                "reference_text": "Synthetic sample.",
+                "candidate_text": "Synthetic sample.",
+                "metadata": {"text_context_fields": ["reference_text"]},
+            }
+        )
+        + "\n",
+        encoding="utf-8",
+    )
+
+    issues = validate_synthesized_manifest(cases_path=cases_path, require_local_audio=False)
+
+    assert [(issue.case_id, issue.reason) for issue in issues] == [
+        (
+            "stale-context-fields",
+            "metadata.text_context_fields does not match case text context: "
+            "expected reference_text+candidate_text, got reference_text.",
+        )
+    ]
+
+
+def test_validate_synthesized_manifest_can_require_text_context_metadata(
+    tmp_path: Path,
+) -> None:
+    cases_path = tmp_path / "tts_audio_cases.jsonl"
+    cases_path.write_text(
+        json.dumps(
+            {
+                "id": "missing-context-fields",
+                "task": "tts_naturalness",
+                "audio_path": "audio/future.wav",
+                "reference_text": "Synthetic sample.",
+            }
+        )
+        + "\n",
+        encoding="utf-8",
+    )
+
+    issues = validate_synthesized_manifest(
+        cases_path=cases_path,
+        require_local_audio=False,
+        require_text_context_metadata=True,
+    )
+
+    assert [(issue.case_id, issue.reason) for issue in issues] == [
+        ("missing-context-fields", "metadata.text_context_fields is missing.")
+    ]
+
+
 def test_write_synthesis_summary_is_metadata_only_for_dry_run(tmp_path: Path) -> None:
     cases_path = tmp_path / "tts_cases.jsonl"
     cases_path.write_text(

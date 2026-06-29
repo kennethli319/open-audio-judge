@@ -69,6 +69,11 @@ def main() -> None:
         action="store_true",
         help="With --validate-only, allow relative audio_path files that do not exist yet.",
     )
+    parser.add_argument(
+        "--require-text-context-metadata",
+        action="store_true",
+        help="With --validate-only, require metadata.text_context_fields to match the case text fields.",
+    )
     parser.add_argument("--dry-run", action="store_true", help="Write manifest without invoking TTS.")
     args = parser.parse_args()
 
@@ -76,6 +81,7 @@ def main() -> None:
         issues = validate_synthesized_manifest(
             cases_path=args.cases,
             require_local_audio=not args.allow_missing_audio,
+            require_text_context_metadata=args.require_text_context_metadata,
         )
         summary = summarize_validation_issues(issues)
         if args.summary_out is not None:
@@ -251,6 +257,7 @@ def validate_synthesized_manifest(
     *,
     cases_path: Path,
     require_local_audio: bool = True,
+    require_text_context_metadata: bool = False,
 ) -> list[SynthesisValidationIssue]:
     issues: list[SynthesisValidationIssue] = []
     for case in load_cases(cases_path):
@@ -278,6 +285,28 @@ def validate_synthesized_manifest(
                         reason=f"audio_path file is empty: {_display_audio_path(audio_path, cases_path)}",
                     )
                 )
+        actual_text_context_fields = _text_context_fields(case)
+        metadata_text_context_fields = case.metadata.get("text_context_fields")
+        if metadata_text_context_fields is None:
+            if require_text_context_metadata:
+                issues.append(
+                    SynthesisValidationIssue(
+                        case_id=case.id,
+                        reason="metadata.text_context_fields is missing.",
+                    )
+                )
+        elif _normalize_text_context_fields(metadata_text_context_fields) != actual_text_context_fields:
+            expected = "+".join(actual_text_context_fields)
+            observed = _text_context_field_key(metadata_text_context_fields)
+            issues.append(
+                SynthesisValidationIssue(
+                    case_id=case.id,
+                    reason=(
+                        "metadata.text_context_fields does not match case text context: "
+                        f"expected {expected}, got {observed}."
+                    ),
+                )
+            )
     return issues
 
 
@@ -385,6 +414,17 @@ def _text_context_field_key(value: Any) -> str:
         return "unknown"
     fields = sorted(str(item) for item in value if str(item).strip())
     return "+".join(fields) if fields else "none"
+
+
+def _normalize_text_context_fields(value: Any) -> list[str]:
+    if not isinstance(value, list):
+        return []
+    allowed_fields = {"reference_text", "candidate_text", "turns"}
+    fields = [str(item) for item in value if str(item).strip() in allowed_fields]
+    if not fields:
+        return []
+    ordered_fields = ["reference_text", "candidate_text", "turns"]
+    return [field for field in ordered_fields if field in fields]
 
 
 def _sorted_counts(values: Iterable[str]) -> dict[str, int]:
