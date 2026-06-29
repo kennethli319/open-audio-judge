@@ -33,6 +33,7 @@ def render_html_report(results: list[EvaluationResult]) -> str:
     category_counts = _category_counts(results)
     high_impact_counts = _high_impact_category_counts(results)
     priority_cases = _priority_cases(results)
+    calibration_checks = _calibration_checks(results)
 
     rows = "\n".join(_render_row(result) for result in results)
     bucket_markup = "\n".join(
@@ -48,6 +49,7 @@ def render_html_report(results: list[EvaluationResult]) -> str:
         empty_label="No high-impact semantic errors",
     )
     priority_markup = _render_priority_cases(priority_cases)
+    calibration_markup = _render_calibration_checks(calibration_checks)
 
     return f"""<!doctype html>
 <html lang="en">
@@ -168,6 +170,9 @@ def render_html_report(results: list[EvaluationResult]) -> str:
       <div class="metric"><span>Error Categories</span>{category_markup}</div>
       <div class="metric"><span>High-Impact Errors</span>{high_impact_markup}</div>
     </section>
+
+    <h2>Calibration Checks</h2>
+    {calibration_markup}
 
     <h2>Priority Cases</h2>
     {priority_markup}
@@ -300,6 +305,62 @@ def _render_priority_cases(results: list[EvaluationResult]) -> str:
           <th>Meaning</th>
           <th>Category</th>
           <th>Summary</th>
+        </tr>
+      </thead>
+      <tbody>
+        {rows}
+      </tbody>
+    </table>"""
+
+
+def _calibration_checks(results: list[EvaluationResult]) -> list[tuple[EvaluationResult, list[str]]]:
+    checks: list[tuple[EvaluationResult, list[str]]] = []
+    for result in results:
+        mismatches: list[str] = []
+        expected_meaning = result.metadata.get("expected_meaning_preservation")
+        if isinstance(expected_meaning, str) and expected_meaning != result.meaning_preservation:
+            mismatches.append(
+                "expected meaning "
+                f"{expected_meaning.replace('_', ' ')}, got "
+                f"{(result.meaning_preservation or 'unknown').replace('_', ' ')}"
+            )
+
+        expected_categories = result.metadata.get("expected_error_categories")
+        if isinstance(expected_categories, list):
+            missing_categories = sorted(
+                category
+                for category in expected_categories
+                if isinstance(category, str) and category not in result.error_categories
+            )
+            if missing_categories:
+                mismatches.append(
+                    "missing categories: "
+                    + ", ".join(category.replace("_", " ") for category in missing_categories)
+                )
+
+        if mismatches:
+            checks.append((result, mismatches))
+    return checks
+
+
+def _render_calibration_checks(checks: list[tuple[EvaluationResult, list[str]]]) -> str:
+    if not checks:
+        return '<div class="metric"><strong class="muted">All calibration expectations matched</strong></div>'
+
+    rows = "\n".join(
+        f"""<tr>
+  <td data-label="Case">{html.escape(result.case_id)}</td>
+  <td data-label="Focus">{html.escape(str(result.metadata.get("calibration_focus", "unspecified")).replace("_", " "))}</td>
+  <td data-label="Mismatch">{_render_list("Expectation misses", mismatches)}</td>
+</tr>"""
+        for result, mismatches in checks
+    )
+    return f"""<table>
+      <thead>
+        <tr>
+          <th>Case</th>
+          <th>Focus</th>
+          <th>Mismatch</th>
         </tr>
       </thead>
       <tbody>

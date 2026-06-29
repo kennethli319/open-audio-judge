@@ -39,6 +39,8 @@ def test_write_html_report(tmp_path: Path) -> None:
     assert "no error" in html
     assert "High-Impact Errors" in html
     assert "No high-impact semantic errors" in html
+    assert "Calibration Checks" in html
+    assert "All calibration expectations matched" in html
     assert "No action needed." in html
 
 
@@ -80,3 +82,33 @@ def test_write_html_report_highlights_priority_semantic_cases(tmp_path: Path) ->
     assert "negation error" in html
     assert "High-Impact Errors" in html
     assert "The transcript reverses the operational instruction." in html
+
+
+def test_write_html_report_flags_calibration_mismatches(tmp_path: Path) -> None:
+    result = EvaluationResult(
+        case_id="calibration-number",
+        task="asr_error",
+        judge_id="asr_error",
+        judge_version="0.1.0",
+        provider="mock",
+        overall_score=88,
+        reason="Looks mostly correct.",
+        meaning_preservation="preserved",
+        semantic_error_summary="Meaning is preserved.",
+        error_categories=["no_error"],
+        label="accurate",
+        metadata={
+            "calibration_focus": "low_wer_high_semantic_severity",
+            "expected_meaning_preservation": "partial_loss",
+            "expected_error_categories": ["number_error"],
+        },
+    )
+
+    output = write_html_report([result], tmp_path / "report.html")
+    html = output.read_text(encoding="utf-8")
+
+    assert "Calibration Checks" in html
+    assert "calibration-number" in html
+    assert "low wer high semantic severity" in html
+    assert "expected meaning partial loss, got preserved" in html
+    assert "missing categories: number error" in html
