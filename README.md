@@ -108,11 +108,13 @@ audio-plus-text contract and that relative local audio files exist:
 python scripts/synthesize_tts_cases.py \
   --cases runs/tts-synthesis/tts_audio_cases.jsonl \
   --validate-only \
+  --redact-summary-case-ids \
   --summary-out runs/tts-synthesis/validation-summary.json
 ```
 
 Use `--allow-missing-audio` only for dry-run manifests that intentionally point at future audio
-paths. Validation summaries contain case ids and issue classes, not prompt text.
+paths. Validation summaries contain issue classes and no prompt text; pass
+`--redact-summary-case-ids` when case ids may reveal private source details.
 
 ## Run With Local Qwen/Qwen3-Omni
 

@@ -79,6 +79,11 @@ def main() -> None:
         action="store_true",
         help="With --validate-only, require local synthesis traceability metadata.",
     )
+    parser.add_argument(
+        "--redact-summary-case-ids",
+        action="store_true",
+        help="With --validate-only and --summary-out, hash case ids in the JSON summary artifact.",
+    )
     parser.add_argument("--dry-run", action="store_true", help="Write manifest without invoking TTS.")
     args = parser.parse_args()
 
@@ -91,7 +96,11 @@ def main() -> None:
         )
         summary = summarize_validation_issues(issues)
         if args.summary_out is not None:
-            write_validation_summary_json(issues, args.summary_out)
+            write_validation_summary_json(
+                issues,
+                args.summary_out,
+                redact_case_ids=args.redact_summary_case_ids,
+            )
         print(json.dumps(summary, sort_keys=True))
         if issues:
             raise SystemExit(1)
@@ -459,23 +468,35 @@ def _validate_audio_metadata(
 
 def summarize_validation_issues(
     issues: Iterable[SynthesisValidationIssue],
+    *,
+    redact_case_ids: bool = False,
 ) -> dict[str, Any]:
     issue_list = list(issues)
     return {
         "valid": not issue_list,
         "issue_count": len(issue_list),
         "by_reason": _sorted_counts(issue.reason for issue in issue_list),
-        "case_ids": [issue.case_id for issue in issue_list],
+        "case_ids": [
+            _redacted_case_id(issue.case_id) if redact_case_ids else issue.case_id
+            for issue in issue_list
+        ],
     }
 
 
 def write_validation_summary_json(
     issues: Iterable[SynthesisValidationIssue],
     path: Path,
+    *,
+    redact_case_ids: bool = False,
 ) -> Path:
     path.parent.mkdir(parents=True, exist_ok=True)
     path.write_text(
-        json.dumps(summarize_validation_issues(issues), indent=2, sort_keys=True) + "\n",
+        json.dumps(
+            summarize_validation_issues(issues, redact_case_ids=redact_case_ids),
+            indent=2,
+            sort_keys=True,
+        )
+        + "\n",
         encoding="utf-8",
     )
     return path
@@ -656,6 +677,10 @@ def _sha256_file(path: Path) -> str:
         for chunk in iter(lambda: handle.read(1024 * 1024), b""):
             digest.update(chunk)
     return digest.hexdigest()
+
+
+def _redacted_case_id(case_id: str) -> str:
+    return f"case-{_sha256_text(case_id)[:12]}"
 
 
 def _wav_duration_seconds(path: Path) -> float | None:

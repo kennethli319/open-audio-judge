@@ -221,6 +221,30 @@ def test_validate_synthesized_manifest_reports_missing_audio_and_text_contract(
     }
 
 
+def test_validation_summary_can_hash_private_case_ids(tmp_path: Path) -> None:
+    issues = [
+        validate_issue
+        for validate_issue in validate_synthesized_manifest(
+            cases_path=_write_private_invalid_manifest(tmp_path)
+        )
+    ]
+
+    summary_path = write_validation_summary_json(
+        issues,
+        tmp_path / "summary.json",
+        redact_case_ids=True,
+    )
+    summary_text = summary_path.read_text(encoding="utf-8")
+    summary = json.loads(summary_text)
+
+    expected_hash = hashlib.sha256("private-session-2026-06-29-row-001".encode("utf-8")).hexdigest()
+    assert summary["case_ids"] == [f"case-{expected_hash[:12]}"]
+    assert "private-session" not in summary_text
+    assert summarize_validation_issues(issues)["case_ids"] == [
+        "private-session-2026-06-29-row-001"
+    ]
+
+
 def test_validate_synthesized_manifest_can_allow_missing_dry_run_audio(
     tmp_path: Path,
 ) -> None:
@@ -856,3 +880,20 @@ def test_synthesize_cases_preflights_missing_tts_binary_before_writing_text(
 
     assert not (tmp_path / "out" / "text").exists()
     assert not (tmp_path / "out" / "tts_audio_cases.jsonl").exists()
+
+
+def _write_private_invalid_manifest(tmp_path: Path) -> Path:
+    cases_path = tmp_path / "tts_audio_cases.jsonl"
+    cases_path.write_text(
+        json.dumps(
+            {
+                "id": "private-session-2026-06-29-row-001",
+                "task": "tts_naturalness",
+                "audio_path": "audio/missing.wav",
+                "reference_text": "Synthetic sample.",
+            }
+        )
+        + "\n",
+        encoding="utf-8",
+    )
+    return cases_path
