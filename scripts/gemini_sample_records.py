@@ -101,15 +101,7 @@ def update_records(
 ) -> None:
     expected = expected_fingerprints(provider, model)
     base_cases = sample_cases_by_id()
-    existing = [
-        record
-        for record in read_jsonl(records_path)
-        if not (
-            record.get("provider") == provider
-            and record.get("model") == model
-            and record.get("base_case_id") in expected
-        )
-    ]
+    existing_records = read_jsonl(records_path)
 
     new_records: list[dict[str, Any]] = []
     for result_path in result_paths:
@@ -134,13 +126,27 @@ def update_records(
                     "reason": result["reason"],
                     "judge_transcript": result.get("judge_transcript"),
                     "meaning_preservation": result.get("meaning_preservation"),
+                    "semantic_error_summary": result.get("semantic_error_summary"),
+                    "key_differences": result.get("key_differences", []),
                     "error_categories": result.get("error_categories", []),
+                    "researcher_notes": result.get("researcher_notes", []),
                     "source_page": base_case.metadata.get("source_page"),
                     "sample_kind": base_case.metadata.get("sample_kind"),
                     "result_created_at": result["created_at"],
                     "recorded_from": _display_path(result_path),
                 }
             )
+
+    replacement_case_ids = {record["base_case_id"] for record in new_records}
+    existing = [
+        record
+        for record in existing_records
+        if not (
+            record.get("provider") == provider
+            and record.get("model") == model
+            and record.get("base_case_id") in replacement_case_ids
+        )
+    ]
 
     records_path.write_text(
         "".join(

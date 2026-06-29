@@ -43,5 +43,21 @@ def test_render_multiturn_context() -> None:
     assert "ASSISTANT: Sure, I can summarize that." in rendered.user
 
 
+def test_load_tts_prompt_requires_naturalness_diagnostics() -> None:
+    prompt = load_prompt("tts_naturalness")
+
+    assert prompt.version == "0.2.0"
+    assert "semantic_error_summary" in prompt.system
+    assert "robotic_prosody" in prompt.system
+    assert prompt.response_schema["required"] == [
+        "overall_score",
+        "reason",
+        "semantic_error_summary",
+        "key_differences",
+        "error_categories",
+        "researcher_notes",
+    ]
+
+
 def test_format_turns() -> None:
     assert format_turns([{"role": "user", "content": "Hello"}]) == "USER: Hello"

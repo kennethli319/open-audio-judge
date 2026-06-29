@@ -41,6 +41,24 @@ def test_parse_asr_diagnostics() -> None:
     assert output.error_categories == ["number_error", "substitution"]
 
 
+def test_parse_tts_naturalness_diagnostics() -> None:
+    output = parse_judge_output(
+        """{
+          "overall_score": 64,
+          "reason": "The sample is intelligible but has choppy rhythm.",
+          "semantic_error_summary": "Naturalness is reduced by pacing artifacts.",
+          "key_differences": ["pause before the final word sounds inserted"],
+          "error_categories": ["awkward_pacing", "artifact"],
+          "researcher_notes": ["Improve pause prediction around short phrases."]
+        }"""
+    )
+
+    assert output.semantic_error_summary == "Naturalness is reduced by pacing artifacts."
+    assert output.key_differences == ["pause before the final word sounds inserted"]
+    assert output.error_categories == ["awkward_pacing", "artifact"]
+    assert output.researcher_notes == ["Improve pause prediction around short phrases."]
+
+
 def test_parse_rejects_empty_reason() -> None:
     with pytest.raises(ValueError, match="reason must not be empty"):
         parse_judge_output('{"overall_score": 88, "reason": "   "}')

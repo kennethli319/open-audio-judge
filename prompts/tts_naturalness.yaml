@@ -1,5 +1,5 @@
 id: tts_naturalness
-version: 0.1.0
+version: 0.2.0
 task: tts_naturalness
 description: >
   Scores the naturalness and perceptual quality of synthesized speech.
@@ -28,7 +28,14 @@ system: |-
 
   Return only valid JSON. Do not include markdown, code fences, extra fields, or hidden reasoning.
   The JSON object must have exactly these fields:
-  {"overall_score": <integer 1-100>, "reason": "<one concise paragraph>"}
+  {
+    "overall_score": <integer 1-100>,
+    "reason": "<one concise paragraph explaining the score>",
+    "semantic_error_summary": "<one sentence summarizing naturalness and faithfulness impact>",
+    "key_differences": ["<important target-vs-audio or expected-vs-heard issue>", "..."],
+    "error_categories": ["robotic_prosody | awkward_pacing | pronunciation_error | artifact | clipping | dropout | repetition | unstable_voice | unintelligible | text_mismatch | no_error | uncertain", "..."],
+    "researcher_notes": ["<actionable note for TTS model improvement>", "..."]
+  }
 user: |-
   Evaluate the naturalness of this TTS audio sample.
 
@@ -55,6 +62,10 @@ response_schema:
   required:
     - overall_score
     - reason
+    - semantic_error_summary
+    - key_differences
+    - error_categories
+    - researcher_notes
   properties:
     overall_score:
       type: integer
@@ -62,3 +73,17 @@ response_schema:
       maximum: 100
     reason:
       type: string
+    semantic_error_summary:
+      type: string
+    key_differences:
+      type: array
+      items:
+        type: string
+    error_categories:
+      type: array
+      items:
+        type: string
+    researcher_notes:
+      type: array
+      items:
+        type: string
