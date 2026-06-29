@@ -1,8 +1,10 @@
 from __future__ import annotations
 
 import html
+from collections import Counter
 import statistics
 from pathlib import Path
+from typing import Iterable
 
 from open_audio_judge.models import EvaluationResult
 
@@ -27,6 +29,8 @@ def render_html_report(results: list[EvaluationResult]) -> str:
     median = statistics.median(scores) if scores else 0
     counts = {label: sum(1 for result in results if result.label == label) for label in LABELS}
     buckets = _bucket_counts(scores)
+    meaning_counts = _field_counts(result.meaning_preservation for result in results)
+    category_counts = _category_counts(results)
 
     rows = "\n".join(_render_row(result) for result in results)
     bucket_markup = "\n".join(
@@ -35,6 +39,8 @@ def render_html_report(results: list[EvaluationResult]) -> str:
         f"<strong>{count}</strong></div>"
         for name, count in buckets
     )
+    meaning_markup = _render_count_list(meaning_counts, empty_label="No meaning diagnostics")
+    category_markup = _render_count_list(category_counts, empty_label="No error categories")
 
     return f"""<!doctype html>
 <html lang="en">
@@ -118,6 +124,8 @@ def render_html_report(results: list[EvaluationResult]) -> str:
     summary {{ cursor: pointer; color: var(--accent); }}
     ul {{ margin: 6px 0 10px 18px; padding: 0; }}
     li {{ margin: 3px 0; }}
+    .counts {{ list-style: none; margin: 10px 0 0; }}
+    .counts li {{ display: flex; justify-content: space-between; gap: 14px; }}
     @media (max-width: 760px) {{
       header {{ padding: 22px 18px 16px; }}
       main {{ padding: 18px 12px 28px; }}
@@ -146,6 +154,12 @@ def render_html_report(results: list[EvaluationResult]) -> str:
 
     <h2>Score Distribution</h2>
     {bucket_markup}
+
+    <h2>Semantic Diagnostics</h2>
+    <section class="summary">
+      <div class="metric"><span>Meaning Preservation</span>{meaning_markup}</div>
+      <div class="metric"><span>Error Categories</span>{category_markup}</div>
+    </section>
 
     <h2>Case Results</h2>
     <table>
@@ -189,6 +203,28 @@ def _render_row(result: EvaluationResult) -> str:
 def _bucket_counts(scores: list[int]) -> list[tuple[str, int]]:
     ranges = [(1, 20), (21, 40), (41, 60), (61, 80), (81, 100)]
     return [(f"{low}-{high}", sum(1 for score in scores if low <= score <= high)) for low, high in ranges]
+
+
+def _field_counts(values: Iterable[str | None]) -> list[tuple[str, int]]:
+    counts = Counter(value for value in values if value)
+    return counts.most_common()
+
+
+def _category_counts(results: list[EvaluationResult]) -> list[tuple[str, int]]:
+    counts: Counter[str] = Counter()
+    for result in results:
+        counts.update(result.error_categories)
+    return counts.most_common()
+
+
+def _render_count_list(items: list[tuple[str, int]], empty_label: str) -> str:
+    if not items:
+        return f'<strong class="muted">{html.escape(empty_label)}</strong>'
+    rendered_items = "".join(
+        f"<li><span>{html.escape(name.replace('_', ' '))}</span> <strong>{count}</strong></li>"
+        for name, count in items
+    )
+    return f'<ul class="counts">{rendered_items}</ul>'
 
 
 def _render_diagnostics(result: EvaluationResult) -> str:

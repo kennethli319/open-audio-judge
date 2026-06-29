@@ -33,4 +33,8 @@ def test_write_html_report(tmp_path: Path) -> None:
     assert "Open Audio Judge Report" in html
     assert "Mostly correct." in html
     assert "Meaning is preserved." in html
+    assert "Meaning Preservation" in html
+    assert "preserved" in html
+    assert "Error Categories" in html
+    assert "no error" in html
     assert "No action needed." in html
