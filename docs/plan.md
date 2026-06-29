@@ -60,6 +60,7 @@ Near-term:
 - `gemini`: hosted audio understanding using Gemini file upload and structured output.
 - `transformers-qwen`: direct local inference for users who do not expose a REST server.
 - `ensemble`: multiple judges with median/trimmed-mean aggregation.
+- `pairwise`: A/B audio comparison protocols for TTS, speech-to-speech translation, and dialogue systems, informed by AudioJudge and MTalk-Bench.
 
 ## Report Roadmap
 
@@ -73,6 +74,8 @@ Near-term report additions:
 - Calibration report comparing audio LLM judge scores to human labels or legacy metrics.
 - Failure taxonomy: substitutions, deletions, insertions, entity errors, number errors, negation errors, speaker-turn errors, acoustic artifacts.
 - ASR semantic slices: meaning preservation class, critical-token error type, and downstream-impact buckets.
+- Judge bias checks: position bias, length/verbosity bias, and modality-specific failures.
+- Multi-aspect reports that separate lexical content, speech quality, paralinguistic behavior, and ambient-sound reasoning before summarizing an overall score.
 
 ## Calibration Direction
 

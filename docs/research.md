@@ -16,9 +16,13 @@ The strongest directly relevant evidence is emerging but task-specific. Chiang e
 
 SpeechLLM-as-Judges proposes structured, explanation-based speech-quality evaluation over quality assessment, pairwise comparison, improvement suggestion, and deepfake detection. Their SQ-LLM is built around prompts and structured outputs, with intermediate quality dimensions guiding the final result. This supports asking a judge to privately inspect dimensions but emit a compact JSON object. Source: [SpeechLLM-as-Judges](https://arxiv.org/html/2510.14664v1).
 
+AudioJudge studies Large Audio Models as judges across audio characteristic detection and human-preference simulation. It reports that audio concatenation with in-context learning improves performance, that multi-aspect judge ensembles can improve general-purpose speech evaluation, and that verbosity and positional biases need mitigation. This supports future Open Audio Judge work on pairwise protocols, aspect-specific judges, judge ensembling, and explicit bias checks instead of relying only on pointwise scores. Source: [AudioJudge: Understanding What Works in Large Audio Model Based Speech Evaluation](https://aclanthology.org/2026.eacl-long.168.pdf).
+
 GatherMOS uses an LLM as a meta-evaluator that combines acoustic descriptors and pseudo-labels from existing speech metrics. That is a useful later direction for Open Audio Judge: prompts can accept auxiliary metrics such as DNSMOS, VQScore, WER, CER, VAD segment stats, or diarization error rate when available, while keeping the final schema unchanged. Source: [Few-Shot and Pseudo-Label Guided Speech Quality Evaluation with Large Language Models](https://arxiv.org/abs/2604.13528).
 
 TRACE, from "Hearing Between the Lines," separates speech-to-speech evaluation into content, voice quality, and paralinguistics, then fuses dimension-wise judgments into an overall rating. That pattern maps well to Open Audio Judge's future multi-dimensional reports. Source: [Hearing Between the Lines, EACL 2026](https://aclanthology.org/2026.findings-eacl.151.pdf).
+
+MTalk-Bench evaluates multi-turn speech-to-speech systems across semantic information, paralinguistic information, and ambient sound, using both arena-style pairwise comparison and rubric-based pointwise scoring. Its findings reinforce two Open Audio Judge requirements: use both pairwise and rubric protocols where appropriate, and track position, length, and modality biases when using LLM-as-judge for speech. Source: [MTalk-Bench](https://arxiv.org/abs/2508.18240).
 
 ## ASR Evaluation Implications
 
@@ -41,3 +45,5 @@ Gemini's official docs expose audio understanding for transcription, translation
 5. Support auxiliary metrics later, but do not require them for the first protocol.
 6. Produce human-scannable reports with distributions, thresholds, and per-case explanations.
 7. Treat each judge family as calibrated separately; do not compare TTS naturalness scores directly to ASR error scores without calibration.
+8. Add pairwise and multi-aspect protocols after the pointwise MVP so speech quality, lexical content, and paralinguistic behavior can be judged separately and ensembled.
+9. Track judge biases explicitly, especially position bias, length/verbosity bias, and failures on nonverbal or paralinguistic cues.
