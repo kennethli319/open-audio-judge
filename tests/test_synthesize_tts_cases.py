@@ -456,6 +456,42 @@ def test_validate_synthesized_manifest_reports_stale_synthesis_metadata(
     ]
 
 
+def test_validate_synthesized_manifest_rejects_unsynthesized_draft_marker(
+    tmp_path: Path,
+) -> None:
+    cases_path = tmp_path / "tts_audio_cases.jsonl"
+    cases_path.write_text(
+        json.dumps(
+            {
+                "id": "tts-source-local-tts",
+                "task": "tts_naturalness",
+                "audio_path": "audio/future.wav",
+                "reference_text": "Synthetic sample.",
+                "metadata": {
+                    "requires_synthesis": True,
+                    "sample_kind": "local_synthetic_tts",
+                    "synthesis_provider": "local_chatterbox",
+                    "source_case_id": "tts-source",
+                    "reference_text_sha256": (
+                        "0d988c7d994421014d1fa0145748fafbef20b4c64112207c609a449b1feeb739"
+                    ),
+                },
+            }
+        )
+        + "\n",
+        encoding="utf-8",
+    )
+
+    issues = validate_synthesized_manifest(cases_path=cases_path, require_local_audio=False)
+
+    assert [(issue.case_id, issue.reason) for issue in issues] == [
+        (
+            "tts-source-local-tts",
+            "metadata.requires_synthesis must be removed or set false after synthesis.",
+        )
+    ]
+
+
 def test_write_synthesis_summary_is_metadata_only_for_dry_run(tmp_path: Path) -> None:
     cases_path = tmp_path / "tts_cases.jsonl"
     cases_path.write_text(

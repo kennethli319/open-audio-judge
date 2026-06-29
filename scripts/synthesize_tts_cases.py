@@ -427,6 +427,13 @@ def _validate_synthesis_metadata(
                 reason="metadata.reference_text_sha256 does not match reference_text.",
             )
         )
+    if metadata.get("requires_synthesis") is True:
+        issues.append(
+            SynthesisValidationIssue(
+                case_id=case.id,
+                reason="metadata.requires_synthesis must be removed or set false after synthesis.",
+            )
+        )
     return issues
 
 
