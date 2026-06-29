@@ -548,6 +548,9 @@ def test_validate_synthesized_manifest_can_require_synthesis_metadata(
     assert [(issue.case_id, issue.reason) for issue in issues] == [
         ("missing-synthesis-metadata-local-tts", "metadata.sample_kind is missing."),
         ("missing-synthesis-metadata-local-tts", "metadata.synthesis_provider is missing."),
+        ("missing-synthesis-metadata-local-tts", "metadata.synthesis_model is missing."),
+        ("missing-synthesis-metadata-local-tts", "metadata.synthesis_voice is missing."),
+        ("missing-synthesis-metadata-local-tts", "metadata.synthesis_lang_code is missing."),
         ("missing-synthesis-metadata-local-tts", "metadata.source_case_id is missing."),
         ("missing-synthesis-metadata-local-tts", "metadata.reference_text_sha256 is missing."),
     ]
@@ -596,6 +599,42 @@ def test_validate_synthesized_manifest_reports_stale_synthesis_metadata(
             "tts-source-local-tts",
             "metadata.reference_text_sha256 does not match reference_text.",
         ),
+    ]
+
+
+def test_validate_synthesized_manifest_rejects_empty_synthesis_trace_fields(
+    tmp_path: Path,
+) -> None:
+    cases_path = tmp_path / "tts_audio_cases.jsonl"
+    cases_path.write_text(
+        json.dumps(
+            {
+                "id": "tts-source-local-tts",
+                "task": "tts_naturalness",
+                "audio_path": "audio/future.wav",
+                "reference_text": "Synthetic sample.",
+                "metadata": {
+                    "sample_kind": "local_synthetic_tts",
+                    "synthesis_provider": "local_chatterbox",
+                    "synthesis_model": " ",
+                    "synthesis_voice": "",
+                    "synthesis_lang_code": "en",
+                    "source_case_id": "tts-source",
+                    "reference_text_sha256": (
+                        "0d988c7d994421014d1fa0145748fafbef20b4c64112207c609a449b1feeb739"
+                    ),
+                },
+            }
+        )
+        + "\n",
+        encoding="utf-8",
+    )
+
+    issues = validate_synthesized_manifest(cases_path=cases_path, require_local_audio=False)
+
+    assert [(issue.case_id, issue.reason) for issue in issues] == [
+        ("tts-source-local-tts", "metadata.synthesis_model must not be empty."),
+        ("tts-source-local-tts", "metadata.synthesis_voice must not be empty."),
     ]
 
 

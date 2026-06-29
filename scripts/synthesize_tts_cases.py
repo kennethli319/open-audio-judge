@@ -434,6 +434,24 @@ def _validate_synthesis_metadata(
                 )
             )
 
+    for field in ["synthesis_model", "synthesis_voice", "synthesis_lang_code"]:
+        observed_value = metadata.get(field)
+        if observed_value is None:
+            if require_synthesis_metadata:
+                issues.append(
+                    SynthesisValidationIssue(
+                        case_id=case.id,
+                        reason=f"metadata.{field} is missing.",
+                    )
+                )
+        elif not str(observed_value).strip():
+            issues.append(
+                SynthesisValidationIssue(
+                    case_id=case.id,
+                    reason=f"metadata.{field} must not be empty.",
+                )
+            )
+
     source_case_id = metadata.get("source_case_id")
     if source_case_id is None:
         if require_synthesis_metadata:
