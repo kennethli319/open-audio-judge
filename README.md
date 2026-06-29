@@ -119,7 +119,9 @@ python scripts/synthesize_tts_cases.py \
 ```
 
 Use `--allow-missing-audio` only for dry-run manifests that intentionally point at future audio
-paths. Validation summaries contain issue classes and no prompt text; pass
+paths. Validation summaries contain issue classes plus metadata-only manifest coverage such as TTS
+slice, source category, sample kind, text-context fields, turn-role sequences, audio
+bytes/duration aggregates, and audio-hash coverage. They do not include prompt text; pass
 `--redact-summary-case-ids` when case ids may reveal private source details.
 
 ## Run With Local Qwen/Qwen3-Omni

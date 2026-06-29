@@ -6,6 +6,7 @@ from pathlib import Path
 
 import pytest
 
+from open_audio_judge.runner import load_cases
 from scripts.synthesize_tts_cases import (
     summarize_synthesized_cases,
     summarize_validation_issues,
@@ -257,6 +258,66 @@ def test_validation_summary_can_hash_private_case_ids(tmp_path: Path) -> None:
     assert summarize_validation_issues(issues)["case_ids"] == [
         "private-session-2026-06-29-row-001"
     ]
+
+
+def test_validation_summary_can_include_metadata_only_manifest_coverage(
+    tmp_path: Path,
+) -> None:
+    cases_path = tmp_path / "tts_audio_cases.jsonl"
+    cases_path.write_text(
+        "\n".join(
+            json.dumps(case)
+            for case in [
+                {
+                    "id": "private-session-2026-06-29-row-001-local-tts",
+                    "task": "tts_naturalness",
+                    "audio_path": "audio/missing.wav",
+                    "reference_text": "Private phrase: call me at 09:45.",
+                    "metadata": {
+                        "sample_kind": "local_synthetic_tts",
+                        "source_category": "instruction_constraints",
+                        "source_case_id": "private-session-2026-06-29-row-001",
+                        "synthesis_provider": "local_chatterbox",
+                        "text_context_fields": ["reference_text", "turns"],
+                        "tts_slice": "dates_times",
+                        "turn_count": 2,
+                        "turn_roles": ["user", "assistant"],
+                    },
+                    "turns": [
+                        {"role": "user", "content": "Read the private phrase aloud."},
+                        {"role": "assistant", "content": "Private phrase: call me at 09:45."},
+                    ],
+                },
+            ]
+        )
+        + "\n",
+        encoding="utf-8",
+    )
+    cases = [case.model_dump(exclude_none=True) for case in load_cases(cases_path)]
+    issues = validate_synthesized_manifest(cases_path=cases_path)
+
+    summary_path = write_validation_summary_json(
+        issues,
+        tmp_path / "summary.json",
+        redact_case_ids=True,
+        cases=cases,
+    )
+    summary_text = summary_path.read_text(encoding="utf-8")
+    summary = json.loads(summary_text)
+
+    expected_hash = hashlib.sha256(
+        "private-session-2026-06-29-row-001-local-tts".encode("utf-8")
+    ).hexdigest()
+    assert summary["case_ids"] == [f"case-{expected_hash[:12]}"]
+    assert summary["manifest"]["by_sample_kind"] == {"local_synthetic_tts": 1}
+    assert summary["manifest"]["by_slice"] == {"dates_times": 1}
+    assert summary["manifest"]["by_source_category"] == {"instruction_constraints": 1}
+    assert summary["manifest"]["by_text_context_fields"] == {"reference_text+turns": 1}
+    assert summary["manifest"]["by_turn_role_sequence"] == {"user+assistant": 1}
+    assert summary["manifest"]["multi_turn_cases"] == 1
+    assert "Private phrase" not in summary_text
+    assert "09:45" not in summary_text
+    assert "private-session" not in summary_text
 
 
 def test_validate_synthesized_manifest_can_allow_missing_dry_run_audio(

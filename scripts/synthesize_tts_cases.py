@@ -94,11 +94,13 @@ def main() -> None:
             require_text_context_metadata=args.require_text_context_metadata,
             require_synthesis_metadata=args.require_synthesis_metadata,
         )
-        summary = summarize_validation_issues(issues)
+        validation_cases = load_cases(args.cases)
+        summary = summarize_validation_issues(issues, cases=validation_cases)
         if args.summary_out is not None:
             write_validation_summary_json(
                 issues,
                 args.summary_out,
+                cases=validation_cases,
                 redact_case_ids=args.redact_summary_case_ids,
             )
         print(json.dumps(summary, sort_keys=True))
@@ -485,9 +487,10 @@ def summarize_validation_issues(
     issues: Iterable[SynthesisValidationIssue],
     *,
     redact_case_ids: bool = False,
+    cases: Iterable[EvaluationCase | dict[str, Any]] | None = None,
 ) -> dict[str, Any]:
     issue_list = list(issues)
-    return {
+    summary = {
         "valid": not issue_list,
         "issue_count": len(issue_list),
         "by_reason": _sorted_counts(issue.reason for issue in issue_list),
@@ -496,6 +499,9 @@ def summarize_validation_issues(
             for issue in issue_list
         ],
     }
+    if cases is not None:
+        summary["manifest"] = summarize_synthesized_cases(_summary_case_dict(case) for case in cases)
+    return summary
 
 
 def write_validation_summary_json(
@@ -503,11 +509,16 @@ def write_validation_summary_json(
     path: Path,
     *,
     redact_case_ids: bool = False,
+    cases: Iterable[EvaluationCase | dict[str, Any]] | None = None,
 ) -> Path:
     path.parent.mkdir(parents=True, exist_ok=True)
     path.write_text(
         json.dumps(
-            summarize_validation_issues(issues, redact_case_ids=redact_case_ids),
+            summarize_validation_issues(
+                issues,
+                redact_case_ids=redact_case_ids,
+                cases=cases,
+            ),
             indent=2,
             sort_keys=True,
         )
@@ -554,6 +565,12 @@ def _run_tts(
     )
     result = json.loads(completed.stdout)
     return Path(result["output"]).resolve()
+
+
+def _summary_case_dict(case: EvaluationCase | dict[str, Any]) -> dict[str, Any]:
+    if isinstance(case, EvaluationCase):
+        return case.model_dump(exclude_none=True)
+    return case
 
 
 def _safe_stem(value: str) -> str:
