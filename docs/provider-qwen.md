@@ -32,6 +32,10 @@ The provider sends:
 
 If the case has `audio_url`, the URL is passed through. If it has `audio_path`, the file is encoded as a data URL. Some local servers may require remote HTTP URLs instead of data URLs; in that case, host your audio files locally and put those URLs in the case file.
 
+Qwen/Qwen3-Omni cases must include both audio (`audio_path` or `audio_url`) and textual context
+(`reference_text`, `candidate_text`, or `turns`). Even when a transcript is available, the judge
+should receive the audio so it can verify the transcript against the signal.
+
 ## Why `modalities: ["text"]`
 
 For judging, we only need structured text output. vLLM-Omni documents modality control for Qwen3-Omni and supports text-only output through `modalities: ["text"]`.

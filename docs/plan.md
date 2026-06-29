@@ -11,7 +11,9 @@ The first implementation includes:
 - Prompt registry with versioned YAML prompts.
 - ASR error judge prompt following the requested three-stage structure, with audio-derived judge transcription and semantic diagnostics.
 - TTS naturalness prompt as the starter example.
-- Case schema for audio path/URL, reference text, candidate text, and metadata.
+- Case schema for audio path/URL, reference text, candidate text, multi-turn context, and metadata.
+- Provider-backed judge calls require audio plus text context; transcript/reference fields complement
+  the audio but do not replace it.
 - Local Qwen/Qwen3-Omni provider through OpenAI-compatible chat completions.
 - Mock provider for tests and offline demos.
 - CLI batch runner.

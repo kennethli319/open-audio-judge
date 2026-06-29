@@ -55,8 +55,24 @@ oaj build-tts-cases \
   --out runs/tts-evalset/cases.jsonl
 ```
 
-The resulting cases use `reference_text` as the target text to synthesize and include
+The resulting draft cases use `reference_text` as the target text to synthesize and include
 `metadata.requires_synthesis=true` so a later local TTS step can attach ignored audio artifacts.
+Do not pass draft text-only cases to hosted audio judges until an `audio_path` or `audio_url` has
+been attached.
+
+To synthesize a small local Chatterbox sample set from a private manifest, write artifacts under
+`runs/` and keep only the derived local manifest there:
+
+```bash
+python scripts/synthesize_tts_cases.py \
+  --cases runs/tts-evalset/cases.jsonl \
+  --limit 5 \
+  --out runs/tts-synthesis
+```
+
+This calls `local-tts-speak` with `mlx-community/chatterbox-turbo-6bit` by default, writes per-case
+text sidecars and audio files under the ignored output directory, and emits
+`runs/tts-synthesis/tts_audio_cases.jsonl` with local `audio_path` fields for provider smoke tests.
 
 ## Run With Local Qwen/Qwen3-Omni
 
@@ -72,7 +88,10 @@ oaj eval --provider qwen --judge asr_error --cases examples/asr_cases.jsonl --ou
 open runs/qwen-asr/report.html
 ```
 
-Audio can be passed as `audio_url` in the case file or as `audio_path`. Local paths are encoded as data URLs for OpenAI-compatible multimodal endpoints by default.
+Provider-backed judging requires both audio and text context. Audio can be passed as `audio_url`
+in the case file or as `audio_path`; textual context should be supplied through `reference_text`,
+`candidate_text`, or `turns`. Local paths are encoded as data URLs for OpenAI-compatible
+multimodal endpoints by default.
 
 ## Run With Gemini
 
@@ -102,6 +121,7 @@ curl -X POST http://127.0.0.1:8000/v1/evaluate \
     "case": {
       "id": "demo",
       "task": "asr_error",
+      "audio_url": "https://example.test/audio.wav",
       "reference_text": "Please transfer fifteen dollars to Maya.",
       "candidate_text": "Please transfer fifty dollars to Maya."
     }
@@ -137,11 +157,15 @@ Fields:
 
 - `id`: stable case identifier.
 - `task`: prompt family, such as `asr_error` or `tts_naturalness`.
-- `audio_path` or `audio_url`: optional for text-only smoke tests, required for true audio judging.
+- `audio_path` or `audio_url`: required for provider-backed audio judging.
 - `turns`: optional multi-turn context as `{"role": "user|assistant|agent|system", "content": "..."}` records. Use this when judging whether an ASR/TTS output matches a prior user request and agent response in context.
 - `reference_text`: expected transcript or target text, when available.
 - `candidate_text`: model output transcript, translation, or synthesis text.
 - `metadata`: language, domain, speaker notes, expected events, or proprietary labels.
+
+Every provider-backed judge case must include audio plus at least one text source:
+`reference_text`, `candidate_text`, or `turns`. Text-only fixtures may be used for deterministic
+mock calibration, but they are not valid hosted audio-judge inputs.
 
 ## Current Scope
 

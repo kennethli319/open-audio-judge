@@ -7,6 +7,7 @@ from typing import Any
 
 import httpx
 
+from open_audio_judge.case_contract import require_audio_and_text
 from open_audio_judge.config import ProviderConfig
 from open_audio_judge.models import EvaluationCase, ProviderResponse, RenderedPrompt
 
@@ -17,6 +18,7 @@ class OpenAICompatibleProvider:
         self.name = config.name
 
     def generate(self, case: EvaluationCase, prompt: RenderedPrompt) -> ProviderResponse:
+        require_audio_and_text(case)
         payload = self._build_payload(case, prompt)
         url = f"{self.config.base_url.rstrip('/')}/chat/completions"
         headers = {
