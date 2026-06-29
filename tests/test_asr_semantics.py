@@ -60,3 +60,14 @@ def test_time_marker_change_is_high_impact_temporal_error() -> None:
 
     assert diff.score <= 55
     assert "date_time_error" in diff.error_categories
+
+
+def test_unit_change_is_high_impact_semantic_error() -> None:
+    diff = analyze_reference_candidate(
+        "Give the patient five milligrams of melatonin before bedtime.",
+        "Give the patient five micrograms of melatonin before bedtime.",
+    )
+
+    assert diff.score <= 50
+    assert diff.meaning_preservation == "partial_loss"
+    assert "unit_error" in diff.error_categories

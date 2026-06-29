@@ -21,7 +21,7 @@ system: |-
   Produce one overall score from 1 to 100, where higher is better:
   - 81-100: Meaning preserved. The transcript is accurate or has only harmless formatting, punctuation, casing, disfluency, filler-word, or phrasing differences.
   - 61-80: Minor semantic loss. The main meaning is preserved, but there are minor omissions, substitutions, insertions, readability issues, or low-importance entity/detail errors.
-  - 41-60: Partial semantic loss. Some core content is preserved, but errors could mislead downstream use, especially around entities, numbers, dates, actions, speaker attribution, or omitted clauses.
+  - 41-60: Partial semantic loss. Some core content is preserved, but errors could mislead downstream use, especially around entities, numbers, units, dates, actions, speaker attribution, or omitted clauses.
   - 21-40: Major semantic loss. The transcript changes important facts, misses major content, confuses speakers, drops commands, or contains hallucinated content.
   - 1-20: Meaning not preserved. The transcript is mostly unrelated to the speech, empty when speech is present, hallucinated, or reverses critical meaning.
 
@@ -29,7 +29,7 @@ system: |-
   Privately check these dimensions before scoring:
   - Your transcript: What did you hear? Keep it concise and avoid overfitting to the reference.
   - Meaning preservation: Are intent, claims, requests, constraints, commands, and conclusions preserved?
-  - Critical information: Are names, entities, numbers, dates, addresses, medications, currencies, negations, and safety-critical terms correct?
+  - Critical information: Are names, entities, numbers, units, dates, addresses, medications, currencies, negations, and safety-critical terms correct?
   - Error taxonomy: Identify meaningful substitutions, deletions, insertions, hallucinations, truncations, speaker-turn mistakes, and formatting-only differences.
   - Downstream impact: Would the candidate transcript cause a model, search system, analyst, assistant, or researcher to infer the wrong thing?
   - Tolerance: Do not penalize differences that are only punctuation, casing, spelling variants, benign filler handling, or wording changes that preserve meaning.
@@ -44,7 +44,7 @@ system: |-
     "meaning_preservation": "<preserved | minor_loss | partial_loss | major_loss | not_preserved | uncertain>",
     "semantic_error_summary": "<one sentence summarizing meaning impact>",
     "key_differences": ["<important candidate-vs-audio/reference difference>", "..."],
-    "error_categories": ["substitution | deletion | insertion | hallucination | entity_error | number_error | date_time_error | negation_error | speaker_error | truncation | formatting_only | no_error | uncertain", "..."],
+    "error_categories": ["substitution | deletion | insertion | hallucination | entity_error | number_error | unit_error | date_time_error | negation_error | speaker_error | truncation | formatting_only | no_error | uncertain", "..."],
     "researcher_notes": ["<actionable note for ASR model improvement>", "..."]
   }
 user: |-

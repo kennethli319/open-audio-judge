@@ -108,6 +108,19 @@ def test_write_html_report_highlights_priority_semantic_cases(tmp_path: Path) ->
             error_categories=["no_error"],
             label="accurate",
         ),
+        EvaluationResult(
+            case_id="dosage-unit",
+            task="asr_error",
+            judge_id="asr_error",
+            judge_version="0.1.0",
+            provider="mock",
+            overall_score=50,
+            reason="The dosage unit changed.",
+            meaning_preservation="partial_loss",
+            semantic_error_summary="The transcript changes the dosage unit.",
+            error_categories=["unit_error"],
+            label="inaccurate",
+        ),
     ]
 
     output = write_html_report(results, tmp_path / "report.html")
@@ -116,6 +129,7 @@ def test_write_html_report_highlights_priority_semantic_cases(tmp_path: Path) ->
     assert "Priority Cases" in html
     assert "low-wer-negation" in html
     assert "negation error" in html
+    assert "unit error" in html
     assert "High-Impact Errors" in html
     assert "The transcript reverses the operational instruction." in html
 

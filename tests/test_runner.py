@@ -22,3 +22,4 @@ def test_evaluate_cases_with_mock(tmp_path: Path) -> None:
     assert "entity_error" in by_id["asr-calibration-entity-001"].error_categories
     assert "date_time_error" in by_id["asr-calibration-date-001"].error_categories
     assert "date_time_error" in by_id["asr-calibration-time-001"].error_categories
+    assert "unit_error" in by_id["asr-calibration-unit-001"].error_categories

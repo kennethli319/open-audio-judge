@@ -125,6 +125,39 @@ TEMPORAL_TERMS = {
     "december",
 }
 
+UNIT_TERMS = {
+    "mg": "mg",
+    "milligram": "mg",
+    "milligrams": "mg",
+    "mcg": "mcg",
+    "microgram": "mcg",
+    "micrograms": "mcg",
+    "g": "g",
+    "gram": "g",
+    "grams": "g",
+    "kg": "kg",
+    "kilogram": "kg",
+    "kilograms": "kg",
+    "ml": "ml",
+    "milliliter": "ml",
+    "milliliters": "ml",
+    "liter": "l",
+    "liters": "l",
+    "l": "l",
+    "percent": "%",
+    "percentage": "%",
+    "dollar": "usd",
+    "dollars": "usd",
+    "cent": "cent",
+    "cents": "cent",
+    "hour": "hour",
+    "hours": "hour",
+    "minute": "minute",
+    "minutes": "minute",
+    "second": "second",
+    "seconds": "second",
+}
+
 
 @dataclass(frozen=True)
 class SemanticAsrDiff:
@@ -196,6 +229,12 @@ def analyze_reference_candidate(reference: str, candidate: str) -> SemanticAsrDi
         differences.append("date, day, or time expression changed")
         notes.append("Add targeted slices for appointments, deadlines, and other time-sensitive speech.")
         score_caps.append(55)
+
+    if unit_values(ref_words) != unit_values(cand_words):
+        categories.append("unit_error")
+        differences.append("measurement, dosage, currency, or duration unit changed")
+        notes.append("Add targeted slices for dosage, measurement, currency, and duration units.")
+        score_caps.append(50)
 
     ref_entities = entity_like_tokens(reference)
     cand_entities = entity_like_tokens(candidate)
@@ -286,6 +325,10 @@ def temporal_values(words: list[str]) -> list[str]:
         if word in {"am", "pm"} and index > 0:
             values.append(f"{words[index - 1]} {word}")
     return values
+
+
+def unit_values(words: list[str]) -> list[str]:
+    return [UNIT_TERMS[word] for word in words if word in UNIT_TERMS]
 
 
 def entity_like_tokens(text: str) -> list[str]:

@@ -82,6 +82,7 @@ Near-term report additions:
 The ASR judge should be calibrated on cases where WER-like overlap and semantic severity disagree:
 
 - `fifteen dollars` versus `fifty dollars`: small edit distance, large downstream payment impact.
+- `five milligrams` versus `five micrograms`: tiny lexical change, large dosage-unit impact.
 - Deleted negation such as `do not take` versus `do take`: low word error count, reversed intent.
 - Wrong location, name, medication, account, or product entity: one-token error with high task impact.
 - Harmless formatting and normalization such as `twenty one` versus `21`: lexical difference with preserved meaning.
