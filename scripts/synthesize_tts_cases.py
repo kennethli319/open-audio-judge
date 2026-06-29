@@ -294,6 +294,7 @@ def validate_synthesized_manifest(
     require_relative_audio_path: bool = False,
 ) -> list[SynthesisValidationIssue]:
     issues: list[SynthesisValidationIssue] = []
+    raw_audio_paths = _raw_audio_paths_by_case_id(cases_path)
     for case in load_cases(cases_path):
         try:
             require_audio_and_text(case)
@@ -316,7 +317,8 @@ def validate_synthesized_manifest(
                     reason="Synthesized TTS manifests must not include audio_url.",
                 )
             )
-        if require_relative_audio_path and Path(case.audio_path).is_absolute():
+        raw_audio_path = raw_audio_paths.get(case.id, case.audio_path)
+        if require_relative_audio_path and Path(raw_audio_path).is_absolute():
             issues.append(
                 SynthesisValidationIssue(
                     case_id=case.id,
@@ -373,6 +375,31 @@ def validate_synthesized_manifest(
             )
         )
     return issues
+
+
+def _raw_audio_paths_by_case_id(cases_path: Path) -> dict[str, str]:
+    raw_paths: dict[str, str] = {}
+    suffix = cases_path.suffix.lower()
+    if suffix == ".jsonl":
+        records = [
+            json.loads(line)
+            for line in cases_path.read_text(encoding="utf-8").splitlines()
+            if line.strip()
+        ]
+    elif suffix == ".json":
+        data = json.loads(cases_path.read_text(encoding="utf-8"))
+        records = data if isinstance(data, list) else data.get("cases", [])
+    else:
+        return raw_paths
+
+    for record in records:
+        if not isinstance(record, dict):
+            continue
+        case_id = record.get("id")
+        audio_path = record.get("audio_path")
+        if isinstance(case_id, str) and isinstance(audio_path, str):
+            raw_paths[case_id] = audio_path
+    return raw_paths
 
 
 def _validate_synthesis_metadata(
