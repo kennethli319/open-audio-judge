@@ -58,4 +58,23 @@ oaj eval --provider gemini --judge tts_naturalness --cases runs/open-audio-sampl
 python scripts/gemini_sample_records.py update --results runs/gemini-asr-open-wav-samples/results.jsonl --results runs/gemini-tts-open-wav-samples/results.jsonl
 ```
 
+## Whisper Tiny ASR Smoke Report
+
+Use the materialized ASR WAV cases to produce a local Whisper tiny candidate manifest and report:
+
+```bash
+python scripts/transcribe_asr_cases.py \
+  --cases runs/open-audio-samples/asr_wav_cases.jsonl \
+  --model tiny \
+  --out runs/whisper-tiny-asr-open/cases.jsonl \
+  --summary-out runs/whisper-tiny-asr-open/summary.json
+
+oaj eval --provider mock --judge asr_error \
+  --cases runs/whisper-tiny-asr-open/cases.jsonl \
+  --out runs/whisper-tiny-asr-open/judge-report
+```
+
+The generated HTML report is ignored by Git at
+`runs/whisper-tiny-asr-open/judge-report/report.html`.
+
 Gemini runs require `GEMINI_API_KEY` to be supplied at runtime.

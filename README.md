@@ -161,6 +161,34 @@ oaj eval --provider gemini --judge asr_error --cases examples/asr_cases.jsonl --
 
 The default Gemini model is `gemini-3.5-flash`. See [docs/provider-gemini.md](docs/provider-gemini.md).
 
+## Generate A Whisper Tiny ASR Report
+
+For a local ASR model smoke test, first materialize the open audio samples if they are not already present:
+
+```bash
+python scripts/materialize_open_samples.py
+```
+
+Then transcribe the local WAV ASR cases with Whisper tiny and judge the resulting candidate transcripts:
+
+```bash
+python scripts/transcribe_asr_cases.py \
+  --cases runs/open-audio-samples/asr_wav_cases.jsonl \
+  --model tiny \
+  --out runs/whisper-tiny-asr-open/cases.jsonl \
+  --summary-out runs/whisper-tiny-asr-open/summary.json
+
+oaj eval \
+  --provider mock \
+  --judge asr_error \
+  --cases runs/whisper-tiny-asr-open/cases.jsonl \
+  --out runs/whisper-tiny-asr-open/judge-report
+```
+
+This writes a local sample report to `runs/whisper-tiny-asr-open/judge-report/report.html`.
+The mock judge is a deterministic reference-vs-candidate semantic baseline; rerun with a hosted or
+local audio LLM judge when model-grade audio-aware judging is needed.
+
 ## REST API
 
 ```bash
