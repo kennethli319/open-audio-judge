@@ -19,8 +19,10 @@ def test_build_tts_cases_preserves_multiturn_context_and_metadata() -> None:
             "version": "0.1.0",
             "category": "instruction_constraints",
             "task": "format_keywords",
+            "modality": "text",
             "turns": [{"role": "user", "content": "Reply with exactly three bullet lines."}],
             "ideal_answer": "- cobalt\n- ledger\n- orbit",
+            "scoring": {"type": "exact", "expected": "- cobalt\n- ledger\n- orbit"},
             "metadata": {"tags": ["format", "constraints"]},
         },
         {
@@ -45,6 +47,9 @@ def test_build_tts_cases_preserves_multiturn_context_and_metadata() -> None:
     assert case.metadata["source_id"] == "ome_0001"
     assert case.metadata["source_version"] == "0.1.0"
     assert case.metadata["source_category"] == "instruction_constraints"
+    assert case.metadata["source_modality"] == "text"
+    assert case.metadata["source_media_count"] == 0
+    assert case.metadata["source_scoring_type"] == "exact"
     assert "source_task" not in case.metadata
     assert case.metadata["source_tags"] == ["format", "constraints"]
     assert case.metadata["tts_slice"] == "punctuation_format"
@@ -79,6 +84,30 @@ def test_build_tts_cases_records_multiturn_role_metadata() -> None:
     assert cases[0].metadata["turn_roles"] == ["user", "assistant", "user"]
     assert cases[0].metadata["turn_context_source"] == "source_turns"
     assert cases[0].metadata["text_context_fields"] == ["reference_text", "turns"]
+
+
+def test_build_tts_cases_records_source_modality_media_and_scoring_metadata() -> None:
+    records = [
+        {
+            "id": "chart-row",
+            "category": "structured_output",
+            "task": "json_from_chart",
+            "modality": "vision",
+            "media": [
+                {"type": "image", "path": "evalset/assets/revenue_chart.svg"},
+                {"type": "image", "path": "evalset/assets/shipping_label.svg"},
+            ],
+            "turns": [{"role": "user", "content": "Return JSON."}],
+            "ideal_answer": '{"trend":"up"}',
+            "scoring": {"type": "json_key_values", "expected": {"trend": "up"}},
+        }
+    ]
+
+    cases = build_tts_cases(records, source_name="fixture")
+
+    assert cases[0].metadata["source_modality"] == "vision"
+    assert cases[0].metadata["source_media_count"] == 2
+    assert cases[0].metadata["source_scoring_type"] == "json_key_values"
 
 
 def test_build_tts_cases_normalizes_source_turn_roles_and_content() -> None:
@@ -452,6 +481,8 @@ def test_summarize_tts_cases_is_metadata_only(tmp_path: Path) -> None:
             "instruction_constraints": 1,
             "structured_output": 1,
         },
+        "by_source_modality": {"unknown": 2},
+        "by_source_scoring_type": {"unknown": 2},
         "by_turn_context_source": {"fallback_instruction": 2},
         "by_turn_role_sequence": {"user": 2},
         "example_source_ids_by_slice": {

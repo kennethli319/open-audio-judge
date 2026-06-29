@@ -55,6 +55,8 @@ class TtsCaseSummary:
     total_cases: int
     by_slice: dict[str, int]
     by_source_category: dict[str, int]
+    by_source_modality: dict[str, int]
+    by_source_scoring_type: dict[str, int]
     by_turn_role_sequence: dict[str, int]
     by_turn_context_source: dict[str, int]
     multi_turn_cases: int
@@ -68,6 +70,8 @@ class TtsCaseSummary:
             "total_cases": self.total_cases,
             "by_slice": self.by_slice,
             "by_source_category": self.by_source_category,
+            "by_source_modality": self.by_source_modality,
+            "by_source_scoring_type": self.by_source_scoring_type,
             "by_turn_role_sequence": self.by_turn_role_sequence,
             "by_turn_context_source": self.by_turn_context_source,
             "multi_turn_cases": self.multi_turn_cases,
@@ -179,11 +183,15 @@ def tts_case_from_evalset_record(
 
     metadata = record.get("metadata") if isinstance(record.get("metadata"), dict) else {}
     tags = _metadata_tags(metadata)
+    media = record.get("media") if isinstance(record.get("media"), list) else []
     case_metadata = {
         "source": source_name,
         "source_id": source_id,
         "source_version": record.get("version"),
         "source_category": record.get("category"),
+        "source_modality": record.get("modality"),
+        "source_media_count": len(media),
+        "source_scoring_type": _source_scoring_type(record),
         "source_tags": tags,
         "tts_slice": classify_tts_slice(record, target_text),
         "turn_count": len(normalized_turns),
@@ -233,6 +241,14 @@ def summarize_tts_cases(
         ),
         by_source_category=_sorted_counts(
             str(case.metadata.get("source_category") or "unknown")
+            for case in case_list
+        ),
+        by_source_modality=_sorted_counts(
+            str(case.metadata.get("source_modality") or "unknown")
+            for case in case_list
+        ),
+        by_source_scoring_type=_sorted_counts(
+            str(case.metadata.get("source_scoring_type") or "unknown")
             for case in case_list
         ),
         by_turn_role_sequence=_sorted_counts(_turn_role_sequence(case) for case in case_list),
@@ -304,6 +320,14 @@ def _metadata_tags(metadata: dict[str, Any]) -> list[str]:
         return []
     tag = str(raw_tags).strip()
     return [tag] if tag else []
+
+
+def _source_scoring_type(record: dict[str, Any]) -> str | None:
+    scoring = record.get("scoring")
+    if not isinstance(scoring, dict):
+        return None
+    scoring_type = str(scoring.get("type") or "").strip()
+    return scoring_type or None
 
 
 def _normalize_turns(turns: Iterable[Any]) -> list[dict[str, str]]:
