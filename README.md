@@ -146,3 +146,5 @@ Fields:
 ## Current Scope
 
 The first version is intentionally small: one provider implementation, one mock provider, two prompts, CLI/API execution, and HTML reporting. Next steps are Gemini provider support, calibration sets, pairwise judging, bootstrap confidence intervals, and prompt version governance.
+
+Development audio sample manifests are listed in [docs/sample-audio.md](docs/sample-audio.md). Each current judge family has at least three linked open-source/free-license audio samples for smoke testing, plus a helper to materialize local WAV fixtures under ignored `runs/`.

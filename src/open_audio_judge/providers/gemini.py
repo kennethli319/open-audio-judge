@@ -26,7 +26,10 @@ class GeminiProvider:
         }
         with httpx.Client(timeout=self.config.timeout_seconds, transport=self.transport) as client:
             response = client.post(url, headers=headers, json=payload)
-            response.raise_for_status()
+            try:
+                response.raise_for_status()
+            except httpx.HTTPStatusError as exc:
+                raise RuntimeError(_format_http_error(exc.response)) from exc
             data = response.json()
 
         return ProviderResponse(content=_extract_output_text(data), raw=_sanitize_raw_response(data))
@@ -125,3 +128,12 @@ def _sanitize_raw_response(data: dict[str, Any]) -> dict[str, Any]:
         "usage",
     }
     return {key: value for key, value in data.items() if key in allowed}
+
+
+def _format_http_error(response: httpx.Response) -> str:
+    body = response.text.strip().replace("\n", " ")
+    if len(body) > 500:
+        body = f"{body[:500]}..."
+    if body:
+        return f"Gemini HTTP {response.status_code}: {body}"
+    return f"Gemini HTTP {response.status_code}"
