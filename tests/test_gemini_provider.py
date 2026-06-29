@@ -185,6 +185,18 @@ def test_gemini_provider_requires_audio_and_text() -> None:
     for case in [
         EvaluationCase(id="no-audio", task="asr_error", reference_text="hello"),
         EvaluationCase(id="no-text", task="asr_error", audio_url="https://example.test/a.wav"),
+        EvaluationCase(
+            id="blank-reference",
+            task="asr_error",
+            audio_url="https://example.test/a.wav",
+            reference_text="   ",
+        ),
+        EvaluationCase(
+            id="blank-turn",
+            task="asr_error",
+            audio_url="https://example.test/a.wav",
+            turns=[{"role": "user", "content": "   "}],
+        ),
     ]:
         try:
             provider.generate(case, prompt)
