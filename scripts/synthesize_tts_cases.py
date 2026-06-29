@@ -74,6 +74,11 @@ def main() -> None:
         action="store_true",
         help="With --validate-only, require metadata.text_context_fields to match the case text fields.",
     )
+    parser.add_argument(
+        "--require-synthesis-metadata",
+        action="store_true",
+        help="With --validate-only, require local synthesis traceability metadata.",
+    )
     parser.add_argument("--dry-run", action="store_true", help="Write manifest without invoking TTS.")
     args = parser.parse_args()
 
@@ -82,6 +87,7 @@ def main() -> None:
             cases_path=args.cases,
             require_local_audio=not args.allow_missing_audio,
             require_text_context_metadata=args.require_text_context_metadata,
+            require_synthesis_metadata=args.require_synthesis_metadata,
         )
         summary = summarize_validation_issues(issues)
         if args.summary_out is not None:
@@ -266,6 +272,7 @@ def validate_synthesized_manifest(
     cases_path: Path,
     require_local_audio: bool = True,
     require_text_context_metadata: bool = False,
+    require_synthesis_metadata: bool = False,
 ) -> list[SynthesisValidationIssue]:
     issues: list[SynthesisValidationIssue] = []
     for case in load_cases(cases_path):
@@ -326,6 +333,84 @@ def validate_synthesized_manifest(
                     ),
                 )
             )
+        issues.extend(
+            _validate_synthesis_metadata(
+                case,
+                require_synthesis_metadata=require_synthesis_metadata,
+            )
+        )
+    return issues
+
+
+def _validate_synthesis_metadata(
+    case: EvaluationCase,
+    *,
+    require_synthesis_metadata: bool,
+) -> list[SynthesisValidationIssue]:
+    issues: list[SynthesisValidationIssue] = []
+    metadata = case.metadata
+    required_fields = {
+        "sample_kind": "local_synthetic_tts",
+        "synthesis_provider": "local_chatterbox",
+    }
+    for field, expected_value in required_fields.items():
+        observed_value = metadata.get(field)
+        if observed_value is None:
+            if require_synthesis_metadata:
+                issues.append(
+                    SynthesisValidationIssue(
+                        case_id=case.id,
+                        reason=f"metadata.{field} is missing.",
+                    )
+                )
+        elif observed_value != expected_value:
+            issues.append(
+                SynthesisValidationIssue(
+                    case_id=case.id,
+                    reason=(
+                        f"metadata.{field} has unexpected value: "
+                        f"expected {expected_value}, got {observed_value}."
+                    ),
+                )
+            )
+
+    source_case_id = metadata.get("source_case_id")
+    if source_case_id is None:
+        if require_synthesis_metadata:
+            issues.append(
+                SynthesisValidationIssue(
+                    case_id=case.id,
+                    reason="metadata.source_case_id is missing.",
+                )
+            )
+    elif case.id != f"{source_case_id}-local-tts":
+        issues.append(
+            SynthesisValidationIssue(
+                case_id=case.id,
+                reason=(
+                    "metadata.source_case_id does not match synthesized case id: "
+                    f"expected {case.id.removesuffix('-local-tts')}, got {source_case_id}."
+                ),
+            )
+        )
+
+    expected_reference_sha256 = metadata.get("reference_text_sha256")
+    actual_reference_sha256 = _sha256_text(case.reference_text or "")
+    if expected_reference_sha256 is None:
+        if require_synthesis_metadata:
+            issues.append(
+                SynthesisValidationIssue(
+                    case_id=case.id,
+                    reason="metadata.reference_text_sha256 is missing.",
+                )
+            )
+    elif expected_reference_sha256 != actual_reference_sha256:
+        issues.append(
+            SynthesisValidationIssue(
+                case_id=case.id,
+                reason="metadata.reference_text_sha256 does not match reference_text.",
+            )
+        )
     return issues
 
 

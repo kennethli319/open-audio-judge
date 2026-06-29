@@ -323,6 +323,83 @@ def test_validate_synthesized_manifest_can_require_text_context_metadata(
     ]
 
 
+def test_validate_synthesized_manifest_can_require_synthesis_metadata(
+    tmp_path: Path,
+) -> None:
+    cases_path = tmp_path / "tts_audio_cases.jsonl"
+    cases_path.write_text(
+        json.dumps(
+            {
+                "id": "missing-synthesis-metadata-local-tts",
+                "task": "tts_naturalness",
+                "audio_path": "audio/future.wav",
+                "reference_text": "Synthetic sample.",
+            }
+        )
+        + "\n",
+        encoding="utf-8",
+    )
+
+    issues = validate_synthesized_manifest(
+        cases_path=cases_path,
+        require_local_audio=False,
+        require_synthesis_metadata=True,
+    )
+
+    assert [(issue.case_id, issue.reason) for issue in issues] == [
+        ("missing-synthesis-metadata-local-tts", "metadata.sample_kind is missing."),
+        ("missing-synthesis-metadata-local-tts", "metadata.synthesis_provider is missing."),
+        ("missing-synthesis-metadata-local-tts", "metadata.source_case_id is missing."),
+        ("missing-synthesis-metadata-local-tts", "metadata.reference_text_sha256 is missing."),
+    ]
+
+
+def test_validate_synthesized_manifest_reports_stale_synthesis_metadata(
+    tmp_path: Path,
+) -> None:
+    cases_path = tmp_path / "tts_audio_cases.jsonl"
+    cases_path.write_text(
+        json.dumps(
+            {
+                "id": "tts-source-local-tts",
+                "task": "tts_naturalness",
+                "audio_path": "audio/future.wav",
+                "reference_text": "Updated synthetic sample.",
+                "metadata": {
+                    "sample_kind": "human_recording",
+                    "synthesis_provider": "other",
+                    "source_case_id": "different-source",
+                    "reference_text_sha256": "stale",
+                },
+            }
+        )
+        + "\n",
+        encoding="utf-8",
+    )
+
+    issues = validate_synthesized_manifest(cases_path=cases_path, require_local_audio=False)
+
+    assert [(issue.case_id, issue.reason) for issue in issues] == [
+        (
+            "tts-source-local-tts",
+            "metadata.sample_kind has unexpected value: expected local_synthetic_tts, got human_recording.",
+        ),
+        (
+            "tts-source-local-tts",
+            "metadata.synthesis_provider has unexpected value: expected local_chatterbox, got other.",
+        ),
+        (
+            "tts-source-local-tts",
+            "metadata.source_case_id does not match synthesized case id: "
+            "expected tts-source, got different-source.",
+        ),
+        (
+            "tts-source-local-tts",
+            "metadata.reference_text_sha256 does not match reference_text.",
+        ),
+    ]
+
+
 def test_write_synthesis_summary_is_metadata_only_for_dry_run(tmp_path: Path) -> None:
     cases_path = tmp_path / "tts_cases.jsonl"
     cases_path.write_text(
