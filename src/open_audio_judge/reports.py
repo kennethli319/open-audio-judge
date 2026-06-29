@@ -31,6 +31,7 @@ def render_html_report(results: list[EvaluationResult]) -> str:
     buckets = _bucket_counts(scores)
     meaning_counts = _field_counts(result.meaning_preservation for result in results)
     category_counts = _category_counts(results)
+    priority_cases = _priority_cases(results)
 
     rows = "\n".join(_render_row(result) for result in results)
     bucket_markup = "\n".join(
@@ -41,6 +42,7 @@ def render_html_report(results: list[EvaluationResult]) -> str:
     )
     meaning_markup = _render_count_list(meaning_counts, empty_label="No meaning diagnostics")
     category_markup = _render_count_list(category_counts, empty_label="No error categories")
+    priority_markup = _render_priority_cases(priority_cases)
 
     return f"""<!doctype html>
 <html lang="en">
@@ -161,6 +163,9 @@ def render_html_report(results: list[EvaluationResult]) -> str:
       <div class="metric"><span>Error Categories</span>{category_markup}</div>
     </section>
 
+    <h2>Priority Cases</h2>
+    {priority_markup}
+
     <h2>Case Results</h2>
     <table>
       <thead>
@@ -183,6 +188,14 @@ def render_html_report(results: list[EvaluationResult]) -> str:
 
 
 LABELS = ("accurate", "needs_review", "inaccurate")
+HIGH_IMPACT_CATEGORIES = {"negation_error", "number_error", "entity_error"}
+MEANING_SEVERITY = {
+    "not_preserved": 5,
+    "major_loss": 4,
+    "partial_loss": 3,
+    "minor_loss": 2,
+    "preserved": 1,
+}
 
 
 def _render_row(result: EvaluationResult) -> str:
@@ -225,6 +238,80 @@ def _render_count_list(items: list[tuple[str, int]], empty_label: str) -> str:
         for name, count in items
     )
     return f'<ul class="counts">{rendered_items}</ul>'
+
+
+def _priority_cases(results: list[EvaluationResult], limit: int = 5) -> list[EvaluationResult]:
+    candidates = [
+        result
+        for result in results
+        if _meaning_severity(result) >= MEANING_SEVERITY["partial_loss"]
+        or HIGH_IMPACT_CATEGORIES.intersection(result.error_categories)
+        or result.label != "accurate"
+        or result.status != "ok"
+    ]
+    return sorted(
+        candidates,
+        key=lambda result: (
+            result.status == "ok",
+            -_meaning_severity(result),
+            -_high_impact_count(result),
+            result.overall_score,
+            result.case_id,
+        ),
+    )[:limit]
+
+
+def _render_priority_cases(results: list[EvaluationResult]) -> str:
+    if not results:
+        return '<div class="metric"><strong class="muted">No priority cases</strong></div>'
+
+    rows = "\n".join(
+        f"""<tr>
+  <td data-label="Case">{html.escape(result.case_id)}</td>
+  <td data-label="Score">{result.overall_score}</td>
+  <td data-label="Meaning">{html.escape((result.meaning_preservation or "unknown").replace("_", " "))}</td>
+  <td data-label="Category">{html.escape(_priority_reason(result))}</td>
+  <td data-label="Summary">{html.escape(result.semantic_error_summary or result.reason)}</td>
+</tr>"""
+        for result in results
+    )
+    return f"""<table>
+      <thead>
+        <tr>
+          <th>Case</th>
+          <th>Score</th>
+          <th>Meaning</th>
+          <th>Category</th>
+          <th>Summary</th>
+        </tr>
+      </thead>
+      <tbody>
+        {rows}
+      </tbody>
+    </table>"""
+
+
+def _meaning_severity(result: EvaluationResult) -> int:
+    return MEANING_SEVERITY.get(result.meaning_preservation or "", 0)
+
+
+def _high_impact_count(result: EvaluationResult) -> int:
+    return len(HIGH_IMPACT_CATEGORIES.intersection(result.error_categories))
+
+
+def _priority_reason(result: EvaluationResult) -> str:
+    high_impact = [
+        category.replace("_", " ")
+        for category in result.error_categories
+        if category in HIGH_IMPACT_CATEGORIES
+    ]
+    if high_impact:
+        return ", ".join(high_impact)
+    if result.status != "ok":
+        return result.status.replace("_", " ")
+    if result.error_categories:
+        return ", ".join(category.replace("_", " ") for category in result.error_categories)
+    return result.label.replace("_", " ")
 
 
 def _render_diagnostics(result: EvaluationResult) -> str:

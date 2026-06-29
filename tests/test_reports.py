@@ -38,3 +38,42 @@ def test_write_html_report(tmp_path: Path) -> None:
     assert "Error Categories" in html
     assert "no error" in html
     assert "No action needed." in html
+
+
+def test_write_html_report_highlights_priority_semantic_cases(tmp_path: Path) -> None:
+    results = [
+        EvaluationResult(
+            case_id="low-wer-negation",
+            task="asr_error",
+            judge_id="asr_error",
+            judge_version="0.1.0",
+            provider="mock",
+            overall_score=40,
+            reason="A negation changed.",
+            meaning_preservation="major_loss",
+            semantic_error_summary="The transcript reverses the operational instruction.",
+            error_categories=["negation_error"],
+            label="inaccurate",
+        ),
+        EvaluationResult(
+            case_id="wording-only",
+            task="asr_error",
+            judge_id="asr_error",
+            judge_version="0.1.0",
+            provider="mock",
+            overall_score=91,
+            reason="Small wording change.",
+            meaning_preservation="preserved",
+            semantic_error_summary="Meaning is preserved.",
+            error_categories=["no_error"],
+            label="accurate",
+        ),
+    ]
+
+    output = write_html_report(results, tmp_path / "report.html")
+    html = output.read_text(encoding="utf-8")
+
+    assert "Priority Cases" in html
+    assert "low-wer-negation" in html
+    assert "negation error" in html
+    assert "The transcript reverses the operational instruction." in html
