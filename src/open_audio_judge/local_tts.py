@@ -129,6 +129,15 @@ def write_local_tts_summary_json(
         "total_cases": len(case_list),
         "case_ids": [case.id for case in case_list],
         "cases_with_audio_path": sum(1 for case in case_list if case.audio_path),
+        "total_audio_bytes": _sum_numeric_metadata(case_list, "audio_bytes", integer=True),
+        "total_audio_duration_seconds": _sum_numeric_metadata(
+            case_list,
+            "audio_duration_seconds",
+        ),
+        "cases_with_audio_duration": _count_present_metadata(
+            case_list,
+            "audio_duration_seconds",
+        ),
         "by_synthesis_provider": _count_metadata(case_list, "synthesis_provider"),
         "by_synthesis_voice": _count_metadata(case_list, "synthesis_voice"),
         "by_synthesis_audio_format": _count_metadata(case_list, "synthesis_audio_format"),
@@ -345,3 +354,25 @@ def _count_metadata(cases: Iterable[EvaluationCase], field: str) -> dict[str, in
         value = str(case.metadata.get(field) or "unknown")
         counts[value] = counts.get(value, 0) + 1
     return dict(sorted(counts.items()))
+
+
+def _count_present_metadata(cases: Iterable[EvaluationCase], field: str) -> int:
+    return sum(1 for case in cases if case.metadata.get(field) is not None)
+
+
+def _sum_numeric_metadata(
+    cases: Iterable[EvaluationCase],
+    field: str,
+    *,
+    integer: bool = False,
+) -> int | float:
+    total = 0.0
+    for case in cases:
+        value = case.metadata.get(field)
+        if isinstance(value, bool):
+            continue
+        if isinstance(value, int | float):
+            total += float(value)
+    if integer:
+        return int(total)
+    return round(total, 3)
