@@ -18,6 +18,14 @@ from open_audio_judge.hf_asr import (
     write_hf_asr_cases_jsonl,
     write_hf_asr_summary_json,
 )
+from open_audio_judge.local_tts import (
+    DEFAULT_CHATTERBOX_BIN,
+    DEFAULT_CHATTERBOX_MODEL,
+    LocalTtsConfig,
+    synthesize_cases_with_local_tts,
+    write_local_tts_cases_jsonl,
+    write_local_tts_summary_json,
+)
 from open_audio_judge.prompting import load_prompt
 from open_audio_judge.providers import build_provider
 from open_audio_judge.runner import evaluate_cases, load_cases
@@ -90,6 +98,84 @@ def autojudge_hf_asr_command(
     results = evaluate_cases(candidate_cases, prompt, provider, judge_out)
     ok_count = sum(1 for result in results if result.status == "ok")
     console.print(f"[bold]AutoJudged {len(results)} Hugging Face ASR cases[/bold] ({ok_count} ok)")
+    console.print(f"Model:   {model}")
+    console.print(f"Cases:   {candidate_path}")
+    console.print(f"Summary: {summary_path}")
+    console.print(f"Results: {judge_out / 'results.jsonl'}")
+    console.print(f"Report:  {judge_out / 'report.html'}")
+
+
+@app.command("autojudge-local-tts")
+def autojudge_local_tts_command(
+    cases: Annotated[Path, typer.Option("--cases", "-c", help="TTS case file with reference_text.")],
+    model: Annotated[
+        str,
+        typer.Option("--model", "-m", help="Local TTS model id."),
+    ] = DEFAULT_CHATTERBOX_MODEL,
+    judge: Annotated[str, typer.Option("--judge", "-j", help="Judge prompt id or path.")] = "tts_naturalness",
+    judge_provider: Annotated[
+        str,
+        typer.Option("--judge-provider", help="Provider used to judge synthesized audio."),
+    ] = "mock",
+    out: Annotated[
+        Path,
+        typer.Option("--out", "-o", help="Output directory for audio and judge report."),
+    ] = Path("runs/chatterbox-tts-autojudge"),
+    tts_bin: Annotated[
+        Path,
+        typer.Option("--tts-bin", help="Path to local-tts-speak-compatible command."),
+    ] = DEFAULT_CHATTERBOX_BIN,
+    voice: Annotated[str, typer.Option("--voice", help="TTS voice id.")] = "af_heart",
+    lang_code: Annotated[str, typer.Option("--lang-code", help="TTS language code.")] = "en",
+    audio_format: Annotated[
+        str,
+        typer.Option("--audio-format", help="Generated audio format."),
+    ] = "wav",
+    keep_text_sidecars: Annotated[
+        bool,
+        typer.Option("--keep-text-sidecars", help="Keep local target-text sidecar files."),
+    ] = False,
+    dry_run: Annotated[
+        bool,
+        typer.Option("--dry-run", help="Write manifests without invoking the TTS model."),
+    ] = False,
+    limit: Annotated[int | None, typer.Option("--limit", help="Maximum cases to synthesize.")] = None,
+) -> None:
+    loaded_cases = load_cases(cases)
+    if limit is not None:
+        loaded_cases = loaded_cases[:limit]
+
+    candidate_dir = out / "synthesis"
+    synthesized_cases = synthesize_cases_with_local_tts(
+        loaded_cases,
+        out_dir=candidate_dir,
+        config=LocalTtsConfig(
+            tts_bin=tts_bin,
+            model=model,
+            voice=voice,
+            lang_code=lang_code,
+            audio_format=audio_format,
+            keep_text_sidecars=keep_text_sidecars,
+            dry_run=dry_run,
+        ),
+    )
+    candidate_path = candidate_dir / "tts_audio_cases.jsonl"
+    summary_path = out / "model_summary.json"
+    judge_out = out / "judge-report"
+    write_local_tts_cases_jsonl(synthesized_cases, candidate_path)
+    write_local_tts_summary_json(
+        synthesized_cases,
+        summary_path,
+        source_cases=cases,
+        model=model,
+    )
+
+    prompt = load_prompt(judge)
+    provider = build_provider(judge_provider)
+    resolved_cases = load_cases(candidate_path)
+    results = evaluate_cases(resolved_cases, prompt, provider, judge_out)
+    ok_count = sum(1 for result in results if result.status == "ok")
+    console.print(f"[bold]AutoJudged {len(results)} local TTS cases[/bold] ({ok_count} ok)")
     console.print(f"Model:   {model}")
     console.print(f"Cases:   {candidate_path}")
     console.print(f"Summary: {summary_path}")

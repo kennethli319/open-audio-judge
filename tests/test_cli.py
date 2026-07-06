@@ -66,6 +66,71 @@ def test_autojudge_hf_asr_cli_writes_candidate_cases_and_report(
     assert "AutoJudged 1 Hugging Face ASR cases" in result.output
 
 
+def test_autojudge_local_tts_cli_writes_synthesized_cases_and_report(
+    tmp_path: Path,
+    monkeypatch,
+) -> None:
+    cases = tmp_path / "cases.jsonl"
+    out = tmp_path / "out"
+    cases.write_text(
+        json.dumps(
+            {
+                "id": "tts-case",
+                "task": "tts_naturalness",
+                "reference_text": "Read this naturally.",
+            }
+        )
+        + "\n",
+        encoding="utf-8",
+    )
+
+    def fake_synthesize_cases(loaded_cases, out_dir, config):
+        audio_dir = out_dir / "audio"
+        audio_dir.mkdir(parents=True)
+        (audio_dir / "tts-case.wav").write_bytes(b"RIFF")
+        return [
+            loaded_cases[0].model_copy(
+                update={
+                    "id": "tts-case-local-tts",
+                    "audio_path": "audio/tts-case.wav",
+                    "metadata": {
+                        "synthesis_model": config.model,
+                        "synthesis_voice": config.voice,
+                        "synthesis_audio_format": config.audio_format,
+                    },
+                }
+            )
+        ]
+
+    monkeypatch.setattr(cli, "synthesize_cases_with_local_tts", fake_synthesize_cases)
+
+    result = CliRunner().invoke(
+        app,
+        [
+            "autojudge-local-tts",
+            "--cases",
+            str(cases),
+            "--model",
+            "mlx-community/chatterbox-turbo-6bit",
+            "--judge-provider",
+            "mock",
+            "--out",
+            str(out),
+        ],
+    )
+
+    assert result.exit_code == 0
+    assert (out / "synthesis" / "tts_audio_cases.jsonl").exists()
+    assert (out / "model_summary.json").exists()
+    assert (out / "judge-report" / "results.jsonl").exists()
+    assert (out / "judge-report" / "report.html").exists()
+    written_case = json.loads(
+        (out / "synthesis" / "tts_audio_cases.jsonl").read_text(encoding="utf-8")
+    )
+    assert written_case["audio_path"] == "audio/tts-case.wav"
+    assert "AutoJudged 1 local TTS cases" in result.output
+
+
 def test_build_tts_cases_writes_metadata_summary(tmp_path: Path) -> None:
     source = tmp_path / "source.jsonl"
     out = tmp_path / "cases.jsonl"

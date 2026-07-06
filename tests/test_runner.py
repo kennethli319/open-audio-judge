@@ -53,6 +53,27 @@ def test_evaluate_cases_with_mock(tmp_path: Path) -> None:
     assert "unit_error" in by_id["asr-calibration-unit-001"].error_categories
 
 
+def test_evaluate_tts_case_with_mock_matches_tts_schema() -> None:
+    prompt = load_prompt("tts_naturalness")
+    result = evaluate_case(
+        EvaluationCase(
+            id="tts-mock",
+            task="tts_naturalness",
+            audio_url="https://example.test/audio.wav",
+            reference_text="hello",
+        ),
+        prompt,
+        MockProvider(),
+    )
+
+    assert result.status == "ok"
+    assert result.overall_score == 75
+    assert result.semantic_error_summary == (
+        "Mock provider does not listen to audio or evaluate perceptual quality."
+    )
+    assert result.error_categories == ["mock"]
+
+
 def test_parse_error_preserves_provider_raw_response() -> None:
     prompt = load_prompt("asr_error")
     result = evaluate_case(

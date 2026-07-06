@@ -10,6 +10,11 @@ class MockProvider:
     name = "mock"
 
     def generate(self, case: EvaluationCase, prompt: RenderedPrompt) -> ProviderResponse:
+        if prompt.judge_id == "tts_naturalness":
+            return self._generate_tts(case, prompt)
+        return self._generate_asr(case, prompt)
+
+    def _generate_asr(self, case: EvaluationCase, prompt: RenderedPrompt) -> ProviderResponse:
         if case.reference_text and case.candidate_text:
             diff = analyze_reference_candidate(case.reference_text, case.candidate_text)
             reason = (
@@ -38,6 +43,24 @@ class MockProvider:
                     if diff
                     else ["Use qwen or another audio LLM provider for real ASR diagnostics."]
                 ),
+            }
+        )
+        return ProviderResponse(content=content, raw={"provider": self.name, "judge": prompt.judge_id})
+
+    def _generate_tts(self, case: EvaluationCase, prompt: RenderedPrompt) -> ProviderResponse:
+        content = json.dumps(
+            {
+                "overall_score": 75,
+                "reason": (
+                    "Mock TTS score used for pipeline checks; use an audio-capable judge "
+                    "for real naturalness, pronunciation, artifact, and faithfulness diagnostics."
+                ),
+                "semantic_error_summary": (
+                    "Mock provider does not listen to audio or evaluate perceptual quality."
+                ),
+                "key_differences": [],
+                "error_categories": ["mock"],
+                "researcher_notes": ["Use gemini or a local audio LLM provider for real TTS judging."],
             }
         )
         return ProviderResponse(content=content, raw={"provider": self.name, "judge": prompt.judge_id})

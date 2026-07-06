@@ -214,6 +214,31 @@ Install `transformers` and any model-specific audio dependencies in the runtime 
 using this command with real Hugging Face models. Keep private or generated audio artifacts under
 `runs/` unless they are explicitly safe to publish.
 
+## AutoJudge A Local Chatterbox TTS Model
+
+For the TTS-first open-model workflow, `autojudge-local-tts` synthesizes a TTS case manifest with a
+local `local-tts-speak` compatible command, then judges the generated audio with the selected Open
+Audio Judge provider.
+
+```bash
+oaj autojudge-local-tts \
+  --model mlx-community/chatterbox-turbo-6bit \
+  --cases examples/tts_multiturn_cases.jsonl \
+  --judge-provider gemini \
+  --limit 3 \
+  --out runs/chatterbox-tts-autojudge
+```
+
+The command writes:
+
+- `synthesis/tts_audio_cases.jsonl`: generated-audio cases with local `audio_path` values.
+- `model_summary.json`: model id, voice, audio format, and synthesis coverage.
+- `judge-report/results.jsonl` and `judge-report/report.html`: aggregate naturalness scores, top
+  issue categories, priority cases, and sample-by-sample reasons.
+
+Use `--judge-provider mock` for a cheap pipeline check. Use an audio-capable judge such as Gemini or
+a local Qwen/Qwen3-Omni endpoint for real perceptual judging.
+
 ## REST API
 
 ```bash
