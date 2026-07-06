@@ -1,4 +1,5 @@
 import json
+import subprocess
 from pathlib import Path
 
 import pytest
@@ -53,6 +54,42 @@ def test_synthesize_cases_with_local_tts_requires_reference_text(tmp_path: Path)
             out_dir=tmp_path / "synthesis",
             config=LocalTtsConfig(dry_run=True),
         )
+
+
+def test_synthesize_cases_with_local_tts_reports_command_failure(
+    tmp_path: Path,
+    monkeypatch,
+) -> None:
+    tts_bin = tmp_path / "bin" / "local-tts-speak"
+    tts_bin.parent.mkdir()
+    tts_bin.write_text("#!/bin/sh\n", encoding="utf-8")
+    case = EvaluationCase(
+        id="tts-fail",
+        task="tts_naturalness",
+        reference_text="This should fail clearly.",
+    )
+
+    def fake_run(command, check, capture_output, text):
+        raise subprocess.CalledProcessError(
+            7,
+            command,
+            output="loading model\nretrying\nfailed after warmup\n",
+            stderr="missing voice af_test\n",
+        )
+
+    monkeypatch.setattr("open_audio_judge.local_tts.subprocess.run", fake_run)
+
+    with pytest.raises(RuntimeError) as excinfo:
+        synthesize_cases_with_local_tts(
+            [case],
+            out_dir=tmp_path / "synthesis",
+            config=LocalTtsConfig(tts_bin=tts_bin, voice="af_test"),
+        )
+
+    message = str(excinfo.value)
+    assert "local TTS command failed with exit code 7: local-tts-speak" in message
+    assert "stderr: missing voice af_test" in message
+    assert "stdout: loading model | retrying | failed after warmup" in message
 
 
 def test_output_path_from_stdout_accepts_progress_before_json() -> None:

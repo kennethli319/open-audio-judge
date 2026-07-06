@@ -158,30 +158,34 @@ def _run_local_tts(
     audio_dir: Path,
     output_stem: str,
 ) -> Path:
-    completed = subprocess.run(
-        [
-            str(config.tts_bin),
-            "--text-file",
-            str(text_path),
-            "--model",
-            config.model,
-            "--output-dir",
-            str(audio_dir),
-            "--file-prefix",
-            output_stem,
-            "--audio-format",
-            config.audio_format,
-            "--voice",
-            config.voice,
-            "--lang-code",
-            config.lang_code,
-            "--quiet",
-            "--json",
-        ],
-        check=True,
-        capture_output=True,
-        text=True,
-    )
+    command = [
+        str(config.tts_bin),
+        "--text-file",
+        str(text_path),
+        "--model",
+        config.model,
+        "--output-dir",
+        str(audio_dir),
+        "--file-prefix",
+        output_stem,
+        "--audio-format",
+        config.audio_format,
+        "--voice",
+        config.voice,
+        "--lang-code",
+        config.lang_code,
+        "--quiet",
+        "--json",
+    ]
+    try:
+        completed = subprocess.run(
+            command,
+            check=True,
+            capture_output=True,
+            text=True,
+        )
+    except subprocess.CalledProcessError as exc:
+        raise RuntimeError(_format_tts_failure(exc, config.tts_bin)) from exc
     output_path = _output_path_from_stdout(completed.stdout)
     if output_path is not None:
         return output_path
@@ -190,6 +194,28 @@ def _run_local_tts(
     if matches:
         return matches[-1].resolve()
     raise ValueError("local TTS command did not report or write an output audio file.")
+
+
+def _format_tts_failure(exc: subprocess.CalledProcessError, tts_bin: Path) -> str:
+    details = [
+        f"local TTS command failed with exit code {exc.returncode}: {tts_bin.name}",
+    ]
+    stderr = _tail_nonempty_lines(exc.stderr)
+    stdout = _tail_nonempty_lines(exc.stdout)
+    if stderr:
+        details.append(f"stderr: {stderr}")
+    if stdout:
+        details.append(f"stdout: {stdout}")
+    if len(details) == 1:
+        details.append("no stdout or stderr was captured")
+    return "; ".join(details)
+
+
+def _tail_nonempty_lines(value: str | None, *, max_lines: int = 4) -> str:
+    if not value:
+        return ""
+    lines = [line.strip() for line in value.splitlines() if line.strip()]
+    return " | ".join(lines[-max_lines:])
 
 
 def _audio_metadata(audio_path: Path) -> dict[str, Any]:
