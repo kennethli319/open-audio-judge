@@ -137,6 +137,78 @@ def test_autojudge_local_tts_cli_writes_synthesized_cases_and_report(
     assert "AutoJudged 1 local TTS cases" in result.output
 
 
+def test_autojudge_local_tts_cli_can_build_cases_from_evalset(
+    tmp_path: Path,
+    monkeypatch,
+) -> None:
+    source = tmp_path / "source.jsonl"
+    out = tmp_path / "out"
+    source.write_text(
+        json.dumps(
+            {
+                "id": "row-001",
+                "category": "instruction_constraints",
+                "task": "read_time",
+                "ideal_answer": "Meet me at 09:45 tomorrow.",
+            }
+        )
+        + "\n",
+        encoding="utf-8",
+    )
+
+    def fake_synthesize_cases(loaded_cases, out_dir, config):
+        audio_dir = out_dir / "audio"
+        audio_dir.mkdir(parents=True)
+        (audio_dir / "tts-evalset-row-001.wav").write_bytes(b"RIFF")
+        return [
+            loaded_cases[0].model_copy(
+                update={
+                    "id": f"{loaded_cases[0].id}-local-tts",
+                    "audio_path": "audio/tts-evalset-row-001.wav",
+                    "metadata": {
+                        **loaded_cases[0].metadata,
+                        "synthesis_provider": config.synthesis_provider,
+                        "synthesis_model": config.model,
+                        "synthesis_voice": config.voice,
+                        "synthesis_audio_format": config.audio_format,
+                    },
+                }
+            )
+        ]
+
+    monkeypatch.setattr(cli, "synthesize_cases_with_local_tts", fake_synthesize_cases)
+
+    result = CliRunner().invoke(
+        app,
+        [
+            "autojudge-local-tts",
+            "--evalset-source",
+            str(source),
+            "--evalset-source-name",
+            "evalset",
+            "--evalset-hash-source-ids",
+            "--limit",
+            "1",
+            "--judge-provider",
+            "mock",
+            "--out",
+            str(out),
+        ],
+    )
+
+    assert result.exit_code == 0
+    assert (out / "evalset" / "tts_cases.jsonl").exists()
+    assert (out / "evalset" / "summary.json").exists()
+    assert (out / "synthesis" / "tts_audio_cases.jsonl").exists()
+    assert (out / "judge-report" / "results.jsonl").exists()
+    evalset_case = json.loads((out / "evalset" / "tts_cases.jsonl").read_text(encoding="utf-8"))
+    assert evalset_case["reference_text"] == "Meet me at 09:45 tomorrow."
+    assert "source_id_sha256" in evalset_case["metadata"]
+    summary = json.loads((out / "model_summary.json").read_text(encoding="utf-8"))
+    assert summary["source_cases"].endswith("evalset/tts_cases.jsonl")
+    assert "Evalset:" in result.output
+
+
 def test_build_tts_cases_writes_metadata_summary(tmp_path: Path) -> None:
     source = tmp_path / "source.jsonl"
     out = tmp_path / "cases.jsonl"

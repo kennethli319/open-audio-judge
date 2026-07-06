@@ -229,8 +229,26 @@ oaj autojudge-local-tts \
   --out runs/chatterbox-tts-autojudge
 ```
 
+To run the ideal flow directly from a local text evalset, pass `--evalset-source` instead of
+`--cases`. The command will first build a metadata-safe TTS manifest, then synthesize and judge it:
+
+```bash
+oaj autojudge-local-tts \
+  --evalset-source /path/to/evalset/seed_v0.jsonl \
+  --evalset-source-name ome \
+  --evalset-slices numbers,dates_times,code_like,punctuation_format \
+  --evalset-per-slice-limit 2 \
+  --evalset-prioritize-slice-coverage \
+  --evalset-hash-source-ids \
+  --model mlx-community/chatterbox-turbo-6bit \
+  --judge-provider gemini \
+  --limit 8 \
+  --out runs/chatterbox-tts-evalset-autojudge
+```
+
 The command writes:
 
+- `evalset/tts_cases.jsonl` and `evalset/summary.json` when `--evalset-source` is used.
 - `synthesis/tts_audio_cases.jsonl`: generated-audio cases with local `audio_path` values.
 - `model_summary.json`: model id, voice, audio format, and synthesis coverage.
 - `judge-report/results.jsonl` and `judge-report/report.html`: aggregate naturalness scores, top

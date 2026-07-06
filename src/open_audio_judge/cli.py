@@ -107,7 +107,57 @@ def autojudge_hf_asr_command(
 
 @app.command("autojudge-local-tts")
 def autojudge_local_tts_command(
-    cases: Annotated[Path, typer.Option("--cases", "-c", help="TTS case file with reference_text.")],
+    cases: Annotated[
+        Optional[Path],
+        typer.Option("--cases", "-c", help="TTS case file with reference_text."),
+    ] = None,
+    evalset_source: Annotated[
+        Optional[Path],
+        typer.Option(
+            "--evalset-source",
+            help="Optional source evalset JSONL to build TTS cases before synthesis.",
+        ),
+    ] = None,
+    evalset_source_name: Annotated[
+        str,
+        typer.Option("--evalset-source-name", help="Stable source label for built TTS cases."),
+    ] = "evalset",
+    evalset_categories: Annotated[
+        str,
+        typer.Option(
+            "--evalset-categories",
+            help="Optional comma-separated source categories to include before TTS slicing.",
+        ),
+    ] = "",
+    evalset_slices: Annotated[
+        str,
+        typer.Option(
+            "--evalset-slices",
+            help="Optional comma-separated TTS slice labels to include after classification.",
+        ),
+    ] = "",
+    evalset_per_slice_limit: Annotated[
+        int | None,
+        typer.Option("--evalset-per-slice-limit", help="Maximum cases to keep for each TTS slice."),
+    ] = None,
+    evalset_hash_source_ids: Annotated[
+        bool,
+        typer.Option("--evalset-hash-source-ids", help="Hash source row ids in built case metadata."),
+    ] = False,
+    evalset_include_source_task: Annotated[
+        bool,
+        typer.Option(
+            "--evalset-include-source-task",
+            help="Include raw source task labels in built case metadata.",
+        ),
+    ] = False,
+    evalset_prioritize_slice_coverage: Annotated[
+        bool,
+        typer.Option(
+            "--evalset-prioritize-slice-coverage",
+            help="Interleave slices before applying --limit when building from an evalset.",
+        ),
+    ] = False,
     model: Annotated[
         str,
         typer.Option("--model", "-m", help="Local TTS model id."),
@@ -148,9 +198,42 @@ def autojudge_local_tts_command(
     ] = False,
     limit: Annotated[int | None, typer.Option("--limit", help="Maximum cases to synthesize.")] = None,
 ) -> None:
-    loaded_cases = load_cases(cases)
-    if limit is not None:
-        loaded_cases = loaded_cases[:limit]
+    if (cases is None) == (evalset_source is None):
+        raise typer.BadParameter("Pass exactly one of --cases or --evalset-source.")
+
+    if evalset_source is not None:
+        category_filter = (
+            {item.strip() for item in evalset_categories.split(",") if item.strip()} or None
+        )
+        slice_filter = {item.strip() for item in evalset_slices.split(",") if item.strip()} or None
+        source_records = load_evalset_records(evalset_source)
+        loaded_cases = build_tts_cases(
+            source_records,
+            source_name=evalset_source_name,
+            limit=limit,
+            category_filter=category_filter,
+            slice_filter=slice_filter,
+            per_slice_limit=evalset_per_slice_limit,
+            hash_source_ids=evalset_hash_source_ids,
+            include_source_task=evalset_include_source_task,
+            prioritize_slice_coverage=evalset_prioritize_slice_coverage,
+        )
+        evalset_dir = out / "evalset"
+        source_cases_path = evalset_dir / "tts_cases.jsonl"
+        evalset_summary_path = evalset_dir / "summary.json"
+        write_cases_jsonl(loaded_cases, source_cases_path)
+        write_tts_summary_json(
+            loaded_cases,
+            evalset_summary_path,
+            include_example_source_ids=not evalset_hash_source_ids,
+        )
+    else:
+        assert cases is not None
+        loaded_cases = load_cases(cases)
+        if limit is not None:
+            loaded_cases = loaded_cases[:limit]
+        source_cases_path = cases
+        evalset_summary_path = None
 
     candidate_dir = out / "synthesis"
     synthesized_cases = synthesize_cases_with_local_tts(
@@ -174,7 +257,7 @@ def autojudge_local_tts_command(
     write_local_tts_summary_json(
         synthesized_cases,
         summary_path,
-        source_cases=cases,
+        source_cases=source_cases_path,
         model=model,
         synthesis_provider=synthesis_provider,
     )
@@ -186,6 +269,9 @@ def autojudge_local_tts_command(
     ok_count = sum(1 for result in results if result.status == "ok")
     console.print(f"[bold]AutoJudged {len(results)} local TTS cases[/bold] ({ok_count} ok)")
     console.print(f"Model:   {model}")
+    if evalset_summary_path is not None:
+        console.print(f"Evalset: {source_cases_path}")
+        console.print(f"Evalsum: {evalset_summary_path}")
     console.print(f"Cases:   {candidate_path}")
     console.print(f"Summary: {summary_path}")
     console.print(f"Results: {judge_out / 'results.jsonl'}")
