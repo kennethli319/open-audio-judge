@@ -7,6 +7,7 @@ import pytest
 from open_audio_judge.local_tts import (
     LocalTtsConfig,
     _output_path_from_stdout,
+    _require_output_path_in_audio_dir,
     synthesize_cases_with_local_tts,
     write_local_tts_summary_json,
 )
@@ -118,6 +119,27 @@ def test_output_path_from_stdout_accepts_common_wrapper_json_shapes(stdout: str)
 
     assert output is not None
     assert output.suffix == ".wav"
+
+
+def test_output_path_from_stdout_resolves_relative_paths_against_audio_dir(
+    tmp_path: Path,
+) -> None:
+    audio_dir = tmp_path / "audio"
+
+    output = _output_path_from_stdout(
+        '{"output": "tts-case.wav", "synthesis_ms": 123.4}\n',
+        base_dir=audio_dir,
+    )
+
+    assert output == (audio_dir / "tts-case.wav").resolve()
+
+
+def test_require_output_path_in_audio_dir_rejects_stale_outside_paths(tmp_path: Path) -> None:
+    audio_dir = tmp_path / "synthesis" / "audio"
+    stale_audio = tmp_path / "previous-run" / "tts-case.wav"
+
+    with pytest.raises(ValueError, match="outside the synthesis audio directory"):
+        _require_output_path_in_audio_dir(stale_audio, audio_dir)
 
 
 def test_write_local_tts_summary_json(tmp_path: Path) -> None:

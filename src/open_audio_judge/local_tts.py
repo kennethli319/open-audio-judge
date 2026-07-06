@@ -189,8 +189,9 @@ def _run_local_tts(
         )
     except subprocess.CalledProcessError as exc:
         raise RuntimeError(_format_tts_failure(exc, config.tts_bin)) from exc
-    output_path = _output_path_from_stdout(completed.stdout)
+    output_path = _output_path_from_stdout(completed.stdout, base_dir=audio_dir)
     if output_path is not None:
+        _require_output_path_in_audio_dir(output_path, audio_dir)
         return output_path
 
     matches = sorted(audio_dir.glob(f"{output_stem}*.{config.audio_format}"))
@@ -221,6 +222,16 @@ def _tail_nonempty_lines(value: str | None, *, max_lines: int = 4) -> str:
     return " | ".join(lines[-max_lines:])
 
 
+def _require_output_path_in_audio_dir(output_path: Path, audio_dir: Path) -> None:
+    try:
+        output_path.resolve().relative_to(audio_dir.resolve())
+    except ValueError as exc:
+        raise ValueError(
+            "local TTS command reported an output audio file outside the synthesis "
+            f"audio directory: {output_path}"
+        ) from exc
+
+
 def _audio_metadata(audio_path: Path) -> dict[str, Any]:
     metadata: dict[str, Any] = {
         "audio_bytes": audio_path.stat().st_size,
@@ -233,7 +244,7 @@ def _audio_metadata(audio_path: Path) -> dict[str, Any]:
     return metadata
 
 
-def _output_path_from_stdout(stdout: str) -> Path | None:
+def _output_path_from_stdout(stdout: str, *, base_dir: Path | None = None) -> Path | None:
     for line in reversed(stdout.splitlines()):
         candidate = line.strip()
         if not (candidate.startswith("{") and candidate.endswith("}")):
@@ -242,29 +253,36 @@ def _output_path_from_stdout(stdout: str) -> Path | None:
             data = json.loads(candidate)
         except json.JSONDecodeError:
             continue
-        output = _first_output_path_value(data)
+        output = _first_output_path_value(data, base_dir=base_dir)
         if output is not None:
             return output
     return None
 
 
-def _first_output_path_value(data: object) -> Path | None:
+def _first_output_path_value(data: object, *, base_dir: Path | None = None) -> Path | None:
     if isinstance(data, dict):
         for key in ("output", "output_path", "audio_path", "path"):
             value = data.get(key)
             if isinstance(value, str) and value.strip():
-                return Path(value).resolve()
+                return _normalize_output_path(value, base_dir=base_dir)
         for key in ("audio", "artifact", "artifacts", "result"):
             value = data.get(key)
-            output = _first_output_path_value(value)
+            output = _first_output_path_value(value, base_dir=base_dir)
             if output is not None:
                 return output
     elif isinstance(data, list):
         for item in data:
-            output = _first_output_path_value(item)
+            output = _first_output_path_value(item, base_dir=base_dir)
             if output is not None:
                 return output
     return None
+
+
+def _normalize_output_path(value: str, *, base_dir: Path | None = None) -> Path:
+    path = Path(value.strip())
+    if not path.is_absolute() and base_dir is not None:
+        path = base_dir / path
+    return path.resolve()
 
 
 def _wav_duration_seconds(path: Path) -> float | None:
