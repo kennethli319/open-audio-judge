@@ -33,6 +33,12 @@ def render_html_report(results: list[EvaluationResult]) -> str:
     category_counts = _category_counts(results)
     high_impact_counts = _high_impact_category_counts(results)
     researcher_note_counts = _researcher_note_counts(results)
+    tts_slice_counts = _metadata_counts(results, "tts_slice")
+    synthesis_model_counts = _metadata_counts(results, "synthesis_model")
+    synthesis_voice_counts = _metadata_counts(results, "synthesis_voice")
+    language_counts = _language_counts(results)
+    sample_kind_counts = _metadata_counts(results, "sample_kind")
+    issue_by_slice_counts = _issue_counts_by_metadata(results, "tts_slice")
     priority_cases = _priority_cases(results)
     calibration_checks = _calibration_checks(results)
 
@@ -52,6 +58,21 @@ def render_html_report(results: list[EvaluationResult]) -> str:
     researcher_note_markup = _render_count_list(
         researcher_note_counts,
         empty_label="No researcher notes",
+    )
+    tts_slice_markup = _render_count_list(tts_slice_counts, empty_label="No TTS slices")
+    synthesis_model_markup = _render_count_list(
+        synthesis_model_counts,
+        empty_label="No synthesis models",
+    )
+    synthesis_voice_markup = _render_count_list(
+        synthesis_voice_counts,
+        empty_label="No synthesis voices",
+    )
+    language_markup = _render_count_list(language_counts, empty_label="No languages")
+    sample_kind_markup = _render_count_list(sample_kind_counts, empty_label="No sample kinds")
+    issue_by_slice_markup = _render_count_list(
+        issue_by_slice_counts,
+        empty_label="No slice issue categories",
     )
     priority_markup = _render_priority_cases(priority_cases)
     calibration_markup = _render_calibration_checks(calibration_checks)
@@ -177,6 +198,16 @@ def render_html_report(results: list[EvaluationResult]) -> str:
       <div class="metric"><span>Actionable Notes</span>{researcher_note_markup}</div>
     </section>
 
+    <h2>Candidate Metadata</h2>
+    <section class="summary">
+      <div class="metric"><span>TTS Slice</span>{tts_slice_markup}</div>
+      <div class="metric"><span>Synthesis Model</span>{synthesis_model_markup}</div>
+      <div class="metric"><span>Synthesis Voice</span>{synthesis_voice_markup}</div>
+      <div class="metric"><span>Language</span>{language_markup}</div>
+      <div class="metric"><span>Sample Kind</span>{sample_kind_markup}</div>
+      <div class="metric"><span>Issues By TTS Slice</span>{issue_by_slice_markup}</div>
+    </section>
+
     <h2>Calibration Checks</h2>
     {calibration_markup}
 
@@ -269,6 +300,42 @@ def _researcher_note_counts(results: list[EvaluationResult]) -> list[tuple[str, 
     for result in results:
         counts.update(result.researcher_notes)
     return counts.most_common(6)
+
+
+def _metadata_counts(results: list[EvaluationResult], field: str) -> list[tuple[str, int]]:
+    counts: Counter[str] = Counter()
+    for result in results:
+        value = result.metadata.get(field)
+        if isinstance(value, str) and value.strip():
+            counts[value.strip()] += 1
+    return counts.most_common()
+
+
+def _language_counts(results: list[EvaluationResult]) -> list[tuple[str, int]]:
+    counts: Counter[str] = Counter()
+    for result in results:
+        for field in ("language", "synthesis_lang_code"):
+            value = result.metadata.get(field)
+            if isinstance(value, str) and value.strip():
+                counts[value.strip()] += 1
+                break
+    return counts.most_common()
+
+
+def _issue_counts_by_metadata(
+    results: list[EvaluationResult],
+    field: str,
+) -> list[tuple[str, int]]:
+    counts: Counter[str] = Counter()
+    for result in results:
+        value = result.metadata.get(field)
+        if not isinstance(value, str) or not value.strip():
+            continue
+        for category in result.error_categories:
+            if category == "no_error":
+                continue
+            counts[f"{value.strip()} / {category}"] += 1
+    return counts.most_common(8)
 
 
 def _render_count_list(items: list[tuple[str, int]], empty_label: str) -> str:

@@ -80,6 +80,67 @@ def test_write_html_report_aggregates_researcher_notes(tmp_path: Path) -> None:
     assert "Audit payment-domain numbers." in html
 
 
+def test_write_html_report_aggregates_tts_candidate_metadata(tmp_path: Path) -> None:
+    results = [
+        EvaluationResult(
+            case_id="tts-date-local-tts",
+            task="tts_naturalness",
+            judge_id="tts_naturalness",
+            judge_version="0.1.0",
+            provider="gemini",
+            overall_score=70,
+            reason="Audible pacing issue around the date.",
+            semantic_error_summary="Date phrasing sounded hesitant.",
+            error_categories=["prosody_issue"],
+            label="needs_review",
+            metadata={
+                "tts_slice": "dates_times",
+                "synthesis_model": "mlx-community/chatterbox-turbo-6bit",
+                "synthesis_voice": "af_heart",
+                "synthesis_lang_code": "en",
+                "sample_kind": "local_synthetic_tts",
+            },
+        ),
+        EvaluationResult(
+            case_id="tts-code-local-tts",
+            task="tts_naturalness",
+            judge_id="tts_naturalness",
+            judge_version="0.1.0",
+            provider="gemini",
+            overall_score=91,
+            reason="Natural enough.",
+            semantic_error_summary="No audible issues.",
+            error_categories=["no_error"],
+            label="accurate",
+            metadata={
+                "tts_slice": "code_like",
+                "synthesis_model": "mlx-community/chatterbox-turbo-6bit",
+                "synthesis_voice": "af_heart",
+                "language": "en-US",
+                "sample_kind": "local_synthetic_tts",
+            },
+        ),
+    ]
+
+    output = write_html_report(results, tmp_path / "report.html")
+    html = output.read_text(encoding="utf-8")
+
+    assert "Candidate Metadata" in html
+    assert "TTS Slice" in html
+    assert "dates times" in html
+    assert "code like" in html
+    assert "Synthesis Model" in html
+    assert "mlx-community/chatterbox-turbo-6bit" in html
+    assert "Synthesis Voice" in html
+    assert "af heart" in html
+    assert "Language" in html
+    assert "en-US" in html
+    assert "Sample Kind" in html
+    assert "local synthetic tts" in html
+    assert "Issues By TTS Slice" in html
+    assert "dates times / prosody issue" in html
+
+
 def test_write_html_report_highlights_priority_semantic_cases(tmp_path: Path) -> None:
     results = [
         EvaluationResult(
