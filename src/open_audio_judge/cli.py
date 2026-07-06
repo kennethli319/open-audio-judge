@@ -13,6 +13,11 @@ from open_audio_judge.evalset_bridge import (
     write_cases_jsonl,
     write_tts_summary_json,
 )
+from open_audio_judge.hf_asr import (
+    transcribe_cases_with_hf_asr,
+    write_hf_asr_cases_jsonl,
+    write_hf_asr_summary_json,
+)
 from open_audio_judge.prompting import load_prompt
 from open_audio_judge.providers import build_provider
 from open_audio_judge.runner import evaluate_cases, load_cases
@@ -36,6 +41,60 @@ def eval_command(
     console.print(f"[bold]Evaluated {len(results)} cases[/bold] ({ok_count} ok)")
     console.print(f"Results: {out / 'results.jsonl'}")
     console.print(f"Report:  {out / 'report.html'}")
+
+
+@app.command("autojudge-hf-asr")
+def autojudge_hf_asr_command(
+    cases: Annotated[Path, typer.Option("--cases", "-c", help="Local-audio ASR case file.")],
+    model: Annotated[
+        str,
+        typer.Option("--model", "-m", help="Hugging Face ASR model id."),
+    ] = "openai/whisper-tiny",
+    judge: Annotated[str, typer.Option("--judge", "-j", help="Judge prompt id or path.")] = "asr_error",
+    judge_provider: Annotated[
+        str,
+        typer.Option("--judge-provider", help="Provider used to judge candidate transcripts."),
+    ] = "mock",
+    out: Annotated[
+        Path,
+        typer.Option("--out", "-o", help="Output directory for transcripts and judge report."),
+    ] = Path("runs/hf-asr-autojudge"),
+    device: Annotated[
+        str,
+        typer.Option("--device", help="Transformers pipeline device, such as cpu, mps, cuda, or 0."),
+    ] = "cpu",
+    limit: Annotated[int | None, typer.Option("--limit", help="Maximum cases to evaluate.")] = None,
+) -> None:
+    loaded_cases = load_cases(cases)
+    if limit is not None:
+        loaded_cases = loaded_cases[:limit]
+
+    candidate_cases = transcribe_cases_with_hf_asr(
+        loaded_cases,
+        model=model,
+        device=device,
+    )
+    candidate_path = out / "candidate_cases.jsonl"
+    summary_path = out / "model_summary.json"
+    judge_out = out / "judge-report"
+    write_hf_asr_cases_jsonl(candidate_cases, candidate_path)
+    write_hf_asr_summary_json(
+        candidate_cases,
+        summary_path,
+        source_cases=cases,
+        model=model,
+    )
+
+    prompt = load_prompt(judge)
+    provider = build_provider(judge_provider)
+    results = evaluate_cases(candidate_cases, prompt, provider, judge_out)
+    ok_count = sum(1 for result in results if result.status == "ok")
+    console.print(f"[bold]AutoJudged {len(results)} Hugging Face ASR cases[/bold] ({ok_count} ok)")
+    console.print(f"Model:   {model}")
+    console.print(f"Cases:   {candidate_path}")
+    console.print(f"Summary: {summary_path}")
+    console.print(f"Results: {judge_out / 'results.jsonl'}")
+    console.print(f"Report:  {judge_out / 'report.html'}")
 
 
 @app.command("build-tts-cases")

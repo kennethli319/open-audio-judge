@@ -3,7 +3,67 @@ from pathlib import Path
 
 from typer.testing import CliRunner
 
+import open_audio_judge.cli as cli
 from open_audio_judge.cli import app
+
+
+def test_autojudge_hf_asr_cli_writes_candidate_cases_and_report(
+    tmp_path: Path,
+    monkeypatch,
+) -> None:
+    audio = tmp_path / "sample.wav"
+    audio.write_bytes(b"RIFF")
+    cases = tmp_path / "cases.jsonl"
+    out = tmp_path / "out"
+    cases.write_text(
+        json.dumps(
+            {
+                "id": "amount-case",
+                "task": "asr_error",
+                "audio_path": str(audio),
+                "reference_text": "Transfer fifteen dollars.",
+            }
+        )
+        + "\n",
+        encoding="utf-8",
+    )
+
+    monkeypatch.setattr(
+        cli,
+        "transcribe_cases_with_hf_asr",
+        lambda loaded_cases, model, device: [
+            loaded_cases[0].model_copy(
+                update={
+                    "candidate_text": "Transfer fifty dollars.",
+                    "metadata": {"candidate_model": model, "candidate_device": device},
+                }
+            )
+        ],
+    )
+
+    result = CliRunner().invoke(
+        app,
+        [
+            "autojudge-hf-asr",
+            "--cases",
+            str(cases),
+            "--model",
+            "openai/whisper-tiny",
+            "--judge-provider",
+            "mock",
+            "--out",
+            str(out),
+        ],
+    )
+
+    assert result.exit_code == 0
+    assert (out / "candidate_cases.jsonl").exists()
+    assert (out / "model_summary.json").exists()
+    assert (out / "judge-report" / "results.jsonl").exists()
+    assert (out / "judge-report" / "report.html").exists()
+    written_case = json.loads((out / "candidate_cases.jsonl").read_text(encoding="utf-8"))
+    assert written_case["candidate_text"] == "Transfer fifty dollars."
+    assert "AutoJudged 1 Hugging Face ASR cases" in result.output
 
 
 def test_build_tts_cases_writes_metadata_summary(tmp_path: Path) -> None:

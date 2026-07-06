@@ -189,6 +189,31 @@ This writes a local sample report to `runs/whisper-tiny-asr-open/judge-report/re
 The mock judge is a deterministic reference-vs-candidate semantic baseline; rerun with a hosted or
 local audio LLM judge when model-grade audio-aware judging is needed.
 
+## AutoJudge A Hugging Face ASR Model
+
+For the end-to-end ASR model workflow, `autojudge-hf-asr` loads a Hugging Face
+`automatic-speech-recognition` pipeline, transcribes local-audio ASR cases, then runs the selected
+Open Audio Judge provider over the generated candidate transcripts.
+
+```bash
+oaj autojudge-hf-asr \
+  --model openai/whisper-tiny \
+  --cases runs/open-audio-samples/asr_wav_cases.jsonl \
+  --judge-provider mock \
+  --out runs/hf-whisper-tiny-asr
+```
+
+The command writes:
+
+- `candidate_cases.jsonl`: source cases plus model-generated `candidate_text`.
+- `model_summary.json`: model id, source manifest, and candidate coverage.
+- `judge-report/results.jsonl` and `judge-report/report.html`: aggregate scores, top issue
+  categories, priority cases, and sample-by-sample breakdowns.
+
+Install `transformers` and any model-specific audio dependencies in the runtime environment before
+using this command with real Hugging Face models. Keep private or generated audio artifacts under
+`runs/` unless they are explicitly safe to publish.
+
 ## REST API
 
 ```bash
