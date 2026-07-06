@@ -242,9 +242,28 @@ def _output_path_from_stdout(stdout: str) -> Path | None:
             data = json.loads(candidate)
         except json.JSONDecodeError:
             continue
-        output = data.get("output")
-        if isinstance(output, str) and output.strip():
-            return Path(output).resolve()
+        output = _first_output_path_value(data)
+        if output is not None:
+            return output
+    return None
+
+
+def _first_output_path_value(data: object) -> Path | None:
+    if isinstance(data, dict):
+        for key in ("output", "output_path", "audio_path", "path"):
+            value = data.get(key)
+            if isinstance(value, str) and value.strip():
+                return Path(value).resolve()
+        for key in ("audio", "artifact", "artifacts", "result"):
+            value = data.get(key)
+            output = _first_output_path_value(value)
+            if output is not None:
+                return output
+    elif isinstance(data, list):
+        for item in data:
+            output = _first_output_path_value(item)
+            if output is not None:
+                return output
     return None
 
 

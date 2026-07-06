@@ -104,6 +104,22 @@ def test_output_path_from_stdout_accepts_progress_before_json() -> None:
     assert output.name == "example.wav"
 
 
+@pytest.mark.parametrize(
+    "stdout",
+    [
+        '{"output_path": "/tmp/output-path.wav"}\n',
+        '{"audio_path": "/tmp/audio-path.wav"}\n',
+        '{"audio": {"path": "/tmp/audio-object.wav"}}\n',
+        '{"artifacts": [{"kind": "audio", "path": "/tmp/artifact.wav"}]}\n',
+    ],
+)
+def test_output_path_from_stdout_accepts_common_wrapper_json_shapes(stdout: str) -> None:
+    output = _output_path_from_stdout(stdout)
+
+    assert output is not None
+    assert output.suffix == ".wav"
+
+
 def test_write_local_tts_summary_json(tmp_path: Path) -> None:
     summary = tmp_path / "summary.json"
     case = EvaluationCase(
