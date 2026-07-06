@@ -23,6 +23,7 @@ DEFAULT_CHATTERBOX_MODEL = "mlx-community/chatterbox-turbo-6bit"
 class LocalTtsConfig:
     tts_bin: Path = DEFAULT_CHATTERBOX_BIN
     model: str = DEFAULT_CHATTERBOX_MODEL
+    synthesis_provider: str = "local_chatterbox"
     voice: str = "af_heart"
     lang_code: str = "en"
     audio_format: str = "wav"
@@ -76,7 +77,7 @@ def synthesize_cases_with_local_tts(
         metadata.update(
             {
                 "sample_kind": "local_synthetic_tts",
-                "synthesis_provider": "local_chatterbox",
+                "synthesis_provider": config.synthesis_provider,
                 "synthesis_model": config.model,
                 "synthesis_voice": config.voice,
                 "synthesis_lang_code": config.lang_code,
@@ -118,15 +119,17 @@ def write_local_tts_summary_json(
     *,
     source_cases: Path,
     model: str,
+    synthesis_provider: str = "local_chatterbox",
 ) -> Path:
     case_list = list(cases)
     summary = {
         "source_cases": str(source_cases),
         "candidate_model": model,
-        "candidate_generator": "local_chatterbox",
+        "candidate_generator": synthesis_provider,
         "total_cases": len(case_list),
         "case_ids": [case.id for case in case_list],
         "cases_with_audio_path": sum(1 for case in case_list if case.audio_path),
+        "by_synthesis_provider": _count_metadata(case_list, "synthesis_provider"),
         "by_synthesis_voice": _count_metadata(case_list, "synthesis_voice"),
         "by_synthesis_audio_format": _count_metadata(case_list, "synthesis_audio_format"),
         "by_tts_slice": _count_metadata(case_list, "tts_slice"),

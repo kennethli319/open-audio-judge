@@ -239,6 +239,10 @@ The command writes:
 Use `--judge-provider mock` for a cheap pipeline check. Use an audio-capable judge such as Gemini or
 a local Qwen/Qwen3-Omni endpoint for real perceptual judging.
 
+For non-Chatterbox wrappers that accept the same `local-tts-speak` arguments, pass `--tts-bin` and
+`--synthesis-provider` so generated case metadata and report aggregates identify the actual local
+backend.
+
 ## REST API
 
 ```bash

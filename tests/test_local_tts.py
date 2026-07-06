@@ -29,6 +29,7 @@ def test_synthesize_cases_with_local_tts_dry_run_writes_relative_audio_metadata(
         config=LocalTtsConfig(
             tts_bin=Path("/missing/local-tts-speak"),
             model="mlx-community/chatterbox-turbo-6bit",
+            synthesis_provider="local_test_tts",
             dry_run=True,
             keep_text_sidecars=True,
         ),
@@ -38,7 +39,7 @@ def test_synthesize_cases_with_local_tts_dry_run_writes_relative_audio_metadata(
     assert synthesized[0].audio_path == "audio/tts-sample-001.wav"
     assert synthesized[0].reference_text == "Call me at 09:45."
     assert synthesized[0].metadata["sample_kind"] == "local_synthetic_tts"
-    assert synthesized[0].metadata["synthesis_provider"] == "local_chatterbox"
+    assert synthesized[0].metadata["synthesis_provider"] == "local_test_tts"
     assert synthesized[0].metadata["synthesis_model"] == "mlx-community/chatterbox-turbo-6bit"
     assert synthesized[0].metadata["source_case_id"] == "tts sample/001"
     assert synthesized[0].metadata["requires_synthesis"] is False
@@ -112,6 +113,7 @@ def test_write_local_tts_summary_json(tmp_path: Path) -> None:
         reference_text="Hello.",
         metadata={
             "synthesis_voice": "af_heart",
+            "synthesis_provider": "local_test_tts",
             "synthesis_audio_format": "wav",
             "tts_slice": "general",
         },
@@ -122,10 +124,12 @@ def test_write_local_tts_summary_json(tmp_path: Path) -> None:
         summary,
         source_cases=Path("examples/tts_cases.jsonl"),
         model="mlx-community/chatterbox-turbo-6bit",
+        synthesis_provider="local_test_tts",
     )
 
     data = json.loads(summary.read_text(encoding="utf-8"))
     assert data["candidate_model"] == "mlx-community/chatterbox-turbo-6bit"
-    assert data["candidate_generator"] == "local_chatterbox"
+    assert data["candidate_generator"] == "local_test_tts"
     assert data["cases_with_audio_path"] == 1
+    assert data["by_synthesis_provider"] == {"local_test_tts": 1}
     assert data["by_synthesis_voice"] == {"af_heart": 1}

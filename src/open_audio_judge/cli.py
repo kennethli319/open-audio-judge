@@ -125,6 +125,13 @@ def autojudge_local_tts_command(
         Path,
         typer.Option("--tts-bin", help="Path to local-tts-speak-compatible command."),
     ] = DEFAULT_CHATTERBOX_BIN,
+    synthesis_provider: Annotated[
+        str,
+        typer.Option(
+            "--synthesis-provider",
+            help="Metadata label for the local TTS backend or wrapper.",
+        ),
+    ] = "local_chatterbox",
     voice: Annotated[str, typer.Option("--voice", help="TTS voice id.")] = "af_heart",
     lang_code: Annotated[str, typer.Option("--lang-code", help="TTS language code.")] = "en",
     audio_format: Annotated[
@@ -152,6 +159,7 @@ def autojudge_local_tts_command(
         config=LocalTtsConfig(
             tts_bin=tts_bin,
             model=model,
+            synthesis_provider=synthesis_provider,
             voice=voice,
             lang_code=lang_code,
             audio_format=audio_format,
@@ -168,6 +176,7 @@ def autojudge_local_tts_command(
         summary_path,
         source_cases=cases,
         model=model,
+        synthesis_provider=synthesis_provider,
     )
 
     prompt = load_prompt(judge)

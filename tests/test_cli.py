@@ -94,6 +94,7 @@ def test_autojudge_local_tts_cli_writes_synthesized_cases_and_report(
                     "id": "tts-case-local-tts",
                     "audio_path": "audio/tts-case.wav",
                     "metadata": {
+                        "synthesis_provider": config.synthesis_provider,
                         "synthesis_model": config.model,
                         "synthesis_voice": config.voice,
                         "synthesis_audio_format": config.audio_format,
@@ -112,6 +113,8 @@ def test_autojudge_local_tts_cli_writes_synthesized_cases_and_report(
             str(cases),
             "--model",
             "mlx-community/chatterbox-turbo-6bit",
+            "--synthesis-provider",
+            "local_test_tts",
             "--judge-provider",
             "mock",
             "--out",
@@ -128,6 +131,9 @@ def test_autojudge_local_tts_cli_writes_synthesized_cases_and_report(
         (out / "synthesis" / "tts_audio_cases.jsonl").read_text(encoding="utf-8")
     )
     assert written_case["audio_path"] == "audio/tts-case.wav"
+    assert written_case["metadata"]["synthesis_provider"] == "local_test_tts"
+    summary = json.loads((out / "model_summary.json").read_text(encoding="utf-8"))
+    assert summary["candidate_generator"] == "local_test_tts"
     assert "AutoJudged 1 local TTS cases" in result.output
 
 
