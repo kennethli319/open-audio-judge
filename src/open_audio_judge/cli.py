@@ -188,6 +188,13 @@ def autojudge_local_tts_command(
         str,
         typer.Option("--audio-format", help="Generated audio format."),
     ] = "wav",
+    tts_timeout_seconds: Annotated[
+        float | None,
+        typer.Option(
+            "--tts-timeout-seconds",
+            help="Maximum seconds to wait for each local TTS command.",
+        ),
+    ] = None,
     keep_text_sidecars: Annotated[
         bool,
         typer.Option("--keep-text-sidecars", help="Keep local target-text sidecar files."),
@@ -246,6 +253,7 @@ def autojudge_local_tts_command(
             voice=voice,
             lang_code=lang_code,
             audio_format=audio_format,
+            timeout_seconds=tts_timeout_seconds,
             keep_text_sidecars=keep_text_sidecars,
             dry_run=dry_run,
         ),

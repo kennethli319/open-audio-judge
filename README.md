@@ -241,6 +241,7 @@ oaj autojudge-local-tts \
   --evalset-prioritize-slice-coverage \
   --evalset-hash-source-ids \
   --model mlx-community/chatterbox-turbo-6bit \
+  --tts-timeout-seconds 180 \
   --judge-provider gemini \
   --limit 8 \
   --out runs/chatterbox-tts-evalset-autojudge
@@ -259,7 +260,8 @@ a local Qwen/Qwen3-Omni endpoint for real perceptual judging.
 
 For non-Chatterbox wrappers that accept the same `local-tts-speak` arguments, pass `--tts-bin` and
 `--synthesis-provider` so generated case metadata and report aggregates identify the actual local
-backend.
+backend. Use `--tts-timeout-seconds` to fail a single stuck synthesis call with captured stdout and
+stderr instead of leaving the full AutoJudge run hanging.
 
 ## REST API
 

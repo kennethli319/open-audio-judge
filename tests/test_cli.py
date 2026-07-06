@@ -85,6 +85,7 @@ def test_autojudge_local_tts_cli_writes_synthesized_cases_and_report(
     )
 
     def fake_synthesize_cases(loaded_cases, out_dir, config):
+        assert config.timeout_seconds == 3.5
         audio_dir = out_dir / "audio"
         audio_dir.mkdir(parents=True)
         (audio_dir / "tts-case.wav").write_bytes(b"RIFF")
@@ -115,6 +116,8 @@ def test_autojudge_local_tts_cli_writes_synthesized_cases_and_report(
             "mlx-community/chatterbox-turbo-6bit",
             "--synthesis-provider",
             "local_test_tts",
+            "--tts-timeout-seconds",
+            "3.5",
             "--judge-provider",
             "mock",
             "--out",

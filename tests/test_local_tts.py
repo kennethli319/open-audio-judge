@@ -71,7 +71,8 @@ def test_synthesize_cases_with_local_tts_reports_command_failure(
         reference_text="This should fail clearly.",
     )
 
-    def fake_run(command, check, capture_output, text):
+    def fake_run(command, check, capture_output, text, timeout):
+        assert timeout is None
         raise subprocess.CalledProcessError(
             7,
             command,
@@ -92,6 +93,57 @@ def test_synthesize_cases_with_local_tts_reports_command_failure(
     assert "local TTS command failed with exit code 7: local-tts-speak" in message
     assert "stderr: missing voice af_test" in message
     assert "stdout: loading model | retrying | failed after warmup" in message
+
+
+def test_synthesize_cases_with_local_tts_reports_timeout(
+    tmp_path: Path,
+    monkeypatch,
+) -> None:
+    tts_bin = tmp_path / "bin" / "local-tts-speak"
+    tts_bin.parent.mkdir()
+    tts_bin.write_text("#!/bin/sh\n", encoding="utf-8")
+    case = EvaluationCase(
+        id="tts-timeout",
+        task="tts_naturalness",
+        reference_text="This should time out clearly.",
+    )
+
+    def fake_run(command, check, capture_output, text, timeout):
+        raise subprocess.TimeoutExpired(
+            command,
+            timeout,
+            output=b"loading model\nstill warming up\n",
+            stderr=b"downloading weights\n",
+        )
+
+    monkeypatch.setattr("open_audio_judge.local_tts.subprocess.run", fake_run)
+
+    with pytest.raises(RuntimeError) as excinfo:
+        synthesize_cases_with_local_tts(
+            [case],
+            out_dir=tmp_path / "synthesis",
+            config=LocalTtsConfig(tts_bin=tts_bin, timeout_seconds=1.5),
+        )
+
+    message = str(excinfo.value)
+    assert "local TTS command timed out after 1.5 seconds: local-tts-speak" in message
+    assert "stderr: downloading weights" in message
+    assert "stdout: loading model | still warming up" in message
+
+
+def test_synthesize_cases_with_local_tts_rejects_nonpositive_timeout(tmp_path: Path) -> None:
+    case = EvaluationCase(
+        id="tts-timeout-invalid",
+        task="tts_naturalness",
+        reference_text="This should fail before synthesis.",
+    )
+
+    with pytest.raises(ValueError, match="timeout_seconds must be greater than zero"):
+        synthesize_cases_with_local_tts(
+            [case],
+            out_dir=tmp_path / "synthesis",
+            config=LocalTtsConfig(dry_run=True, timeout_seconds=0),
+        )
 
 
 def test_output_path_from_stdout_accepts_progress_before_json() -> None:

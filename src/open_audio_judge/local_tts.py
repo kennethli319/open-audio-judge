@@ -27,6 +27,7 @@ class LocalTtsConfig:
     voice: str = "af_heart"
     lang_code: str = "en"
     audio_format: str = "wav"
+    timeout_seconds: float | None = None
     keep_text_sidecars: bool = False
     dry_run: bool = False
 
@@ -43,6 +44,8 @@ def synthesize_cases_with_local_tts(
         raise FileNotFoundError(
             f"local TTS binary not found at {config.tts_bin}; pass --tts-bin or use --dry-run."
         )
+    if config.timeout_seconds is not None and config.timeout_seconds <= 0:
+        raise ValueError("local TTS timeout_seconds must be greater than zero.")
 
     text_dir = out_dir / "text"
     audio_dir = out_dir / "audio"
@@ -197,7 +200,10 @@ def _run_local_tts(
             check=True,
             capture_output=True,
             text=True,
+            timeout=config.timeout_seconds,
         )
+    except subprocess.TimeoutExpired as exc:
+        raise RuntimeError(_format_tts_timeout(exc, config.tts_bin)) from exc
     except subprocess.CalledProcessError as exc:
         raise RuntimeError(_format_tts_failure(exc, config.tts_bin)) from exc
     output_path = _output_path_from_stdout(completed.stdout, base_dir=audio_dir)
@@ -224,6 +230,27 @@ def _format_tts_failure(exc: subprocess.CalledProcessError, tts_bin: Path) -> st
     if len(details) == 1:
         details.append("no stdout or stderr was captured")
     return "; ".join(details)
+
+
+def _format_tts_timeout(exc: subprocess.TimeoutExpired, tts_bin: Path) -> str:
+    details = [
+        f"local TTS command timed out after {exc.timeout:g} seconds: {tts_bin.name}",
+    ]
+    stderr = _tail_nonempty_lines(_output_text(exc.stderr))
+    stdout = _tail_nonempty_lines(_output_text(exc.stdout))
+    if stderr:
+        details.append(f"stderr: {stderr}")
+    if stdout:
+        details.append(f"stdout: {stdout}")
+    if len(details) == 1:
+        details.append("no stdout or stderr was captured")
+    return "; ".join(details)
+
+
+def _output_text(value: str | bytes | None) -> str | None:
+    if isinstance(value, bytes):
+        return value.decode("utf-8", errors="replace")
+    return value
 
 
 def _tail_nonempty_lines(value: str | None, *, max_lines: int = 4) -> str:
