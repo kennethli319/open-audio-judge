@@ -139,7 +139,9 @@ def write_local_tts_summary_json(
             "audio_duration_seconds",
         ),
         "by_synthesis_provider": _count_metadata(case_list, "synthesis_provider"),
+        "by_synthesis_model": _count_metadata(case_list, "synthesis_model"),
         "by_synthesis_voice": _count_metadata(case_list, "synthesis_voice"),
+        "by_synthesis_lang_code": _count_metadata(case_list, "synthesis_lang_code"),
         "by_synthesis_audio_format": _count_metadata(case_list, "synthesis_audio_format"),
         "by_tts_slice": _count_metadata(case_list, "tts_slice"),
     }

@@ -152,6 +152,8 @@ def test_write_local_tts_summary_json(tmp_path: Path) -> None:
         metadata={
             "synthesis_voice": "af_heart",
             "synthesis_provider": "local_test_tts",
+            "synthesis_model": "mlx-community/chatterbox-turbo-6bit",
+            "synthesis_lang_code": "en",
             "synthesis_audio_format": "wav",
             "tts_slice": "general",
             "audio_bytes": 1234,
@@ -175,4 +177,6 @@ def test_write_local_tts_summary_json(tmp_path: Path) -> None:
     assert data["total_audio_duration_seconds"] == 1.234
     assert data["cases_with_audio_duration"] == 1
     assert data["by_synthesis_provider"] == {"local_test_tts": 1}
+    assert data["by_synthesis_model"] == {"mlx-community/chatterbox-turbo-6bit": 1}
     assert data["by_synthesis_voice"] == {"af_heart": 1}
+    assert data["by_synthesis_lang_code"] == {"en": 1}

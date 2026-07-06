@@ -160,6 +160,18 @@ def test_write_html_report_aggregates_tts_candidate_metadata(tmp_path: Path) -> 
     assert "Issues By TTS Slice" in html
     assert "Failures By TTS Slice" in html
     assert "structured json / provider error" in html
+    assert "Issues By Model" in html
+    assert "mlx-community/chatterbox-turbo-6bit / prosody issue" in html
+    assert "Issues By Voice" in html
+    assert "af heart / prosody issue" in html
+    assert "Issues By Language" in html
+    assert "en / prosody issue" in html
+    assert "Failures By Model" in html
+    assert "mlx-community/chatterbox-turbo-6bit / provider error" in html
+    assert "Failures By Voice" in html
+    assert "af heart / provider error" in html
+    assert "Failures By Language" in html
+    assert "en / provider error" in html
     assert "Failures By Sample Kind" in html
     assert "local synthetic tts / provider error" in html
     assert "dates times / prosody issue" in html
