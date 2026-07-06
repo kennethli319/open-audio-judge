@@ -157,6 +157,24 @@ def test_output_path_from_stdout_accepts_progress_before_json() -> None:
     assert output.name == "example.wav"
 
 
+def test_output_path_from_stdout_accepts_pretty_json_after_progress() -> None:
+    output = _output_path_from_stdout(
+        "loading model\n"
+        "generating speech\n"
+        '{\n'
+        '  "result": {\n'
+        '    "outputs": [\n'
+        '      {"kind": "log", "path": ""},\n'
+        '      {"kind": "audio", "path": "/tmp/pretty-output.wav"}\n'
+        "    ]\n"
+        "  }\n"
+        "}\n"
+    )
+
+    assert output is not None
+    assert output.name == "pretty-output.wav"
+
+
 @pytest.mark.parametrize(
     "stdout",
     [
@@ -164,6 +182,8 @@ def test_output_path_from_stdout_accepts_progress_before_json() -> None:
         '{"audio_path": "/tmp/audio-path.wav"}\n',
         '{"audio": {"path": "/tmp/audio-object.wav"}}\n',
         '{"artifacts": [{"kind": "audio", "path": "/tmp/artifact.wav"}]}\n',
+        '{"outputs": [{"path": "/tmp/outputs.wav"}]}\n',
+        '{"files": [{"path": "/tmp/files.wav"}]}\n',
     ],
 )
 def test_output_path_from_stdout_accepts_common_wrapper_json_shapes(stdout: str) -> None:

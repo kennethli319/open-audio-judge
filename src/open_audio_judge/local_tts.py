@@ -294,7 +294,27 @@ def _output_path_from_stdout(stdout: str, *, base_dir: Path | None = None) -> Pa
         output = _first_output_path_value(data, base_dir=base_dir)
         if output is not None:
             return output
+    for data in _json_values_from_stdout_tail(stdout):
+        output = _first_output_path_value(data, base_dir=base_dir)
+        if output is not None:
+            return output
     return None
+
+
+def _json_values_from_stdout_tail(stdout: str) -> list[object]:
+    decoder = json.JSONDecoder()
+    values: list[object] = []
+    for index in range(len(stdout) - 1, -1, -1):
+        if stdout[index] not in "{[":
+            continue
+        try:
+            value, end = decoder.raw_decode(stdout[index:])
+        except json.JSONDecodeError:
+            continue
+        if stdout[index + end :].strip():
+            continue
+        values.append(value)
+    return values
 
 
 def _first_output_path_value(data: object, *, base_dir: Path | None = None) -> Path | None:
@@ -303,7 +323,7 @@ def _first_output_path_value(data: object, *, base_dir: Path | None = None) -> P
             value = data.get(key)
             if isinstance(value, str) and value.strip():
                 return _normalize_output_path(value, base_dir=base_dir)
-        for key in ("audio", "artifact", "artifacts", "result"):
+        for key in ("audio", "artifact", "artifacts", "result", "outputs", "files"):
             value = data.get(key)
             output = _first_output_path_value(value, base_dir=base_dir)
             if output is not None:
