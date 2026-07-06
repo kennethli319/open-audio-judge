@@ -39,6 +39,8 @@ def render_html_report(results: list[EvaluationResult]) -> str:
     language_counts = _language_counts(results)
     sample_kind_counts = _metadata_counts(results, "sample_kind")
     issue_by_slice_counts = _issue_counts_by_metadata(results, "tts_slice")
+    status_by_slice_counts = _status_counts_by_metadata(results, "tts_slice")
+    status_by_sample_kind_counts = _status_counts_by_metadata(results, "sample_kind")
     priority_cases = _priority_cases(results)
     calibration_checks = _calibration_checks(results)
 
@@ -73,6 +75,14 @@ def render_html_report(results: list[EvaluationResult]) -> str:
     issue_by_slice_markup = _render_count_list(
         issue_by_slice_counts,
         empty_label="No slice issue categories",
+    )
+    status_by_slice_markup = _render_count_list(
+        status_by_slice_counts,
+        empty_label="No slice failures",
+    )
+    status_by_sample_kind_markup = _render_count_list(
+        status_by_sample_kind_counts,
+        empty_label="No sample-kind failures",
     )
     priority_markup = _render_priority_cases(priority_cases)
     calibration_markup = _render_calibration_checks(calibration_checks)
@@ -206,6 +216,8 @@ def render_html_report(results: list[EvaluationResult]) -> str:
       <div class="metric"><span>Language</span>{language_markup}</div>
       <div class="metric"><span>Sample Kind</span>{sample_kind_markup}</div>
       <div class="metric"><span>Issues By TTS Slice</span>{issue_by_slice_markup}</div>
+      <div class="metric"><span>Failures By TTS Slice</span>{status_by_slice_markup}</div>
+      <div class="metric"><span>Failures By Sample Kind</span>{status_by_sample_kind_markup}</div>
     </section>
 
     <h2>Calibration Checks</h2>
@@ -335,6 +347,21 @@ def _issue_counts_by_metadata(
             if category == "no_error":
                 continue
             counts[f"{value.strip()} / {category}"] += 1
+    return counts.most_common(8)
+
+
+def _status_counts_by_metadata(
+    results: list[EvaluationResult],
+    field: str,
+) -> list[tuple[str, int]]:
+    counts: Counter[str] = Counter()
+    for result in results:
+        if result.status == "ok":
+            continue
+        value = result.metadata.get(field)
+        if not isinstance(value, str) or not value.strip():
+            continue
+        counts[f"{value.strip()} / {result.status}"] += 1
     return counts.most_common(8)
 
 

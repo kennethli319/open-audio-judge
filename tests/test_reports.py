@@ -120,6 +120,26 @@ def test_write_html_report_aggregates_tts_candidate_metadata(tmp_path: Path) -> 
                 "sample_kind": "local_synthetic_tts",
             },
         ),
+        EvaluationResult(
+            case_id="tts-json-local-tts",
+            task="tts_naturalness",
+            judge_id="tts_naturalness",
+            judge_version="0.1.0",
+            provider="gemini",
+            overall_score=1,
+            reason="Evaluation failed: upstream timeout",
+            error_categories=[],
+            label="inaccurate",
+            status="provider_error",
+            error="upstream timeout",
+            metadata={
+                "tts_slice": "structured_json",
+                "synthesis_model": "mlx-community/chatterbox-turbo-6bit",
+                "synthesis_voice": "af_heart",
+                "synthesis_lang_code": "en",
+                "sample_kind": "local_synthetic_tts",
+            },
+        ),
     ]
 
     output = write_html_report(results, tmp_path / "report.html")
@@ -138,6 +158,10 @@ def test_write_html_report_aggregates_tts_candidate_metadata(tmp_path: Path) -> 
     assert "Sample Kind" in html
     assert "local synthetic tts" in html
     assert "Issues By TTS Slice" in html
+    assert "Failures By TTS Slice" in html
+    assert "structured json / provider error" in html
+    assert "Failures By Sample Kind" in html
+    assert "local synthetic tts / provider error" in html
     assert "dates times / prosody issue" in html
 
 
