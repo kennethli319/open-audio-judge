@@ -107,10 +107,13 @@ runs can map private prompts into the same categories without copying private ro
 - `measurement_unit_disambiguation`: abbreviated and confusable measurement units such as mg/mL,
   mm/m, ms/min, lb/oz/mL, and W/Wh where TTS must preserve exact unit meaning under realistic
   clinical, engineering, logistics, and device-spec wording.
+- `contextual_abbreviation_expansion`: context-dependent abbreviations such as St., No., month
+  labels, business shorthand, corporate suffixes, and weekday labels where the model must expand or
+  preserve the right spoken form from surrounding meaning rather than punctuation alone.
 
 ## Manifest Contract
 
-The public comparison manifest is intentionally balanced at 180 cases for now: 36 categories with 5
+The public comparison manifest is intentionally balanced at 185 cases for now: 37 categories with 5
 cases each. Expansion should add complete five-case category batches before deepening existing
 categories.
 
