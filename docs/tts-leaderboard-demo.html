@@ -979,6 +979,8 @@
       <div class="panel">
         <h3>Evaluation Category</h3>
         <p><code>information_tuning</code><br>avg 84.5 / n 2 / range 76-93</p>
+        <p class="muted">Category focus: numbers, dates, units, ordered steps, and safety-critical wording.</p>
+        <p class="muted">Source basis: Seed-TTS-Eval intelligibility checks and TTSDS intelligibility/prosody dimensions.</p>
         <p class="muted">Likely fix areas: pronunciation, prosody/pacing, text faithfulness.</p>
         <p class="muted">Representative cases: dense dates, numbers, and units.</p>
       </div>
@@ -1003,6 +1005,7 @@
           <th>Category</th>
           <th>Score</th>
           <th>Likely Fix Areas</th>
+          <th>Category Guidance</th>
           <th>Evidence</th>
           <th>Representative Cases</th>
         </tr>
@@ -1013,6 +1016,7 @@
           <td data-label="Category"><code>information_tuning</code></td>
           <td data-label="Score">avg 76.0<br><span class="muted">n 2 / range 72-80</span></td>
           <td data-label="Likely Fix Areas">pronunciation, prosody/pacing, text faithfulness</td>
+          <td data-label="Category Guidance">Focus: numbers, dates, units, ordered steps, and safety-critical wording. Source basis: Seed-TTS-Eval intelligibility checks.</td>
           <td data-label="Evidence">issues: intelligibility issue x1, number error x1</td>
           <td data-label="Representative Cases">dense dates, measurements, and step boundaries</td>
         </tr>
@@ -1021,6 +1025,7 @@
           <td data-label="Category"><code>speech_steerability</code></td>
           <td data-label="Score">avg 81.5<br><span class="muted">n 2 / range 79-84</span></td>
           <td data-label="Likely Fix Areas">instruction/style following, prosody/pacing</td>
+          <td data-label="Category Guidance">Focus: register, pace, volume, pitch, and emphasis controls. Source basis: InstructTTSEval acoustic/style control.</td>
           <td data-label="Evidence">issues: style mismatch x1, pacing issue x1</td>
           <td data-label="Representative Cases">pace, emphasis, and register-control prompts</td>
         </tr>
@@ -1169,12 +1174,12 @@
       the model leaderboard, then inspect category-level rankings to find where one generator loses
       to another on the same eval set. Use the Weakest Segments cards to find low-scoring
       model/category/slice groups, then use the Model-Category Action Matrix to route the lowest
-      model/category pairs to likely solution areas and representative samples. Use the top
-      diagnostics to confirm repeated issue clusters such as pronunciation errors, artifact classes,
-      or weak slices. Finally, filter the per-sample rows by label, status, model, category, or TTS
-      slice, search for an issue or case id, sort by score, and inspect the averaged score, the
-      three underlying Gemini scores, target text hash, generated-audio provenance, and any
-      researcher notes.
+      model/category pairs to likely solution areas, taxonomy focus areas, source-basis signals, and
+      representative samples. Use the top diagnostics to confirm repeated issue clusters such as
+      pronunciation errors, artifact classes, or weak slices. Finally, filter the per-sample rows by
+      label, status, model, category, or TTS slice, search for an issue or case id, sort by score,
+      and inspect the averaged score, the three underlying Gemini scores, target text hash,
+      generated-audio provenance, and any researcher notes.
     </p>
 
     <p class="muted">

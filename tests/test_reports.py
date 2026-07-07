@@ -103,6 +103,10 @@ def test_write_html_report_aggregates_tts_candidate_metadata(tmp_path: Path) -> 
                 "source_case_id": "tts-date",
                 "judge_sample_scores": [65, 75],
                 "judge_sample_average": 70.0,
+                "source_basis": (
+                    "Seed-TTS-Eval intelligibility checks and TTSDS intelligibility/prosody "
+                    "dimensions"
+                ),
             },
         ),
         EvaluationResult(
@@ -145,6 +149,10 @@ def test_write_html_report_aggregates_tts_candidate_metadata(tmp_path: Path) -> 
                 "synthesis_lang_code": "en",
                 "sample_kind": "local_synthetic_tts",
                 "source_case_id": "tts-date",
+                "source_basis": (
+                    "Seed-TTS-Eval intelligibility checks and TTSDS intelligibility/prosody "
+                    "dimensions"
+                ),
             },
         ),
         EvaluationResult(
@@ -220,6 +228,11 @@ def test_write_html_report_aggregates_tts_candidate_metadata(tmp_path: Path) -> 
     assert "judge samples: 65, 75; avg 70.00" in html
     assert "Weakest Segments" in html
     assert "Model-Category Action Matrix" in html
+    assert "Category Guidance" in html
+    assert "numbers, dates, units, ordered steps, and safety-critical wording" in html
+    assert "numeric/date normalization" in html
+    assert "entity and unit pronunciation" in html
+    assert "Seed-TTS-Eval intelligibility checks" in html
     assert "mlx-community/Kokoro-82M-4bit" in html
     assert "intelligibility" in html
     assert "text faithfulness" in html

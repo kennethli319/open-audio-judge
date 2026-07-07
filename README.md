@@ -272,9 +272,9 @@ The command writes:
   source category, and sample kind.
 - `judge-report/results.jsonl` and `judge-report/report.html`: aggregate naturalness scores, top
   issue categories, weakest category/slice/model segments, a ranked model-category action matrix,
-  likely fix areas, priority cases, category score breakdowns, and searchable/sortable
-  sample-by-sample reasons with label, status, model, category, and slice filters. Use
-  `--judge-samples` to run multiple independent judge calls per
+  research-backed category guidance, likely fix areas, priority cases, category score breakdowns,
+  and searchable/sortable sample-by-sample reasons with label, status, model, category, and slice
+  filters. Use `--judge-samples` to run multiple independent judge calls per
   synthesized sample and report the averaged score plus the individual judge scores.
 
 Use `--judge-provider mock` for a cheap pipeline check. Use an audio-capable judge such as Gemini or
@@ -300,7 +300,10 @@ the model selected with `--baseline-model` (default:
 score deltas, and the largest per-case regressions to inspect first. A companion baseline
 regression-slices section groups those matched deltas by evaluation category and TTS slice, then
 surfaces likely fix areas and representative regressions so engineers can prioritize the model
-behaviors most responsible for low scores.
+behaviors most responsible for low scores. Category-focused rows also show the taxonomy focus and
+`source_basis` signals from the manifest, which helps route low scores to concrete work such as
+numeric/date normalization, multilingual phonemization, speaker embedding stability, or
+discourse-level prosody.
 
 For non-Chatterbox wrappers that accept the same `local-tts-speak` arguments, pass `--tts-bin` and
 `--synthesis-provider` so generated case metadata and report aggregates identify the actual local

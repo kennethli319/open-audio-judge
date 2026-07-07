@@ -535,6 +535,82 @@ ISSUE_FIX_AREAS = {
     "provider_error": "synthesis failures",
     "parse_error": "synthesis failures",
 }
+TTS_CATEGORY_GUIDANCE = {
+    "paralinguistics": (
+        "emotion, empathy, confidence, urgency, and warmth",
+        [
+            "style-conditioning controls",
+            "emotion/prosody labels",
+            "volume and pace calibration",
+        ],
+    ),
+    "instruction_following": (
+        "exact text, pronunciation directives, punctuation, emphasis, and do-not-say constraints",
+        [
+            "instruction parser",
+            "text normalization guardrails",
+            "pronunciation and emphasis controls",
+        ],
+    ),
+    "information_tuning": (
+        "numbers, dates, units, ordered steps, and safety-critical wording",
+        [
+            "numeric/date normalization",
+            "entity and unit pronunciation",
+            "high-stakes text faithfulness",
+        ],
+    ),
+    "storytelling_dialogue": (
+        "narration, role play, dialogue naturalness, and scene pacing",
+        [
+            "role/style embeddings",
+            "dialogue prosody",
+            "longer-context pacing",
+        ],
+    ),
+    "speech_steerability": (
+        "register, pace, volume, pitch, and emphasis controls",
+        [
+            "acoustic-control knobs",
+            "prompt-to-prosody mapping",
+            "control strength calibration",
+        ],
+    ),
+    "robustness_intelligibility": (
+        "rare words, acronyms, code-like strings, long text, and clear snippets",
+        [
+            "G2P and acronym handling",
+            "decoder robustness",
+            "long-text breath and clarity",
+        ],
+    ),
+    "speaker_voice_consistency": (
+        "speaker identity, stable persona, timbre, and cross-sentence consistency",
+        [
+            "speaker embedding stability",
+            "voice cloning/reference conditioning",
+            "anti-drift decoding",
+        ],
+    ),
+    "multilingual_code_switching": (
+        "short bilingual phrases, names, loanwords, and respectful language switches",
+        [
+            "multilingual phonemization",
+            "language ID/code-switch handling",
+            "name pronunciation coverage",
+        ],
+    ),
+    "long_form_discourse": (
+        "paragraph flow, list structure, transitions, parentheticals, and end stability",
+        [
+            "context window handling",
+            "discourse-level prosody",
+            "end-of-passage stability",
+        ],
+    ),
+}
+
+
 @dataclass(frozen=True)
 class SegmentSummary:
     field_label: str
@@ -546,6 +622,8 @@ class SegmentSummary:
     issue_counts: list[tuple[str, int]]
     status_counts: list[tuple[str, int]]
     fix_areas: list[str]
+    category_focus: str | None
+    source_bases: list[str]
     representative_cases: list[EvaluationResult]
 
 
@@ -560,6 +638,8 @@ class ModelCategoryAction:
     issue_counts: list[tuple[str, int]]
     status_counts: list[tuple[str, int]]
     fix_areas: list[str]
+    category_focus: str | None
+    source_bases: list[str]
     representative_cases: list[EvaluationResult]
 
 
@@ -873,7 +953,9 @@ def _weakest_segments(
                     high=max(scores),
                     issue_counts=issue_counts,
                     status_counts=status_counts,
-                    fix_areas=_fix_areas_for_segment(issue_counts, status_counts),
+                    fix_areas=_fix_areas_for_segment(issue_counts, status_counts, name),
+                    category_focus=_category_focus_for_segment(field, name),
+                    source_bases=_source_bases_for_results(group_results),
                     representative_cases=representative_cases,
                 )
             )
@@ -898,15 +980,38 @@ def _segment_status_counts(results: list[EvaluationResult]) -> list[tuple[str, i
 def _fix_areas_for_segment(
     issue_counts: list[tuple[str, int]],
     status_counts: list[tuple[str, int]],
+    category: str | None = None,
 ) -> list[str]:
     areas: list[str] = []
     for issue, _count in [*issue_counts, *status_counts]:
         mapped = ISSUE_FIX_AREAS.get(issue, issue.replace("_", " "))
         if mapped not in areas:
             areas.append(mapped)
+    if category in TTS_CATEGORY_GUIDANCE:
+        for mapped in TTS_CATEGORY_GUIDANCE[category][1]:
+            if mapped not in areas:
+                areas.append(mapped)
     if not areas:
         areas.append("inspect low-score audio and judge rationale")
     return areas[:4]
+
+
+def _category_focus_for_segment(field: str, value: str) -> str | None:
+    if field != "evaluation_category":
+        return None
+    guidance = TTS_CATEGORY_GUIDANCE.get(value)
+    if guidance is None:
+        return None
+    return guidance[0]
+
+
+def _source_bases_for_results(results: list[EvaluationResult], limit: int = 2) -> list[str]:
+    counts: Counter[str] = Counter()
+    for result in results:
+        basis = result.metadata.get("source_basis")
+        if isinstance(basis, str) and basis.strip():
+            counts[basis.strip()] += 1
+    return [basis for basis, _count in counts.most_common(limit)]
 
 
 def _render_weakest_segments(items: list[SegmentSummary]) -> str:
@@ -928,6 +1033,8 @@ def _render_weakest_segment_card(item: SegmentSummary) -> str:
         empty_label="No failed evaluations",
     )
     fix_markup = _render_inline_tags(item.fix_areas, empty_label="Inspect judge rationale")
+    focus_markup = _render_guidance_block("Category focus", item.category_focus)
+    basis_markup = _render_guidance_tags("Source basis", item.source_bases)
     case_markup = "".join(
         "<li>"
         f"<span>{html.escape(result.case_id)}</span> "
@@ -939,11 +1046,28 @@ def _render_weakest_segment_card(item: SegmentSummary) -> str:
       <span>{html.escape(item.field_label)}</span>
       <strong>{html.escape(item.name.replace("_", " "))}</strong>
       <div class="muted">avg {item.average:.1f} / n {item.count} / range {item.low}-{item.high}</div>
+      {focus_markup}
+      {basis_markup}
       <div><span class="muted">Likely fix areas</span><br>{fix_markup}</div>
       <div><span class="muted">Issue categories</span><br>{issue_markup}</div>
       <div><span class="muted">Evaluation failures</span><br>{status_markup}</div>
       <div><span class="muted">Representative cases</span><ul class="counts">{case_markup}</ul></div>
     </div>"""
+
+
+def _render_guidance_block(label: str, value: str | None) -> str:
+    if value is None:
+        return ""
+    return f'<div><span class="muted">{html.escape(label)}</span><br>{html.escape(value)}</div>'
+
+
+def _render_guidance_tags(label: str, items: list[str]) -> str:
+    if not items:
+        return ""
+    return (
+        f'<div><span class="muted">{html.escape(label)}</span><br>'
+        f'{_render_inline_tags(items, empty_label="")}</div>'
+    )
 
 
 def _segment_severity_class(average: float) -> str:
@@ -997,7 +1121,9 @@ def _model_category_actions(
                 high=max(scores),
                 issue_counts=issue_counts,
                 status_counts=status_counts,
-                fix_areas=_fix_areas_for_segment(issue_counts, status_counts),
+                fix_areas=_fix_areas_for_segment(issue_counts, status_counts, category),
+                category_focus=_category_focus_for_segment("evaluation_category", category),
+                source_bases=_source_bases_for_results(group_results),
                 representative_cases=representative_cases,
             )
         )
@@ -1016,6 +1142,7 @@ def _render_model_category_actions(items: list[ModelCategoryAction]) -> str:
           <th>Category</th>
           <th>Score</th>
           <th>Likely Fix Areas</th>
+          <th>Category Guidance</th>
           <th>Evidence</th>
           <th>Representative Cases</th>
         </tr>
@@ -1036,6 +1163,8 @@ def _render_model_category_action_row(item: ModelCategoryAction) -> str:
         empty_label="No failed evaluations",
     )
     fix_markup = _render_inline_tags(item.fix_areas, empty_label="Inspect judge rationale")
+    focus_markup = _render_guidance_block("Focus", item.category_focus)
+    basis_markup = _render_guidance_tags("Source basis", item.source_bases)
     case_markup = "".join(
         "<li>"
         f"<span>{html.escape(result.case_id)}</span> "
@@ -1048,6 +1177,7 @@ def _render_model_category_action_row(item: ModelCategoryAction) -> str:
   <td data-label="Category">{html.escape(item.category.replace("_", " "))}</td>
   <td data-label="Score"><strong>avg {item.average:.1f}</strong><br><span class="muted">n {item.count} / range {item.low}-{item.high}</span></td>
   <td data-label="Likely Fix Areas">{fix_markup}</td>
+  <td data-label="Category Guidance">{focus_markup}{basis_markup}</td>
   <td data-label="Evidence"><span class="muted">Issues</span><br>{issue_markup}<br><span class="muted">Failures</span><br>{status_markup}</td>
   <td data-label="Representative Cases"><ul class="counts">{case_markup}</ul></td>
 </tr>"""
@@ -1195,7 +1325,11 @@ def _baseline_segment_deltas(
                 wins=sum(1 for delta in deltas if delta > 0),
                 ties=sum(1 for delta in deltas if delta == 0),
                 losses=sum(1 for delta in deltas if delta < 0),
-                fix_areas=_fix_areas_for_segment(issue_counts, status_counts),
+                fix_areas=_fix_areas_for_segment(
+                    issue_counts,
+                    status_counts,
+                    segment if field == "evaluation_category" else None,
+                ),
                 largest_regressions=sorted(
                     regressions,
                     key=lambda item: (item[2], item[0].case_id),
