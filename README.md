@@ -256,8 +256,10 @@ The command writes:
 - `synthesis/synthesis_failures.jsonl` when `--skip-failed-synthesis` records skipped local TTS
   failures.
 - `model_summary.json`: model id, voice, audio format, attempted/synthesized counts, synthesis
-  success rate, and failure breakdowns by error type, synthesis provider/model/voice/language,
-  audio format, TTS slice, source category, and sample kind.
+  success rate, and failure breakdowns by error type such as `command_failed`,
+  `command_timeout`, `missing_output`, `stale_fallback_output`, `invalid_output_path`, or
+  `audio_format_mismatch`, plus synthesis provider/model/voice/language, audio format, TTS slice,
+  source category, and sample kind.
 - `judge-report/results.jsonl` and `judge-report/report.html`: aggregate naturalness scores, top
   issue categories, priority cases, and sample-by-sample reasons.
 

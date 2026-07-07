@@ -392,7 +392,7 @@ def _failure_for_case(
     )
     return LocalTtsFailure(
         case_id=case.id,
-        error_type=type(exc).__name__,
+        error_type=_failure_error_type(exc),
         message=_compact_error_message(exc),
         metadata=metadata,
     )
@@ -412,6 +412,30 @@ def _compact_error_message(exc: Exception) -> str:
     if len(message) > 1000:
         return f"{message[:1000]}..."
     return message or type(exc).__name__
+
+
+def _failure_error_type(exc: Exception) -> str:
+    if isinstance(exc, FileNotFoundError):
+        return "missing_output"
+    if isinstance(exc, ValueError):
+        message = str(exc)
+        if "outside the synthesis audio directory" in message:
+            return "invalid_output_path"
+        if "expected " in message and "--audio-format" in message:
+            return "audio_format_mismatch"
+        if "fallback matching files were unchanged" in message:
+            return "stale_fallback_output"
+        if "did not report or write an output audio file" in message:
+            return "missing_output"
+        if "did not report an output audio file" in message:
+            return "missing_output"
+    if isinstance(exc, RuntimeError):
+        message = str(exc)
+        if message.startswith("local TTS command timed out"):
+            return "command_timeout"
+        if message.startswith("local TTS command failed with exit code"):
+            return "command_failed"
+    return type(exc).__name__
 
 
 def _format_tts_timeout(exc: subprocess.TimeoutExpired, tts_bin: Path) -> str:

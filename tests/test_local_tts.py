@@ -153,7 +153,7 @@ def test_synthesize_cases_with_local_tts_batch_can_continue_after_failure(
     assert [case.id for case in result.cases] == ["tts-ok-local-tts"]
     assert len(result.failures) == 1
     assert result.failures[0].case_id == "tts-fail"
-    assert result.failures[0].error_type == "RuntimeError"
+    assert result.failures[0].error_type == "command_failed"
     assert "voice unavailable" in result.failures[0].message
     assert result.failures[0].metadata["tts_slice"] == "numbers"
     assert result.failures[0].metadata["synthesis_provider"] == "local_chatterbox"
@@ -163,6 +163,71 @@ def test_synthesize_cases_with_local_tts_batch_can_continue_after_failure(
     assert result.failures[0].metadata["synthesis_audio_format"] == "wav"
     assert result.failures[0].metadata["source_case_id"] == "tts-fail"
     assert "reference_text_sha256" in result.failures[0].metadata
+
+
+@pytest.mark.parametrize(
+    ("exc", "error_type"),
+    [
+        (
+            RuntimeError("local TTS command timed out after 1.5 seconds: local-tts-speak"),
+            "command_timeout",
+        ),
+        (
+            ValueError(
+                "local TTS command reported an output audio file outside the synthesis "
+                "audio directory"
+            ),
+            "invalid_output_path",
+        ),
+        (
+            ValueError(
+                "local TTS command reported an output audio file with extension .mp3; "
+                "expected .wav for --audio-format wav."
+            ),
+            "audio_format_mismatch",
+        ),
+        (
+            ValueError(
+                "local TTS command did not report an output audio file and fallback "
+                "matching files were unchanged from before synthesis."
+            ),
+            "stale_fallback_output",
+        ),
+        (FileNotFoundError("Expected synthesized audio at audio/tts.wav"), "missing_output"),
+    ],
+)
+def test_synthesize_cases_with_local_tts_batch_classifies_failure_types(
+    tmp_path: Path,
+    monkeypatch,
+    exc: Exception,
+    error_type: str,
+) -> None:
+    tts_bin = tmp_path / "bin" / "local-tts-speak"
+    tts_bin.parent.mkdir()
+    tts_bin.write_text("#!/bin/sh\n", encoding="utf-8")
+    case = EvaluationCase(
+        id="tts-fail",
+        task="tts_naturalness",
+        reference_text="This should fail with a classified error.",
+    )
+
+    def fake_synthesize_one_case(*args, **kwargs):
+        raise exc
+
+    monkeypatch.setattr(
+        "open_audio_judge.local_tts._synthesize_one_case",
+        fake_synthesize_one_case,
+    )
+
+    result = synthesize_cases_with_local_tts_batch(
+        [case],
+        out_dir=tmp_path / "synthesis",
+        config=LocalTtsConfig(tts_bin=tts_bin),
+        continue_on_error=True,
+    )
+
+    assert result.cases == []
+    assert result.failures[0].error_type == error_type
 
 
 def test_synthesize_cases_with_local_tts_reports_timeout(
@@ -435,7 +500,7 @@ def test_write_local_tts_summary_json_counts_failures(tmp_path: Path) -> None:
     failures = [
         LocalTtsFailure(
             case_id="tts-fail",
-            error_type="RuntimeError",
+            error_type="command_failed",
             message="voice unavailable",
             metadata={
                 "language": "en-US",
@@ -467,7 +532,7 @@ def test_write_local_tts_summary_json_counts_failures(tmp_path: Path) -> None:
     assert data["synthesized_case_count"] == 0
     assert data["synthesis_success_rate"] == 0.0
     assert data["synthesis_failure_count"] == 1
-    assert data["synthesis_failures_by_error_type"] == {"RuntimeError": 1}
+    assert data["synthesis_failures_by_error_type"] == {"command_failed": 1}
     assert data["synthesis_failures_by_provider"] == {"local_test_tts": 1}
     assert data["synthesis_failures_by_model"] == {"test-model": 1}
     assert data["synthesis_failures_by_voice"] == {"af_test": 1}
@@ -486,7 +551,7 @@ def test_write_local_tts_failures_jsonl(tmp_path: Path) -> None:
         [
             LocalTtsFailure(
                 case_id="tts-fail",
-                error_type="RuntimeError",
+                error_type="command_failed",
                 message="voice unavailable",
                 metadata={"tts_slice": "numbers"},
             )
@@ -497,7 +562,7 @@ def test_write_local_tts_failures_jsonl(tmp_path: Path) -> None:
     written = json.loads(path.read_text(encoding="utf-8"))
     assert written == {
         "case_id": "tts-fail",
-        "error_type": "RuntimeError",
+        "error_type": "command_failed",
         "message": "voice unavailable",
         "metadata": {"tts_slice": "numbers"},
     }

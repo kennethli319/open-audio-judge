@@ -276,7 +276,7 @@ def test_autojudge_local_tts_cli_can_skip_failed_synthesis(
             failures=[
                 LocalTtsFailure(
                     case_id="tts-fail",
-                    error_type="RuntimeError",
+                    error_type="command_failed",
                     message="voice unavailable",
                     metadata=loaded_cases[1].metadata,
                 )
@@ -312,7 +312,7 @@ def test_autojudge_local_tts_cli_can_skip_failed_synthesis(
     assert summary["synthesized_case_count"] == 1
     assert summary["synthesis_success_rate"] == 0.5
     assert summary["synthesis_failure_count"] == 1
-    assert summary["synthesis_failures_by_error_type"] == {"RuntimeError": 1}
+    assert summary["synthesis_failures_by_error_type"] == {"command_failed": 1}
     assert summary["synthesis_failures_by_tts_slice"] == {"numbers": 1}
     assert summary["synthesis_failures_by_source_category"] == {
         "instruction_constraints": 1
