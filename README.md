@@ -290,7 +290,10 @@ oaj report \
 ```
 
 The combined report reuses the same score, category, slice, voice, language, weakest-segment, and
-model-category action matrix views across all supplied result files.
+model-category action matrix views across all supplied result files. When multiple synthesis models
+share `metadata.source_case_id`, the report also adds baseline deltas against
+`mlx-community/chatterbox-turbo-6bit`, including matched-case counts, win/tie/loss totals, average
+score deltas, and the largest per-case regressions to inspect first.
 
 For non-Chatterbox wrappers that accept the same `local-tts-speak` arguments, pass `--tts-bin` and
 `--synthesis-provider` so generated case metadata and report aggregates identify the actual local

@@ -100,6 +100,7 @@ def test_write_html_report_aggregates_tts_candidate_metadata(tmp_path: Path) -> 
                 "synthesis_voice": "af_heart",
                 "synthesis_lang_code": "en",
                 "sample_kind": "local_synthetic_tts",
+                "source_case_id": "tts-date",
                 "judge_sample_scores": [65, 75],
                 "judge_sample_average": 70.0,
             },
@@ -122,6 +123,7 @@ def test_write_html_report_aggregates_tts_candidate_metadata(tmp_path: Path) -> 
                 "synthesis_voice": "af_heart",
                 "language": "en-US",
                 "sample_kind": "local_synthetic_tts",
+                "source_case_id": "tts-code",
             },
         ),
         EvaluationResult(
@@ -142,6 +144,7 @@ def test_write_html_report_aggregates_tts_candidate_metadata(tmp_path: Path) -> 
                 "synthesis_voice": "af_heart",
                 "synthesis_lang_code": "en",
                 "sample_kind": "local_synthetic_tts",
+                "source_case_id": "tts-date",
             },
         ),
         EvaluationResult(
@@ -241,6 +244,13 @@ def test_write_html_report_aggregates_tts_candidate_metadata(tmp_path: Path) -> 
     assert "All categories" in html
     assert "All slices" in html
     assert "The number and date were hard to understand." in html
+    assert "Baseline Model Deltas" in html
+    assert "Compared Model" in html
+    assert "Wins / Ties / Losses" in html
+    assert "-25.0" in html
+    assert "-25" in html
+    assert "tts-date" in html
+    assert "45 vs baseline 70" in html
 
 
 def test_write_html_report_shows_sample_provenance_per_row(tmp_path: Path) -> None:

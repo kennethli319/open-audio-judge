@@ -292,7 +292,7 @@
         </tr>
         <tr>
           <td data-label="Path"><code>judge-report/report.html</code></td>
-          <td data-label="Purpose">Human-readable report with aggregate scores, weakest segments, likely fix areas, priority cases, and searchable/sortable sample-by-sample details.</td>
+          <td data-label="Purpose">Human-readable report with aggregate scores, baseline deltas, weakest segments, likely fix areas, priority cases, and searchable/sortable sample-by-sample details.</td>
         </tr>
       </tbody>
     </table>
@@ -433,6 +433,38 @@
           <td data-label="Kokoro">85.0</td>
           <td data-label="Qwen3-TTS">82.5</td>
           <td data-label="What To Inspect">rare words, acronyms, code-like strings, long text, multilingual snippets</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <h2>Baseline Model Deltas</h2>
+    <table>
+      <thead>
+        <tr>
+          <th>Compared Model</th>
+          <th>Baseline</th>
+          <th>Matched Cases</th>
+          <th>Avg Delta</th>
+          <th>Wins / Ties / Losses</th>
+          <th>Largest Regressions</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td data-label="Compared Model"><code>mlx-community/Kokoro-82M-4bit</code></td>
+          <td data-label="Baseline"><code>mlx-community/chatterbox-turbo-6bit</code></td>
+          <td data-label="Matched Cases">30</td>
+          <td data-label="Avg Delta">-2.6</td>
+          <td data-label="Wins / Ties / Losses">5 / 4 / 21</td>
+          <td data-label="Largest Regressions">speech pace and emphasis cases where style control trails the baseline.</td>
+        </tr>
+        <tr>
+          <td data-label="Compared Model"><code>mlx-community/Qwen3-TTS-12Hz-0.6B-Base-4bit</code></td>
+          <td data-label="Baseline"><code>mlx-community/chatterbox-turbo-6bit</code></td>
+          <td data-label="Matched Cases">30</td>
+          <td data-label="Avg Delta">-6.5</td>
+          <td data-label="Wins / Ties / Losses">3 / 2 / 25</td>
+          <td data-label="Largest Regressions">emotion and dense-fact cases with lower naturalness or intelligibility.</td>
         </tr>
       </tbody>
     </table>

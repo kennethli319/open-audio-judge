@@ -31,6 +31,8 @@ def test_chatterbox_gemini_sample_page_documents_workflow() -> None:
         "Model Leaderboard",
         "Category Leaderboard",
         "Scores By Category",
+        "Baseline Model Deltas",
+        "Wins / Ties / Losses",
         "Weakest Segments",
         "Likely fix areas",
         "searchable/sortable sample-by-sample details",

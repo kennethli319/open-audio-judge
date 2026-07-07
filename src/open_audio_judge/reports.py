@@ -61,6 +61,7 @@ def render_html_report(results: list[EvaluationResult]) -> str:
     status_by_sample_kind_counts = _status_counts_by_metadata(results, "sample_kind")
     weakest_segments = _weakest_segments(results)
     model_category_actions = _model_category_actions(results)
+    baseline_deltas = _baseline_deltas(results)
     priority_cases = _priority_cases(results)
     calibration_checks = _calibration_checks(results)
 
@@ -163,6 +164,7 @@ def render_html_report(results: list[EvaluationResult]) -> str:
     )
     weakest_segments_markup = _render_weakest_segments(weakest_segments)
     model_category_actions_markup = _render_model_category_actions(model_category_actions)
+    baseline_deltas_markup = _render_baseline_deltas(baseline_deltas)
     priority_markup = _render_priority_cases(priority_cases)
     calibration_markup = _render_calibration_checks(calibration_checks)
 
@@ -375,6 +377,9 @@ def render_html_report(results: list[EvaluationResult]) -> str:
     <h2>Model-Category Action Matrix</h2>
     {model_category_actions_markup}
 
+    <h2>Baseline Model Deltas</h2>
+    {baseline_deltas_markup}
+
     <h2>Priority Cases</h2>
     {priority_markup}
 
@@ -510,6 +515,7 @@ ISSUE_FIX_AREAS = {
     "provider_error": "synthesis failures",
     "parse_error": "synthesis failures",
 }
+BASELINE_SYNTHESIS_MODEL = "mlx-community/chatterbox-turbo-6bit"
 
 
 @dataclass(frozen=True)
@@ -538,6 +544,17 @@ class ModelCategoryAction:
     status_counts: list[tuple[str, int]]
     fix_areas: list[str]
     representative_cases: list[EvaluationResult]
+
+
+@dataclass(frozen=True)
+class BaselineDeltaSummary:
+    model: str
+    count: int
+    average_delta: float
+    wins: int
+    ties: int
+    losses: int
+    largest_regressions: list[tuple[EvaluationResult, EvaluationResult, int]]
 
 
 def _render_row(result: EvaluationResult) -> str:
@@ -1002,6 +1019,122 @@ def _render_model_category_action_row(item: ModelCategoryAction) -> str:
   <td data-label="Evidence"><span class="muted">Issues</span><br>{issue_markup}<br><span class="muted">Failures</span><br>{status_markup}</td>
   <td data-label="Representative Cases"><ul class="counts">{case_markup}</ul></td>
 </tr>"""
+
+
+def _baseline_deltas(
+    results: list[EvaluationResult],
+    *,
+    baseline_model: str = BASELINE_SYNTHESIS_MODEL,
+    regression_limit: int = 3,
+) -> list[BaselineDeltaSummary]:
+    baseline_by_case: dict[str, EvaluationResult] = {}
+    by_model_and_case: dict[tuple[str, str], EvaluationResult] = {}
+    for result in results:
+        model = _metadata_group_value(result, "synthesis_model")
+        source_case_id = _source_case_key(result)
+        if model is None or source_case_id is None:
+            continue
+        if model == baseline_model:
+            existing = baseline_by_case.get(source_case_id)
+            if existing is None or result.status == "ok":
+                baseline_by_case[source_case_id] = result
+        else:
+            by_model_and_case[(model, source_case_id)] = result
+
+    grouped_pairs: dict[str, list[tuple[EvaluationResult, EvaluationResult, int]]] = {}
+    for (model, source_case_id), result in by_model_and_case.items():
+        baseline = baseline_by_case.get(source_case_id)
+        if baseline is None:
+            continue
+        delta = result.overall_score - baseline.overall_score
+        grouped_pairs.setdefault(model, []).append((result, baseline, delta))
+
+    summaries: list[BaselineDeltaSummary] = []
+    for model, pairs in grouped_pairs.items():
+        deltas = [delta for _result, _baseline, delta in pairs]
+        regressions = [pair for pair in pairs if pair[2] < 0]
+        summaries.append(
+            BaselineDeltaSummary(
+                model=model,
+                count=len(pairs),
+                average_delta=statistics.mean(deltas),
+                wins=sum(1 for delta in deltas if delta > 0),
+                ties=sum(1 for delta in deltas if delta == 0),
+                losses=sum(1 for delta in deltas if delta < 0),
+                largest_regressions=sorted(
+                    regressions,
+                    key=lambda item: (item[2], item[0].case_id),
+                )[:regression_limit],
+            )
+        )
+    return sorted(summaries, key=lambda item: (item.average_delta, item.model))
+
+
+def _render_baseline_deltas(items: list[BaselineDeltaSummary]) -> str:
+    if not items:
+        return (
+            '<div class="metric"><strong class="muted">'
+            "No matched baseline model comparisons available"
+            "</strong></div>"
+        )
+
+    rows = "\n".join(_render_baseline_delta_row(item) for item in items)
+    return f"""<table>
+      <thead>
+        <tr>
+          <th>Compared Model</th>
+          <th>Baseline</th>
+          <th>Matched Cases</th>
+          <th>Avg Delta</th>
+          <th>Wins / Ties / Losses</th>
+          <th>Largest Regressions</th>
+        </tr>
+      </thead>
+      <tbody>
+        {rows}
+      </tbody>
+    </table>"""
+
+
+def _render_baseline_delta_row(item: BaselineDeltaSummary) -> str:
+    regression_markup = "".join(
+        "<li>"
+        f"<span>{html.escape(_source_case_key(result) or result.case_id)}</span> "
+        f"<strong>{delta:+d}</strong>"
+        f"<br><span class=\"muted\">{html.escape(result.case_id)}: "
+        f"{result.overall_score} vs baseline {baseline.overall_score}</span>"
+        "</li>"
+        for result, baseline, delta in item.largest_regressions
+    )
+    if not regression_markup:
+        regression_markup = '<li><span class="muted">No regressions</span></li>'
+    return f"""<tr class="{_delta_severity_class(item.average_delta)}">
+  <td data-label="Compared Model">{html.escape(item.model)}</td>
+  <td data-label="Baseline">{html.escape(BASELINE_SYNTHESIS_MODEL)}</td>
+  <td data-label="Matched Cases">{item.count}</td>
+  <td data-label="Avg Delta"><strong>{item.average_delta:+.1f}</strong></td>
+  <td data-label="Wins / Ties / Losses">{item.wins} / {item.ties} / {item.losses}</td>
+  <td data-label="Largest Regressions"><ul class="counts">{regression_markup}</ul></td>
+</tr>"""
+
+
+def _delta_severity_class(delta: float) -> str:
+    if delta <= -10:
+        return "severity-low"
+    if delta < 0:
+        return "severity-medium"
+    return "severity-high"
+
+
+def _source_case_key(result: EvaluationResult) -> str | None:
+    source_case_id = result.metadata.get("source_case_id")
+    if isinstance(source_case_id, str) and source_case_id.strip():
+        return source_case_id.strip()
+    case_id = result.case_id
+    suffix = "-local-tts"
+    if case_id.endswith(suffix):
+        return case_id[: -len(suffix)]
+    return None
 
 
 def _metadata_group_value(result: EvaluationResult, field: str) -> str | None:
