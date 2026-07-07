@@ -85,6 +85,7 @@ def test_tts_leaderboard_demo_page_documents_workflow() -> None:
         "tts-slot-value-pairing-delivery-intake-form-001",
         "tts-commitment-scope-delivery-apology-boundary-001",
         "tts-ordinal-ranking-delivery-triage-rerank-001",
+        "tts-temporal-relation-delivery-migration-window-001",
         "Model Leaderboard",
         "Category Leaderboard",
         "no error: 167",
@@ -131,7 +132,7 @@ def test_tts_multiturn_examples_cover_requested_categories() -> None:
         category = record["metadata"]["eval_category"]
         categories[category] = categories.get(category, 0) + 1
 
-    assert len(records) == 300
+    assert len(records) == 305
     assert categories == {
         "paralinguistics": 5,
         "instruction_following": 5,
@@ -193,6 +194,7 @@ def test_tts_multiturn_examples_cover_requested_categories() -> None:
         "slot_value_pairing_delivery": 5,
         "commitment_scope_delivery": 5,
         "ordinal_ranking_delivery": 5,
+        "temporal_relation_delivery": 5,
     }
     assert all(record["turns"] for record in records)
     assert all(record["reference_text"] for record in records)

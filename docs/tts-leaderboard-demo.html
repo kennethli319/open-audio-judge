@@ -385,6 +385,7 @@
           <option value="slot_value_pairing_delivery">Slot value pairing delivery</option>
           <option value="commitment_scope_delivery">Commitment scope delivery</option>
           <option value="ordinal_ranking_delivery">Ordinal ranking delivery</option>
+          <option value="temporal_relation_delivery">Temporal relation delivery</option>
         </select>
         <select id="label-filter" aria-label="Filter by label">
           <option value="">All labels</option>
@@ -429,7 +430,7 @@
   --cases examples/tts_multiturn_cases.jsonl \
   --judge-provider gemini \
   --judge-samples 3 \
-  --limit 300 \
+  --limit 305 \
   --out runs/leaderboard/chatterbox</code></pre>
 
     <pre><code>oaj autojudge-local-tts \
@@ -438,7 +439,7 @@
   --cases examples/tts_multiturn_cases.jsonl \
   --judge-provider gemini \
   --judge-samples 3 \
-  --limit 300 \
+  --limit 305 \
   --out runs/leaderboard/kokoro</code></pre>
 
     <pre><code>oaj autojudge-local-tts \
@@ -447,7 +448,7 @@
   --cases examples/tts_multiturn_cases.jsonl \
   --judge-provider gemini \
   --judge-samples 3 \
-  --limit 300 \
+  --limit 305 \
   --out runs/leaderboard/qwen3-tts</code></pre>
 
     <p>
@@ -459,7 +460,7 @@
   --cases examples/tts_multiturn_cases.jsonl \
   --judge-provider gemini \
   --judge-samples 3 \
-  --limit 300 \
+  --limit 305 \
   --out runs/leaderboard/chatterbox</code></pre>
 
     <p>
@@ -2615,6 +2616,41 @@
             <p><strong>Slice:</strong> <code>version_label_first_second_final_order</code></p>
             <p><strong>Prompt:</strong> Read this QA note so version labels do not sound numerically reordered.</p>
             <p><strong>Target:</strong> Run version 2.01 as the first baseline, version 2.1 as the second check, and version 2.10 as the final comparison.</p>
+          </article>
+        </div>
+      </details>
+      <details class="sample-group" data-category="temporal_relation_delivery">
+        <summary><span>Temporal Relation Delivery</span><strong>5 cases</strong></summary>
+        <div class="sample-list">
+          <article class="sample-card">
+            <h3><code>tts-temporal-relation-delivery-migration-window-001</code></h3>
+            <p><strong>Slice:</strong> <code>migration_window_before_during_after_checks</code></p>
+            <p><strong>Prompt:</strong> Read this migration schedule so before, during, and after the maintenance window stay distinct.</p>
+            <p><strong>Target:</strong> Before the 02:00 UTC window, export the audit log. During the window, pause writes. After 02:45 UTC, resume writes only if checks pass.</p>
+          </article>
+          <article class="sample-card">
+            <h3><code>tts-temporal-relation-delivery-medication-taper-001</code></h3>
+            <p><strong>Slice:</strong> <code>medication_taper_through_starting_until</code></p>
+            <p><strong>Prompt:</strong> Read this medication taper so the listener can hear when each dose changes.</p>
+            <p><strong>Target:</strong> Take one tablet nightly through Friday; starting Saturday, take one tablet every other night until the bottle is empty.</p>
+          </article>
+          <article class="sample-card">
+            <h3><code>tts-temporal-relation-delivery-travel-timezone-001</code></h3>
+            <p><strong>Slice:</strong> <code>travel_local_time_elapsed_connection_gate</code></p>
+            <p><strong>Prompt:</strong> Read this travel update so local times and elapsed layover timing are not merged.</p>
+            <p><strong>Target:</strong> Your flight lands in Denver at 4:10 PM local time; the connection boards 55 minutes later at gate B12.</p>
+          </article>
+          <article class="sample-card">
+            <h3><code>tts-temporal-relation-delivery-subscription-grace-001</code></h3>
+            <p><strong>Slice:</strong> <code>billing_active_grace_cancellation_dates</code></p>
+            <p><strong>Prompt:</strong> Read this billing note so active service, grace period, and cancellation timing are unmistakable.</p>
+            <p><strong>Target:</strong> Service stays active until July 31. The seven-day grace period starts August 1, and cancellation completes after August 7.</p>
+          </article>
+          <article class="sample-card">
+            <h3><code>tts-temporal-relation-delivery-lab-incubation-001</code></h3>
+            <p><strong>Slice:</strong> <code>lab_incubation_cool_then_measure_window</code></p>
+            <p><strong>Prompt:</strong> Read this lab protocol so incubation, cooling, and measurement order cannot be swapped.</p>
+            <p><strong>Target:</strong> Incubate for 18 minutes, cool for exactly two minutes, then measure absorbance within 30 seconds.</p>
           </article>
         </div>
       </details>

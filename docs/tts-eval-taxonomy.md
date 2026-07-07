@@ -177,10 +177,13 @@ runs can map private prompts into the same categories without copying private ro
 - `ordinal_ranking_delivery`: priority order, floor sequences, tied ranks, rubric levels, and
   version-order instructions where ordinal words, numeric labels, and relation changes must stay
   attached to the right item.
+- `temporal_relation_delivery`: before/during/after windows, through/starting/until dose changes,
+  local-time versus elapsed-time travel updates, service grace periods, and lab timing sequences
+  where time spans and event order must remain attached to the correct action.
 
 ## Manifest Contract
 
-The public comparison manifest is intentionally balanced at 300 cases for now: 60 categories with 5
+The public comparison manifest is intentionally balanced at 305 cases for now: 61 categories with 5
 cases each. Expansion should add complete five-case category batches before deepening existing
 categories.
 

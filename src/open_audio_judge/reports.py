@@ -1022,6 +1022,14 @@ TTS_CATEGORY_GUIDANCE = {
             "relation-change prosody",
         ],
     ),
+    "temporal_relation_delivery": (
+        "before, during, after, through, starting, until, local-time, elapsed-time, and timed protocol spans",
+        [
+            "temporal phrase grouping",
+            "date, time, and duration text normalization",
+            "sequence and active-window prosody",
+        ],
+    ),
 }
 
 
