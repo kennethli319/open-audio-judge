@@ -1102,6 +1102,14 @@ TTS_CATEGORY_GUIDANCE = {
             "term, variable, and condition grouping",
         ],
     ),
+    "discourse_marker_intonation": (
+        "tag questions, correction markers, topic returns, politeness softeners, and contrast markers that carry pragmatic intent",
+        [
+            "discourse-marker prosody",
+            "pragmatic intent preservation",
+            "marker-to-clause attachment and question contour",
+        ],
+    ),
 }
 
 

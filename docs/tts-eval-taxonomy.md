@@ -207,10 +207,13 @@ runs can map private prompts into the same categories without copying private ro
 - `operator_precedence_delivery`: parentheses, boolean grouping, chained inequalities, exponent
   scope, and subscript boundaries where spoken math or logic must preserve which operation binds
   to which term.
+- `discourse_marker_intonation`: tag questions, correction markers, topic-return markers,
+  politeness softeners, and contrastive discourse markers where prosody must preserve pragmatic
+  intent and attach the marker to the right clause.
 
 ## Manifest Contract
 
-The public comparison manifest is intentionally balanced at 350 cases for now: 70 categories with 5
+The public comparison manifest is intentionally balanced at 355 cases for now: 71 categories with 5
 cases each. Expansion should add complete five-case category batches before deepening existing
 categories.
 
