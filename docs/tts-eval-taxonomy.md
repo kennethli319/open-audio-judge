@@ -216,10 +216,15 @@ runs can map private prompts into the same categories without copying private ro
 - `ellipsis_fragment_delivery`: short answers, clipped confirmations, label-value fragments,
   headline-style updates, and repair fragments where TTS must preserve exact words without filling
   in omitted context or flattening the fragment's pragmatic role.
+- `quoted_reported_speech_delivery`: direct quotes, indirect reports, nested quotes, quoted status
+  labels, and speaker-switching handoffs where attribution and quote boundaries must remain clear.
+- `modal_negation_scope_delivery`: may-not, do-not-have-to, likely-won't, cannot-until, and
+  optional-versus-mandatory constructions where prosody must preserve permission, probability,
+  prohibition, and obligation scope.
 
 ## Manifest Contract
 
-The public comparison manifest is intentionally balanced at 365 cases for now: 73 categories with 5
+The public comparison manifest is intentionally balanced at 375 cases for now: 75 categories with 5
 cases each. Expansion should add complete five-case category batches before deepening existing
 categories.
 

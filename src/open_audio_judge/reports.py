@@ -1126,6 +1126,22 @@ TTS_CATEGORY_GUIDANCE = {
             "short-answer and repair prosody",
         ],
     ),
+    "quoted_reported_speech_delivery": (
+        "direct quotes, indirect reports, nested quotes, quoted labels, and speaker-switching handoffs",
+        [
+            "quote-boundary prosody",
+            "speaker and source attribution",
+            "reported-speech text normalization",
+        ],
+    ),
+    "modal_negation_scope_delivery": (
+        "may-not, do-not-have-to, likely-won't, cannot-until, and optional-versus-mandatory scope",
+        [
+            "modal and negation scope prosody",
+            "permission, probability, and obligation preservation",
+            "exception and condition attachment",
+        ],
+    ),
 }
 
 

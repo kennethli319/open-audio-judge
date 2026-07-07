@@ -398,6 +398,8 @@
           <option value="discourse_marker_intonation">Discourse marker intonation</option>
           <option value="deictic_reference_delivery">Deictic reference delivery</option>
           <option value="ellipsis_fragment_delivery">Ellipsis fragment delivery</option>
+          <option value="quoted_reported_speech_delivery">Quoted reported speech delivery</option>
+          <option value="modal_negation_scope_delivery">Modal negation scope delivery</option>
         </select>
         <select id="label-filter" aria-label="Filter by label">
           <option value="">All labels</option>
@@ -442,7 +444,7 @@
   --cases examples/tts_multiturn_cases.jsonl \
   --judge-provider gemini \
   --judge-samples 3 \
-  --limit 365 \
+  --limit 375 \
   --out runs/leaderboard/chatterbox</code></pre>
 
     <pre><code>oaj autojudge-local-tts \
@@ -451,7 +453,7 @@
   --cases examples/tts_multiturn_cases.jsonl \
   --judge-provider gemini \
   --judge-samples 3 \
-  --limit 365 \
+  --limit 375 \
   --out runs/leaderboard/kokoro</code></pre>
 
     <pre><code>oaj autojudge-local-tts \
@@ -460,7 +462,7 @@
   --cases examples/tts_multiturn_cases.jsonl \
   --judge-provider gemini \
   --judge-samples 3 \
-  --limit 365 \
+  --limit 375 \
   --out runs/leaderboard/qwen3-tts</code></pre>
 
     <p>
@@ -472,7 +474,7 @@
   --cases examples/tts_multiturn_cases.jsonl \
   --judge-provider gemini \
   --judge-samples 3 \
-  --limit 365 \
+  --limit 375 \
   --out runs/leaderboard/chatterbox</code></pre>
 
     <p>
@@ -517,7 +519,7 @@
     <h2>Sample Report Preview</h2>
     <section class="grid" aria-label="Sample report metrics">
       <div class="metric"><span>Models</span><strong>3</strong></div>
-      <div class="metric"><span>Shared Eval Cases</span><strong>365</strong></div>
+      <div class="metric"><span>Shared Eval Cases</span><strong>375</strong></div>
       <div class="metric"><span>Judge Samples</span><strong>3x</strong></div>
       <div class="metric"><span>Top Avg</span><strong>91.2</strong></div>
       <div class="metric"><span>Lowest Avg</span><strong>84.7</strong></div>
@@ -526,7 +528,7 @@
 
     <h2>Eval Set Samples</h2>
     <p>
-      The public demo eval set contains 365 synthetic, public-safe cases grouped into research-backed
+      The public demo eval set contains 375 synthetic, public-safe cases grouped into research-backed
       TTS dimensions. Each category below contributes five shared cases that every model synthesizes
       before Gemini judges the generated audio.
     </p>
@@ -3083,6 +3085,76 @@
             <p><strong>Slice:</strong> <code>not_tuesday_wednesday_repair_fragment</code></p>
             <p><strong>Prompt:</strong> Read this correction fragment so the replacement value is clear without adding a full sentence.</p>
             <p><strong>Target:</strong> Not Tuesday, Wednesday morning.</p>
+          </article>
+        </div>
+      </details>
+      <details class="sample-group" data-category="quoted_reported_speech_delivery">
+        <summary><span>Quoted Reported Speech Delivery</span><strong>5 cases</strong></summary>
+        <div class="sample-list">
+          <article class="sample-card">
+            <h3><code>tts-quoted-reported-speech-delivery-direct-quote-001</code></h3>
+            <p><strong>Slice:</strong> <code>direct_quote_instruction_attribution_mina</code></p>
+            <p><strong>Prompt:</strong> Read this update so the quoted instruction is clearly someone else's exact wording.</p>
+            <p><strong>Target:</strong> Mina said, "Lock the rear gate first," before she left for the south lot.</p>
+          </article>
+          <article class="sample-card">
+            <h3><code>tts-quoted-reported-speech-delivery-indirect-warning-001</code></h3>
+            <p><strong>Slice:</strong> <code>indirect_warning_attribution_jordan_charger</code></p>
+            <p><strong>Prompt:</strong> Read this indirect report so it does not sound like a new command from the speaker.</p>
+            <p><strong>Target:</strong> Jordan warned that the charger should stay unplugged until the case cools down.</p>
+          </article>
+          <article class="sample-card">
+            <h3><code>tts-quoted-reported-speech-delivery-quote-within-quote-001</code></h3>
+            <p><strong>Slice:</strong> <code>nested_quote_manual_review_label</code></p>
+            <p><strong>Prompt:</strong> Read this nested quote so the label phrase stays inside the quoted message.</p>
+            <p><strong>Target:</strong> The note says, "Choose the option marked 'manual review' before approving the claim."</p>
+          </article>
+          <article class="sample-card">
+            <h3><code>tts-quoted-reported-speech-delivery-scare-quotes-001</code></h3>
+            <p><strong>Slice:</strong> <code>quoted_status_label_pending_customs_condition</code></p>
+            <p><strong>Prompt:</strong> Read this so the quoted word sounds like a label under review, not sarcasm.</p>
+            <p><strong>Target:</strong> The dashboard marks this shipment as "pending" until the customs scan arrives.</p>
+          </article>
+          <article class="sample-card">
+            <h3><code>tts-quoted-reported-speech-delivery-speaker-switch-001</code></h3>
+            <p><strong>Slice:</strong> <code>two_speaker_quote_attribution_ava_leo_condition</code></p>
+            <p><strong>Prompt:</strong> Read this handoff note so the two speakers' words stay attached to the right people.</p>
+            <p><strong>Target:</strong> Ava asked, "Can we delay pickup?" Leo answered, "Only if dispatch confirms by noon."</p>
+          </article>
+        </div>
+      </details>
+      <details class="sample-group" data-category="modal_negation_scope_delivery">
+        <summary><span>Modal Negation Scope Delivery</span><strong>5 cases</strong></summary>
+        <div class="sample-list">
+          <article class="sample-card">
+            <h3><code>tts-modal-negation-scope-delivery-may-not-001</code></h3>
+            <p><strong>Slice:</strong> <code>may_not_permission_unless_supervisor_signs</code></p>
+            <p><strong>Prompt:</strong> Read this policy sentence so may not is understood as not allowed, not as uncertainty.</p>
+            <p><strong>Target:</strong> Visitors may not enter the clean room unless the supervisor signs the access log.</p>
+          </article>
+          <article class="sample-card">
+            <h3><code>tts-modal-negation-scope-delivery-do-not-have-to-001</code></h3>
+            <p><strong>Slice:</strong> <code>do_not_have_to_optional_receipts_under_fifteen</code></p>
+            <p><strong>Prompt:</strong> Read this benefits note so do not have to sounds optional, not forbidden.</p>
+            <p><strong>Target:</strong> You do not have to submit receipts for meals under fifteen dollars.</p>
+          </article>
+          <article class="sample-card">
+            <h3><code>tts-modal-negation-scope-delivery-likely-wont-001</code></h3>
+            <p><strong>Slice:</strong> <code>likely_wont_forecast_after_nightly_sync</code></p>
+            <p><strong>Prompt:</strong> Read this forecast so likely won't remains a cautious probability, not a guarantee.</p>
+            <p><strong>Target:</strong> The update likely won't reach branch devices until after the nightly sync.</p>
+          </article>
+          <article class="sample-card">
+            <h3><code>tts-modal-negation-scope-delivery-cannot-until-001</code></h3>
+            <p><strong>Slice:</strong> <code>cannot_release_until_duplicate_charge_voided</code></p>
+            <p><strong>Prompt:</strong> Read this workflow gate so cannot and until control the same action.</p>
+            <p><strong>Target:</strong> The refund cannot be released until the duplicate charge is voided.</p>
+          </article>
+          <article class="sample-card">
+            <h3><code>tts-modal-negation-scope-delivery-not-required-but-must-001</code></h3>
+            <p><strong>Slice:</strong> <code>photo_optional_inspector_must_record_seal</code></p>
+            <p><strong>Prompt:</strong> Read this compliance note so the optional and mandatory parts do not blur together.</p>
+            <p><strong>Target:</strong> A photo is not required, but the inspector must record the seal number.</p>
           </article>
         </div>
       </details>
