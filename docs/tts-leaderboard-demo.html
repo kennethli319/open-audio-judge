@@ -378,7 +378,7 @@
   --cases examples/tts_multiturn_cases.jsonl \
   --judge-provider gemini \
   --judge-samples 3 \
-  --limit 75 \
+  --limit 85 \
   --out runs/leaderboard/chatterbox</code></pre>
 
     <pre><code>oaj autojudge-local-tts \
@@ -387,7 +387,7 @@
   --cases examples/tts_multiturn_cases.jsonl \
   --judge-provider gemini \
   --judge-samples 3 \
-  --limit 75 \
+  --limit 85 \
   --out runs/leaderboard/kokoro</code></pre>
 
     <pre><code>oaj autojudge-local-tts \
@@ -396,7 +396,7 @@
   --cases examples/tts_multiturn_cases.jsonl \
   --judge-provider gemini \
   --judge-samples 3 \
-  --limit 75 \
+  --limit 85 \
   --out runs/leaderboard/qwen3-tts</code></pre>
 
     <p>
@@ -408,7 +408,7 @@
   --cases examples/tts_multiturn_cases.jsonl \
   --judge-provider gemini \
   --judge-samples 3 \
-  --limit 75 \
+  --limit 85 \
   --out runs/leaderboard/chatterbox</code></pre>
 
     <p>
@@ -453,16 +453,16 @@
     <h2>Sample Report Preview</h2>
     <section class="grid" aria-label="Sample report metrics">
       <div class="metric"><span>Models</span><strong>3</strong></div>
-      <div class="metric"><span>Shared Eval Cases</span><strong>75</strong></div>
+      <div class="metric"><span>Shared Eval Cases</span><strong>85</strong></div>
       <div class="metric"><span>Judge Samples</span><strong>3x</strong></div>
       <div class="metric"><span>Top Avg</span><strong>91.2</strong></div>
       <div class="metric"><span>Lowest Avg</span><strong>84.7</strong></div>
-      <div class="metric"><span>Total Judgments</span><strong>675</strong></div>
+      <div class="metric"><span>Total Judgments</span><strong>765</strong></div>
     </section>
 
     <h2>Eval Set Samples</h2>
     <p>
-      The public demo eval set contains 75 synthetic, public-safe cases grouped into research-backed
+      The public demo eval set contains 85 synthetic, public-safe cases grouped into research-backed
       TTS dimensions. Each category below contributes five shared cases that every model synthesizes
       before Gemini judges the generated audio.
     </p>
@@ -992,6 +992,76 @@
           </article>
         </div>
       </details>
+      <details class="sample-group" data-category="heteronym_disambiguation">
+        <summary><span>Heteronym Disambiguation</span><strong>5 cases</strong></summary>
+        <div class="sample-list">
+          <article class="sample-card">
+            <h3><code>tts-heteronym-disambiguation-read-001</code></h3>
+            <p><strong>Slice:</strong> <code>read_present_past</code></p>
+            <p><strong>Prompt:</strong> Read this sentence so the two forms of read are pronounced differently from context.</p>
+            <p><strong>Target:</strong> I will read the brief after I read the alert from yesterday.</p>
+          </article>
+          <article class="sample-card">
+            <h3><code>tts-heteronym-disambiguation-wind-001</code></h3>
+            <p><strong>Slice:</strong> <code>wind_verb_noun</code></p>
+            <p><strong>Prompt:</strong> Read this operations note with the verb wind and noun wind clearly disambiguated.</p>
+            <p><strong>Target:</strong> Please wind the sample cable before the wind tunnel fan starts.</p>
+          </article>
+          <article class="sample-card">
+            <h3><code>tts-heteronym-disambiguation-bass-001</code></h3>
+            <p><strong>Slice:</strong> <code>bass_music_fish</code></p>
+            <p><strong>Prompt:</strong> Read this caption so the music term and the fish name do not collapse into one pronunciation.</p>
+            <p><strong>Target:</strong> The bass player sketched a bass near the lake sign.</p>
+          </article>
+          <article class="sample-card">
+            <h3><code>tts-heteronym-disambiguation-minute-001</code></h3>
+            <p><strong>Slice:</strong> <code>minute_adjective_time</code></p>
+            <p><strong>Prompt:</strong> Read this inspection note so the adjective minute and the time unit minute are distinct.</p>
+            <p><strong>Target:</strong> A minute crack appeared one minute after the pressure test.</p>
+          </article>
+          <article class="sample-card">
+            <h3><code>tts-heteronym-disambiguation-polish-001</code></h3>
+            <p><strong>Slice:</strong> <code>polish_verb_nationality</code></p>
+            <p><strong>Prompt:</strong> Read this museum task with the verb polish and the nationality Polish clearly separated.</p>
+            <p><strong>Target:</strong> Please polish the Polish award plaque before the donor tour.</p>
+          </article>
+        </div>
+      </details>
+      <details class="sample-group" data-category="formatting_markup_robustness">
+        <summary><span>Formatting Markup Robustness</span><strong>5 cases</strong></summary>
+        <div class="sample-list">
+          <article class="sample-card">
+            <h3><code>tts-formatting-markup-asterisks-001</code></h3>
+            <p><strong>Slice:</strong> <code>markdown_emphasis</code></p>
+            <p><strong>Prompt:</strong> Read this support note by treating markdown asterisks as emphasis, not as words.</p>
+            <p><strong>Target:</strong> Mark the account as **high priority** before the noon review.</p>
+          </article>
+          <article class="sample-card">
+            <h3><code>tts-formatting-markup-bracket-label-001</code></h3>
+            <p><strong>Slice:</strong> <code>bracket_label_literal</code></p>
+            <p><strong>Prompt:</strong> Read this as visible plain text, not as a command or hidden markup.</p>
+            <p><strong>Target:</strong> The label shows [warning], then the code changes to A-17.</p>
+          </article>
+          <article class="sample-card">
+            <h3><code>tts-formatting-markup-bullets-001</code></h3>
+            <p><strong>Slice:</strong> <code>inline_bullet_list</code></p>
+            <p><strong>Prompt:</strong> Read this short checklist with list cadence and no extra item numbers.</p>
+            <p><strong>Target:</strong> Complete these steps: - save draft; - close ticket; - notify owner.</p>
+          </article>
+          <article class="sample-card">
+            <h3><code>tts-formatting-markup-identifiers-001</code></h3>
+            <p><strong>Slice:</strong> <code>camel_snake_identifiers</code></p>
+            <p><strong>Prompt:</strong> Read this developer note so the code-style identifiers stay intelligible.</p>
+            <p><strong>Target:</strong> Set enableBetaMode to false and retry the user_id lookup.</p>
+          </article>
+          <article class="sample-card">
+            <h3><code>tts-formatting-markup-emoticon-001</code></h3>
+            <p><strong>Slice:</strong> <code>emoticon_text</code></p>
+            <p><strong>Prompt:</strong> Read this status message so the emoticon is understandable without changing the meaning.</p>
+            <p><strong>Target:</strong> The status says colon right parenthesis, but the customer note says not resolved.</p>
+          </article>
+        </div>
+      </details>
     </section>
 
     <h2>Model Leaderboard</h2>
@@ -1011,7 +1081,7 @@
           <td data-label="Rank">1</td>
           <td data-label="Model"><code>mlx-community/chatterbox-turbo-6bit</code></td>
           <td data-label="Avg">91.2</td>
-          <td data-label="Accurate">66 / 75</td>
+          <td data-label="Accurate">74 / 85</td>
           <td data-label="Weakest Category"><code>information_tuning</code> avg 84.5</td>
           <td data-label="Likely Fix Focus">number clarity, pauses around dense facts</td>
         </tr>
@@ -1019,7 +1089,7 @@
           <td data-label="Rank">2</td>
           <td data-label="Model"><code>mlx-community/Kokoro-82M-4bit</code></td>
           <td data-label="Avg">88.6</td>
-          <td data-label="Accurate">60 / 75</td>
+          <td data-label="Accurate">67 / 85</td>
           <td data-label="Weakest Category"><code>speech_steerability</code> avg 80.8</td>
           <td data-label="Likely Fix Focus">style control, emphasis, pacing</td>
         </tr>
@@ -1027,7 +1097,7 @@
           <td data-label="Rank">3</td>
           <td data-label="Model"><code>mlx-community/Qwen3-TTS-12Hz-0.6B-Base-4bit</code></td>
           <td data-label="Avg">84.7</td>
-          <td data-label="Accurate">46 / 75</td>
+          <td data-label="Accurate">50 / 85</td>
           <td data-label="Weakest Category"><code>paralinguistics</code> avg 77.0</td>
           <td data-label="Likely Fix Focus">emotion rendering, natural prosody</td>
         </tr>
@@ -1063,12 +1133,14 @@
         <p><code>affective_transitions</code><br>avg 84.6 / n 5 / 76-92</p>
         <p><code>punctuation_prosody</code><br>avg 86.0 / n 5 / 78-93</p>
         <p><code>domain_terminology</code><br>avg 85.4 / n 5 / 77-92</p>
+        <p><code>heteronym_disambiguation</code><br>avg 84.8 / n 5 / 75-92</p>
+        <p><code>formatting_markup_robustness</code><br>avg 83.6 / n 5 / 74-91</p>
       </div>
       <div class="panel">
         <h3>Scores By Model</h3>
-        <p><code>mlx-community/chatterbox-turbo-6bit</code><br>avg 90.5 / n 75 / 78-97</p>
-        <p><code>mlx-community/Kokoro-82M-4bit</code><br>avg 87.8 / n 75 / 74-95</p>
-        <p><code>mlx-community/Qwen3-TTS-12Hz-0.6B-Base-4bit</code><br>avg 84.1 / n 75 / 70-93</p>
+        <p><code>mlx-community/chatterbox-turbo-6bit</code><br>avg 90.3 / n 85 / 78-97</p>
+        <p><code>mlx-community/Kokoro-82M-4bit</code><br>avg 87.5 / n 85 / 74-95</p>
+        <p><code>mlx-community/Qwen3-TTS-12Hz-0.6B-Base-4bit</code><br>avg 83.9 / n 85 / 70-93</p>
       </div>
       <div class="panel">
         <h3>Scores By Voice</h3>
@@ -1214,17 +1286,17 @@
         <tr>
           <td data-label="Compared Model"><code>mlx-community/Kokoro-82M-4bit</code></td>
           <td data-label="Baseline"><code>mlx-community/chatterbox-turbo-6bit</code></td>
-          <td data-label="Matched Cases">75</td>
+          <td data-label="Matched Cases">85</td>
           <td data-label="Avg Delta">-2.6</td>
-          <td data-label="Wins / Ties / Losses">13 / 10 / 52</td>
+          <td data-label="Wins / Ties / Losses">15 / 11 / 59</td>
           <td data-label="Largest Regressions">speech pace and emphasis cases where style control trails the baseline.</td>
         </tr>
         <tr>
           <td data-label="Compared Model"><code>mlx-community/Qwen3-TTS-12Hz-0.6B-Base-4bit</code></td>
           <td data-label="Baseline"><code>mlx-community/chatterbox-turbo-6bit</code></td>
-          <td data-label="Matched Cases">75</td>
+          <td data-label="Matched Cases">85</td>
           <td data-label="Avg Delta">-6.5</td>
-          <td data-label="Wins / Ties / Losses">8 / 6 / 61</td>
+          <td data-label="Wins / Ties / Losses">9 / 7 / 69</td>
           <td data-label="Largest Regressions">emotion and dense-fact cases with lower naturalness or intelligibility.</td>
         </tr>
       </tbody>
@@ -1248,7 +1320,7 @@
       </div>
       <div class="panel">
         <h3>Synthesis Model</h3>
-        <p><code>mlx-community/Qwen3-TTS-12Hz-0.6B-Base-4bit</code><br>avg 84.1 / n 75 / range 70-93</p>
+        <p><code>mlx-community/Qwen3-TTS-12Hz-0.6B-Base-4bit</code><br>avg 83.9 / n 85 / range 70-93</p>
         <p class="muted">Compare model-level weak spots before changing prompts, voices, wrappers, or model settings.</p>
       </div>
     </section>

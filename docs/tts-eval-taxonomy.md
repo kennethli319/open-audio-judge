@@ -55,10 +55,14 @@ runs can map private prompts into the same categories without copying private ro
   contours, and ellipsis pauses that should guide prosody without changing the text.
 - `domain_terminology`: clinical, legal, engineering, finance, and science terms that should remain
   intelligible in realistic domain-specific registers.
+- `heteronym_disambiguation`: context-dependent pronunciations such as read/read, wind/wind,
+  bass/bass, minute/minute, and polish/Polish that should be resolved from sentence meaning.
+- `formatting_markup_robustness`: markdown emphasis, bracketed labels, inline bullets, code-style
+  identifiers, and symbolic emoticon text that should not produce literal or hallucinated speech.
 
 ## Manifest Contract
 
-The public comparison manifest is intentionally balanced at 75 cases for now: 15 categories with 5
+The public comparison manifest is intentionally balanced at 85 cases for now: 17 categories with 5
 cases each. Expansion should add complete five-case category batches before deepening existing
 categories.
 
