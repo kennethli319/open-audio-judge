@@ -408,7 +408,7 @@
   --cases examples/tts_multiturn_cases.jsonl \
   --judge-provider gemini \
   --judge-samples 3 \
-  --limit 205 \
+  --limit 220 \
   --out runs/leaderboard/chatterbox</code></pre>
 
     <pre><code>oaj autojudge-local-tts \
@@ -417,7 +417,7 @@
   --cases examples/tts_multiturn_cases.jsonl \
   --judge-provider gemini \
   --judge-samples 3 \
-  --limit 205 \
+  --limit 220 \
   --out runs/leaderboard/kokoro</code></pre>
 
     <pre><code>oaj autojudge-local-tts \
@@ -426,7 +426,7 @@
   --cases examples/tts_multiturn_cases.jsonl \
   --judge-provider gemini \
   --judge-samples 3 \
-  --limit 205 \
+  --limit 220 \
   --out runs/leaderboard/qwen3-tts</code></pre>
 
     <p>
@@ -438,7 +438,7 @@
   --cases examples/tts_multiturn_cases.jsonl \
   --judge-provider gemini \
   --judge-samples 3 \
-  --limit 205 \
+  --limit 220 \
   --out runs/leaderboard/chatterbox</code></pre>
 
     <p>
@@ -483,16 +483,16 @@
     <h2>Sample Report Preview</h2>
     <section class="grid" aria-label="Sample report metrics">
       <div class="metric"><span>Models</span><strong>3</strong></div>
-      <div class="metric"><span>Shared Eval Cases</span><strong>205</strong></div>
+      <div class="metric"><span>Shared Eval Cases</span><strong>220</strong></div>
       <div class="metric"><span>Judge Samples</span><strong>3x</strong></div>
       <div class="metric"><span>Top Avg</span><strong>91.2</strong></div>
       <div class="metric"><span>Lowest Avg</span><strong>84.7</strong></div>
-      <div class="metric"><span>Total Judgments</span><strong>1845</strong></div>
+      <div class="metric"><span>Total Judgments</span><strong>1980</strong></div>
     </section>
 
     <h2>Eval Set Samples</h2>
     <p>
-      The public demo eval set contains 205 synthetic, public-safe cases grouped into research-backed
+      The public demo eval set contains 220 synthetic, public-safe cases grouped into research-backed
       TTS dimensions. Each category below contributes five shared cases that every model synthesizes
       before Gemini judges the generated audio.
     </p>
@@ -1929,6 +1929,111 @@
             <p><strong>Slice:</strong> <code>progressive_navigation_guidance</code></p>
             <p><strong>Prompt:</strong> Read this navigation guidance as progressive streaming: give the immediate action first, then the later landmark.</p>
             <p><strong>Target:</strong> Turn right at the next light, then stay in the left lane until you pass the library.</p>
+          </article>
+        </div>
+      </details>
+      <details class="sample-group" data-category="numeric_identifier_delivery">
+        <summary><span>Numeric Identifier Delivery</span><strong>5 cases</strong></summary>
+        <div class="sample-list">
+          <article class="sample-card">
+            <h3><code>tts-numeric-identifier-delivery-support-ticket-001</code></h3>
+            <p><strong>Slice:</strong> <code>support_ticket_alphanumeric_chunking</code></p>
+            <p><strong>Prompt:</strong> Read this support ticket number so a listener can write it down without confusing letters and digits.</p>
+            <p><strong>Target:</strong> Your support ticket is A seven F two, dash, 49 C, and it expires at 6 PM.</p>
+          </article>
+          <article class="sample-card">
+            <h3><code>tts-numeric-identifier-delivery-verification-code-001</code></h3>
+            <p><strong>Slice:</strong> <code>verification_code_digit_grouping</code></p>
+            <p><strong>Prompt:</strong> Read this verification code with grouped digits, not as a natural number.</p>
+            <p><strong>Target:</strong> Enter verification code 904 118, then press pound to continue.</p>
+          </article>
+          <article class="sample-card">
+            <h3><code>tts-numeric-identifier-delivery-device-serial-001</code></h3>
+            <p><strong>Slice:</strong> <code>device_serial_zero_letter_contrast</code></p>
+            <p><strong>Prompt:</strong> Read this device serial so zeros and letters remain distinguishable by ear.</p>
+            <p><strong>Target:</strong> The device serial is Z zero Q, dash, 08 L, dash, 3 M.</p>
+          </article>
+          <article class="sample-card">
+            <h3><code>tts-numeric-identifier-delivery-flight-record-001</code></h3>
+            <p><strong>Slice:</strong> <code>flight_record_locator_chunking</code></p>
+            <p><strong>Prompt:</strong> Read this travel record locator so the airline code and locator do not blur together.</p>
+            <p><strong>Target:</strong> Flight AC 214 is linked to record locator R six T 9 K P.</p>
+          </article>
+          <article class="sample-card">
+            <h3><code>tts-numeric-identifier-delivery-lab-sample-001</code></h3>
+            <p><strong>Slice:</strong> <code>lab_sample_identifier_chunking</code></p>
+            <p><strong>Prompt:</strong> Read this lab sample label so the prefix, date-like digits, and suffix are easy to transcribe.</p>
+            <p><strong>Target:</strong> Sample ID L seven, 2407, dash, B two should be stored in tray four.</p>
+          </article>
+        </div>
+      </details>
+      <details class="sample-group" data-category="sentence_boundary_inference">
+        <summary><span>Sentence Boundary Inference</span><strong>5 cases</strong></summary>
+        <div class="sample-list">
+          <article class="sample-card">
+            <h3><code>tts-sentence-boundary-inference-runon-update-001</code></h3>
+            <p><strong>Slice:</strong> <code>punctuation_light_status_boundaries</code></p>
+            <p><strong>Prompt:</strong> Read this punctuation-light status update with sensible phrase boundaries.</p>
+            <p><strong>Target:</strong> The backup finished overnight the archive is still verifying start the migration after lunch.</p>
+          </article>
+          <article class="sample-card">
+            <h3><code>tts-sentence-boundary-inference-shopping-note-001</code></h3>
+            <p><strong>Slice:</strong> <code>compact_list_then_reminder_boundaries</code></p>
+            <p><strong>Prompt:</strong> Read this compact household note so list items and the final reminder do not run together.</p>
+            <p><strong>Target:</strong> Pick up rice oat milk batteries for the flashlight leave the receipt on the counter.</p>
+          </article>
+          <article class="sample-card">
+            <h3><code>tts-sentence-boundary-inference-meeting-agenda-001</code></h3>
+            <p><strong>Slice:</strong> <code>terse_agenda_topic_boundaries</code></p>
+            <p><strong>Prompt:</strong> Read this terse meeting agenda with clear transitions between topics.</p>
+            <p><strong>Target:</strong> Review hiring numbers discuss the launch risk decide whether design needs another week.</p>
+          </article>
+          <article class="sample-card">
+            <h3><code>tts-sentence-boundary-inference-alert-cascade-001</code></h3>
+            <p><strong>Slice:</strong> <code>alert_cause_impact_action_boundaries</code></p>
+            <p><strong>Prompt:</strong> Read this alert cascade so the cause, impact, and action are not flattened into one phrase.</p>
+            <p><strong>Target:</strong> Sensor three lost power cooling is reduced move the samples to bay two now.</p>
+          </article>
+          <article class="sample-card">
+            <h3><code>tts-sentence-boundary-inference-customer-message-001</code></h3>
+            <p><strong>Slice:</strong> <code>unpunctuated_condition_callback_boundaries</code></p>
+            <p><strong>Prompt:</strong> Read this unpolished customer message naturally while keeping the condition and callback request clear.</p>
+            <p><strong>Target:</strong> The part arrived damaged if a replacement ships today call me before five.</p>
+          </article>
+        </div>
+      </details>
+      <details class="sample-group" data-category="cross_lingual_name_pronunciation">
+        <summary><span>Cross Lingual Name Pronunciation</span><strong>5 cases</strong></summary>
+        <div class="sample-list">
+          <article class="sample-card">
+            <h3><code>tts-cross-lingual-name-pronunciation-person-001</code></h3>
+            <p><strong>Slice:</strong> <code>vietnamese_name_in_english_context</code></p>
+            <p><strong>Prompt:</strong> Read this English sentence with respectful pronunciation for the Vietnamese name and no exaggerated accent.</p>
+            <p><strong>Target:</strong> Please welcome Linh Nguyen, who will lead the onboarding session after lunch.</p>
+          </article>
+          <article class="sample-card">
+            <h3><code>tts-cross-lingual-name-pronunciation-place-001</code></h3>
+            <p><strong>Slice:</strong> <code>portuguese_spanish_place_names_in_travel_update</code></p>
+            <p><strong>Prompt:</strong> Read this travel update with natural English delivery and careful place-name pronunciation.</p>
+            <p><strong>Target:</strong> The connection through Sao Paulo is delayed, but the flight to Lima is still on time.</p>
+          </article>
+          <article class="sample-card">
+            <h3><code>tts-cross-lingual-name-pronunciation-menu-001</code></h3>
+            <p><strong>Slice:</strong> <code>spanish_menu_item_in_english_context</code></p>
+            <p><strong>Prompt:</strong> Read this restaurant note so the Spanish dish name is clear without switching the whole sentence into Spanish.</p>
+            <p><strong>Target:</strong> The special is pollo asado with rice, and the vegetarian soup is ready at noon.</p>
+          </article>
+          <article class="sample-card">
+            <h3><code>tts-cross-lingual-name-pronunciation-product-001</code></h3>
+            <p><strong>Slice:</strong> <code>japanese_product_name_with_version_number</code></p>
+            <p><strong>Prompt:</strong> Read this product support line with careful pronunciation of the Japanese product name.</p>
+            <p><strong>Target:</strong> The Sakura Mini printer needs firmware version 2.1 before the label test.</p>
+          </article>
+          <article class="sample-card">
+            <h3><code>tts-cross-lingual-name-pronunciation-organization-001</code></h3>
+            <p><strong>Slice:</strong> <code>organization_and_city_names_in_conference_announcement</code></p>
+            <p><strong>Prompt:</strong> Read this conference announcement with clear pronunciation of the organization and city names.</p>
+            <p><strong>Target:</strong> The keynote from Casa Verde starts after the Zurich accessibility panel.</p>
           </article>
         </div>
       </details>

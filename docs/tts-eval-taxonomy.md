@@ -122,10 +122,18 @@ runs can map private prompts into the same categories without copying private ro
 - `real_time_streaming_delivery`: first-token openings, streamed chunk boundaries, barge-in repair,
   concise alerts, and progressive guidance where low-latency delivery must stay intelligible,
   stable, and interruption-aware.
+- `numeric_identifier_delivery`: support tickets, verification codes, device serials, record
+  locators, and lab sample IDs where long identifiers must be chunked and transcribed exactly.
+- `sentence_boundary_inference`: punctuation-light status updates, compact lists, terse agendas,
+  alert cascades, and unpolished messages where prosody must infer sensible phrase boundaries
+  without changing the words.
+- `cross_lingual_name_pronunciation`: person names, place names, menu items, product names, and
+  organization names from non-English contexts that should stay intelligible and respectful inside
+  English utterances without caricature.
 
 ## Manifest Contract
 
-The public comparison manifest is intentionally balanced at 205 cases for now: 41 categories with 5
+The public comparison manifest is intentionally balanced at 220 cases for now: 44 categories with 5
 cases each. Expansion should add complete five-case category batches before deepening existing
 categories.
 

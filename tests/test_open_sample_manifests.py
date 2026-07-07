@@ -58,6 +58,9 @@ TTS_RESEARCH_CATEGORIES = {
     "audience_register_adaptation",
     "uncertainty_calibration_delivery",
     "real_time_streaming_delivery",
+    "numeric_identifier_delivery",
+    "sentence_boundary_inference",
+    "cross_lingual_name_pronunciation",
 }
 TTS_REQUIRED_METADATA = {
     "language",
@@ -111,7 +114,7 @@ def test_open_sample_docs_list_every_case_id() -> None:
 def test_tts_multiturn_manifest_has_research_metadata_contract() -> None:
     cases = load_cases(TTS_MULTITURN_MANIFEST)
 
-    assert len(cases) == 205
+    assert len(cases) == 220
     assert len({case.id for case in cases}) == len(cases)
     assert len({case.metadata["tts_slice"] for case in cases}) == len(cases)
     assert {case.metadata["eval_category"] for case in cases} == TTS_RESEARCH_CATEGORIES
