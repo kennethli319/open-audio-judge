@@ -22,8 +22,9 @@ from open_audio_judge.local_tts import (
     DEFAULT_CHATTERBOX_BIN,
     DEFAULT_CHATTERBOX_MODEL,
     LocalTtsConfig,
-    synthesize_cases_with_local_tts,
+    synthesize_cases_with_local_tts_batch,
     write_local_tts_cases_jsonl,
+    write_local_tts_failures_jsonl,
     write_local_tts_summary_json,
 )
 from open_audio_judge.prompting import load_prompt
@@ -203,6 +204,13 @@ def autojudge_local_tts_command(
         bool,
         typer.Option("--dry-run", help="Write manifests without invoking the TTS model."),
     ] = False,
+    skip_failed_synthesis: Annotated[
+        bool,
+        typer.Option(
+            "--skip-failed-synthesis",
+            help="Record failed local TTS samples and judge the successfully synthesized samples.",
+        ),
+    ] = False,
     limit: Annotated[int | None, typer.Option("--limit", help="Maximum cases to synthesize.")] = None,
 ) -> None:
     if (cases is None) == (evalset_source is None):
@@ -243,7 +251,7 @@ def autojudge_local_tts_command(
         evalset_summary_path = None
 
     candidate_dir = out / "synthesis"
-    synthesized_cases = synthesize_cases_with_local_tts(
+    synthesis_result = synthesize_cases_with_local_tts_batch(
         loaded_cases,
         out_dir=candidate_dir,
         config=LocalTtsConfig(
@@ -257,18 +265,30 @@ def autojudge_local_tts_command(
             keep_text_sidecars=keep_text_sidecars,
             dry_run=dry_run,
         ),
+        continue_on_error=skip_failed_synthesis,
     )
+    synthesized_cases = synthesis_result.cases
     candidate_path = candidate_dir / "tts_audio_cases.jsonl"
+    failure_path = candidate_dir / "synthesis_failures.jsonl"
     summary_path = out / "model_summary.json"
     judge_out = out / "judge-report"
     write_local_tts_cases_jsonl(synthesized_cases, candidate_path)
+    if synthesis_result.failures:
+        write_local_tts_failures_jsonl(synthesis_result.failures, failure_path)
     write_local_tts_summary_json(
         synthesized_cases,
         summary_path,
         source_cases=source_cases_path,
         model=model,
         synthesis_provider=synthesis_provider,
+        failures=synthesis_result.failures,
     )
+    if not synthesized_cases:
+        console.print("[bold red]No local TTS cases were synthesized.[/bold red]")
+        if synthesis_result.failures:
+            console.print(f"Failures: {failure_path}")
+        console.print(f"Summary:  {summary_path}")
+        raise typer.Exit(1)
 
     prompt = load_prompt(judge)
     provider = build_provider(judge_provider)
@@ -281,6 +301,8 @@ def autojudge_local_tts_command(
         console.print(f"Evalset: {source_cases_path}")
         console.print(f"Evalsum: {evalset_summary_path}")
     console.print(f"Cases:   {candidate_path}")
+    if synthesis_result.failures:
+        console.print(f"Failures: {failure_path}")
     console.print(f"Summary: {summary_path}")
     console.print(f"Results: {judge_out / 'results.jsonl'}")
     console.print(f"Report:  {judge_out / 'report.html'}")

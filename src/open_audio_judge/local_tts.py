@@ -32,12 +32,37 @@ class LocalTtsConfig:
     dry_run: bool = False
 
 
+@dataclass(frozen=True)
+class LocalTtsFailure:
+    case_id: str
+    error_type: str
+    message: str
+    metadata: dict[str, Any]
+
+
+@dataclass(frozen=True)
+class LocalTtsBatchResult:
+    cases: list[EvaluationCase]
+    failures: list[LocalTtsFailure]
+
+
 def synthesize_cases_with_local_tts(
     cases: Iterable[EvaluationCase],
     *,
     out_dir: Path,
     config: LocalTtsConfig,
 ) -> list[EvaluationCase]:
+    result = synthesize_cases_with_local_tts_batch(cases, out_dir=out_dir, config=config)
+    return result.cases
+
+
+def synthesize_cases_with_local_tts_batch(
+    cases: Iterable[EvaluationCase],
+    *,
+    out_dir: Path,
+    config: LocalTtsConfig,
+    continue_on_error: bool = False,
+) -> LocalTtsBatchResult:
     case_list = list(cases)
     _validate_tts_input_cases(case_list)
     if not config.dry_run and not config.tts_bin.is_file():
@@ -54,58 +79,25 @@ def synthesize_cases_with_local_tts(
 
     used_stems: set[str] = set()
     synthesized: list[EvaluationCase] = []
+    failures: list[LocalTtsFailure] = []
     for case in case_list:
-        target_text = (case.reference_text or "").strip()
         output_stem = _unique_stem(case.id, used_stems)
-        text_path = text_dir / f"{output_stem}.txt"
-        audio_path = audio_dir / f"{output_stem}.{config.audio_format}"
-        if config.keep_text_sidecars or not config.dry_run:
-            text_path.write_text(target_text, encoding="utf-8")
-
-        audio_metadata: dict[str, Any] = {}
-        if not config.dry_run:
-            audio_path = _run_local_tts(
-                config=config,
-                text_path=text_path,
-                audio_dir=audio_dir,
-                output_stem=output_stem,
+        try:
+            synthesized.append(
+                _synthesize_one_case(
+                    case,
+                    out_dir=out_dir,
+                    text_dir=text_dir,
+                    audio_dir=audio_dir,
+                    output_stem=output_stem,
+                    config=config,
+                )
             )
-            if not audio_path.exists() or audio_path.stat().st_size == 0:
-                raise FileNotFoundError(f"Expected synthesized audio at {audio_path}")
-            audio_metadata = _audio_metadata(audio_path)
-            if not config.keep_text_sidecars:
-                text_path.unlink(missing_ok=True)
-
-        metadata = dict(case.metadata)
-        metadata.update(
-            {
-                "sample_kind": "local_synthetic_tts",
-                "synthesis_provider": config.synthesis_provider,
-                "synthesis_model": config.model,
-                "synthesis_voice": config.voice,
-                "synthesis_lang_code": config.lang_code,
-                "synthesis_audio_format": config.audio_format,
-                "source_case_id": case.id,
-                "reference_text_sha256": _sha256_text(target_text),
-                "requires_synthesis": False,
-                "text_sidecar_written": config.keep_text_sidecars,
-                **audio_metadata,
-            }
-        )
-        if config.keep_text_sidecars:
-            metadata["text_sidecar_path"] = _relative_path(text_path, out_dir)
-
-        synthesized_case = case.model_copy(
-            update={
-                "id": f"{case.id}-local-tts",
-                "audio_path": _relative_path(audio_path, out_dir),
-                "audio_url": None,
-                "metadata": metadata,
-            }
-        )
-        require_audio_and_text(synthesized_case)
-        synthesized.append(synthesized_case)
-    return synthesized
+        except Exception as exc:
+            if not continue_on_error:
+                raise
+            failures.append(_failure_for_case(case, exc))
+    return LocalTtsBatchResult(cases=synthesized, failures=failures)
 
 
 def write_local_tts_cases_jsonl(cases: Iterable[EvaluationCase], path: Path) -> Path:
@@ -116,6 +108,14 @@ def write_local_tts_cases_jsonl(cases: Iterable[EvaluationCase], path: Path) -> 
     return path
 
 
+def write_local_tts_failures_jsonl(failures: Iterable[LocalTtsFailure], path: Path) -> Path:
+    path.parent.mkdir(parents=True, exist_ok=True)
+    with path.open("w", encoding="utf-8") as handle:
+        for failure in failures:
+            handle.write(json.dumps(_failure_record(failure), ensure_ascii=False) + "\n")
+    return path
+
+
 def write_local_tts_summary_json(
     cases: Iterable[EvaluationCase],
     path: Path,
@@ -123,13 +123,16 @@ def write_local_tts_summary_json(
     source_cases: Path,
     model: str,
     synthesis_provider: str = "local_chatterbox",
+    failures: Iterable[LocalTtsFailure] = (),
 ) -> Path:
     case_list = list(cases)
+    failure_list = list(failures)
     summary = {
         "source_cases": str(source_cases),
         "candidate_model": model,
         "candidate_generator": synthesis_provider,
         "total_cases": len(case_list),
+        "synthesis_failure_count": len(failure_list),
         "case_ids": [case.id for case in case_list],
         "cases_with_audio_path": sum(1 for case in case_list if case.audio_path),
         "total_audio_bytes": _sum_numeric_metadata(case_list, "audio_bytes", integer=True),
@@ -147,10 +150,74 @@ def write_local_tts_summary_json(
         "by_synthesis_lang_code": _count_metadata(case_list, "synthesis_lang_code"),
         "by_synthesis_audio_format": _count_metadata(case_list, "synthesis_audio_format"),
         "by_tts_slice": _count_metadata(case_list, "tts_slice"),
+        "synthesis_failures_by_error_type": _count_failure_field(failure_list, "error_type"),
+        "synthesis_failures_by_tts_slice": _count_failure_metadata(failure_list, "tts_slice"),
     }
     path.parent.mkdir(parents=True, exist_ok=True)
     path.write_text(json.dumps(summary, indent=2, sort_keys=True) + "\n", encoding="utf-8")
     return path
+
+
+def _synthesize_one_case(
+    case: EvaluationCase,
+    *,
+    out_dir: Path,
+    text_dir: Path,
+    audio_dir: Path,
+    output_stem: str,
+    config: LocalTtsConfig,
+) -> EvaluationCase:
+    target_text = (case.reference_text or "").strip()
+    text_path = text_dir / f"{output_stem}.txt"
+    audio_path = audio_dir / f"{output_stem}.{config.audio_format}"
+    if config.keep_text_sidecars or not config.dry_run:
+        text_path.write_text(target_text, encoding="utf-8")
+
+    audio_metadata: dict[str, Any] = {}
+    if not config.dry_run:
+        try:
+            audio_path = _run_local_tts(
+                config=config,
+                text_path=text_path,
+                audio_dir=audio_dir,
+                output_stem=output_stem,
+            )
+            if not audio_path.exists() or audio_path.stat().st_size == 0:
+                raise FileNotFoundError(f"Expected synthesized audio at {audio_path}")
+            audio_metadata = _audio_metadata(audio_path)
+        finally:
+            if not config.keep_text_sidecars:
+                text_path.unlink(missing_ok=True)
+
+    metadata = dict(case.metadata)
+    metadata.update(
+        {
+            "sample_kind": "local_synthetic_tts",
+            "synthesis_provider": config.synthesis_provider,
+            "synthesis_model": config.model,
+            "synthesis_voice": config.voice,
+            "synthesis_lang_code": config.lang_code,
+            "synthesis_audio_format": config.audio_format,
+            "source_case_id": case.id,
+            "reference_text_sha256": _sha256_text(target_text),
+            "requires_synthesis": False,
+            "text_sidecar_written": config.keep_text_sidecars,
+            **audio_metadata,
+        }
+    )
+    if config.keep_text_sidecars:
+        metadata["text_sidecar_path"] = _relative_path(text_path, out_dir)
+
+    synthesized_case = case.model_copy(
+        update={
+            "id": f"{case.id}-local-tts",
+            "audio_path": _relative_path(audio_path, out_dir),
+            "audio_url": None,
+            "metadata": metadata,
+        }
+    )
+    require_audio_and_text(synthesized_case)
+    return synthesized_case
 
 
 def _validate_tts_input_cases(cases: list[EvaluationCase]) -> None:
@@ -273,6 +340,31 @@ def _format_tts_failure(exc: subprocess.CalledProcessError, tts_bin: Path) -> st
     if len(details) == 1:
         details.append("no stdout or stderr was captured")
     return "; ".join(details)
+
+
+def _failure_for_case(case: EvaluationCase, exc: Exception) -> LocalTtsFailure:
+    return LocalTtsFailure(
+        case_id=case.id,
+        error_type=type(exc).__name__,
+        message=_compact_error_message(exc),
+        metadata=dict(case.metadata),
+    )
+
+
+def _failure_record(failure: LocalTtsFailure) -> dict[str, Any]:
+    return {
+        "case_id": failure.case_id,
+        "error_type": failure.error_type,
+        "message": failure.message,
+        "metadata": failure.metadata,
+    }
+
+
+def _compact_error_message(exc: Exception) -> str:
+    message = str(exc).strip().replace("\n", " ")
+    if len(message) > 1000:
+        return f"{message[:1000]}..."
+    return message or type(exc).__name__
 
 
 def _format_tts_timeout(exc: subprocess.TimeoutExpired, tts_bin: Path) -> str:
@@ -444,6 +536,22 @@ def _count_metadata(cases: Iterable[EvaluationCase], field: str) -> dict[str, in
     counts: dict[str, int] = {}
     for case in cases:
         value = str(case.metadata.get(field) or "unknown")
+        counts[value] = counts.get(value, 0) + 1
+    return dict(sorted(counts.items()))
+
+
+def _count_failure_field(failures: Iterable[LocalTtsFailure], field: str) -> dict[str, int]:
+    counts: dict[str, int] = {}
+    for failure in failures:
+        value = str(getattr(failure, field) or "unknown")
+        counts[value] = counts.get(value, 0) + 1
+    return dict(sorted(counts.items()))
+
+
+def _count_failure_metadata(failures: Iterable[LocalTtsFailure], field: str) -> dict[str, int]:
+    counts: dict[str, int] = {}
+    for failure in failures:
+        value = str(failure.metadata.get(field) or "unknown")
         counts[value] = counts.get(value, 0) + 1
     return dict(sorted(counts.items()))
 

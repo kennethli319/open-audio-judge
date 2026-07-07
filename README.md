@@ -251,6 +251,8 @@ The command writes:
 
 - `evalset/tts_cases.jsonl` and `evalset/summary.json` when `--evalset-source` is used.
 - `synthesis/tts_audio_cases.jsonl`: generated-audio cases with local `audio_path` values.
+- `synthesis/synthesis_failures.jsonl` when `--skip-failed-synthesis` records skipped local TTS
+  failures.
 - `model_summary.json`: model id, voice, audio format, and synthesis coverage.
 - `judge-report/results.jsonl` and `judge-report/report.html`: aggregate naturalness scores, top
   issue categories, priority cases, and sample-by-sample reasons.
@@ -265,6 +267,9 @@ stderr instead of leaving the full AutoJudge run hanging.
 Wrappers should emit JSON with an `output`, `output_path`, or `audio_path` field when possible. If a
 wrapper only writes files, Open Audio Judge will use a matching newly created or modified audio file
 and reject unchanged leftovers from an earlier run.
+By default, a synthesis error fails the command before judging. Add `--skip-failed-synthesis` for
+larger batches where the run should write `synthesis_failures.jsonl`, include failure counts in
+`model_summary.json`, and judge the samples that did synthesize successfully.
 
 ## REST API
 

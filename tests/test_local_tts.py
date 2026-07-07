@@ -6,9 +6,12 @@ import pytest
 
 from open_audio_judge.local_tts import (
     LocalTtsConfig,
+    LocalTtsFailure,
     _output_path_from_stdout,
     _require_output_path_in_audio_dir,
     synthesize_cases_with_local_tts,
+    synthesize_cases_with_local_tts_batch,
+    write_local_tts_failures_jsonl,
     write_local_tts_summary_json,
 )
 from open_audio_judge.models import EvaluationCase
@@ -93,6 +96,65 @@ def test_synthesize_cases_with_local_tts_reports_command_failure(
     assert "local TTS command failed with exit code 7: local-tts-speak" in message
     assert "stderr: missing voice af_test" in message
     assert "stdout: loading model | retrying | failed after warmup" in message
+    assert not (tmp_path / "synthesis" / "text" / "tts-fail.txt").exists()
+
+
+def test_synthesize_cases_with_local_tts_batch_can_continue_after_failure(
+    tmp_path: Path,
+    monkeypatch,
+) -> None:
+    tts_bin = tmp_path / "bin" / "local-tts-speak"
+    tts_bin.parent.mkdir()
+    tts_bin.write_text("#!/bin/sh\n", encoding="utf-8")
+    cases = [
+        EvaluationCase(
+            id="tts-ok",
+            task="tts_naturalness",
+            reference_text="This should synthesize.",
+            metadata={"tts_slice": "general"},
+        ),
+        EvaluationCase(
+            id="tts-fail",
+            task="tts_naturalness",
+            reference_text="This should fail clearly.",
+            metadata={"tts_slice": "numbers"},
+        ),
+    ]
+
+    def fake_run(command, check, capture_output, text, timeout):
+        output_dir = Path(command[command.index("--output-dir") + 1])
+        file_prefix = command[command.index("--file-prefix") + 1]
+        if file_prefix == "tts-fail":
+            raise subprocess.CalledProcessError(
+                3,
+                command,
+                output="loading model\n",
+                stderr="voice unavailable\n",
+            )
+        audio_path = output_dir / f"{file_prefix}.wav"
+        audio_path.write_bytes(b"RIFF")
+        return subprocess.CompletedProcess(
+            command,
+            0,
+            stdout=json.dumps({"output_path": str(audio_path)}) + "\n",
+            stderr="",
+        )
+
+    monkeypatch.setattr("open_audio_judge.local_tts.subprocess.run", fake_run)
+
+    result = synthesize_cases_with_local_tts_batch(
+        cases,
+        out_dir=tmp_path / "synthesis",
+        config=LocalTtsConfig(tts_bin=tts_bin),
+        continue_on_error=True,
+    )
+
+    assert [case.id for case in result.cases] == ["tts-ok-local-tts"]
+    assert len(result.failures) == 1
+    assert result.failures[0].case_id == "tts-fail"
+    assert result.failures[0].error_type == "RuntimeError"
+    assert "voice unavailable" in result.failures[0].message
+    assert result.failures[0].metadata == {"tts_slice": "numbers"}
 
 
 def test_synthesize_cases_with_local_tts_reports_timeout(
@@ -315,3 +377,55 @@ def test_write_local_tts_summary_json(tmp_path: Path) -> None:
     assert data["by_synthesis_model"] == {"mlx-community/chatterbox-turbo-6bit": 1}
     assert data["by_synthesis_voice"] == {"af_heart": 1}
     assert data["by_synthesis_lang_code"] == {"en": 1}
+    assert data["synthesis_failure_count"] == 0
+
+
+def test_write_local_tts_summary_json_counts_failures(tmp_path: Path) -> None:
+    summary = tmp_path / "summary.json"
+    failures = [
+        LocalTtsFailure(
+            case_id="tts-fail",
+            error_type="RuntimeError",
+            message="voice unavailable",
+            metadata={"tts_slice": "numbers"},
+        )
+    ]
+
+    write_local_tts_summary_json(
+        [],
+        summary,
+        source_cases=Path("examples/tts_cases.jsonl"),
+        model="mlx-community/chatterbox-turbo-6bit",
+        synthesis_provider="local_test_tts",
+        failures=failures,
+    )
+
+    data = json.loads(summary.read_text(encoding="utf-8"))
+    assert data["total_cases"] == 0
+    assert data["synthesis_failure_count"] == 1
+    assert data["synthesis_failures_by_error_type"] == {"RuntimeError": 1}
+    assert data["synthesis_failures_by_tts_slice"] == {"numbers": 1}
+
+
+def test_write_local_tts_failures_jsonl(tmp_path: Path) -> None:
+    path = tmp_path / "failures.jsonl"
+
+    write_local_tts_failures_jsonl(
+        [
+            LocalTtsFailure(
+                case_id="tts-fail",
+                error_type="RuntimeError",
+                message="voice unavailable",
+                metadata={"tts_slice": "numbers"},
+            )
+        ],
+        path,
+    )
+
+    written = json.loads(path.read_text(encoding="utf-8"))
+    assert written == {
+        "case_id": "tts-fail",
+        "error_type": "RuntimeError",
+        "message": "voice unavailable",
+        "metadata": {"tts_slice": "numbers"},
+    }

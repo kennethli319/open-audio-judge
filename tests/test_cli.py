@@ -5,6 +5,7 @@ from typer.testing import CliRunner
 
 import open_audio_judge.cli as cli
 from open_audio_judge.cli import app
+from open_audio_judge.local_tts import LocalTtsBatchResult, LocalTtsFailure
 
 
 def test_autojudge_hf_asr_cli_writes_candidate_cases_and_report(
@@ -84,27 +85,31 @@ def test_autojudge_local_tts_cli_writes_synthesized_cases_and_report(
         encoding="utf-8",
     )
 
-    def fake_synthesize_cases(loaded_cases, out_dir, config):
+    def fake_synthesize_cases(loaded_cases, out_dir, config, continue_on_error=False):
+        assert continue_on_error is False
         assert config.timeout_seconds == 3.5
         audio_dir = out_dir / "audio"
         audio_dir.mkdir(parents=True)
         (audio_dir / "tts-case.wav").write_bytes(b"RIFF")
-        return [
-            loaded_cases[0].model_copy(
-                update={
-                    "id": "tts-case-local-tts",
-                    "audio_path": "audio/tts-case.wav",
-                    "metadata": {
-                        "synthesis_provider": config.synthesis_provider,
-                        "synthesis_model": config.model,
-                        "synthesis_voice": config.voice,
-                        "synthesis_audio_format": config.audio_format,
-                    },
-                }
-            )
-        ]
+        return LocalTtsBatchResult(
+            cases=[
+                loaded_cases[0].model_copy(
+                    update={
+                        "id": "tts-case-local-tts",
+                        "audio_path": "audio/tts-case.wav",
+                        "metadata": {
+                            "synthesis_provider": config.synthesis_provider,
+                            "synthesis_model": config.model,
+                            "synthesis_voice": config.voice,
+                            "synthesis_audio_format": config.audio_format,
+                        },
+                    }
+                )
+            ],
+            failures=[],
+        )
 
-    monkeypatch.setattr(cli, "synthesize_cases_with_local_tts", fake_synthesize_cases)
+    monkeypatch.setattr(cli, "synthesize_cases_with_local_tts_batch", fake_synthesize_cases)
 
     result = CliRunner().invoke(
         app,
@@ -159,27 +164,30 @@ def test_autojudge_local_tts_cli_can_build_cases_from_evalset(
         encoding="utf-8",
     )
 
-    def fake_synthesize_cases(loaded_cases, out_dir, config):
+    def fake_synthesize_cases(loaded_cases, out_dir, config, continue_on_error=False):
         audio_dir = out_dir / "audio"
         audio_dir.mkdir(parents=True)
         (audio_dir / "tts-evalset-row-001.wav").write_bytes(b"RIFF")
-        return [
-            loaded_cases[0].model_copy(
-                update={
-                    "id": f"{loaded_cases[0].id}-local-tts",
-                    "audio_path": "audio/tts-evalset-row-001.wav",
-                    "metadata": {
-                        **loaded_cases[0].metadata,
-                        "synthesis_provider": config.synthesis_provider,
-                        "synthesis_model": config.model,
-                        "synthesis_voice": config.voice,
-                        "synthesis_audio_format": config.audio_format,
-                    },
-                }
-            )
-        ]
+        return LocalTtsBatchResult(
+            cases=[
+                loaded_cases[0].model_copy(
+                    update={
+                        "id": f"{loaded_cases[0].id}-local-tts",
+                        "audio_path": "audio/tts-evalset-row-001.wav",
+                        "metadata": {
+                            **loaded_cases[0].metadata,
+                            "synthesis_provider": config.synthesis_provider,
+                            "synthesis_model": config.model,
+                            "synthesis_voice": config.voice,
+                            "synthesis_audio_format": config.audio_format,
+                        },
+                    }
+                )
+            ],
+            failures=[],
+        )
 
-    monkeypatch.setattr(cli, "synthesize_cases_with_local_tts", fake_synthesize_cases)
+    monkeypatch.setattr(cli, "synthesize_cases_with_local_tts_batch", fake_synthesize_cases)
 
     result = CliRunner().invoke(
         app,
@@ -210,6 +218,96 @@ def test_autojudge_local_tts_cli_can_build_cases_from_evalset(
     summary = json.loads((out / "model_summary.json").read_text(encoding="utf-8"))
     assert summary["source_cases"].endswith("evalset/tts_cases.jsonl")
     assert "Evalset:" in result.output
+
+
+def test_autojudge_local_tts_cli_can_skip_failed_synthesis(
+    tmp_path: Path,
+    monkeypatch,
+) -> None:
+    cases = tmp_path / "cases.jsonl"
+    out = tmp_path / "out"
+    cases.write_text(
+        "\n".join(
+            json.dumps(record)
+            for record in [
+                {
+                    "id": "tts-ok",
+                    "task": "tts_naturalness",
+                    "reference_text": "Read this naturally.",
+                    "metadata": {"tts_slice": "general"},
+                },
+                {
+                    "id": "tts-fail",
+                    "task": "tts_naturalness",
+                    "reference_text": "This one fails.",
+                    "metadata": {"tts_slice": "numbers"},
+                },
+            ]
+        )
+        + "\n",
+        encoding="utf-8",
+    )
+
+    def fake_synthesize_cases(loaded_cases, out_dir, config, continue_on_error=False):
+        assert continue_on_error is True
+        audio_dir = out_dir / "audio"
+        audio_dir.mkdir(parents=True)
+        (audio_dir / "tts-ok.wav").write_bytes(b"RIFF")
+        return LocalTtsBatchResult(
+            cases=[
+                loaded_cases[0].model_copy(
+                    update={
+                        "id": "tts-ok-local-tts",
+                        "audio_path": "audio/tts-ok.wav",
+                        "metadata": {
+                            **loaded_cases[0].metadata,
+                            "synthesis_provider": config.synthesis_provider,
+                            "synthesis_model": config.model,
+                            "synthesis_voice": config.voice,
+                            "synthesis_audio_format": config.audio_format,
+                        },
+                    }
+                )
+            ],
+            failures=[
+                LocalTtsFailure(
+                    case_id="tts-fail",
+                    error_type="RuntimeError",
+                    message="voice unavailable",
+                    metadata=loaded_cases[1].metadata,
+                )
+            ],
+        )
+
+    monkeypatch.setattr(cli, "synthesize_cases_with_local_tts_batch", fake_synthesize_cases)
+
+    result = CliRunner().invoke(
+        app,
+        [
+            "autojudge-local-tts",
+            "--cases",
+            str(cases),
+            "--skip-failed-synthesis",
+            "--judge-provider",
+            "mock",
+            "--out",
+            str(out),
+        ],
+    )
+
+    assert result.exit_code == 0
+    assert (out / "judge-report" / "results.jsonl").exists()
+    failure_record = json.loads(
+        (out / "synthesis" / "synthesis_failures.jsonl").read_text(encoding="utf-8")
+    )
+    assert failure_record["case_id"] == "tts-fail"
+    assert failure_record["message"] == "voice unavailable"
+    summary = json.loads((out / "model_summary.json").read_text(encoding="utf-8"))
+    assert summary["total_cases"] == 1
+    assert summary["synthesis_failure_count"] == 1
+    assert summary["synthesis_failures_by_error_type"] == {"RuntimeError": 1}
+    assert summary["synthesis_failures_by_tts_slice"] == {"numbers": 1}
+    assert "Failures:" in result.output
 
 
 def test_build_tts_cases_writes_metadata_summary(tmp_path: Path) -> None:
