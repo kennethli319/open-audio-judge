@@ -91,10 +91,12 @@ runs can map private prompts into the same categories without copying private ro
 - `pragmatic_intent_delivery`: speech-act intent such as polite refusal, gentle suggestion, firm
   deadline reminder, supportive boundary-setting, and invitation with opt-out where prosody should
   preserve intent beyond literal words.
+- `symbolic_math_reading`: formulas, conditional probability, polynomial terms, coordinate pairs,
+  ratios, variables, signs, and units where exact symbolic structure must remain intelligible.
 
 ## Manifest Contract
 
-The public comparison manifest is intentionally balanced at 150 cases for now: 30 categories with 5
+The public comparison manifest is intentionally balanced at 155 cases for now: 31 categories with 5
 cases each. Expansion should add complete five-case category batches before deepening existing
 categories.
 

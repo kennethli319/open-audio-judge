@@ -398,7 +398,7 @@
   --cases examples/tts_multiturn_cases.jsonl \
   --judge-provider gemini \
   --judge-samples 3 \
-  --limit 150 \
+  --limit 155 \
   --out runs/leaderboard/chatterbox</code></pre>
 
     <pre><code>oaj autojudge-local-tts \
@@ -407,7 +407,7 @@
   --cases examples/tts_multiturn_cases.jsonl \
   --judge-provider gemini \
   --judge-samples 3 \
-  --limit 150 \
+  --limit 155 \
   --out runs/leaderboard/kokoro</code></pre>
 
     <pre><code>oaj autojudge-local-tts \
@@ -416,7 +416,7 @@
   --cases examples/tts_multiturn_cases.jsonl \
   --judge-provider gemini \
   --judge-samples 3 \
-  --limit 150 \
+  --limit 155 \
   --out runs/leaderboard/qwen3-tts</code></pre>
 
     <p>
@@ -428,7 +428,7 @@
   --cases examples/tts_multiturn_cases.jsonl \
   --judge-provider gemini \
   --judge-samples 3 \
-  --limit 150 \
+  --limit 155 \
   --out runs/leaderboard/chatterbox</code></pre>
 
     <p>
@@ -473,16 +473,16 @@
     <h2>Sample Report Preview</h2>
     <section class="grid" aria-label="Sample report metrics">
       <div class="metric"><span>Models</span><strong>3</strong></div>
-      <div class="metric"><span>Shared Eval Cases</span><strong>150</strong></div>
+      <div class="metric"><span>Shared Eval Cases</span><strong>155</strong></div>
       <div class="metric"><span>Judge Samples</span><strong>3x</strong></div>
       <div class="metric"><span>Top Avg</span><strong>91.2</strong></div>
       <div class="metric"><span>Lowest Avg</span><strong>84.7</strong></div>
-      <div class="metric"><span>Total Judgments</span><strong>1350</strong></div>
+      <div class="metric"><span>Total Judgments</span><strong>1395</strong></div>
     </section>
 
     <h2>Eval Set Samples</h2>
     <p>
-      The public demo eval set contains 150 synthetic, public-safe cases grouped into research-backed
+      The public demo eval set contains 155 synthetic, public-safe cases grouped into research-backed
       TTS dimensions. Each category below contributes five shared cases that every model synthesizes
       before Gemini judges the generated audio.
     </p>
@@ -1537,6 +1537,41 @@
           </article>
         </div>
       </details>
+      <details class="sample-group" data-category="symbolic_math_reading">
+        <summary><span>Symbolic Math Reading</span><strong>5 cases</strong></summary>
+        <div class="sample-list">
+          <article class="sample-card">
+            <h3><code>tts-symbolic-math-reading-geometry-formula-001</code></h3>
+            <p><strong>Slice:</strong> <code>geometry_formula_variables_units</code></p>
+            <p><strong>Prompt:</strong> Read this geometry formula so each variable, operation, and unit is easy to copy by ear.</p>
+            <p><strong>Target:</strong> Area equals pi r squared, where r is 3.5 centimeters.</p>
+          </article>
+          <article class="sample-card">
+            <h3><code>tts-symbolic-math-reading-probability-order-001</code></h3>
+            <p><strong>Slice:</strong> <code>conditional_probability_order</code></p>
+            <p><strong>Prompt:</strong> Read this probability statement with the conditional order and contrast preserved exactly.</p>
+            <p><strong>Target:</strong> P of A given B equals 0.42, not P of B given A.</p>
+          </article>
+          <article class="sample-card">
+            <h3><code>tts-symbolic-math-reading-polynomial-001</code></h3>
+            <p><strong>Slice:</strong> <code>polynomial_expression_terms</code></p>
+            <p><strong>Prompt:</strong> Read this polynomial exactly as a solve-for-x prompt, with signs and terms separated.</p>
+            <p><strong>Target:</strong> Solve for x: x squared minus 5 x plus 6 equals zero.</p>
+          </article>
+          <article class="sample-card">
+            <h3><code>tts-symbolic-math-reading-coordinates-001</code></h3>
+            <p><strong>Slice:</strong> <code>coordinate_signs_order</code></p>
+            <p><strong>Prompt:</strong> Read these coordinate instructions so negative signs, commas, and point order are unambiguous.</p>
+            <p><strong>Target:</strong> Plot point negative 2 comma 7, then move to 4 comma negative 1.</p>
+          </article>
+          <article class="sample-card">
+            <h3><code>tts-symbolic-math-reading-ratio-proportion-001</code></h3>
+            <p><strong>Slice:</strong> <code>ratio_proportion_counts</code></p>
+            <p><strong>Prompt:</strong> Read this ratio and count result as an exact quantitative explanation, not a casual estimate.</p>
+            <p><strong>Target:</strong> The ratio is 3 to 2, so 18 samples need 12 controls.</p>
+          </article>
+        </div>
+      </details>
     </section>
 
     <h2>Model Leaderboard</h2>
@@ -1556,7 +1591,7 @@
           <td data-label="Rank">1</td>
           <td data-label="Model"><code>mlx-community/chatterbox-turbo-6bit</code></td>
           <td data-label="Avg">91.2</td>
-          <td data-label="Accurate">95 / 150</td>
+          <td data-label="Accurate">95 / 155</td>
           <td data-label="Weakest Category"><code>information_tuning</code> avg 84.5</td>
           <td data-label="Likely Fix Focus">number clarity, pauses around dense facts</td>
         </tr>
@@ -1564,7 +1599,7 @@
           <td data-label="Rank">2</td>
           <td data-label="Model"><code>mlx-community/Kokoro-82M-4bit</code></td>
           <td data-label="Avg">88.6</td>
-          <td data-label="Accurate">88 / 150</td>
+          <td data-label="Accurate">88 / 155</td>
           <td data-label="Weakest Category"><code>speech_steerability</code> avg 80.8</td>
           <td data-label="Likely Fix Focus">style control, emphasis, pacing</td>
         </tr>
@@ -1572,7 +1607,7 @@
           <td data-label="Rank">3</td>
           <td data-label="Model"><code>mlx-community/Qwen3-TTS-12Hz-0.6B-Base-4bit</code></td>
           <td data-label="Avg">84.7</td>
-          <td data-label="Accurate">65 / 150</td>
+          <td data-label="Accurate">65 / 155</td>
           <td data-label="Weakest Category"><code>paralinguistics</code> avg 77.0</td>
           <td data-label="Likely Fix Focus">emotion rendering, natural prosody</td>
         </tr>
@@ -1623,12 +1658,13 @@
         <p><code>disfluency_repair_control</code><br>avg 84.6 / n 5 / 75-92</p>
         <p><code>lexical_stress_disambiguation</code><br>avg 84.3 / n 5 / 74-92</p>
         <p><code>pragmatic_intent_delivery</code><br>avg 84.8 / n 5 / 75-93</p>
+        <p><code>symbolic_math_reading</code><br>avg 83.9 / n 5 / 74-92</p>
       </div>
       <div class="panel">
         <h3>Scores By Model</h3>
-        <p><code>mlx-community/chatterbox-turbo-6bit</code><br>avg 90.1 / n 150 / 78-97</p>
-        <p><code>mlx-community/Kokoro-82M-4bit</code><br>avg 87.2 / n 150 / 73-95</p>
-        <p><code>mlx-community/Qwen3-TTS-12Hz-0.6B-Base-4bit</code><br>avg 83.6 / n 150 / 70-93</p>
+        <p><code>mlx-community/chatterbox-turbo-6bit</code><br>avg 90.1 / n 155 / 78-97</p>
+        <p><code>mlx-community/Kokoro-82M-4bit</code><br>avg 87.2 / n 155 / 73-95</p>
+        <p><code>mlx-community/Qwen3-TTS-12Hz-0.6B-Base-4bit</code><br>avg 83.6 / n 155 / 70-93</p>
       </div>
       <div class="panel">
         <h3>Scores By Voice</h3>
@@ -1785,6 +1821,13 @@
           <td data-label="Qwen3-TTS">78.5</td>
           <td data-label="What To Inspect">quiet urgency, friendly formality, upbeat slow coaching, serious reassurance</td>
         </tr>
+        <tr>
+          <td data-label="Category"><code>symbolic_math_reading</code></td>
+          <td data-label="Chatterbox">88.0</td>
+          <td data-label="Kokoro">84.0</td>
+          <td data-label="Qwen3-TTS">79.0</td>
+          <td data-label="What To Inspect">formulas, variables, signs, coordinates, ratios, exact symbolic structure</td>
+        </tr>
       </tbody>
     </table>
 
@@ -1809,17 +1852,17 @@
         <tr>
           <td data-label="Compared Model"><code>mlx-community/Kokoro-82M-4bit</code></td>
           <td data-label="Baseline"><code>mlx-community/chatterbox-turbo-6bit</code></td>
-          <td data-label="Matched Cases">150</td>
+          <td data-label="Matched Cases">155</td>
           <td data-label="Avg Delta">-2.6</td>
-          <td data-label="Wins / Ties / Losses">22 / 16 / 92</td>
+          <td data-label="Wins / Ties / Losses">24 / 18 / 113</td>
           <td data-label="Largest Regressions">speech pace and emphasis cases where style control trails the baseline.</td>
         </tr>
         <tr>
           <td data-label="Compared Model"><code>mlx-community/Qwen3-TTS-12Hz-0.6B-Base-4bit</code></td>
           <td data-label="Baseline"><code>mlx-community/chatterbox-turbo-6bit</code></td>
-          <td data-label="Matched Cases">150</td>
+          <td data-label="Matched Cases">155</td>
           <td data-label="Avg Delta">-6.5</td>
-          <td data-label="Wins / Ties / Losses">14 / 12 / 104</td>
+          <td data-label="Wins / Ties / Losses">15 / 13 / 127</td>
           <td data-label="Largest Regressions">emotion and dense-fact cases with lower naturalness or intelligibility.</td>
         </tr>
       </tbody>
@@ -1843,7 +1886,7 @@
       </div>
       <div class="panel">
         <h3>Synthesis Model</h3>
-        <p><code>mlx-community/Qwen3-TTS-12Hz-0.6B-Base-4bit</code><br>avg 83.6 / n 150 / range 70-93</p>
+        <p><code>mlx-community/Qwen3-TTS-12Hz-0.6B-Base-4bit</code><br>avg 83.6 / n 155 / range 70-93</p>
         <p class="muted">Compare model-level weak spots before changing prompts, voices, wrappers, or model settings.</p>
       </div>
     </section>
