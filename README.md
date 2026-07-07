@@ -2,7 +2,7 @@
 
 Open Audio Judge is a prompt-based evaluation harness for audio LLM judges. The goal is to make ASR, TTS, VAD, diarization, speech translation, and speech-event evaluations comparable even when teams run the judge on private datasets.
 
-**Live sample:** [TTS model leaderboard judged by Gemini](https://kennethli319.github.io/open-audio-judge/chatterbox-gemini-sample.html)
+**Live demo:** [TTS model leaderboard judged by Gemini](https://kennethli319.github.io/open-audio-judge/tts-leaderboard-demo.html)
 
 The first MVP focuses on:
 
@@ -227,7 +227,7 @@ using this command with real Hugging Face models. Keep private or generated audi
 For the TTS-first open-model workflow, `autojudge-local-tts` synthesizes a TTS case manifest with a
 local `local-tts-speak` compatible command, then judges the generated audio with the selected Open
 Audio Judge provider.
-See the committed [Chatterbox + Gemini sample page](docs/chatterbox-gemini-sample.html) for the
+See the committed [TTS leaderboard demo page](docs/tts-leaderboard-demo.html) for the
 full command flow, expected output files, and a representative report preview.
 
 ```bash

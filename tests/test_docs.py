@@ -8,8 +8,8 @@ class StrictEnoughHtmlParser(HTMLParser):
         raise AssertionError(message)
 
 
-def test_chatterbox_gemini_sample_page_documents_workflow() -> None:
-    page = Path("docs/chatterbox-gemini-sample.html")
+def test_tts_leaderboard_demo_page_documents_workflow() -> None:
+    page = Path("docs/tts-leaderboard-demo.html")
     html = page.read_text(encoding="utf-8")
 
     parser = StrictEnoughHtmlParser()
@@ -86,6 +86,7 @@ def test_tts_multiturn_examples_cover_requested_categories() -> None:
 def test_readme_links_chatterbox_gemini_sample_page() -> None:
     readme = Path("README.md").read_text(encoding="utf-8")
 
-    assert "docs/chatterbox-gemini-sample.html" in readme
+    assert "docs/tts-leaderboard-demo.html" in readme
+    assert "https://kennethli319.github.io/open-audio-judge/tts-leaderboard-demo.html" in readme
     assert "TTS model leaderboard judged by Gemini" in readme
     assert "docs/tts-eval-taxonomy.md" in readme
