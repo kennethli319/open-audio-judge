@@ -1041,13 +1041,7 @@ def _render_weakest_segment_card(item: SegmentSummary) -> str:
     fix_markup = _render_inline_tags(item.fix_areas, empty_label="Inspect judge rationale")
     focus_markup = _render_guidance_block("Category focus", item.category_focus)
     basis_markup = _render_guidance_tags("Source basis", item.source_bases)
-    case_markup = "".join(
-        "<li>"
-        f"<span>{html.escape(result.case_id)}</span> "
-        f"<strong>{result.overall_score} / {html.escape(result.label.replace('_', ' '))}</strong>"
-        "</li>"
-        for result in item.representative_cases
-    )
+    case_markup = _render_representative_case_items(item.representative_cases)
     return f"""<div class="metric {severity_class}">
       <span>{html.escape(item.field_label)}</span>
       <strong>{html.escape(item.name.replace("_", " "))}</strong>
@@ -1057,7 +1051,7 @@ def _render_weakest_segment_card(item: SegmentSummary) -> str:
       <div><span class="muted">Likely fix areas</span><br>{fix_markup}</div>
       <div><span class="muted">Issue categories</span><br>{issue_markup}</div>
       <div><span class="muted">Evaluation failures</span><br>{status_markup}</div>
-      <div><span class="muted">Representative cases</span><ul class="counts">{case_markup}</ul></div>
+      <div><span class="muted">Representative low-score samples</span><ul class="counts">{case_markup}</ul></div>
     </div>"""
 
 
@@ -1171,13 +1165,7 @@ def _render_model_category_action_row(item: ModelCategoryAction) -> str:
     fix_markup = _render_inline_tags(item.fix_areas, empty_label="Inspect judge rationale")
     focus_markup = _render_guidance_block("Focus", item.category_focus)
     basis_markup = _render_guidance_tags("Source basis", item.source_bases)
-    case_markup = "".join(
-        "<li>"
-        f"<span>{html.escape(result.case_id)}</span> "
-        f"<strong>{result.overall_score} / {html.escape(result.label.replace('_', ' '))}</strong>"
-        "</li>"
-        for result in item.representative_cases
-    )
+    case_markup = _render_representative_case_items(item.representative_cases)
     return f"""<tr class="{_segment_severity_class(item.average)}">
   <td data-label="Model">{html.escape(item.model)}</td>
   <td data-label="Category">{html.escape(item.category.replace("_", " "))}</td>
@@ -1185,8 +1173,38 @@ def _render_model_category_action_row(item: ModelCategoryAction) -> str:
   <td data-label="Likely Fix Areas">{fix_markup}</td>
   <td data-label="Category Guidance">{focus_markup}{basis_markup}</td>
   <td data-label="Evidence"><span class="muted">Issues</span><br>{issue_markup}<br><span class="muted">Failures</span><br>{status_markup}</td>
-  <td data-label="Representative Cases"><ul class="counts">{case_markup}</ul></td>
+  <td data-label="Representative Low-Score Samples"><ul class="counts">{case_markup}</ul></td>
 </tr>"""
+
+
+def _render_representative_case_items(results: list[EvaluationResult]) -> str:
+    if not results:
+        return '<li><span class="muted">No representative samples</span></li>'
+    return "".join(_render_representative_case_item(result) for result in results)
+
+
+def _render_representative_case_item(result: EvaluationResult) -> str:
+    source_case = _source_case_key(result)
+    source_markup = (
+        f'<br><span class="muted">source: {html.escape(source_case)}</span>'
+        if source_case and source_case != result.case_id
+        else ""
+    )
+    issue_markup = _render_inline_tags(
+        [category.replace("_", " ") for category in result.error_categories if category != "no_error"],
+        empty_label="No judge issue categories",
+    )
+    reason = result.semantic_error_summary or result.reason
+    return (
+        "<li>"
+        f"<span>{html.escape(result.case_id)}</span> "
+        f"<strong>{result.overall_score} / {html.escape(result.label.replace('_', ' '))}</strong>"
+        f'<br><span class="muted">status: {html.escape(result.status)}</span>'
+        f"{source_markup}"
+        f'<br><span class="muted">issues:</span> {issue_markup}'
+        f'<br><span class="reason">{html.escape(reason)}</span>'
+        "</li>"
+    )
 
 
 def _baseline_deltas(

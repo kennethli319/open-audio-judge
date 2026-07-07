@@ -233,12 +233,16 @@ def test_write_html_report_aggregates_tts_candidate_metadata(tmp_path: Path) -> 
     assert "numeric/date normalization" in html
     assert "entity and unit pronunciation" in html
     assert "Seed-TTS-Eval intelligibility checks" in html
+    assert "Representative low-score samples" in html
     assert "mlx-community/Kokoro-82M-4bit" in html
     assert "intelligibility" in html
     assert "text faithfulness" in html
     assert "information tuning" in html
     assert "avg 45.0" in html
     assert "tts-kokoro-date-local-tts" in html
+    assert "source: tts-date" in html
+    assert "status: ok" in html
+    assert "Dense facts became unclear." in html
     assert 'id="case-search"' in html
     assert 'id="case-label-filter"' in html
     assert 'id="case-status-filter"' in html
