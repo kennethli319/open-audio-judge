@@ -351,6 +351,7 @@
           <option value="semantic_contrast_focus">Semantic contrast focus</option>
           <option value="dialogue_turn_management">Dialogue turn management</option>
           <option value="compositional_style_control">Compositional style control</option>
+          <option value="named_entity_pronunciation">Named entity pronunciation</option>
         </select>
         <select id="label-filter" aria-label="Filter by label">
           <option value="">All labels</option>
@@ -395,7 +396,7 @@
   --cases examples/tts_multiturn_cases.jsonl \
   --judge-provider gemini \
   --judge-samples 3 \
-  --limit 130 \
+  --limit 135 \
   --out runs/leaderboard/chatterbox</code></pre>
 
     <pre><code>oaj autojudge-local-tts \
@@ -404,7 +405,7 @@
   --cases examples/tts_multiturn_cases.jsonl \
   --judge-provider gemini \
   --judge-samples 3 \
-  --limit 130 \
+  --limit 135 \
   --out runs/leaderboard/kokoro</code></pre>
 
     <pre><code>oaj autojudge-local-tts \
@@ -413,7 +414,7 @@
   --cases examples/tts_multiturn_cases.jsonl \
   --judge-provider gemini \
   --judge-samples 3 \
-  --limit 130 \
+  --limit 135 \
   --out runs/leaderboard/qwen3-tts</code></pre>
 
     <p>
@@ -425,7 +426,7 @@
   --cases examples/tts_multiturn_cases.jsonl \
   --judge-provider gemini \
   --judge-samples 3 \
-  --limit 130 \
+  --limit 135 \
   --out runs/leaderboard/chatterbox</code></pre>
 
     <p>
@@ -470,16 +471,16 @@
     <h2>Sample Report Preview</h2>
     <section class="grid" aria-label="Sample report metrics">
       <div class="metric"><span>Models</span><strong>3</strong></div>
-      <div class="metric"><span>Shared Eval Cases</span><strong>130</strong></div>
+      <div class="metric"><span>Shared Eval Cases</span><strong>135</strong></div>
       <div class="metric"><span>Judge Samples</span><strong>3x</strong></div>
       <div class="metric"><span>Top Avg</span><strong>91.2</strong></div>
       <div class="metric"><span>Lowest Avg</span><strong>84.7</strong></div>
-      <div class="metric"><span>Total Judgments</span><strong>1170</strong></div>
+      <div class="metric"><span>Total Judgments</span><strong>1215</strong></div>
     </section>
 
     <h2>Eval Set Samples</h2>
     <p>
-      The public demo eval set contains 130 synthetic, public-safe cases grouped into research-backed
+      The public demo eval set contains 135 synthetic, public-safe cases grouped into research-backed
       TTS dimensions. Each category below contributes five shared cases that every model synthesizes
       before Gemini judges the generated audio.
     </p>
@@ -1394,6 +1395,41 @@
           </article>
         </div>
       </details>
+      <details class="sample-group" data-category="named_entity_pronunciation">
+        <summary><span>Named Entity Pronunciation</span><strong>5 cases</strong></summary>
+        <div class="sample-list">
+          <article class="sample-card">
+            <h3><code>tts-named-entity-pronunciation-healthcare-schedule-001</code></h3>
+            <p><strong>Slice:</strong> <code>healthcare_person_place_names</code></p>
+            <p><strong>Prompt:</strong> Read this appointment notice with careful pronunciation of each person and place name.</p>
+            <p><strong>Target:</strong> Dr. Aisha Nguyen will meet Joaquin Alvarez at the Des Moines clinic on Fleur Drive.</p>
+          </article>
+          <article class="sample-card">
+            <h3><code>tts-named-entity-pronunciation-product-ticket-001</code></h3>
+            <p><strong>Slice:</strong> <code>product_ticket_assignee_names</code></p>
+            <p><strong>Prompt:</strong> Read this engineering handoff with the product name, ticket id, and assignee pronounced clearly.</p>
+            <p><strong>Target:</strong> Open Audio Judge issue O A J 427 is assigned to Priya Natarajan for the Kokoro wrapper review.</p>
+          </article>
+          <article class="sample-card">
+            <h3><code>tts-named-entity-pronunciation-mixed-origin-panel-001</code></h3>
+            <p><strong>Slice:</strong> <code>mixed_origin_person_names</code></p>
+            <p><strong>Prompt:</strong> Read the speaker introduction warmly, with respectful pronunciation of mixed-origin names.</p>
+            <p><strong>Target:</strong> Please welcome Saoirse O'Connell, Xiaoyu Li, and Mateo Ibarra to the advisory panel.</p>
+          </article>
+          <article class="sample-card">
+            <h3><code>tts-named-entity-pronunciation-place-route-001</code></h3>
+            <p><strong>Slice:</strong> <code>difficult_place_name_route</code></p>
+            <p><strong>Prompt:</strong> Read this route update naturally, but make the difficult place names distinct.</p>
+            <p><strong>Target:</strong> The route passes through Worcester, Boise, and La Jolla before the Santa Fe handoff.</p>
+          </article>
+          <article class="sample-card">
+            <h3><code>tts-named-entity-pronunciation-acronym-briefing-001</code></h3>
+            <p><strong>Slice:</strong> <code>acronym_program_place_briefing</code></p>
+            <p><strong>Prompt:</strong> Read this briefing line with acronyms and names crisp, not rushed.</p>
+            <p><strong>Target:</strong> NASA and NOAA briefed Maya Chen about the Artemis weather window at Vandenberg.</p>
+          </article>
+        </div>
+      </details>
     </section>
 
     <h2>Model Leaderboard</h2>
@@ -1413,7 +1449,7 @@
           <td data-label="Rank">1</td>
           <td data-label="Model"><code>mlx-community/chatterbox-turbo-6bit</code></td>
           <td data-label="Avg">91.2</td>
-          <td data-label="Accurate">89 / 130</td>
+          <td data-label="Accurate">92 / 135</td>
           <td data-label="Weakest Category"><code>information_tuning</code> avg 84.5</td>
           <td data-label="Likely Fix Focus">number clarity, pauses around dense facts</td>
         </tr>
@@ -1421,7 +1457,7 @@
           <td data-label="Rank">2</td>
           <td data-label="Model"><code>mlx-community/Kokoro-82M-4bit</code></td>
           <td data-label="Avg">88.6</td>
-          <td data-label="Accurate">82 / 130</td>
+          <td data-label="Accurate">85 / 135</td>
           <td data-label="Weakest Category"><code>speech_steerability</code> avg 80.8</td>
           <td data-label="Likely Fix Focus">style control, emphasis, pacing</td>
         </tr>
@@ -1429,7 +1465,7 @@
           <td data-label="Rank">3</td>
           <td data-label="Model"><code>mlx-community/Qwen3-TTS-12Hz-0.6B-Base-4bit</code></td>
           <td data-label="Avg">84.7</td>
-          <td data-label="Accurate">61 / 130</td>
+          <td data-label="Accurate">63 / 135</td>
           <td data-label="Weakest Category"><code>paralinguistics</code> avg 77.0</td>
           <td data-label="Likely Fix Focus">emotion rendering, natural prosody</td>
         </tr>
@@ -1476,12 +1512,13 @@
         <p><code>semantic_contrast_focus</code><br>avg 85.0 / n 5 / 76-93</p>
         <p><code>dialogue_turn_management</code><br>avg 86.2 / n 5 / 78-94</p>
         <p><code>compositional_style_control</code><br>avg 83.8 / n 5 / 74-92</p>
+        <p><code>named_entity_pronunciation</code><br>avg 84.2 / n 5 / 73-93</p>
       </div>
       <div class="panel">
         <h3>Scores By Model</h3>
-        <p><code>mlx-community/chatterbox-turbo-6bit</code><br>avg 90.1 / n 130 / 78-97</p>
-        <p><code>mlx-community/Kokoro-82M-4bit</code><br>avg 87.2 / n 130 / 73-95</p>
-        <p><code>mlx-community/Qwen3-TTS-12Hz-0.6B-Base-4bit</code><br>avg 83.6 / n 130 / 70-93</p>
+        <p><code>mlx-community/chatterbox-turbo-6bit</code><br>avg 90.1 / n 135 / 78-97</p>
+        <p><code>mlx-community/Kokoro-82M-4bit</code><br>avg 87.2 / n 135 / 73-95</p>
+        <p><code>mlx-community/Qwen3-TTS-12Hz-0.6B-Base-4bit</code><br>avg 83.6 / n 135 / 70-93</p>
       </div>
       <div class="panel">
         <h3>Scores By Voice</h3>
@@ -1662,7 +1699,7 @@
         <tr>
           <td data-label="Compared Model"><code>mlx-community/Kokoro-82M-4bit</code></td>
           <td data-label="Baseline"><code>mlx-community/chatterbox-turbo-6bit</code></td>
-          <td data-label="Matched Cases">130</td>
+          <td data-label="Matched Cases">135</td>
           <td data-label="Avg Delta">-2.6</td>
           <td data-label="Wins / Ties / Losses">22 / 16 / 92</td>
           <td data-label="Largest Regressions">speech pace and emphasis cases where style control trails the baseline.</td>
@@ -1670,7 +1707,7 @@
         <tr>
           <td data-label="Compared Model"><code>mlx-community/Qwen3-TTS-12Hz-0.6B-Base-4bit</code></td>
           <td data-label="Baseline"><code>mlx-community/chatterbox-turbo-6bit</code></td>
-          <td data-label="Matched Cases">130</td>
+          <td data-label="Matched Cases">135</td>
           <td data-label="Avg Delta">-6.5</td>
           <td data-label="Wins / Ties / Losses">14 / 12 / 104</td>
           <td data-label="Largest Regressions">emotion and dense-fact cases with lower naturalness or intelligibility.</td>
@@ -1696,7 +1733,7 @@
       </div>
       <div class="panel">
         <h3>Synthesis Model</h3>
-        <p><code>mlx-community/Qwen3-TTS-12Hz-0.6B-Base-4bit</code><br>avg 83.6 / n 130 / range 70-93</p>
+        <p><code>mlx-community/Qwen3-TTS-12Hz-0.6B-Base-4bit</code><br>avg 83.6 / n 135 / range 70-93</p>
         <p class="muted">Compare model-level weak spots before changing prompts, voices, wrappers, or model settings.</p>
       </div>
     </section>
@@ -1739,7 +1776,7 @@
     <h2>Sample-By-Sample Breakdown</h2>
     <p>
       The real combined report contains one row per synthesized model/case pair. This preview shows
-      representative rows across models, categories, slices, and score bands from the 375 generated
+      representative rows across models, categories, slices, and score bands from the 405 generated
       samples.
     </p>
     <table id="sample-breakdown-table">

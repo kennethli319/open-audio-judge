@@ -750,6 +750,14 @@ TTS_CATEGORY_GUIDANCE = {
             "instruction and intelligibility preservation",
         ],
     ),
+    "named_entity_pronunciation": (
+        "person names, place names, product names, acronyms, and program names",
+        [
+            "proper-noun phonemization",
+            "acronym and initialism handling",
+            "name/place pronunciation dictionaries",
+        ],
+    ),
 }
 
 
