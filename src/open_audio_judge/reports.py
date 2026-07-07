@@ -1078,6 +1078,14 @@ TTS_CATEGORY_GUIDANCE = {
             "amount, unit, and condition intelligibility",
         ],
     ),
+    "medication_dosage_delivery": (
+        "dose, route, schedule, taper phase, look-alike medication names, missed-dose conditions, and maximum daily dose constraints",
+        [
+            "clinical dose and unit normalization",
+            "route, interval, and schedule phrase grouping",
+            "safety-critical conditional prosody",
+        ],
+    ),
 }
 
 

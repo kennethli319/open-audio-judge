@@ -392,6 +392,7 @@
           <option value="spatial_relation_delivery">Spatial relation delivery</option>
           <option value="homograph_number_format_delivery">Homograph number-format delivery</option>
           <option value="currency_financial_delivery">Currency financial delivery</option>
+          <option value="medication_dosage_delivery">Medication dosage delivery</option>
         </select>
         <select id="label-filter" aria-label="Filter by label">
           <option value="">All labels</option>
@@ -436,7 +437,7 @@
   --cases examples/tts_multiturn_cases.jsonl \
   --judge-provider gemini \
   --judge-samples 3 \
-  --limit 335 \
+  --limit 340 \
   --out runs/leaderboard/chatterbox</code></pre>
 
     <pre><code>oaj autojudge-local-tts \
@@ -445,7 +446,7 @@
   --cases examples/tts_multiturn_cases.jsonl \
   --judge-provider gemini \
   --judge-samples 3 \
-  --limit 335 \
+  --limit 340 \
   --out runs/leaderboard/kokoro</code></pre>
 
     <pre><code>oaj autojudge-local-tts \
@@ -454,7 +455,7 @@
   --cases examples/tts_multiturn_cases.jsonl \
   --judge-provider gemini \
   --judge-samples 3 \
-  --limit 335 \
+  --limit 340 \
   --out runs/leaderboard/qwen3-tts</code></pre>
 
     <p>
@@ -466,7 +467,7 @@
   --cases examples/tts_multiturn_cases.jsonl \
   --judge-provider gemini \
   --judge-samples 3 \
-  --limit 335 \
+  --limit 340 \
   --out runs/leaderboard/chatterbox</code></pre>
 
     <p>
@@ -511,16 +512,16 @@
     <h2>Sample Report Preview</h2>
     <section class="grid" aria-label="Sample report metrics">
       <div class="metric"><span>Models</span><strong>3</strong></div>
-      <div class="metric"><span>Shared Eval Cases</span><strong>335</strong></div>
+      <div class="metric"><span>Shared Eval Cases</span><strong>340</strong></div>
       <div class="metric"><span>Judge Samples</span><strong>3x</strong></div>
       <div class="metric"><span>Top Avg</span><strong>91.2</strong></div>
       <div class="metric"><span>Lowest Avg</span><strong>84.7</strong></div>
-      <div class="metric"><span>Total Judgments</span><strong>2925</strong></div>
+      <div class="metric"><span>Total Judgments</span><strong>3060</strong></div>
     </section>
 
     <h2>Eval Set Samples</h2>
     <p>
-      The public demo eval set contains 335 synthetic, public-safe cases grouped into research-backed
+      The public demo eval set contains 340 synthetic, public-safe cases grouped into research-backed
       TTS dimensions. Each category below contributes five shared cases that every model synthesizes
       before Gemini judges the generated audio.
     </p>
@@ -2867,6 +2868,41 @@
             <p><strong>Slice:</strong> <code>similar_balances_after_ach_deposit</code></p>
             <p><strong>Prompt:</strong> Read this bank update so the two similar balances can be transcribed on first listen.</p>
             <p><strong>Target:</strong> The balance changed from $2,005.05 to $2,050.50 after the ACH deposit cleared.</p>
+          </article>
+        </div>
+      </details>
+      <details class="sample-group" data-category="medication_dosage_delivery">
+        <summary><span>Medication Dosage Delivery</span><strong>5 cases</strong></summary>
+        <div class="sample-list">
+          <article class="sample-card">
+            <h3><code>tts-medication-dosage-delivery-route-schedule-001</code></h3>
+            <p><strong>Slice:</strong> <code>five_mg_mouth_morning_ten_mg_bedtime</code></p>
+            <p><strong>Prompt:</strong> Read this medication instruction so the dose, route, and schedule cannot be swapped.</p>
+            <p><strong>Target:</strong> Take 5 milligrams by mouth every morning, and use the 10 milligram tablet only at bedtime.</p>
+          </article>
+          <article class="sample-card">
+            <h3><code>tts-medication-dosage-delivery-taper-001</code></h3>
+            <p><strong>Slice:</strong> <code>week_one_two_tablets_week_two_one_then_stop</code></p>
+            <p><strong>Prompt:</strong> Read this taper schedule so the week numbers and tablet counts stay attached.</p>
+            <p><strong>Target:</strong> For week one, take two tablets nightly; for week two, take one tablet nightly; then stop.</p>
+          </article>
+          <article class="sample-card">
+            <h3><code>tts-medication-dosage-delivery-lookalike-names-001</code></h3>
+            <p><strong>Slice:</strong> <code>hydroxyzine_not_hydralazine_25_mg_evening</code></p>
+            <p><strong>Prompt:</strong> Read this pharmacy note so the similar medication names and strengths do not blur together.</p>
+            <p><strong>Target:</strong> Dispense hydroxyzine 25 milligrams, not hydralazine 25 milligrams, for the evening dose.</p>
+          </article>
+          <article class="sample-card">
+            <h3><code>tts-medication-dosage-delivery-missed-dose-boundary-001</code></h3>
+            <p><strong>Slice:</strong> <code>less_than_four_hours_take_otherwise_skip_no_double</code></p>
+            <p><strong>Prompt:</strong> Read this missed-dose guidance so the skip condition and do-not-double warning are unmistakable.</p>
+            <p><strong>Target:</strong> If it is less than four hours late, take the dose now; otherwise skip it, and do not double the next dose.</p>
+          </article>
+          <article class="sample-card">
+            <h3><code>tts-medication-dosage-delivery-weight-based-001</code></h3>
+            <p><strong>Slice:</strong> <code>ten_mg_per_kg_every_eight_hours_max_300_daily</code></p>
+            <p><strong>Prompt:</strong> Read this pediatric dosing note so the amount per kilogram and maximum daily dose remain distinct.</p>
+            <p><strong>Target:</strong> Give 10 milligrams per kilogram every eight hours, with a maximum of 300 milligrams per day.</p>
           </article>
         </div>
       </details>

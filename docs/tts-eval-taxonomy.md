@@ -198,10 +198,13 @@ runs can map private prompts into the same categories without copying private ro
 - `currency_financial_delivery`: currency amounts, currency codes, basis points versus percent,
   negative refunds, exchange rates, transfer caps, and near-matching balances where financial text
   normalization must preserve exact money, units, signs, and conditions.
+- `medication_dosage_delivery`: medication dose, route, schedule, taper phase, look-alike drug
+  names, missed-dose boundaries, and maximum daily constraints where clinical text normalization
+  must preserve exact units, timing, conditions, and safety warnings.
 
 ## Manifest Contract
 
-The public comparison manifest is intentionally balanced at 335 cases for now: 67 categories with 5
+The public comparison manifest is intentionally balanced at 340 cases for now: 68 categories with 5
 cases each. Expansion should add complete five-case category batches before deepening existing
 categories.
 
