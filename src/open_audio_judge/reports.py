@@ -65,6 +65,7 @@ def render_html_report(results: list[EvaluationResult]) -> str:
     calibration_checks = _calibration_checks(results)
 
     rows = "\n".join(_render_row(result) for result in results)
+    case_table_controls = _render_case_table_controls(results)
     bucket_markup = "\n".join(
         f'<div class="bucket"><span>{html.escape(name)}</span>'
         f'<div class="track"><div class="fill" style="width:{_pct(count, len(results))}%"></div></div>'
@@ -262,9 +263,49 @@ def render_html_report(results: list[EvaluationResult]) -> str:
       font-size: 12px;
       color: var(--muted);
     }}
+    .case-tools {{
+      display: grid;
+      grid-template-columns: minmax(220px, 1fr) repeat(3, minmax(140px, 180px));
+      gap: 10px;
+      margin: 0 0 12px;
+      align-items: end;
+    }}
+    .case-tools label {{
+      display: grid;
+      gap: 4px;
+      color: var(--muted);
+      font-size: 12px;
+    }}
+    .case-tools input,
+    .case-tools select {{
+      width: 100%;
+      border: 1px solid var(--line);
+      border-radius: 6px;
+      padding: 8px 10px;
+      color: var(--ink);
+      background: var(--panel);
+      font: inherit;
+    }}
+    .sort-button {{
+      border: 0;
+      background: transparent;
+      color: inherit;
+      cursor: pointer;
+      font: inherit;
+      padding: 0;
+      text-align: left;
+    }}
+    .sort-button::after {{
+      content: "  sort";
+      color: var(--muted);
+      font-size: 11px;
+      font-weight: 400;
+    }}
+    .is-hidden {{ display: none !important; }}
     @media (max-width: 760px) {{
       header {{ padding: 22px 18px 16px; }}
       main {{ padding: 18px 12px 28px; }}
+      .case-tools {{ grid-template-columns: 1fr; }}
       table, thead, tbody, th, td, tr {{ display: block; }}
       thead {{ display: none; }}
       tr {{ border-bottom: 1px solid var(--line); padding: 10px 0; }}
@@ -338,12 +379,13 @@ def render_html_report(results: list[EvaluationResult]) -> str:
     {priority_markup}
 
     <h2>Case Results</h2>
-    <table>
+    {case_table_controls}
+    <table id="case-results-table">
       <thead>
         <tr>
-          <th>Case</th>
+          <th><button class="sort-button" type="button" data-sort="case">Case</button></th>
           <th>Provenance</th>
-          <th>Score</th>
+          <th><button class="sort-button" type="button" data-sort="score">Score</button></th>
           <th>Label</th>
           <th>Reason</th>
           <th>Diagnostics</th>
@@ -355,6 +397,62 @@ def render_html_report(results: list[EvaluationResult]) -> str:
       </tbody>
     </table>
   </main>
+  <script>
+    (() => {{
+      const table = document.querySelector("#case-results-table");
+      if (!table) return;
+      const tbody = table.querySelector("tbody");
+      const rows = Array.from(tbody.querySelectorAll("tr"));
+      const search = document.querySelector("#case-search");
+      const label = document.querySelector("#case-label-filter");
+      const status = document.querySelector("#case-status-filter");
+      const model = document.querySelector("#case-model-filter");
+      const count = document.querySelector("#case-visible-count");
+      const state = {{ sortKey: "", sortDir: "desc" }};
+
+      function applyFilters() {{
+        const query = (search?.value || "").trim().toLowerCase();
+        const labelValue = label?.value || "";
+        const statusValue = status?.value || "";
+        const modelValue = model?.value || "";
+        let visible = 0;
+        rows.forEach((row) => {{
+          const matches =
+            (!query || row.dataset.search.includes(query)) &&
+            (!labelValue || row.dataset.label === labelValue) &&
+            (!statusValue || row.dataset.status === statusValue) &&
+            (!modelValue || row.dataset.model === modelValue);
+          row.classList.toggle("is-hidden", !matches);
+          if (matches) visible += 1;
+        }});
+        if (count) count.textContent = `${{visible}} / ${{rows.length}} shown`;
+      }}
+
+      function sortRows(key) {{
+        state.sortDir = state.sortKey === key && state.sortDir === "asc" ? "desc" : "asc";
+        state.sortKey = key;
+        const dir = state.sortDir === "asc" ? 1 : -1;
+        const sorted = [...rows].sort((left, right) => {{
+          if (key === "score") {{
+            return (Number(left.dataset.score) - Number(right.dataset.score)) * dir;
+          }}
+          return left.dataset.case.localeCompare(right.dataset.case) * dir;
+        }});
+        sorted.forEach((row) => tbody.appendChild(row));
+        rows.splice(0, rows.length, ...sorted);
+        applyFilters();
+      }}
+
+      [search, label, status, model].forEach((control) => {{
+        control?.addEventListener("input", applyFilters);
+        control?.addEventListener("change", applyFilters);
+      }});
+      table.querySelectorAll("[data-sort]").forEach((button) => {{
+        button.addEventListener("click", () => sortRows(button.dataset.sort));
+      }});
+      sortRows("score");
+    }})();
+  </script>
 </body>
 </html>"""
 
@@ -440,7 +538,9 @@ def _render_row(result: EvaluationResult) -> str:
     score = result.overall_score
     label = result.label
     score_detail = _render_judge_sample_scores(result)
-    return f"""<tr>
+    search_text = _result_search_text(result)
+    model = _metadata_group_value(result, "synthesis_model") or ""
+    return f"""<tr data-case="{html.escape(result.case_id)}" data-score="{score}" data-label="{html.escape(label)}" data-status="{html.escape(result.status)}" data-model="{html.escape(model)}" data-search="{html.escape(search_text)}">
   <td data-label="Case">{html.escape(result.case_id)}</td>
   <td data-label="Provenance">{_render_provenance(result)}</td>
   <td data-label="Score" class="scorebar"><strong>{score}</strong>
@@ -452,6 +552,78 @@ def _render_row(result: EvaluationResult) -> str:
   <td data-label="Diagnostics">{_render_diagnostics(result)}</td>
   <td data-label="Status">{html.escape(result.status)}</td>
 </tr>"""
+
+
+def _render_case_table_controls(results: list[EvaluationResult]) -> str:
+    models = sorted(
+        {
+            value
+            for result in results
+            if (value := _metadata_group_value(result, "synthesis_model")) is not None
+        }
+    )
+    model_options = "".join(
+        f'<option value="{html.escape(model)}">{html.escape(model)}</option>' for model in models
+    )
+    return f"""<section class="case-tools" aria-label="Case result filters">
+      <label>Search
+        <input id="case-search" type="search" placeholder="case, model, category, reason, issue">
+      </label>
+      <label>Label
+        <select id="case-label-filter">
+          <option value="">All labels</option>
+          <option value="accurate">Accurate</option>
+          <option value="needs_review">Needs review</option>
+          <option value="inaccurate">Inaccurate</option>
+        </select>
+      </label>
+      <label>Status
+        <select id="case-status-filter">
+          <option value="">All statuses</option>
+          <option value="ok">OK</option>
+          <option value="provider_error">Provider error</option>
+          <option value="parse_error">Parse error</option>
+        </select>
+      </label>
+      <label>Model
+        <select id="case-model-filter">
+          <option value="">All models</option>
+          {model_options}
+        </select>
+      </label>
+      <div class="muted" id="case-visible-count">{len(results)} / {len(results)} shown</div>
+    </section>"""
+
+
+def _result_search_text(result: EvaluationResult) -> str:
+    metadata_values = [
+        value
+        for key in (
+            "eval_category",
+            "evaluation_category",
+            "source_category",
+            "tts_slice",
+            "synthesis_model",
+            "synthesis_voice",
+            "language",
+            "synthesis_lang_code",
+            "sample_kind",
+            "source_case_id",
+        )
+        if isinstance((value := result.metadata.get(key)), str)
+    ]
+    values = [
+        result.case_id,
+        result.label,
+        result.status,
+        result.reason,
+        result.semantic_error_summary or "",
+        result.meaning_preservation or "",
+        *result.error_categories,
+        *result.researcher_notes,
+        *metadata_values,
+    ]
+    return " ".join(value for value in values if value).lower()
 
 
 def _bucket_counts(scores: list[int]) -> list[tuple[str, int]]:

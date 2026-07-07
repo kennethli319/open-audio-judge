@@ -33,6 +33,7 @@ def test_chatterbox_gemini_sample_page_documents_workflow() -> None:
         "Scores By Category",
         "Weakest Segments",
         "Likely fix areas",
+        "searchable/sortable sample-by-sample details",
         "Sample-By-Sample Breakdown",
         "Representative Result JSON",
         "judge_sample_scores",

@@ -270,9 +270,9 @@ The command writes:
   source category, and sample kind.
 - `judge-report/results.jsonl` and `judge-report/report.html`: aggregate naturalness scores, top
   issue categories, weakest category/slice/model segments, a ranked model-category action matrix,
-  likely fix areas, priority cases, category score breakdowns, and sample-by-sample reasons. Use
-  `--judge-samples` to run multiple independent judge calls per synthesized sample and report the
-  averaged score plus the individual judge scores.
+  likely fix areas, priority cases, category score breakdowns, and searchable/sortable
+  sample-by-sample reasons. Use `--judge-samples` to run multiple independent judge calls per
+  synthesized sample and report the averaged score plus the individual judge scores.
 
 Use `--judge-provider mock` for a cheap pipeline check. Use an audio-capable judge such as Gemini or
 a local Qwen/Qwen3-Omni endpoint for real perceptual judging.

@@ -223,6 +223,18 @@ def test_write_html_report_aggregates_tts_candidate_metadata(tmp_path: Path) -> 
     assert "information tuning" in html
     assert "avg 45.0" in html
     assert "tts-kokoro-date-local-tts" in html
+    assert 'id="case-search"' in html
+    assert 'id="case-label-filter"' in html
+    assert 'id="case-status-filter"' in html
+    assert 'id="case-model-filter"' in html
+    assert 'id="case-visible-count"' in html
+    assert 'data-sort="score"' in html
+    assert 'data-sort="case"' in html
+    assert 'data-score="45"' in html
+    assert 'data-label="inaccurate"' in html
+    assert 'data-status="provider_error"' in html
+    assert 'data-model="mlx-community/Kokoro-82M-4bit"' in html
+    assert "The number and date were hard to understand." in html
 
 
 def test_write_html_report_shows_sample_provenance_per_row(tmp_path: Path) -> None:
