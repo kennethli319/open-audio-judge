@@ -758,6 +758,14 @@ TTS_CATEGORY_GUIDANCE = {
             "name/place pronunciation dictionaries",
         ],
     ),
+    "phonetic_confusability": (
+        "minimal pairs, confusable codes, similar names, result contrasts, and small function words",
+        [
+            "fine-grained phoneme contrast",
+            "code and name articulation",
+            "text-faithful emphasis on short function words",
+        ],
+    ),
 }
 
 

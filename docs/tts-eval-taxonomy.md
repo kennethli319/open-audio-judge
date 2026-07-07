@@ -98,10 +98,13 @@ runs can map private prompts into the same categories without copying private ro
   right speaker or actor.
 - `structured_enumeration_delivery`: ranked lists, labeled options, phase checklists, compact status
   rows, and nested plan items where spoken structure must remain scannable without visual layout.
+- `phonetic_confusability`: minimal pairs, confusable letter and digit codes, similar names,
+  positive/negative contrasts, and small function-word distinctions where intelligibility must
+  survive similar sounds.
 
 ## Manifest Contract
 
-The public comparison manifest is intentionally balanced at 165 cases for now: 33 categories with 5
+The public comparison manifest is intentionally balanced at 170 cases for now: 34 categories with 5
 cases each. Expansion should add complete five-case category batches before deepening existing
 categories.
 

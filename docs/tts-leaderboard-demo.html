@@ -354,6 +354,11 @@
           <option value="named_entity_pronunciation">Named entity pronunciation</option>
           <option value="disfluency_repair_control">Disfluency repair control</option>
           <option value="lexical_stress_disambiguation">Lexical stress disambiguation</option>
+          <option value="pragmatic_intent_delivery">Pragmatic intent delivery</option>
+          <option value="symbolic_math_reading">Symbolic math reading</option>
+          <option value="multi_speaker_attribution">Multi speaker attribution</option>
+          <option value="structured_enumeration_delivery">Structured enumeration delivery</option>
+          <option value="phonetic_confusability">Phonetic confusability</option>
         </select>
         <select id="label-filter" aria-label="Filter by label">
           <option value="">All labels</option>
@@ -398,7 +403,7 @@
   --cases examples/tts_multiturn_cases.jsonl \
   --judge-provider gemini \
   --judge-samples 3 \
-  --limit 165 \
+  --limit 170 \
   --out runs/leaderboard/chatterbox</code></pre>
 
     <pre><code>oaj autojudge-local-tts \
@@ -407,7 +412,7 @@
   --cases examples/tts_multiturn_cases.jsonl \
   --judge-provider gemini \
   --judge-samples 3 \
-  --limit 165 \
+  --limit 170 \
   --out runs/leaderboard/kokoro</code></pre>
 
     <pre><code>oaj autojudge-local-tts \
@@ -416,7 +421,7 @@
   --cases examples/tts_multiturn_cases.jsonl \
   --judge-provider gemini \
   --judge-samples 3 \
-  --limit 165 \
+  --limit 170 \
   --out runs/leaderboard/qwen3-tts</code></pre>
 
     <p>
@@ -428,7 +433,7 @@
   --cases examples/tts_multiturn_cases.jsonl \
   --judge-provider gemini \
   --judge-samples 3 \
-  --limit 165 \
+  --limit 170 \
   --out runs/leaderboard/chatterbox</code></pre>
 
     <p>
@@ -473,16 +478,16 @@
     <h2>Sample Report Preview</h2>
     <section class="grid" aria-label="Sample report metrics">
       <div class="metric"><span>Models</span><strong>3</strong></div>
-      <div class="metric"><span>Shared Eval Cases</span><strong>165</strong></div>
+      <div class="metric"><span>Shared Eval Cases</span><strong>170</strong></div>
       <div class="metric"><span>Judge Samples</span><strong>3x</strong></div>
       <div class="metric"><span>Top Avg</span><strong>91.2</strong></div>
       <div class="metric"><span>Lowest Avg</span><strong>84.7</strong></div>
-      <div class="metric"><span>Total Judgments</span><strong>1485</strong></div>
+      <div class="metric"><span>Total Judgments</span><strong>1530</strong></div>
     </section>
 
     <h2>Eval Set Samples</h2>
     <p>
-      The public demo eval set contains 165 synthetic, public-safe cases grouped into research-backed
+      The public demo eval set contains 170 synthetic, public-safe cases grouped into research-backed
       TTS dimensions. Each category below contributes five shared cases that every model synthesizes
       before Gemini judges the generated audio.
     </p>
@@ -1639,6 +1644,41 @@
             <p><strong>Slice:</strong> <code>nested_step_subitem_grouping</code></p>
             <p><strong>Prompt:</strong> Read this nested plan so the main step and its two subitems remain clear in audio.</p>
             <p><strong>Target:</strong> Step one is prep: gather the consent forms and confirm the room number. Step two is review: note missing signatures and flag unclear dates.</p>
+          </article>
+        </div>
+      </details>
+      <details class="sample-group" data-category="phonetic_confusability">
+        <summary><span>Phonetic Confusability</span><strong>5 cases</strong></summary>
+        <div class="sample-list">
+          <article class="sample-card">
+            <h3><code>tts-phonetic-confusability-minimal-pair-001</code></h3>
+            <p><strong>Slice:</strong> <code>minimal_pair_pain_pane</code></p>
+            <p><strong>Prompt:</strong> Read this clinic note so the similar-sounding words pain and pane are not confused.</p>
+            <p><strong>Target:</strong> The patient reported pain near the window pane after the waiting-room chair shifted.</p>
+          </article>
+          <article class="sample-card">
+            <h3><code>tts-phonetic-confusability-letter-code-001</code></h3>
+            <p><strong>Slice:</strong> <code>confusable_letters_digits_code</code></p>
+            <p><strong>Prompt:</strong> Read this support code so each similar letter and digit can be copied by ear.</p>
+            <p><strong>Target:</strong> Use code B as in bravo, D as in delta, then 3 0 8 before the final M.</p>
+          </article>
+          <article class="sample-card">
+            <h3><code>tts-phonetic-confusability-name-contrast-001</code></h3>
+            <p><strong>Slice:</strong> <code>similar_names_assignment</code></p>
+            <p><strong>Prompt:</strong> Read this handoff so the two similar teammate names remain distinct.</p>
+            <p><strong>Target:</strong> Sean signs the intake form, and Shawn sends the confirmation after lunch.</p>
+          </article>
+          <article class="sample-card">
+            <h3><code>tts-phonetic-confusability-negative-positive-001</code></h3>
+            <p><strong>Slice:</strong> <code>positive_negative_result_contrast</code></p>
+            <p><strong>Prompt:</strong> Read this test-result update so positive and negative cannot be misheard.</p>
+            <p><strong>Target:</strong> The first screen was positive, but the confirmatory lab result was negative.</p>
+          </article>
+          <article class="sample-card">
+            <h3><code>tts-phonetic-confusability-short-function-words-001</code></h3>
+            <p><strong>Slice:</strong> <code>function_word_in_on_contrast</code></p>
+            <p><strong>Prompt:</strong> Read this access instruction so the small function words do not disappear.</p>
+            <p><strong>Target:</strong> Put the badge in the tray, not on the tray, before you scan it.</p>
           </article>
         </div>
       </details>
