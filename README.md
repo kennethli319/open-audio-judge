@@ -219,6 +219,8 @@ using this command with real Hugging Face models. Keep private or generated audi
 For the TTS-first open-model workflow, `autojudge-local-tts` synthesizes a TTS case manifest with a
 local `local-tts-speak` compatible command, then judges the generated audio with the selected Open
 Audio Judge provider.
+See the committed [Chatterbox + Gemini sample page](docs/chatterbox-gemini-sample.html) for the
+full command flow, expected output files, and a representative report preview.
 
 ```bash
 oaj autojudge-local-tts \

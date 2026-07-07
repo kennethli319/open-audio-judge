@@ -1,0 +1,371 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Open Audio Judge Sample: Chatterbox TTS + Gemini Judge</title>
+  <style>
+    :root {
+      --ink: #172026;
+      --muted: #5d6975;
+      --line: #d8dee5;
+      --bg: #f7f8fa;
+      --panel: #ffffff;
+      --good: #0f8a5f;
+      --warn: #b36b00;
+      --bad: #c93535;
+      --accent: #2864b4;
+    }
+    * {
+      box-sizing: border-box;
+    }
+    body {
+      margin: 0;
+      background: var(--bg);
+      color: var(--ink);
+      font-family: ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      line-height: 1.55;
+    }
+    header {
+      background: var(--panel);
+      border-bottom: 1px solid var(--line);
+      padding: 28px 24px 22px;
+    }
+    main,
+    .header-inner {
+      max-width: 1120px;
+      margin: 0 auto;
+    }
+    main {
+      padding: 24px 24px 44px;
+    }
+    h1 {
+      margin: 0 0 8px;
+      font-size: 28px;
+      letter-spacing: 0;
+    }
+    h2 {
+      margin: 30px 0 12px;
+      font-size: 19px;
+      letter-spacing: 0;
+    }
+    h3 {
+      margin: 0 0 8px;
+      font-size: 15px;
+    }
+    p {
+      margin: 0 0 12px;
+    }
+    a {
+      color: var(--accent);
+    }
+    code {
+      background: #edf1f5;
+      border-radius: 4px;
+      padding: 0.12rem 0.28rem;
+    }
+    pre {
+      background: #172026;
+      border-radius: 8px;
+      color: #f7f8fa;
+      overflow-x: auto;
+      padding: 14px 16px;
+    }
+    pre code {
+      background: transparent;
+      padding: 0;
+    }
+    .muted {
+      color: var(--muted);
+    }
+    .grid {
+      display: grid;
+      gap: 12px;
+      grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
+    }
+    .metric,
+    .panel {
+      background: var(--panel);
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      padding: 14px 16px;
+    }
+    .metric span {
+      color: var(--muted);
+      display: block;
+      font-size: 13px;
+    }
+    .metric strong {
+      display: block;
+      font-size: 27px;
+      margin-top: 4px;
+    }
+    .flow {
+      display: grid;
+      gap: 10px;
+      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+      margin-top: 10px;
+    }
+    .flow div {
+      background: var(--panel);
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      padding: 12px;
+    }
+    .scorebar {
+      background: #e8edf2;
+      border-radius: 999px;
+      height: 10px;
+      overflow: hidden;
+    }
+    .scorebar div {
+      background: var(--good);
+      height: 100%;
+      width: 95%;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      background: var(--panel);
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      overflow: hidden;
+    }
+    th,
+    td {
+      border-bottom: 1px solid var(--line);
+      padding: 11px 12px;
+      text-align: left;
+      vertical-align: top;
+    }
+    th {
+      background: #fbfcfd;
+      color: var(--muted);
+      font-size: 13px;
+    }
+    tr:last-child td {
+      border-bottom: 0;
+    }
+    .good {
+      color: var(--good);
+      font-weight: 700;
+    }
+    .warn {
+      color: var(--warn);
+      font-weight: 700;
+    }
+    .bad {
+      color: var(--bad);
+      font-weight: 700;
+    }
+    @media (max-width: 720px) {
+      header {
+        padding: 22px 16px 18px;
+      }
+      main {
+        padding: 18px 12px 34px;
+      }
+      table,
+      thead,
+      tbody,
+      th,
+      td,
+      tr {
+        display: block;
+      }
+      thead {
+        display: none;
+      }
+      tr {
+        border-bottom: 1px solid var(--line);
+      }
+      td {
+        border-bottom: 0;
+      }
+      td::before {
+        color: var(--muted);
+        content: attr(data-label);
+        display: block;
+        font-size: 12px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="header-inner">
+      <h1>Open Audio Judge Sample</h1>
+      <p class="muted">Chatterbox TTS generation scored by the Gemini audio judge.</p>
+    </div>
+  </header>
+
+  <main>
+    <section class="panel">
+      <h2>What This Demonstrates</h2>
+      <p>
+        This sample shows the TTS-first AutoJudge workflow: build or load TTS cases,
+        synthesize audio with a local open model, send the generated audio plus target
+        text to Gemini, and review an aggregate report with per-sample diagnostics.
+      </p>
+      <div class="flow" aria-label="Workflow">
+        <div><strong>1. Cases</strong><br><span class="muted">JSONL cases with target text, turns, and metadata.</span></div>
+        <div><strong>2. Generator</strong><br><span class="muted">Chatterbox writes local audio files under <code>runs/</code>.</span></div>
+        <div><strong>3. Judge</strong><br><span class="muted">Gemini listens to audio and returns strict JSON scores.</span></div>
+        <div><strong>4. Report</strong><br><span class="muted">HTML and JSONL summarize issues, scores, and provenance.</span></div>
+      </div>
+    </section>
+
+    <h2>How To Run It</h2>
+    <p>
+      Use this command for a small safe demo case. Source <code>GEMINI_API_KEY</code>
+      at runtime; do not commit it to the repository.
+    </p>
+    <pre><code>oaj autojudge-local-tts \
+  --model mlx-community/chatterbox-turbo-6bit \
+  --cases examples/tts_multiturn_cases.jsonl \
+  --judge-provider gemini \
+  --limit 1 \
+  --out runs/chatterbox-tts-autojudge-smoke</code></pre>
+
+    <p>
+      If the local console script is stale while developing from source, run the
+      same command through the module entry point:
+    </p>
+    <pre><code>PYTHONPATH=src:. .venv/bin/python -m open_audio_judge.cli autojudge-local-tts \
+  --model mlx-community/chatterbox-turbo-6bit \
+  --cases examples/tts_multiturn_cases.jsonl \
+  --judge-provider gemini \
+  --limit 1 \
+  --out runs/chatterbox-tts-autojudge-smoke</code></pre>
+
+    <h2>Expected Output Files</h2>
+    <table>
+      <thead>
+        <tr>
+          <th>Path</th>
+          <th>Purpose</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td data-label="Path"><code>synthesis/tts_audio_cases.jsonl</code></td>
+          <td data-label="Purpose">Generated-audio cases with local <code>audio_path</code>, target text, and synthesis metadata.</td>
+        </tr>
+        <tr>
+          <td data-label="Path"><code>model_summary.json</code></td>
+          <td data-label="Purpose">Attempted/synthesized counts, success rate, audio totals, model/voice/language breakdowns, and failure counts.</td>
+        </tr>
+        <tr>
+          <td data-label="Path"><code>judge-report/results.jsonl</code></td>
+          <td data-label="Purpose">One strict JSON result per judged sample: score, reason, categories, notes, status, and provenance.</td>
+        </tr>
+        <tr>
+          <td data-label="Path"><code>judge-report/report.html</code></td>
+          <td data-label="Purpose">Human-readable report with aggregate scores, top issues, priority cases, and sample-by-sample details.</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <h2>Sample Report Preview</h2>
+    <section class="grid" aria-label="Sample report metrics">
+      <div class="metric"><span>Cases</span><strong>1</strong></div>
+      <div class="metric"><span>Average</span><strong>95.0</strong></div>
+      <div class="metric"><span>Median</span><strong>95.0</strong></div>
+      <div class="metric"><span>Accurate</span><strong>1</strong></div>
+      <div class="metric"><span>Needs Review</span><strong>0</strong></div>
+      <div class="metric"><span>Inaccurate</span><strong>0</strong></div>
+    </section>
+
+    <h2>Score Distribution</h2>
+    <div class="panel">
+      <p><strong>81-100</strong> <span class="muted">1 sample</span></p>
+      <div class="scorebar" aria-label="Score distribution 81 to 100"><div></div></div>
+    </div>
+
+    <h2>Top Diagnostics</h2>
+    <section class="grid">
+      <div class="panel">
+        <h3>Error Categories</h3>
+        <p class="good">no error: 1</p>
+      </div>
+      <div class="panel">
+        <h3>Scores By Model</h3>
+        <p><code>mlx-community/chatterbox-turbo-6bit</code><br>avg 95.0 / n 1 / 95-95</p>
+      </div>
+      <div class="panel">
+        <h3>Scores By Voice</h3>
+        <p><code>af_heart</code><br>avg 95.0 / n 1 / 95-95</p>
+      </div>
+      <div class="panel">
+        <h3>Scores By Language</h3>
+        <p><code>en</code><br>avg 95.0 / n 1 / 95-95</p>
+      </div>
+    </section>
+
+    <h2>Sample-By-Sample Breakdown</h2>
+    <table>
+      <thead>
+        <tr>
+          <th>Case</th>
+          <th>Score</th>
+          <th>Label</th>
+          <th>Reason</th>
+          <th>Provenance</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td data-label="Case"><code>tts-multiturn-demo-001-local-tts</code></td>
+          <td data-label="Score">95</td>
+          <td data-label="Label" class="good">accurate</td>
+          <td data-label="Reason">
+            The speech is highly natural, fluent, intelligible, and faithful to the target text.
+          </td>
+          <td data-label="Provenance">
+            model: <code>mlx-community/chatterbox-turbo-6bit</code><br>
+            voice: <code>af_heart</code><br>
+            sample kind: <code>local_synthetic_tts</code><br>
+            duration: <code>3.1s</code>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+
+    <h2>Representative Result JSON</h2>
+    <pre><code>{
+  "case_id": "tts-multiturn-demo-001-local-tts",
+  "task": "tts_naturalness",
+  "provider": "gemini",
+  "overall_score": 95,
+  "label": "accurate",
+  "semantic_error_summary": "The audio is highly natural and fully faithful to the target text.",
+  "error_categories": ["no_error"],
+  "researcher_notes": [
+    "The voice sounds highly natural with clear pronunciation and no artifacts."
+  ],
+  "metadata": {
+    "synthesis_provider": "local_chatterbox",
+    "synthesis_model": "mlx-community/chatterbox-turbo-6bit",
+    "synthesis_voice": "af_heart",
+    "synthesis_lang_code": "en",
+    "sample_kind": "local_synthetic_tts"
+  }
+}</code></pre>
+
+    <h2>How To Read The Report</h2>
+    <p>
+      Start with average score and label counts, then inspect score breakdowns by
+      TTS slice, model, voice, and language. Use the top diagnostics to find
+      repeated issue clusters such as pronunciation errors, artifact classes, or
+      weak slices. Finally, open the per-sample rows to inspect the exact Gemini
+      reason, target text hash, generated-audio provenance, and any researcher notes.
+    </p>
+
+    <p class="muted">
+      This page is a committed sample artifact. Real run outputs should stay under
+      ignored <code>runs/</code> directories unless the audio, text, and metadata are
+      explicitly safe to publish.
+    </p>
+  </main>
+</body>
+</html>
