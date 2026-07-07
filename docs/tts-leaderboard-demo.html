@@ -382,6 +382,7 @@
           <option value="statistical_notation_delivery">Statistical notation delivery</option>
           <option value="readback_confirmation_delivery">Readback confirmation delivery</option>
           <option value="focus_particle_scope_delivery">Focus particle scope delivery</option>
+          <option value="slot_value_pairing_delivery">Slot value pairing delivery</option>
         </select>
         <select id="label-filter" aria-label="Filter by label">
           <option value="">All labels</option>
@@ -426,7 +427,7 @@
   --cases examples/tts_multiturn_cases.jsonl \
   --judge-provider gemini \
   --judge-samples 3 \
-  --limit 285 \
+  --limit 290 \
   --out runs/leaderboard/chatterbox</code></pre>
 
     <pre><code>oaj autojudge-local-tts \
@@ -435,7 +436,7 @@
   --cases examples/tts_multiturn_cases.jsonl \
   --judge-provider gemini \
   --judge-samples 3 \
-  --limit 285 \
+  --limit 290 \
   --out runs/leaderboard/kokoro</code></pre>
 
     <pre><code>oaj autojudge-local-tts \
@@ -444,7 +445,7 @@
   --cases examples/tts_multiturn_cases.jsonl \
   --judge-provider gemini \
   --judge-samples 3 \
-  --limit 285 \
+  --limit 290 \
   --out runs/leaderboard/qwen3-tts</code></pre>
 
     <p>
@@ -456,7 +457,7 @@
   --cases examples/tts_multiturn_cases.jsonl \
   --judge-provider gemini \
   --judge-samples 3 \
-  --limit 285 \
+  --limit 290 \
   --out runs/leaderboard/chatterbox</code></pre>
 
     <p>
@@ -501,16 +502,16 @@
     <h2>Sample Report Preview</h2>
     <section class="grid" aria-label="Sample report metrics">
       <div class="metric"><span>Models</span><strong>3</strong></div>
-      <div class="metric"><span>Shared Eval Cases</span><strong>285</strong></div>
+      <div class="metric"><span>Shared Eval Cases</span><strong>290</strong></div>
       <div class="metric"><span>Judge Samples</span><strong>3x</strong></div>
       <div class="metric"><span>Top Avg</span><strong>91.2</strong></div>
       <div class="metric"><span>Lowest Avg</span><strong>84.7</strong></div>
-      <div class="metric"><span>Total Judgments</span><strong>2565</strong></div>
+      <div class="metric"><span>Total Judgments</span><strong>2610</strong></div>
     </section>
 
     <h2>Eval Set Samples</h2>
     <p>
-      The public demo eval set contains 285 synthetic, public-safe cases grouped into research-backed
+      The public demo eval set contains 290 synthetic, public-safe cases grouped into research-backed
       TTS dimensions. Each category below contributes five shared cases that every model synthesizes
       before Gemini judges the generated audio.
     </p>
@@ -2510,6 +2511,41 @@
           </article>
         </div>
       </details>
+      <details class="sample-group" data-category="slot_value_pairing_delivery">
+        <summary><span>Slot Value Pairing Delivery</span><strong>5 cases</strong></summary>
+        <div class="sample-list">
+          <article class="sample-card">
+            <h3><code>tts-slot-value-pairing-delivery-intake-form-001</code></h3>
+            <p><strong>Slice:</strong> <code>intake_form_label_value_grouping</code></p>
+            <p><strong>Prompt:</strong> Read this intake form summary so each field label stays attached to its value.</p>
+            <p><strong>Target:</strong> Name: Mira Patel. Arrival time: 8:40 AM. Reason for visit: follow-up blood pressure check.</p>
+          </article>
+          <article class="sample-card">
+            <h3><code>tts-slot-value-pairing-delivery-inventory-row-001</code></h3>
+            <p><strong>Slice:</strong> <code>inventory_field_value_attachment</code></p>
+            <p><strong>Prompt:</strong> Read this inventory row so quantity, location, and status do not swap values.</p>
+            <p><strong>Target:</strong> Item: filter cartridge. Quantity: 12. Location: shelf B-7. Status: hold for inspection.</p>
+          </article>
+          <article class="sample-card">
+            <h3><code>tts-slot-value-pairing-delivery-calendar-rsvp-001</code></h3>
+            <p><strong>Slice:</strong> <code>calendar_rsvp_slot_attachment</code></p>
+            <p><strong>Prompt:</strong> Read this calendar RSVP record so attendee, response, and requested change are easy to transcribe.</p>
+            <p><strong>Target:</strong> Attendee: Jonah Lee. Response: tentative. Request: move the design review to 3 PM.</p>
+          </article>
+          <article class="sample-card">
+            <h3><code>tts-slot-value-pairing-delivery-lab-requisition-001</code></h3>
+            <p><strong>Slice:</strong> <code>lab_requisition_field_grouping</code></p>
+            <p><strong>Prompt:</strong> Read this lab requisition summary so specimen type, priority, and destination remain distinct.</p>
+            <p><strong>Target:</strong> Specimen: serum tube. Priority: stat. Destination: chemistry bench two.</p>
+          </article>
+          <article class="sample-card">
+            <h3><code>tts-slot-value-pairing-delivery-api-status-001</code></h3>
+            <p><strong>Slice:</strong> <code>api_status_payload_label_value_grouping</code></p>
+            <p><strong>Prompt:</strong> Read this API status payload as speech without losing the field names or mixing their values.</p>
+            <p><strong>Target:</strong> Service: payments API. State: degraded. Region: us-west-2. Next update: 14:30 UTC.</p>
+          </article>
+        </div>
+      </details>
     </section>
 
     <h2>Model Leaderboard</h2>
@@ -2529,7 +2565,7 @@
           <td data-label="Rank">1</td>
           <td data-label="Model"><code>mlx-community/chatterbox-turbo-6bit</code></td>
           <td data-label="Avg">91.2</td>
-          <td data-label="Accurate">162 / 285</td>
+          <td data-label="Accurate">162 / 290</td>
           <td data-label="Weakest Category"><code>information_tuning</code> avg 84.5</td>
           <td data-label="Likely Fix Focus">number clarity, pauses around dense facts</td>
         </tr>
@@ -2537,7 +2573,7 @@
           <td data-label="Rank">2</td>
           <td data-label="Model"><code>mlx-community/Kokoro-82M-4bit</code></td>
           <td data-label="Avg">88.6</td>
-          <td data-label="Accurate">151 / 285</td>
+          <td data-label="Accurate">151 / 290</td>
           <td data-label="Weakest Category"><code>speech_steerability</code> avg 80.8</td>
           <td data-label="Likely Fix Focus">style control, emphasis, pacing</td>
         </tr>
@@ -2545,7 +2581,7 @@
           <td data-label="Rank">3</td>
           <td data-label="Model"><code>mlx-community/Qwen3-TTS-12Hz-0.6B-Base-4bit</code></td>
           <td data-label="Avg">84.7</td>
-          <td data-label="Accurate">111 / 285</td>
+          <td data-label="Accurate">111 / 290</td>
           <td data-label="Weakest Category"><code>paralinguistics</code> avg 77.0</td>
           <td data-label="Likely Fix Focus">emotion rendering, natural prosody</td>
         </tr>
@@ -2600,9 +2636,9 @@
       </div>
       <div class="panel">
         <h3>Scores By Model</h3>
-        <p><code>mlx-community/chatterbox-turbo-6bit</code><br>avg 90.1 / n 285 / 78-97</p>
-        <p><code>mlx-community/Kokoro-82M-4bit</code><br>avg 87.2 / n 285 / 73-95</p>
-        <p><code>mlx-community/Qwen3-TTS-12Hz-0.6B-Base-4bit</code><br>avg 83.6 / n 285 / 70-93</p>
+        <p><code>mlx-community/chatterbox-turbo-6bit</code><br>avg 90.1 / n 290 / 78-97</p>
+        <p><code>mlx-community/Kokoro-82M-4bit</code><br>avg 87.2 / n 290 / 73-95</p>
+        <p><code>mlx-community/Qwen3-TTS-12Hz-0.6B-Base-4bit</code><br>avg 83.6 / n 290 / 70-93</p>
       </div>
       <div class="panel">
         <h3>Scores By Voice</h3>
@@ -2790,7 +2826,7 @@
         <tr>
           <td data-label="Compared Model"><code>mlx-community/Kokoro-82M-4bit</code></td>
           <td data-label="Baseline"><code>mlx-community/chatterbox-turbo-6bit</code></td>
-          <td data-label="Matched Cases">285</td>
+          <td data-label="Matched Cases">290</td>
           <td data-label="Avg Delta">-2.6</td>
           <td data-label="Wins / Ties / Losses">42 / 31 / 212</td>
           <td data-label="Largest Regressions">speech pace, conditional-logic, and escalation-priority cases where style control trails the baseline.</td>
@@ -2798,7 +2834,7 @@
         <tr>
           <td data-label="Compared Model"><code>mlx-community/Qwen3-TTS-12Hz-0.6B-Base-4bit</code></td>
           <td data-label="Baseline"><code>mlx-community/chatterbox-turbo-6bit</code></td>
-          <td data-label="Matched Cases">285</td>
+          <td data-label="Matched Cases">290</td>
           <td data-label="Avg Delta">-6.5</td>
           <td data-label="Wins / Ties / Losses">25 / 22 / 238</td>
           <td data-label="Largest Regressions">emotion, dense-fact, conditional-rule, and critical-alert cases with lower naturalness or intelligibility.</td>
@@ -2824,7 +2860,7 @@
       </div>
       <div class="panel">
         <h3>Synthesis Model</h3>
-        <p><code>mlx-community/Qwen3-TTS-12Hz-0.6B-Base-4bit</code><br>avg 83.6 / n 285 / range 70-93</p>
+        <p><code>mlx-community/Qwen3-TTS-12Hz-0.6B-Base-4bit</code><br>avg 83.6 / n 290 / range 70-93</p>
         <p class="muted">Compare model-level weak spots before changing prompts, voices, wrappers, or model settings.</p>
       </div>
     </section>

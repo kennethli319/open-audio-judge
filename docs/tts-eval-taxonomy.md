@@ -169,10 +169,12 @@ runs can map private prompts into the same categories without copying private ro
 - `focus_particle_scope_delivery`: focus particles such as only, also, even, just, and not all
   where prosody must preserve whether a condition is exclusive, additive, unexpected, limited, or
   broadly negated.
+- `slot_value_pairing_delivery`: form fields, inventory rows, calendar records, lab requisitions,
+  and API status payloads where spoken labels must stay attached to their exact values.
 
 ## Manifest Contract
 
-The public comparison manifest is intentionally balanced at 285 cases for now: 57 categories with 5
+The public comparison manifest is intentionally balanced at 290 cases for now: 58 categories with 5
 cases each. Expansion should add complete five-case category batches before deepening existing
 categories.
 

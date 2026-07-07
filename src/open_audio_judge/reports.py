@@ -998,6 +998,14 @@ TTS_CATEGORY_GUIDANCE = {
             "exclusive/additive cue text faithfulness",
         ],
     ),
+    "slot_value_pairing_delivery": (
+        "form fields, inventory rows, calendar records, lab requisitions, and API status payloads",
+        [
+            "label-value phrase grouping",
+            "schema-aware text normalization",
+            "field attachment and value ordering",
+        ],
+    ),
 }
 
 
