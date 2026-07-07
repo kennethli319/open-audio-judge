@@ -71,10 +71,13 @@ runs can map private prompts into the same categories without copying private ro
   phrase rhythm, and short-clause timing that should stay spoken rather than sung or flattened.
 - `safety_privacy_delivery`: consent notices, credential warnings, redacted identifiers, location
   choice, and irreversible-action warnings that must preserve exact safety and privacy conditions.
+- `semantic_contrast_focus`: negation scope, exception boundaries, corrections, balanced
+  alternatives, and threshold conditions where the model must preserve meaning through emphasis and
+  prosodic grouping.
 
 ## Manifest Contract
 
-The public comparison manifest is intentionally balanced at 115 cases for now: 23 categories with 5
+The public comparison manifest is intentionally balanced at 120 cases for now: 24 categories with 5
 cases each. Expansion should add complete five-case category batches before deepening existing
 categories.
 
