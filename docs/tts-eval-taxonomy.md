@@ -116,10 +116,13 @@ runs can map private prompts into the same categories without copying private ro
 - `audience_register_adaptation`: child-friendly safety, patient plain-language, executive
   briefings, engineering handoffs, and public-radio narration where style must adapt to the
   listener without losing exact conditions, entities, or reported-speech boundaries.
+- `uncertainty_calibration_delivery`: probability forecasts, diagnostic caveats, confidence
+  scores, escalation handoffs, and estimate ranges where prosody must preserve calibrated
+  uncertainty without turning cautious statements into guarantees.
 
 ## Manifest Contract
 
-The public comparison manifest is intentionally balanced at 195 cases for now: 39 categories with 5
+The public comparison manifest is intentionally balanced at 200 cases for now: 40 categories with 5
 cases each. Expansion should add complete five-case category batches before deepening existing
 categories.
 
