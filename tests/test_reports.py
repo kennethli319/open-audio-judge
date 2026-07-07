@@ -216,9 +216,12 @@ def test_write_html_report_aggregates_tts_candidate_metadata(tmp_path: Path) -> 
     assert "dates times / prosody issue" in html
     assert "judge samples: 65, 75; avg 70.00" in html
     assert "Weakest Segments" in html
+    assert "Model-Category Action Matrix" in html
     assert "mlx-community/Kokoro-82M-4bit" in html
     assert "intelligibility" in html
     assert "text faithfulness" in html
+    assert "information tuning" in html
+    assert "avg 45.0" in html
     assert "tts-kokoro-date-local-tts" in html
 
 

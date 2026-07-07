@@ -60,6 +60,7 @@ def render_html_report(results: list[EvaluationResult]) -> str:
     status_by_language_counts = _status_counts_by_metadata(results, "language")
     status_by_sample_kind_counts = _status_counts_by_metadata(results, "sample_kind")
     weakest_segments = _weakest_segments(results)
+    model_category_actions = _model_category_actions(results)
     priority_cases = _priority_cases(results)
     calibration_checks = _calibration_checks(results)
 
@@ -160,6 +161,7 @@ def render_html_report(results: list[EvaluationResult]) -> str:
         empty_label="No sample-kind failures",
     )
     weakest_segments_markup = _render_weakest_segments(weakest_segments)
+    model_category_actions_markup = _render_model_category_actions(model_category_actions)
     priority_markup = _render_priority_cases(priority_cases)
     calibration_markup = _render_calibration_checks(calibration_checks)
 
@@ -329,6 +331,9 @@ def render_html_report(results: list[EvaluationResult]) -> str:
     <h2>Weakest Segments</h2>
     {weakest_segments_markup}
 
+    <h2>Model-Category Action Matrix</h2>
+    {model_category_actions_markup}
+
     <h2>Priority Cases</h2>
     {priority_markup}
 
@@ -407,6 +412,20 @@ ISSUE_FIX_AREAS = {
 class SegmentSummary:
     field_label: str
     name: str
+    count: int
+    average: float
+    low: int
+    high: int
+    issue_counts: list[tuple[str, int]]
+    status_counts: list[tuple[str, int]]
+    fix_areas: list[str]
+    representative_cases: list[EvaluationResult]
+
+
+@dataclass(frozen=True)
+class ModelCategoryAction:
+    model: str
+    category: str
     count: int
     average: float
     low: int
@@ -676,6 +695,99 @@ def _render_inline_tags(items: list[str], empty_label: str) -> str:
     if not items:
         return f'<span class="muted">{html.escape(empty_label)}</span>'
     return "".join(f'<span class="tag">{html.escape(item)}</span>' for item in items)
+
+
+def _model_category_actions(
+    results: list[EvaluationResult],
+    *,
+    limit: int = 8,
+    representative_limit: int = 2,
+) -> list[ModelCategoryAction]:
+    groups: dict[tuple[str, str], list[EvaluationResult]] = {}
+    for result in results:
+        model = _metadata_group_value(result, "synthesis_model")
+        category = _metadata_group_value(result, "evaluation_category")
+        if model is None or category is None:
+            continue
+        groups.setdefault((model, category), []).append(result)
+
+    actions: list[ModelCategoryAction] = []
+    for (model, category), group_results in groups.items():
+        scores = [result.overall_score for result in group_results]
+        issue_counts = _segment_issue_counts(group_results)
+        status_counts = _segment_status_counts(group_results)
+        representative_cases = sorted(
+            group_results,
+            key=lambda result: (
+                result.status == "ok",
+                result.overall_score,
+                result.case_id,
+            ),
+        )[:representative_limit]
+        actions.append(
+            ModelCategoryAction(
+                model=model,
+                category=category,
+                count=len(group_results),
+                average=statistics.mean(scores),
+                low=min(scores),
+                high=max(scores),
+                issue_counts=issue_counts,
+                status_counts=status_counts,
+                fix_areas=_fix_areas_for_segment(issue_counts, status_counts),
+                representative_cases=representative_cases,
+            )
+        )
+    return sorted(actions, key=lambda item: (item.average, item.model, item.category))[:limit]
+
+
+def _render_model_category_actions(items: list[ModelCategoryAction]) -> str:
+    if not items:
+        return '<div class="metric"><strong class="muted">No model/category pairs available</strong></div>'
+
+    rows = "\n".join(_render_model_category_action_row(item) for item in items)
+    return f"""<table>
+      <thead>
+        <tr>
+          <th>Model</th>
+          <th>Category</th>
+          <th>Score</th>
+          <th>Likely Fix Areas</th>
+          <th>Evidence</th>
+          <th>Representative Cases</th>
+        </tr>
+      </thead>
+      <tbody>
+        {rows}
+      </tbody>
+    </table>"""
+
+
+def _render_model_category_action_row(item: ModelCategoryAction) -> str:
+    issue_markup = _render_inline_tags(
+        [f"{name.replace('_', ' ')} x{count}" for name, count in item.issue_counts],
+        empty_label="No judge issue categories",
+    )
+    status_markup = _render_inline_tags(
+        [f"{name.replace('_', ' ')} x{count}" for name, count in item.status_counts],
+        empty_label="No failed evaluations",
+    )
+    fix_markup = _render_inline_tags(item.fix_areas, empty_label="Inspect judge rationale")
+    case_markup = "".join(
+        "<li>"
+        f"<span>{html.escape(result.case_id)}</span> "
+        f"<strong>{result.overall_score} / {html.escape(result.label.replace('_', ' '))}</strong>"
+        "</li>"
+        for result in item.representative_cases
+    )
+    return f"""<tr class="{_segment_severity_class(item.average)}">
+  <td data-label="Model">{html.escape(item.model)}</td>
+  <td data-label="Category">{html.escape(item.category.replace("_", " "))}</td>
+  <td data-label="Score"><strong>avg {item.average:.1f}</strong><br><span class="muted">n {item.count} / range {item.low}-{item.high}</span></td>
+  <td data-label="Likely Fix Areas">{fix_markup}</td>
+  <td data-label="Evidence"><span class="muted">Issues</span><br>{issue_markup}<br><span class="muted">Failures</span><br>{status_markup}</td>
+  <td data-label="Representative Cases"><ul class="counts">{case_markup}</ul></td>
+</tr>"""
 
 
 def _metadata_group_value(result: EvaluationResult, field: str) -> str | None:

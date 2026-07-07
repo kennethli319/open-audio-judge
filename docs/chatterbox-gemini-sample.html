@@ -448,6 +448,38 @@
       </div>
     </section>
 
+    <h2>Model-Category Action Matrix</h2>
+    <table>
+      <thead>
+        <tr>
+          <th>Model</th>
+          <th>Category</th>
+          <th>Score</th>
+          <th>Likely Fix Areas</th>
+          <th>Evidence</th>
+          <th>Representative Cases</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td data-label="Model"><code>mlx-community/Qwen3-TTS-12Hz-0.6B-Base-4bit</code></td>
+          <td data-label="Category"><code>information_tuning</code></td>
+          <td data-label="Score">avg 76.0<br><span class="muted">n 2 / range 72-80</span></td>
+          <td data-label="Likely Fix Areas">pronunciation, prosody/pacing, text faithfulness</td>
+          <td data-label="Evidence">issues: intelligibility issue x1, number error x1</td>
+          <td data-label="Representative Cases">dense dates, measurements, and step boundaries</td>
+        </tr>
+        <tr>
+          <td data-label="Model"><code>mlx-community/Kokoro-82M-4bit</code></td>
+          <td data-label="Category"><code>speech_steerability</code></td>
+          <td data-label="Score">avg 81.5<br><span class="muted">n 2 / range 79-84</span></td>
+          <td data-label="Likely Fix Areas">instruction/style following, prosody/pacing</td>
+          <td data-label="Evidence">issues: style mismatch x1, pacing issue x1</td>
+          <td data-label="Representative Cases">pace, emphasis, and register-control prompts</td>
+        </tr>
+      </tbody>
+    </table>
+
     <h2>Sample-By-Sample Breakdown</h2>
     <table>
       <thead>
@@ -509,10 +541,12 @@
       Start with average score and label counts, then inspect score breakdowns by
       the model leaderboard, then inspect category-level rankings to find where one generator loses
       to another on the same eval set. Use the Weakest Segments cards to find low-scoring
-      model/category/slice groups, likely solution areas, and representative cases. Then use the top
+      model/category/slice groups, then use the Model-Category Action Matrix to route the lowest
+      model/category pairs to likely solution areas and representative samples. Use the top
       diagnostics to confirm repeated issue clusters such as pronunciation errors, artifact classes,
       or weak slices. Finally, open the per-sample rows to inspect the averaged score, the three
-      underlying Gemini scores, target text hash, generated-audio provenance, and any researcher notes.
+      underlying Gemini scores, target text hash, generated-audio provenance, and any researcher
+      notes.
     </p>
 
     <p class="muted">
