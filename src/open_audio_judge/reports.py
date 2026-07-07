@@ -42,6 +42,10 @@ def render_html_report(results: list[EvaluationResult]) -> str:
     issue_by_model_counts = _issue_counts_by_metadata(results, "synthesis_model")
     issue_by_voice_counts = _issue_counts_by_metadata(results, "synthesis_voice")
     issue_by_language_counts = _issue_counts_by_metadata(results, "language")
+    scores_by_slice = _score_summaries_by_metadata(results, "tts_slice")
+    scores_by_model = _score_summaries_by_metadata(results, "synthesis_model")
+    scores_by_voice = _score_summaries_by_metadata(results, "synthesis_voice")
+    scores_by_language = _score_summaries_by_metadata(results, "language")
     status_by_slice_counts = _status_counts_by_metadata(results, "tts_slice")
     status_by_model_counts = _status_counts_by_metadata(results, "synthesis_model")
     status_by_voice_counts = _status_counts_by_metadata(results, "synthesis_voice")
@@ -93,6 +97,22 @@ def render_html_report(results: list[EvaluationResult]) -> str:
     issue_by_language_markup = _render_count_list(
         issue_by_language_counts,
         empty_label="No language issue categories",
+    )
+    scores_by_slice_markup = _render_score_summary_list(
+        scores_by_slice,
+        empty_label="No slice scores",
+    )
+    scores_by_model_markup = _render_score_summary_list(
+        scores_by_model,
+        empty_label="No model scores",
+    )
+    scores_by_voice_markup = _render_score_summary_list(
+        scores_by_voice,
+        empty_label="No voice scores",
+    )
+    scores_by_language_markup = _render_score_summary_list(
+        scores_by_language,
+        empty_label="No language scores",
     )
     status_by_slice_markup = _render_count_list(
         status_by_slice_counts,
@@ -249,6 +269,10 @@ def render_html_report(results: list[EvaluationResult]) -> str:
       <div class="metric"><span>Issues By Model</span>{issue_by_model_markup}</div>
       <div class="metric"><span>Issues By Voice</span>{issue_by_voice_markup}</div>
       <div class="metric"><span>Issues By Language</span>{issue_by_language_markup}</div>
+      <div class="metric"><span>Scores By TTS Slice</span>{scores_by_slice_markup}</div>
+      <div class="metric"><span>Scores By Model</span>{scores_by_model_markup}</div>
+      <div class="metric"><span>Scores By Voice</span>{scores_by_voice_markup}</div>
+      <div class="metric"><span>Scores By Language</span>{scores_by_language_markup}</div>
       <div class="metric"><span>Failures By TTS Slice</span>{status_by_slice_markup}</div>
       <div class="metric"><span>Failures By Model</span>{status_by_model_markup}</div>
       <div class="metric"><span>Failures By Voice</span>{status_by_voice_markup}</div>
@@ -386,6 +410,31 @@ def _issue_counts_by_metadata(
     return counts.most_common(8)
 
 
+def _score_summaries_by_metadata(
+    results: list[EvaluationResult],
+    field: str,
+) -> list[tuple[str, int, float, int, int]]:
+    groups: dict[str, list[int]] = {}
+    for result in results:
+        if result.status != "ok":
+            continue
+        value = _metadata_group_value(result, field)
+        if value is None:
+            continue
+        groups.setdefault(value, []).append(result.overall_score)
+    summaries = [
+        (
+            name,
+            len(scores),
+            statistics.mean(scores),
+            min(scores),
+            max(scores),
+        )
+        for name, scores in groups.items()
+    ]
+    return sorted(summaries, key=lambda item: (item[2], item[0]))[:8]
+
+
 def _status_counts_by_metadata(
     results: list[EvaluationResult],
     field: str,
@@ -424,6 +473,22 @@ def _render_count_list(items: list[tuple[str, int]], empty_label: str) -> str:
     rendered_items = "".join(
         f"<li><span>{html.escape(name.replace('_', ' '))}</span> <strong>{count}</strong></li>"
         for name, count in items
+    )
+    return f'<ul class="counts">{rendered_items}</ul>'
+
+
+def _render_score_summary_list(
+    items: list[tuple[str, int, float, int, int]],
+    empty_label: str,
+) -> str:
+    if not items:
+        return f'<strong class="muted">{html.escape(empty_label)}</strong>'
+    rendered_items = "".join(
+        "<li>"
+        f"<span>{html.escape(name.replace('_', ' '))}</span> "
+        f"<strong>avg {average:.1f} / n {count} / {low}-{high}</strong>"
+        "</li>"
+        for name, count, average, low, high in items
     )
     return f'<ul class="counts">{rendered_items}</ul>'
 

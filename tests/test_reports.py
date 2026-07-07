@@ -166,6 +166,12 @@ def test_write_html_report_aggregates_tts_candidate_metadata(tmp_path: Path) -> 
     assert "af heart / prosody issue" in html
     assert "Issues By Language" in html
     assert "en / prosody issue" in html
+    assert "Scores By TTS Slice" in html
+    assert "Scores By Model" in html
+    assert "Scores By Voice" in html
+    assert "Scores By Language" in html
+    assert "avg 70.0 / n 1 / 70-70" in html
+    assert "avg 80.5 / n 2 / 70-91" in html
     assert "Failures By Model" in html
     assert "mlx-community/chatterbox-turbo-6bit / provider error" in html
     assert "Failures By Voice" in html
