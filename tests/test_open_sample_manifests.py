@@ -79,6 +79,7 @@ TTS_RESEARCH_CATEGORIES = {
     "commitment_scope_delivery",
     "ordinal_ranking_delivery",
     "temporal_relation_delivery",
+    "syntactic_attachment_delivery",
 }
 TTS_REQUIRED_METADATA = {
     "language",
@@ -132,7 +133,7 @@ def test_open_sample_docs_list_every_case_id() -> None:
 def test_tts_multiturn_manifest_has_research_metadata_contract() -> None:
     cases = load_cases(TTS_MULTITURN_MANIFEST)
 
-    assert len(cases) == 305
+    assert len(cases) == 310
     assert len({case.id for case in cases}) == len(cases)
     assert len({case.metadata["tts_slice"] for case in cases}) == len(cases)
     assert {case.metadata["eval_category"] for case in cases} == TTS_RESEARCH_CATEGORIES

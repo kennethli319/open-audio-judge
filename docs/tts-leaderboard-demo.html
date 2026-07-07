@@ -386,6 +386,7 @@
           <option value="commitment_scope_delivery">Commitment scope delivery</option>
           <option value="ordinal_ranking_delivery">Ordinal ranking delivery</option>
           <option value="temporal_relation_delivery">Temporal relation delivery</option>
+          <option value="syntactic_attachment_delivery">Syntactic attachment delivery</option>
         </select>
         <select id="label-filter" aria-label="Filter by label">
           <option value="">All labels</option>
@@ -430,7 +431,7 @@
   --cases examples/tts_multiturn_cases.jsonl \
   --judge-provider gemini \
   --judge-samples 3 \
-  --limit 305 \
+  --limit 310 \
   --out runs/leaderboard/chatterbox</code></pre>
 
     <pre><code>oaj autojudge-local-tts \
@@ -439,7 +440,7 @@
   --cases examples/tts_multiturn_cases.jsonl \
   --judge-provider gemini \
   --judge-samples 3 \
-  --limit 305 \
+  --limit 310 \
   --out runs/leaderboard/kokoro</code></pre>
 
     <pre><code>oaj autojudge-local-tts \
@@ -448,7 +449,7 @@
   --cases examples/tts_multiturn_cases.jsonl \
   --judge-provider gemini \
   --judge-samples 3 \
-  --limit 305 \
+  --limit 310 \
   --out runs/leaderboard/qwen3-tts</code></pre>
 
     <p>
@@ -460,7 +461,7 @@
   --cases examples/tts_multiturn_cases.jsonl \
   --judge-provider gemini \
   --judge-samples 3 \
-  --limit 305 \
+  --limit 310 \
   --out runs/leaderboard/chatterbox</code></pre>
 
     <p>
@@ -505,16 +506,16 @@
     <h2>Sample Report Preview</h2>
     <section class="grid" aria-label="Sample report metrics">
       <div class="metric"><span>Models</span><strong>3</strong></div>
-      <div class="metric"><span>Shared Eval Cases</span><strong>300</strong></div>
+      <div class="metric"><span>Shared Eval Cases</span><strong>310</strong></div>
       <div class="metric"><span>Judge Samples</span><strong>3x</strong></div>
       <div class="metric"><span>Top Avg</span><strong>91.2</strong></div>
       <div class="metric"><span>Lowest Avg</span><strong>84.7</strong></div>
-      <div class="metric"><span>Total Judgments</span><strong>2700</strong></div>
+      <div class="metric"><span>Total Judgments</span><strong>2790</strong></div>
     </section>
 
     <h2>Eval Set Samples</h2>
     <p>
-      The public demo eval set contains 300 synthetic, public-safe cases grouped into research-backed
+      The public demo eval set contains 310 synthetic, public-safe cases grouped into research-backed
       TTS dimensions. Each category below contributes five shared cases that every model synthesizes
       before Gemini judges the generated audio.
     </p>
@@ -2651,6 +2652,41 @@
             <p><strong>Slice:</strong> <code>lab_incubation_cool_then_measure_window</code></p>
             <p><strong>Prompt:</strong> Read this lab protocol so incubation, cooling, and measurement order cannot be swapped.</p>
             <p><strong>Target:</strong> Incubate for 18 minutes, cool for exactly two minutes, then measure absorbance within 30 seconds.</p>
+          </article>
+        </div>
+      </details>
+      <details class="sample-group" data-category="syntactic_attachment_delivery">
+        <summary><span>Syntactic Attachment Delivery</span><strong>5 cases</strong></summary>
+        <div class="sample-list">
+          <article class="sample-card">
+            <h3><code>tts-syntactic-attachment-delivery-after-clause-001</code></h3>
+            <p><strong>Slice:</strong> <code>after_clause_actor_boundary</code></p>
+            <p><strong>Prompt:</strong> Read this ticket note so the listener can tell who called and who archived the ticket.</p>
+            <p><strong>Target:</strong> After Dana called, Riley archived the ticket; Morgan did not call.</p>
+          </article>
+          <article class="sample-card">
+            <h3><code>tts-syntactic-attachment-delivery-technician-modifier-001</code></h3>
+            <p><strong>Slice:</strong> <code>modifier_attachment_badge_not_cart</code></p>
+            <p><strong>Prompt:</strong> Read this dispatch instruction so the badge description attaches to the right technician.</p>
+            <p><strong>Target:</strong> Notify the technician with the red badge, not the technician by the red cart.</p>
+          </article>
+          <article class="sample-card">
+            <h3><code>tts-syntactic-attachment-delivery-coordination-scope-001</code></h3>
+            <p><strong>Slice:</strong> <code>coordination_scope_beta_customer_documents</code></p>
+            <p><strong>Prompt:</strong> Read this document cleanup note so the customer-condition scope is not applied to the legal notes.</p>
+            <p><strong>Target:</strong> Archive the drafts and summaries that mention beta customers, but leave the legal notes open.</p>
+          </article>
+          <article class="sample-card">
+            <h3><code>tts-syntactic-attachment-delivery-reduced-relative-001</code></h3>
+            <p><strong>Slice:</strong> <code>reduced_relative_copied_created_files</code></p>
+            <p><strong>Prompt:</strong> Read this QA status so copied yesterday describes the files and does not sound like a new action.</p>
+            <p><strong>Target:</strong> The files copied yesterday failed verification; the files created today passed.</p>
+          </article>
+          <article class="sample-card">
+            <h3><code>tts-syntactic-attachment-delivery-appositive-001</code></h3>
+            <p><strong>Slice:</strong> <code>appositive_manager_name_after_audit</code></p>
+            <p><strong>Prompt:</strong> Read this scheduling note so Alex is clearly the manager, not a second person to call.</p>
+            <p><strong>Target:</strong> Call Priya's manager, Alex, after the audit ends.</p>
           </article>
         </div>
       </details>

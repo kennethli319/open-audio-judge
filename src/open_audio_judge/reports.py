@@ -1030,6 +1030,14 @@ TTS_CATEGORY_GUIDANCE = {
             "sequence and active-window prosody",
         ],
     ),
+    "syntactic_attachment_delivery": (
+        "subordinate clauses, modifier attachment, coordination scope, reduced relatives, and appositives",
+        [
+            "syntactic phrase-boundary detection",
+            "attachment-aware prosody",
+            "actor, object, and condition grouping",
+        ],
+    ),
 }
 
 

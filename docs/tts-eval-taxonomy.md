@@ -180,10 +180,13 @@ runs can map private prompts into the same categories without copying private ro
 - `temporal_relation_delivery`: before/during/after windows, through/starting/until dose changes,
   local-time versus elapsed-time travel updates, service grace periods, and lab timing sequences
   where time spans and event order must remain attached to the correct action.
+- `syntactic_attachment_delivery`: subordinate clauses, modifier attachment, coordination scope,
+  reduced-relative descriptors, and appositive names where prosodic grouping must preserve which
+  phrase attaches to which actor, object, or condition.
 
 ## Manifest Contract
 
-The public comparison manifest is intentionally balanced at 305 cases for now: 61 categories with 5
+The public comparison manifest is intentionally balanced at 310 cases for now: 62 categories with 5
 cases each. Expansion should add complete five-case category batches before deepening existing
 categories.
 
