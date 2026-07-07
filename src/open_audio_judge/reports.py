@@ -180,8 +180,14 @@ def render_html_report(
     )
     weakest_segments_markup = _render_weakest_segments(weakest_segments)
     model_category_actions_markup = _render_model_category_actions(model_category_actions)
-    baseline_deltas_markup = _render_baseline_deltas(baseline_deltas)
-    baseline_segment_deltas_markup = _render_baseline_segment_deltas(baseline_segment_deltas)
+    baseline_deltas_markup = _render_baseline_deltas(
+        baseline_deltas,
+        baseline_model=baseline_model,
+    )
+    baseline_segment_deltas_markup = _render_baseline_segment_deltas(
+        baseline_segment_deltas,
+        baseline_model=baseline_model,
+    )
     priority_markup = _render_priority_cases(priority_cases)
     calibration_markup = _render_calibration_checks(calibration_checks)
 
@@ -1233,16 +1239,34 @@ def _baseline_deltas(
     return sorted(summaries, key=lambda item: (item.average_delta, item.model))
 
 
-def _render_baseline_deltas(items: list[BaselineDeltaSummary]) -> str:
+def _render_baseline_context(baseline_model: str, detail: str) -> str:
+    return (
+        '<div class="metric">'
+        f'<span>Baseline Model</span><strong>{html.escape(baseline_model)}</strong>'
+        f'<div class="muted">{html.escape(detail)}</div>'
+        "</div>"
+    )
+
+
+def _render_baseline_deltas(
+    items: list[BaselineDeltaSummary],
+    *,
+    baseline_model: str,
+) -> str:
+    context = _render_baseline_context(
+        baseline_model,
+        "Matched by metadata.source_case_id, or by stripping the -local-tts suffix.",
+    )
     if not items:
         return (
-            '<div class="metric"><strong class="muted">'
+            f'{context}<div class="metric"><strong class="muted">'
             "No matched baseline model comparisons available"
             "</strong></div>"
         )
 
     rows = "\n".join(_render_baseline_delta_row(item) for item in items)
-    return f"""<table>
+    return f"""{context}
+    <table>
       <thead>
         <tr>
           <th>Compared Model</th>
@@ -1373,16 +1397,25 @@ def _matched_baseline_pairs(
     return pairs
 
 
-def _render_baseline_segment_deltas(items: list[BaselineSegmentDeltaSummary]) -> str:
+def _render_baseline_segment_deltas(
+    items: list[BaselineSegmentDeltaSummary],
+    *,
+    baseline_model: str,
+) -> str:
+    context = _render_baseline_context(
+        baseline_model,
+        "Negative deltas show category or slice regressions versus the selected baseline.",
+    )
     if not items:
         return (
-            '<div class="metric"><strong class="muted">'
+            f'{context}<div class="metric"><strong class="muted">'
             "No matched baseline category or slice regressions available"
             "</strong></div>"
         )
 
     rows = "\n".join(_render_baseline_segment_delta_row(item) for item in items)
-    return f"""<table>
+    return f"""{context}
+    <table>
       <thead>
         <tr>
           <th>Compared Model</th>

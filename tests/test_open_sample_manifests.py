@@ -15,6 +15,41 @@ OPEN_SAMPLE_MANIFESTS = [
     Path("examples/tts_open_samples.jsonl"),
 ]
 
+TTS_MULTITURN_MANIFEST = Path("examples/tts_multiturn_cases.jsonl")
+TTS_RESEARCH_CATEGORIES = {
+    "paralinguistics",
+    "instruction_following",
+    "information_tuning",
+    "storytelling_dialogue",
+    "speech_steerability",
+    "robustness_intelligibility",
+    "speaker_voice_consistency",
+    "multilingual_code_switching",
+    "long_form_discourse",
+}
+TTS_REQUIRED_METADATA = {
+    "language",
+    "eval_category",
+    "tts_slice",
+    "voice",
+    "source",
+    "style_prompt",
+    "expected_style",
+    "expected_instruction",
+    "source_basis",
+}
+TTS_SOURCE_BASIS_TERMS = (
+    "Seed-TTS",
+    "Seed-TTS-Eval",
+    "InstructTTSEval",
+    "VoiceBench",
+    "VocalBench",
+    "TTSDS",
+    "Discrete-token SLM",
+    "prosodic variation",
+    "long-form intelligibility",
+)
+
 
 def test_open_sample_manifests_load_as_cases() -> None:
     for manifest in OPEN_SAMPLE_MANIFESTS:
@@ -39,6 +74,35 @@ def test_open_sample_docs_list_every_case_id() -> None:
 
     for case_id in case_ids:
         assert case_id in sample_docs
+
+
+def test_tts_multiturn_manifest_has_research_metadata_contract() -> None:
+    cases = load_cases(TTS_MULTITURN_MANIFEST)
+
+    assert len(cases) == 45
+    assert len({case.id for case in cases}) == len(cases)
+    assert len({case.metadata["tts_slice"] for case in cases}) == len(cases)
+    assert {case.metadata["eval_category"] for case in cases} == TTS_RESEARCH_CATEGORIES
+
+    for case in cases:
+        metadata = case.metadata
+        missing = sorted(key for key in TTS_REQUIRED_METADATA if not metadata.get(key))
+        assert missing == [], f"{case.id} missing metadata: {missing}"
+        assert metadata["source"] == "research-backed-tts-demo"
+        assert metadata["language"] == "en"
+        assert case.reference_text
+        assert case.turns[-1].content == case.reference_text
+        assert any(term in metadata["source_basis"] for term in TTS_SOURCE_BASIS_TERMS)
+
+
+def test_tts_multiturn_manifest_keeps_five_cases_per_category() -> None:
+    cases = load_cases(TTS_MULTITURN_MANIFEST)
+    counts: dict[str, int] = {}
+    for case in cases:
+        category = str(case.metadata["eval_category"])
+        counts[category] = counts.get(category, 0) + 1
+
+    assert counts == {category: 5 for category in TTS_RESEARCH_CATEGORIES}
 
 
 def test_gemini_sample_records_are_current() -> None:

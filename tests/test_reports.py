@@ -258,6 +258,8 @@ def test_write_html_report_aggregates_tts_candidate_metadata(tmp_path: Path) -> 
     assert "All slices" in html
     assert "The number and date were hard to understand." in html
     assert "Baseline Model Deltas" in html
+    assert "Baseline Model" in html
+    assert "Matched by metadata.source_case_id" in html
     assert "Compared Model" in html
     assert "Wins / Ties / Losses" in html
     assert "-25.0" in html
@@ -265,6 +267,7 @@ def test_write_html_report_aggregates_tts_candidate_metadata(tmp_path: Path) -> 
     assert "tts-date" in html
     assert "45 vs baseline 70" in html
     assert "Baseline Regression Slices" in html
+    assert "Negative deltas show category or slice regressions" in html
     assert "Evaluation Category: information tuning" in html
     assert "TTS Slice: dates times" in html
     assert "Regression Examples" in html

@@ -44,6 +44,24 @@ runs can map private prompts into the same categories without copying private ro
 - `long_form_discourse`: paragraph-level breath control, list structure, topic transitions,
   parentheticals, and end-of-passage stability.
 
+## Manifest Contract
+
+The public comparison manifest is intentionally capped at 45 cases for now: 9 categories with 5
+cases each. Expansion should keep category balance or explain why a category needs extra depth.
+
+Every committed case should preserve the following metadata contract:
+
+- `source=research-backed-tts-demo`.
+- `eval_category` must be one of the public categories above.
+- `tts_slice` should be unique within the 45-case seed set so model reports can point to a narrow
+  failure mode before aggregating upward.
+- `style_prompt`, `expected_style`, and `expected_instruction` should describe observable speech
+  behavior, not implementation details.
+- `source_basis` should name at least one grounding signal from the source list, such as
+  Seed-TTS-Eval intelligibility, speaker similarity, InstructTTSEval style control, VoiceBench or
+  VocalBench spoken behavior, TTSDS identity/intelligibility/prosody dimensions, or discrete-token
+  SLM prosodic/style evaluation.
+
 Each category should have up to five public-safe examples before expanding breadth further. Every
 case should include `eval_category`, `tts_slice`, `style_prompt`, `expected_style`, and
 `expected_instruction` metadata so reports can aggregate by model/category and engineers can map low
