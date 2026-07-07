@@ -61,10 +61,12 @@ runs can map private prompts into the same categories without copying private ro
   identifiers, and symbolic emoticon text that should not produce literal or hallucinated speech.
 - `nonverbal_paralinguistic_cues`: controlled chuckles, sighs, whisper-like delivery, amused
   restraint, and breath management that should add expression without harming intelligibility.
+- `voice_conversion_similarity`: reference-style transfer, content preservation under speaker
+  transfer, prosody retention, anti-generic voice leakage, and identity-preserved style shifts.
 
 ## Manifest Contract
 
-The public comparison manifest is intentionally balanced at 90 cases for now: 18 categories with 5
+The public comparison manifest is intentionally balanced at 95 cases for now: 19 categories with 5
 cases each. Expansion should add complete five-case category batches before deepening existing
 categories.
 

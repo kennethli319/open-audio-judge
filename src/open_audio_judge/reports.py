@@ -654,6 +654,46 @@ TTS_CATEGORY_GUIDANCE = {
             "pause and intonation control",
         ],
     ),
+    "domain_terminology": (
+        "clinical, legal, engineering, finance, and science terms in realistic registers",
+        [
+            "domain lexicon coverage",
+            "G2P/pronunciation dictionaries",
+            "technical phrase boundary detection",
+        ],
+    ),
+    "heteronym_disambiguation": (
+        "context-dependent pronunciations resolved from sentence meaning",
+        [
+            "context-aware pronunciation",
+            "semantic disambiguation before phonemization",
+            "capitalization and part-of-speech cues",
+        ],
+    ),
+    "formatting_markup_robustness": (
+        "markdown, bracketed labels, bullets, identifiers, and symbolic text",
+        [
+            "markup-aware text normalization",
+            "symbol verbalization policy",
+            "code identifier readability",
+        ],
+    ),
+    "nonverbal_paralinguistic_cues": (
+        "controlled chuckles, sighs, whisper-like delivery, restraint, and breath management",
+        [
+            "nonverbal cue conditioning",
+            "paralinguistic style strength",
+            "breath and artifact control",
+        ],
+    ),
+    "voice_conversion_similarity": (
+        "reference-style transfer, speaker similarity, identity preservation, and anti-leakage",
+        [
+            "speaker embedding similarity",
+            "content-preserving voice conversion",
+            "identity/prosody disentanglement",
+        ],
+    ),
 }
 
 

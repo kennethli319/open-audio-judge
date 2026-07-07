@@ -334,6 +334,16 @@
           <option value="speaker_voice_consistency">Speaker voice consistency</option>
           <option value="multilingual_code_switching">Multilingual code switching</option>
           <option value="long_form_discourse">Long-form discourse</option>
+          <option value="text_normalization">Text normalization</option>
+          <option value="acoustic_contexts">Acoustic contexts</option>
+          <option value="spontaneous_conversation">Spontaneous conversation</option>
+          <option value="affective_transitions">Affective transitions</option>
+          <option value="punctuation_prosody">Punctuation prosody</option>
+          <option value="domain_terminology">Domain terminology</option>
+          <option value="heteronym_disambiguation">Heteronym disambiguation</option>
+          <option value="formatting_markup_robustness">Formatting markup robustness</option>
+          <option value="nonverbal_paralinguistic_cues">Nonverbal paralinguistic cues</option>
+          <option value="voice_conversion_similarity">Voice conversion similarity</option>
         </select>
         <select id="label-filter" aria-label="Filter by label">
           <option value="">All labels</option>
@@ -378,7 +388,7 @@
   --cases examples/tts_multiturn_cases.jsonl \
   --judge-provider gemini \
   --judge-samples 3 \
-  --limit 90 \
+  --limit 95 \
   --out runs/leaderboard/chatterbox</code></pre>
 
     <pre><code>oaj autojudge-local-tts \
@@ -387,7 +397,7 @@
   --cases examples/tts_multiturn_cases.jsonl \
   --judge-provider gemini \
   --judge-samples 3 \
-  --limit 90 \
+  --limit 95 \
   --out runs/leaderboard/kokoro</code></pre>
 
     <pre><code>oaj autojudge-local-tts \
@@ -396,7 +406,7 @@
   --cases examples/tts_multiturn_cases.jsonl \
   --judge-provider gemini \
   --judge-samples 3 \
-  --limit 90 \
+  --limit 95 \
   --out runs/leaderboard/qwen3-tts</code></pre>
 
     <p>
@@ -408,7 +418,7 @@
   --cases examples/tts_multiturn_cases.jsonl \
   --judge-provider gemini \
   --judge-samples 3 \
-  --limit 90 \
+  --limit 95 \
   --out runs/leaderboard/chatterbox</code></pre>
 
     <p>
@@ -453,16 +463,16 @@
     <h2>Sample Report Preview</h2>
     <section class="grid" aria-label="Sample report metrics">
       <div class="metric"><span>Models</span><strong>3</strong></div>
-      <div class="metric"><span>Shared Eval Cases</span><strong>90</strong></div>
+      <div class="metric"><span>Shared Eval Cases</span><strong>95</strong></div>
       <div class="metric"><span>Judge Samples</span><strong>3x</strong></div>
       <div class="metric"><span>Top Avg</span><strong>91.2</strong></div>
       <div class="metric"><span>Lowest Avg</span><strong>84.7</strong></div>
-      <div class="metric"><span>Total Judgments</span><strong>810</strong></div>
+      <div class="metric"><span>Total Judgments</span><strong>855</strong></div>
     </section>
 
     <h2>Eval Set Samples</h2>
     <p>
-      The public demo eval set contains 90 synthetic, public-safe cases grouped into research-backed
+      The public demo eval set contains 95 synthetic, public-safe cases grouped into research-backed
       TTS dimensions. Each category below contributes five shared cases that every model synthesizes
       before Gemini judges the generated audio.
     </p>
@@ -1097,6 +1107,41 @@
           </article>
         </div>
       </details>
+      <details class="sample-group" data-category="voice_conversion_similarity">
+        <summary><span>Voice Conversion Similarity</span><strong>5 cases</strong></summary>
+        <div class="sample-list">
+          <article class="sample-card">
+            <h3><code>tts-voice-conversion-similarity-reference-style-001</code></h3>
+            <p><strong>Slice:</strong> <code>reference_style_transfer</code></p>
+            <p><strong>Prompt:</strong> Read this as if matching a calm reference speaker: low energy, even timbre, and no theatrical emphasis.</p>
+            <p><strong>Target:</strong> The account review is complete, and the renewal packet is ready for signature.</p>
+          </article>
+          <article class="sample-card">
+            <h3><code>tts-voice-conversion-similarity-content-preservation-001</code></h3>
+            <p><strong>Slice:</strong> <code>speaker_transfer_content_preservation</code></p>
+            <p><strong>Prompt:</strong> Read this in a converted-speaker style while preserving every number, unit, and condition exactly.</p>
+            <p><strong>Target:</strong> Set pump two to 1.8 liters per minute, then stop if the pressure rises above 42 PSI.</p>
+          </article>
+          <article class="sample-card">
+            <h3><code>tts-voice-conversion-similarity-prosody-retention-001</code></h3>
+            <p><strong>Slice:</strong> <code>reference_prosody_retention</code></p>
+            <p><strong>Prompt:</strong> Read this with the same measured cadence a reference narrator would use across the whole sentence.</p>
+            <p><strong>Target:</strong> After the opening remarks, pause briefly, introduce the panel, and invite questions from the front row.</p>
+          </article>
+          <article class="sample-card">
+            <h3><code>tts-voice-conversion-similarity-identity-leakage-001</code></h3>
+            <p><strong>Slice:</strong> <code>anti_generic_voice_leakage</code></p>
+            <p><strong>Prompt:</strong> Read this in the target voice only; avoid slipping into a generic assistant voice on the second sentence.</p>
+            <p><strong>Target:</strong> I can confirm the appointment for Friday morning. Please bring the printed form and a photo ID.</p>
+          </article>
+          <article class="sample-card">
+            <h3><code>tts-voice-conversion-similarity-cross-style-001</code></h3>
+            <p><strong>Slice:</strong> <code>identity_preserved_style_shift</code></p>
+            <p><strong>Prompt:</strong> Read this with target-speaker similarity while shifting from neutral status to gentle reassurance.</p>
+            <p><strong>Target:</strong> The connection dropped during the upload, but the draft was saved and you can retry safely.</p>
+          </article>
+        </div>
+      </details>
     </section>
 
     <h2>Model Leaderboard</h2>
@@ -1116,7 +1161,7 @@
           <td data-label="Rank">1</td>
           <td data-label="Model"><code>mlx-community/chatterbox-turbo-6bit</code></td>
           <td data-label="Avg">91.2</td>
-          <td data-label="Accurate">78 / 90</td>
+          <td data-label="Accurate">82 / 95</td>
           <td data-label="Weakest Category"><code>information_tuning</code> avg 84.5</td>
           <td data-label="Likely Fix Focus">number clarity, pauses around dense facts</td>
         </tr>
@@ -1124,7 +1169,7 @@
           <td data-label="Rank">2</td>
           <td data-label="Model"><code>mlx-community/Kokoro-82M-4bit</code></td>
           <td data-label="Avg">88.6</td>
-          <td data-label="Accurate">71 / 90</td>
+          <td data-label="Accurate">75 / 95</td>
           <td data-label="Weakest Category"><code>speech_steerability</code> avg 80.8</td>
           <td data-label="Likely Fix Focus">style control, emphasis, pacing</td>
         </tr>
@@ -1132,7 +1177,7 @@
           <td data-label="Rank">3</td>
           <td data-label="Model"><code>mlx-community/Qwen3-TTS-12Hz-0.6B-Base-4bit</code></td>
           <td data-label="Avg">84.7</td>
-          <td data-label="Accurate">53 / 90</td>
+          <td data-label="Accurate">56 / 95</td>
           <td data-label="Weakest Category"><code>paralinguistics</code> avg 77.0</td>
           <td data-label="Likely Fix Focus">emotion rendering, natural prosody</td>
         </tr>
@@ -1171,12 +1216,13 @@
         <p><code>heteronym_disambiguation</code><br>avg 84.8 / n 5 / 75-92</p>
         <p><code>formatting_markup_robustness</code><br>avg 83.6 / n 5 / 74-91</p>
         <p><code>nonverbal_paralinguistic_cues</code><br>avg 84.2 / n 5 / 75-92</p>
+        <p><code>voice_conversion_similarity</code><br>avg 84.0 / n 5 / 74-92</p>
       </div>
       <div class="panel">
         <h3>Scores By Model</h3>
-        <p><code>mlx-community/chatterbox-turbo-6bit</code><br>avg 90.1 / n 90 / 78-97</p>
-        <p><code>mlx-community/Kokoro-82M-4bit</code><br>avg 87.3 / n 90 / 74-95</p>
-        <p><code>mlx-community/Qwen3-TTS-12Hz-0.6B-Base-4bit</code><br>avg 83.7 / n 90 / 70-93</p>
+        <p><code>mlx-community/chatterbox-turbo-6bit</code><br>avg 90.1 / n 95 / 78-97</p>
+        <p><code>mlx-community/Kokoro-82M-4bit</code><br>avg 87.3 / n 95 / 74-95</p>
+        <p><code>mlx-community/Qwen3-TTS-12Hz-0.6B-Base-4bit</code><br>avg 83.7 / n 95 / 70-93</p>
       </div>
       <div class="panel">
         <h3>Scores By Voice</h3>
@@ -1298,6 +1344,13 @@
           <td data-label="Qwen3-TTS">81.0</td>
           <td data-label="What To Inspect">quote boundaries, lists, asides, questions, ellipsis pauses</td>
         </tr>
+        <tr>
+          <td data-label="Category"><code>voice_conversion_similarity</code></td>
+          <td data-label="Chatterbox">88.0</td>
+          <td data-label="Kokoro">84.5</td>
+          <td data-label="Qwen3-TTS">79.5</td>
+          <td data-label="What To Inspect">speaker similarity, content preservation, reference prosody, identity leakage</td>
+        </tr>
       </tbody>
     </table>
 
@@ -1322,7 +1375,7 @@
         <tr>
           <td data-label="Compared Model"><code>mlx-community/Kokoro-82M-4bit</code></td>
           <td data-label="Baseline"><code>mlx-community/chatterbox-turbo-6bit</code></td>
-          <td data-label="Matched Cases">90</td>
+          <td data-label="Matched Cases">95</td>
           <td data-label="Avg Delta">-2.6</td>
           <td data-label="Wins / Ties / Losses">16 / 12 / 62</td>
           <td data-label="Largest Regressions">speech pace and emphasis cases where style control trails the baseline.</td>
@@ -1330,7 +1383,7 @@
         <tr>
           <td data-label="Compared Model"><code>mlx-community/Qwen3-TTS-12Hz-0.6B-Base-4bit</code></td>
           <td data-label="Baseline"><code>mlx-community/chatterbox-turbo-6bit</code></td>
-          <td data-label="Matched Cases">90</td>
+          <td data-label="Matched Cases">95</td>
           <td data-label="Avg Delta">-6.5</td>
           <td data-label="Wins / Ties / Losses">10 / 8 / 72</td>
           <td data-label="Largest Regressions">emotion and dense-fact cases with lower naturalness or intelligibility.</td>
@@ -1356,7 +1409,7 @@
       </div>
       <div class="panel">
         <h3>Synthesis Model</h3>
-        <p><code>mlx-community/Qwen3-TTS-12Hz-0.6B-Base-4bit</code><br>avg 83.7 / n 90 / range 70-93</p>
+        <p><code>mlx-community/Qwen3-TTS-12Hz-0.6B-Base-4bit</code><br>avg 83.7 / n 95 / range 70-93</p>
         <p class="muted">Compare model-level weak spots before changing prompts, voices, wrappers, or model settings.</p>
       </div>
     </section>
