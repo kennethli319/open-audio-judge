@@ -146,6 +146,69 @@ def test_synthesize_cases_with_local_tts_rejects_nonpositive_timeout(tmp_path: P
         )
 
 
+def test_synthesize_cases_with_local_tts_rejects_unchanged_fallback_audio(
+    tmp_path: Path,
+    monkeypatch,
+) -> None:
+    tts_bin = tmp_path / "bin" / "local-tts-speak"
+    tts_bin.parent.mkdir()
+    tts_bin.write_text("#!/bin/sh\n", encoding="utf-8")
+    synthesis_dir = tmp_path / "synthesis"
+    stale_audio = synthesis_dir / "audio" / "tts-stale.wav"
+    stale_audio.parent.mkdir(parents=True)
+    stale_audio.write_bytes(b"stale-audio")
+    case = EvaluationCase(
+        id="tts-stale",
+        task="tts_naturalness",
+        reference_text="This should not reuse stale audio.",
+    )
+
+    def fake_run(command, check, capture_output, text, timeout):
+        return subprocess.CompletedProcess(command, 0, stdout="", stderr="")
+
+    monkeypatch.setattr("open_audio_judge.local_tts.subprocess.run", fake_run)
+
+    with pytest.raises(ValueError, match="fallback matching files were unchanged"):
+        synthesize_cases_with_local_tts(
+            [case],
+            out_dir=synthesis_dir,
+            config=LocalTtsConfig(tts_bin=tts_bin),
+        )
+
+
+def test_synthesize_cases_with_local_tts_accepts_changed_fallback_audio(
+    tmp_path: Path,
+    monkeypatch,
+) -> None:
+    tts_bin = tmp_path / "bin" / "local-tts-speak"
+    tts_bin.parent.mkdir()
+    tts_bin.write_text("#!/bin/sh\n", encoding="utf-8")
+    synthesis_dir = tmp_path / "synthesis"
+    audio_path = synthesis_dir / "audio" / "tts-overwrite.wav"
+    audio_path.parent.mkdir(parents=True)
+    audio_path.write_bytes(b"old")
+    case = EvaluationCase(
+        id="tts-overwrite",
+        task="tts_naturalness",
+        reference_text="This should accept an updated fallback file.",
+    )
+
+    def fake_run(command, check, capture_output, text, timeout):
+        audio_path.write_bytes(b"new-audio")
+        return subprocess.CompletedProcess(command, 0, stdout="", stderr="")
+
+    monkeypatch.setattr("open_audio_judge.local_tts.subprocess.run", fake_run)
+
+    synthesized = synthesize_cases_with_local_tts(
+        [case],
+        out_dir=synthesis_dir,
+        config=LocalTtsConfig(tts_bin=tts_bin),
+    )
+
+    assert synthesized[0].audio_path == "audio/tts-overwrite.wav"
+    assert synthesized[0].metadata["audio_bytes"] == len(b"new-audio")
+
+
 def test_output_path_from_stdout_accepts_progress_before_json() -> None:
     output = _output_path_from_stdout(
         "\x1b[94mText:\x1b[0m hello\n"

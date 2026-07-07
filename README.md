@@ -262,6 +262,9 @@ For non-Chatterbox wrappers that accept the same `local-tts-speak` arguments, pa
 `--synthesis-provider` so generated case metadata and report aggregates identify the actual local
 backend. Use `--tts-timeout-seconds` to fail a single stuck synthesis call with captured stdout and
 stderr instead of leaving the full AutoJudge run hanging.
+Wrappers should emit JSON with an `output`, `output_path`, or `audio_path` field when possible. If a
+wrapper only writes files, Open Audio Judge will use a matching newly created or modified audio file
+and reject unchanged leftovers from an earlier run.
 
 ## REST API
 

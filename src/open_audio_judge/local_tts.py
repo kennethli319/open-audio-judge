@@ -175,6 +175,8 @@ def _run_local_tts(
     audio_dir: Path,
     output_stem: str,
 ) -> Path:
+    output_pattern = f"{output_stem}*.{config.audio_format}"
+    existing_audio = _audio_file_snapshots(audio_dir.glob(output_pattern))
     command = [
         str(config.tts_bin),
         "--text-file",
@@ -211,10 +213,51 @@ def _run_local_tts(
         _require_output_path_in_audio_dir(output_path, audio_dir)
         return output_path
 
-    matches = sorted(audio_dir.glob(f"{output_stem}*.{config.audio_format}"))
-    if matches:
-        return matches[-1].resolve()
+    fallback_output = _latest_new_or_changed_audio_path(
+        audio_dir.glob(output_pattern),
+        previous=existing_audio,
+    )
+    if fallback_output is not None:
+        return fallback_output
+    if existing_audio:
+        raise ValueError(
+            "local TTS command did not report an output audio file and fallback "
+            "matching files were unchanged from before synthesis."
+        )
     raise ValueError("local TTS command did not report or write an output audio file.")
+
+
+def _audio_file_snapshots(paths: Iterable[Path]) -> dict[Path, tuple[int, int]]:
+    snapshots: dict[Path, tuple[int, int]] = {}
+    for path in paths:
+        resolved = path.resolve()
+        try:
+            stat = resolved.stat()
+        except FileNotFoundError:
+            continue
+        snapshots[resolved] = (stat.st_mtime_ns, stat.st_size)
+    return snapshots
+
+
+def _latest_new_or_changed_audio_path(
+    paths: Iterable[Path],
+    *,
+    previous: dict[Path, tuple[int, int]],
+) -> Path | None:
+    candidates: list[tuple[int, Path]] = []
+    for path in paths:
+        resolved = path.resolve()
+        try:
+            stat = resolved.stat()
+        except FileNotFoundError:
+            continue
+        snapshot = (stat.st_mtime_ns, stat.st_size)
+        if previous.get(resolved) == snapshot:
+            continue
+        candidates.append((stat.st_mtime_ns, resolved))
+    if not candidates:
+        return None
+    return sorted(candidates)[-1][1]
 
 
 def _format_tts_failure(exc: subprocess.CalledProcessError, tts_bin: Path) -> str:
