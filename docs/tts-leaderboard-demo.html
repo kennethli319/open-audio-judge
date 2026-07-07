@@ -2646,18 +2646,18 @@
         <tr>
           <td data-label="Compared Model"><code>mlx-community/Kokoro-82M-4bit</code></td>
           <td data-label="Baseline"><code>mlx-community/chatterbox-turbo-6bit</code></td>
-          <td data-label="Matched Cases">165</td>
+          <td data-label="Matched Cases">265</td>
           <td data-label="Avg Delta">-2.6</td>
-          <td data-label="Wins / Ties / Losses">24 / 18 / 113</td>
-          <td data-label="Largest Regressions">speech pace and emphasis cases where style control trails the baseline.</td>
+          <td data-label="Wins / Ties / Losses">39 / 29 / 197</td>
+          <td data-label="Largest Regressions">speech pace, conditional-logic, and escalation-priority cases where style control trails the baseline.</td>
         </tr>
         <tr>
           <td data-label="Compared Model"><code>mlx-community/Qwen3-TTS-12Hz-0.6B-Base-4bit</code></td>
           <td data-label="Baseline"><code>mlx-community/chatterbox-turbo-6bit</code></td>
-          <td data-label="Matched Cases">165</td>
+          <td data-label="Matched Cases">265</td>
           <td data-label="Avg Delta">-6.5</td>
-          <td data-label="Wins / Ties / Losses">15 / 13 / 127</td>
-          <td data-label="Largest Regressions">emotion and dense-fact cases with lower naturalness or intelligibility.</td>
+          <td data-label="Wins / Ties / Losses">24 / 21 / 220</td>
+          <td data-label="Largest Regressions">emotion, dense-fact, conditional-rule, and critical-alert cases with lower naturalness or intelligibility.</td>
         </tr>
       </tbody>
     </table>
@@ -2666,21 +2666,21 @@
     <section class="grid">
       <div class="panel">
         <h3>Evaluation Category</h3>
-        <p><code>information_tuning</code><br>avg 84.5 / n 2 / range 76-93</p>
-        <p class="muted">Category focus: numbers, dates, units, ordered steps, and safety-critical wording.</p>
-        <p class="muted">Source basis: Seed-TTS-Eval intelligibility checks and TTSDS intelligibility/prosody dimensions.</p>
+        <p><code>conditional_logic_delivery</code><br>avg 80.8 / n 15 / range 72-91</p>
+        <p class="muted">Category focus: unless, only-if, if/otherwise, nested conditions, and exception boundaries.</p>
+        <p class="muted">Source basis: VoiceBench safety/robustness behavior, InstructTTSEval exact instruction control, Seed-TTS-Eval intelligibility checks, and TTSDS prosody dimensions.</p>
         <p class="muted">Likely fix areas: pronunciation, prosody/pacing, text faithfulness.</p>
-        <p class="muted">Representative cases: dense dates, numbers, and units.</p>
+        <p class="muted">Representative cases: unless exceptions, only-if thresholds, if/otherwise route decisions, and nested badge-reader rules.</p>
       </div>
       <div class="panel">
         <h3>TTS Slice</h3>
-        <p><code>dates_times</code><br>avg 76.0 / n 1 / range 76-76</p>
-        <p class="muted">Likely fix areas: text faithfulness and intelligibility.</p>
+        <p><code>critical_alert_room_action_escalation</code><br>avg 74.0 / n 3 / range 70-78</p>
+        <p class="muted">Likely fix areas: urgency calibration, text faithfulness, and intelligibility.</p>
         <p class="muted">Inspect low-score rows before tuning prompts, voices, or model wrappers.</p>
       </div>
       <div class="panel">
         <h3>Synthesis Model</h3>
-        <p><code>mlx-community/Qwen3-TTS-12Hz-0.6B-Base-4bit</code><br>avg 83.6 / n 165 / range 70-93</p>
+        <p><code>mlx-community/Qwen3-TTS-12Hz-0.6B-Base-4bit</code><br>avg 83.6 / n 265 / range 70-93</p>
         <p class="muted">Compare model-level weak spots before changing prompts, voices, wrappers, or model settings.</p>
       </div>
     </section>
@@ -2701,12 +2701,12 @@
       <tbody>
         <tr>
           <td data-label="Model"><code>mlx-community/Qwen3-TTS-12Hz-0.6B-Base-4bit</code></td>
-          <td data-label="Category"><code>information_tuning</code></td>
-          <td data-label="Score">avg 76.0<br><span class="muted">n 2 / range 72-80</span></td>
-          <td data-label="Likely Fix Areas">pronunciation, prosody/pacing, text faithfulness</td>
-          <td data-label="Category Guidance">Focus: numbers, dates, units, ordered steps, and safety-critical wording. Source basis: Seed-TTS-Eval intelligibility checks.</td>
-          <td data-label="Evidence">issues: intelligibility issue x1, number error x1</td>
-          <td data-label="Representative Cases">dense dates, measurements, and step boundaries</td>
+          <td data-label="Category"><code>conditional_logic_delivery</code></td>
+          <td data-label="Score">avg 78.0<br><span class="muted">n 5 / range 72-84</span></td>
+          <td data-label="Likely Fix Areas">text faithfulness, prosody/pacing, instruction/style following</td>
+          <td data-label="Category Guidance">Focus: unless, only-if, if/otherwise, nested conditions, and exception boundaries. Source basis: VoiceBench safety/robustness behavior and InstructTTSEval exact instruction control.</td>
+          <td data-label="Evidence">issues: condition scope error x1, pacing issue x1</td>
+          <td data-label="Representative Cases">unless exceptions, only-if thresholds, and nested badge-reader rules</td>
         </tr>
         <tr>
           <td data-label="Model"><code>mlx-community/Kokoro-82M-4bit</code></td>
@@ -2717,13 +2717,22 @@
           <td data-label="Evidence">issues: style mismatch x1, pacing issue x1</td>
           <td data-label="Representative Cases">pace, emphasis, and register-control prompts</td>
         </tr>
+        <tr>
+          <td data-label="Model"><code>mlx-community/Qwen3-TTS-12Hz-0.6B-Base-4bit</code></td>
+          <td data-label="Category"><code>priority_escalation_delivery</code></td>
+          <td data-label="Score">avg 77.5<br><span class="muted">n 5 / range 70-86</span></td>
+          <td data-label="Likely Fix Areas">urgency calibration, intelligibility, text faithfulness</td>
+          <td data-label="Category Guidance">Focus: critical alerts, severity labels, triage priority, alert downgrades, and escalation owner/deadline handoffs. Source basis: VoiceBench safety/robustness behavior and Seed-TTS-Eval intelligibility checks.</td>
+          <td data-label="Evidence">issues: over-urgent prosody x1, room/action clarity x1</td>
+          <td data-label="Representative Cases">critical alert, severity label, triage assignment, and handoff deadline samples</td>
+        </tr>
       </tbody>
     </table>
 
     <h2>Sample-By-Sample Breakdown</h2>
     <p>
       The real combined report contains one row per synthesized model/case pair. This preview shows
-      representative rows across models, categories, slices, and score bands from the 480 generated
+      representative rows across models, categories, slices, and score bands from the 795 generated
       samples.
     </p>
     <table id="sample-breakdown-table">
