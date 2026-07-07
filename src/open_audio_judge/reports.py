@@ -1086,6 +1086,22 @@ TTS_CATEGORY_GUIDANCE = {
             "safety-critical conditional prosody",
         ],
     ),
+    "morphosyntactic_marker_delivery": (
+        "plural, possessive, contraction, tense, comparative, and pronoun-case markers that can disappear in fast or over-smoothed speech",
+        [
+            "small grammatical marker intelligibility",
+            "morphosyntactic contrast preservation",
+            "role, tense, and ownership phrase grouping",
+        ],
+    ),
+    "operator_precedence_delivery": (
+        "parentheses, boolean grouping, chained inequalities, exponent scope, and subscript boundaries in spoken math or logic",
+        [
+            "operator and delimiter text normalization",
+            "math and logic scope prosody",
+            "term, variable, and condition grouping",
+        ],
+    ),
 }
 
 

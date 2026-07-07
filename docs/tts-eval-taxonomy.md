@@ -201,10 +201,16 @@ runs can map private prompts into the same categories without copying private ro
 - `medication_dosage_delivery`: medication dose, route, schedule, taper phase, look-alike drug
   names, missed-dose boundaries, and maximum daily constraints where clinical text normalization
   must preserve exact units, timing, conditions, and safety warnings.
+- `morphosyntactic_marker_delivery`: plural, possessive, contraction, tense, comparative, and
+  pronoun-case markers where small grammatical sounds must remain audible enough to preserve who
+  did what, when, and to whom.
+- `operator_precedence_delivery`: parentheses, boolean grouping, chained inequalities, exponent
+  scope, and subscript boundaries where spoken math or logic must preserve which operation binds
+  to which term.
 
 ## Manifest Contract
 
-The public comparison manifest is intentionally balanced at 340 cases for now: 68 categories with 5
+The public comparison manifest is intentionally balanced at 350 cases for now: 70 categories with 5
 cases each. Expansion should add complete five-case category batches before deepening existing
 categories.
 

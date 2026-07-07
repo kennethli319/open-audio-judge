@@ -393,6 +393,8 @@
           <option value="homograph_number_format_delivery">Homograph number-format delivery</option>
           <option value="currency_financial_delivery">Currency financial delivery</option>
           <option value="medication_dosage_delivery">Medication dosage delivery</option>
+          <option value="morphosyntactic_marker_delivery">Morphosyntactic marker delivery</option>
+          <option value="operator_precedence_delivery">Operator precedence delivery</option>
         </select>
         <select id="label-filter" aria-label="Filter by label">
           <option value="">All labels</option>
@@ -437,7 +439,7 @@
   --cases examples/tts_multiturn_cases.jsonl \
   --judge-provider gemini \
   --judge-samples 3 \
-  --limit 340 \
+  --limit 350 \
   --out runs/leaderboard/chatterbox</code></pre>
 
     <pre><code>oaj autojudge-local-tts \
@@ -446,7 +448,7 @@
   --cases examples/tts_multiturn_cases.jsonl \
   --judge-provider gemini \
   --judge-samples 3 \
-  --limit 340 \
+  --limit 350 \
   --out runs/leaderboard/kokoro</code></pre>
 
     <pre><code>oaj autojudge-local-tts \
@@ -455,7 +457,7 @@
   --cases examples/tts_multiturn_cases.jsonl \
   --judge-provider gemini \
   --judge-samples 3 \
-  --limit 340 \
+  --limit 350 \
   --out runs/leaderboard/qwen3-tts</code></pre>
 
     <p>
@@ -467,7 +469,7 @@
   --cases examples/tts_multiturn_cases.jsonl \
   --judge-provider gemini \
   --judge-samples 3 \
-  --limit 340 \
+  --limit 350 \
   --out runs/leaderboard/chatterbox</code></pre>
 
     <p>
@@ -512,16 +514,16 @@
     <h2>Sample Report Preview</h2>
     <section class="grid" aria-label="Sample report metrics">
       <div class="metric"><span>Models</span><strong>3</strong></div>
-      <div class="metric"><span>Shared Eval Cases</span><strong>340</strong></div>
+      <div class="metric"><span>Shared Eval Cases</span><strong>350</strong></div>
       <div class="metric"><span>Judge Samples</span><strong>3x</strong></div>
       <div class="metric"><span>Top Avg</span><strong>91.2</strong></div>
       <div class="metric"><span>Lowest Avg</span><strong>84.7</strong></div>
-      <div class="metric"><span>Total Judgments</span><strong>3060</strong></div>
+      <div class="metric"><span>Total Judgments</span><strong>3150</strong></div>
     </section>
 
     <h2>Eval Set Samples</h2>
     <p>
-      The public demo eval set contains 340 synthetic, public-safe cases grouped into research-backed
+      The public demo eval set contains 350 synthetic, public-safe cases grouped into research-backed
       TTS dimensions. Each category below contributes five shared cases that every model synthesizes
       before Gemini judges the generated audio.
     </p>
@@ -2903,6 +2905,76 @@
             <p><strong>Slice:</strong> <code>ten_mg_per_kg_every_eight_hours_max_300_daily</code></p>
             <p><strong>Prompt:</strong> Read this pediatric dosing note so the amount per kilogram and maximum daily dose remain distinct.</p>
             <p><strong>Target:</strong> Give 10 milligrams per kilogram every eight hours, with a maximum of 300 milligrams per day.</p>
+          </article>
+        </div>
+      </details>
+      <details class="sample-group" data-category="morphosyntactic_marker_delivery">
+        <summary><span>Morphosyntactic Marker Delivery</span><strong>5 cases</strong></summary>
+        <div class="sample-list">
+          <article class="sample-card">
+            <h3><code>tts-morphosyntactic-marker-delivery-plural-possessive-001</code></h3>
+            <p><strong>Slice:</strong> <code>plural_possessive_nurses_tablets_contrast</code></p>
+            <p><strong>Prompt:</strong> Read this inventory note so the plural item and possessive owner marker are both audible.</p>
+            <p><strong>Target:</strong> The nurses' tablets are charged, but the nurse's tablet is still missing.</p>
+          </article>
+          <article class="sample-card">
+            <h3><code>tts-morphosyntactic-marker-delivery-contracted-negation-001</code></h3>
+            <p><strong>Slice:</strong> <code>contracted_negative_wont_will_contrast</code></p>
+            <p><strong>Prompt:</strong> Read this access warning so the contracted negative does not disappear.</p>
+            <p><strong>Target:</strong> The badge won't open the lab door, but it will open the storage room.</p>
+          </article>
+          <article class="sample-card">
+            <h3><code>tts-morphosyntactic-marker-delivery-tense-suffix-001</code></h3>
+            <p><strong>Slice:</strong> <code>past_present_tense_suffix_patched_patches</code></p>
+            <p><strong>Prompt:</strong> Read this deployment status so completed and ongoing actions are not confused.</p>
+            <p><strong>Target:</strong> Sam patched the router yesterday, and Sam patches the backup switch tonight.</p>
+          </article>
+          <article class="sample-card">
+            <h3><code>tts-morphosyntactic-marker-delivery-comparative-superlative-001</code></h3>
+            <p><strong>Slice:</strong> <code>comparative_superlative_faster_fastest_routes</code></p>
+            <p><strong>Prompt:</strong> Read this routing decision so comparative and superlative endings stay attached to the right route.</p>
+            <p><strong>Target:</strong> Route B is faster than route C, but route A is the fastest after 6 PM.</p>
+          </article>
+          <article class="sample-card">
+            <h3><code>tts-morphosyntactic-marker-delivery-pronoun-case-001</code></h3>
+            <p><strong>Slice:</strong> <code>pronoun_case_she_him_he_her_handoff</code></p>
+            <p><strong>Prompt:</strong> Read this handoff so subject and object pronouns are not blurred.</p>
+            <p><strong>Target:</strong> She assigned the ticket to him, and he returned the ticket to her before noon.</p>
+          </article>
+        </div>
+      </details>
+      <details class="sample-group" data-category="operator_precedence_delivery">
+        <summary><span>Operator Precedence Delivery</span><strong>5 cases</strong></summary>
+        <div class="sample-list">
+          <article class="sample-card">
+            <h3><code>tts-operator-precedence-delivery-parentheses-first-001</code></h3>
+            <p><strong>Slice:</strong> <code>parentheses_before_multiplication_contrast</code></p>
+            <p><strong>Prompt:</strong> Read this calculator note so the parenthesized term is evaluated first.</p>
+            <p><strong>Target:</strong> Calculate open parenthesis 2 plus 3 close parenthesis times 4, not 2 plus 3 times 4.</p>
+          </article>
+          <article class="sample-card">
+            <h3><code>tts-operator-precedence-delivery-boolean-and-or-001</code></h3>
+            <p><strong>Slice:</strong> <code>boolean_and_group_before_or_override</code></p>
+            <p><strong>Prompt:</strong> Read this rule so the AND group binds before the OR fallback.</p>
+            <p><strong>Target:</strong> Allow access if role equals admin and status equals active, or if override equals true.</p>
+          </article>
+          <article class="sample-card">
+            <h3><code>tts-operator-precedence-delivery-inequality-chain-001</code></h3>
+            <p><strong>Slice:</strong> <code>chained_inequality_lower_upper_temperature</code></p>
+            <p><strong>Prompt:</strong> Read this monitoring threshold so the lower and upper bounds stay in order.</p>
+            <p><strong>Target:</strong> Alert only when 20 is less than temperature and temperature is less than 30.</p>
+          </article>
+          <article class="sample-card">
+            <h3><code>tts-operator-precedence-delivery-exponent-before-subtraction-001</code></h3>
+            <p><strong>Slice:</strong> <code>exponent_scope_x_squared_minus_y</code></p>
+            <p><strong>Prompt:</strong> Read this formula note so the exponent does not attach to the whole subtraction.</p>
+            <p><strong>Target:</strong> Use x squared minus y, not x times open parenthesis x minus y close parenthesis.</p>
+          </article>
+          <article class="sample-card">
+            <h3><code>tts-operator-precedence-delivery-subscript-index-001</code></h3>
+            <p><strong>Slice:</strong> <code>subscript_scope_a_sub_i_plus_one</code></p>
+            <p><strong>Prompt:</strong> Read this array expression so the subscript and plus-one operation do not merge.</p>
+            <p><strong>Target:</strong> Read A sub i plus 1 as A sub i, then plus 1; do not read it as A sub open parenthesis i plus 1 close parenthesis.</p>
           </article>
         </div>
       </details>
