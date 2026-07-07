@@ -391,6 +391,7 @@
           <option value="acronym_initialism_delivery">Acronym initialism delivery</option>
           <option value="spatial_relation_delivery">Spatial relation delivery</option>
           <option value="homograph_number_format_delivery">Homograph number-format delivery</option>
+          <option value="currency_financial_delivery">Currency financial delivery</option>
         </select>
         <select id="label-filter" aria-label="Filter by label">
           <option value="">All labels</option>
@@ -435,7 +436,7 @@
   --cases examples/tts_multiturn_cases.jsonl \
   --judge-provider gemini \
   --judge-samples 3 \
-  --limit 330 \
+  --limit 335 \
   --out runs/leaderboard/chatterbox</code></pre>
 
     <pre><code>oaj autojudge-local-tts \
@@ -444,7 +445,7 @@
   --cases examples/tts_multiturn_cases.jsonl \
   --judge-provider gemini \
   --judge-samples 3 \
-  --limit 330 \
+  --limit 335 \
   --out runs/leaderboard/kokoro</code></pre>
 
     <pre><code>oaj autojudge-local-tts \
@@ -453,7 +454,7 @@
   --cases examples/tts_multiturn_cases.jsonl \
   --judge-provider gemini \
   --judge-samples 3 \
-  --limit 330 \
+  --limit 335 \
   --out runs/leaderboard/qwen3-tts</code></pre>
 
     <p>
@@ -465,7 +466,7 @@
   --cases examples/tts_multiturn_cases.jsonl \
   --judge-provider gemini \
   --judge-samples 3 \
-  --limit 330 \
+  --limit 335 \
   --out runs/leaderboard/chatterbox</code></pre>
 
     <p>
@@ -510,7 +511,7 @@
     <h2>Sample Report Preview</h2>
     <section class="grid" aria-label="Sample report metrics">
       <div class="metric"><span>Models</span><strong>3</strong></div>
-      <div class="metric"><span>Shared Eval Cases</span><strong>330</strong></div>
+      <div class="metric"><span>Shared Eval Cases</span><strong>335</strong></div>
       <div class="metric"><span>Judge Samples</span><strong>3x</strong></div>
       <div class="metric"><span>Top Avg</span><strong>91.2</strong></div>
       <div class="metric"><span>Lowest Avg</span><strong>84.7</strong></div>
@@ -519,7 +520,7 @@
 
     <h2>Eval Set Samples</h2>
     <p>
-      The public demo eval set contains 330 synthetic, public-safe cases grouped into research-backed
+      The public demo eval set contains 335 synthetic, public-safe cases grouped into research-backed
       TTS dimensions. Each category below contributes five shared cases that every model synthesizes
       before Gemini judges the generated audio.
     </p>
@@ -2831,6 +2832,41 @@
             <p><strong>Slice:</strong> <code>filename_suffixes_semver_v120</code></p>
             <p><strong>Prompt:</strong> Read this engineering handoff so the filename suffix and semantic version remain exact.</p>
             <p><strong>Target:</strong> Open report.final.2, compare it with report.final.10, and deploy service v1.2.0 only after review.</p>
+          </article>
+        </div>
+      </details>
+      <details class="sample-group" data-category="currency_financial_delivery">
+        <summary><span>Currency Financial Delivery</span><strong>5 cases</strong></summary>
+        <div class="sample-list">
+          <article class="sample-card">
+            <h3><code>tts-currency-financial-delivery-usd-cad-001</code></h3>
+            <p><strong>Slice:</strong> <code>invoice_usd_not_cad_amount</code></p>
+            <p><strong>Prompt:</strong> Read this invoice instruction so the amount and currency code cannot be confused.</p>
+            <p><strong>Target:</strong> Charge $1,250.50 in USD, not 1,250.50 CAD, before sending the invoice.</p>
+          </article>
+          <article class="sample-card">
+            <h3><code>tts-currency-financial-delivery-basis-points-001</code></h3>
+            <p><strong>Slice:</strong> <code>fee_basis_points_not_percent</code></p>
+            <p><strong>Prompt:</strong> Read this pricing policy so basis points are not mistaken for percent.</p>
+            <p><strong>Target:</strong> Raise the service fee by 25 basis points, not 25 percent, for balances over $10,000.</p>
+          </article>
+          <article class="sample-card">
+            <h3><code>tts-currency-financial-delivery-negative-refund-001</code></h3>
+            <p><strong>Slice:</strong> <code>negative_refund_original_charge</code></p>
+            <p><strong>Prompt:</strong> Read this ledger correction so the negative refund and original charge stay separate.</p>
+            <p><strong>Target:</strong> Record a refund of -$43.20, and leave the original $143.20 charge unchanged.</p>
+          </article>
+          <article class="sample-card">
+            <h3><code>tts-currency-financial-delivery-exchange-rate-001</code></h3>
+            <p><strong>Slice:</strong> <code>exchange_rate_euros_per_dollar_cap</code></p>
+            <p><strong>Prompt:</strong> Read this transfer note so the exchange rate and transfer cap are not merged.</p>
+            <p><strong>Target:</strong> Use an exchange rate of 0.92 euros per dollar, then cap the transfer at 500 euros.</p>
+          </article>
+          <article class="sample-card">
+            <h3><code>tts-currency-financial-delivery-balance-near-match-001</code></h3>
+            <p><strong>Slice:</strong> <code>similar_balances_after_ach_deposit</code></p>
+            <p><strong>Prompt:</strong> Read this bank update so the two similar balances can be transcribed on first listen.</p>
+            <p><strong>Target:</strong> The balance changed from $2,005.05 to $2,050.50 after the ACH deposit cleared.</p>
           </article>
         </div>
       </details>

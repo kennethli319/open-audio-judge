@@ -195,10 +195,13 @@ runs can map private prompts into the same categories without copying private ro
 - `homograph_number_format_delivery`: versions versus decimals, room numbers versus extensions,
   slash dates versus ratios, hash versus pound symbols, and filename suffixes versus semantic
   versions where context must choose the right spoken normalization.
+- `currency_financial_delivery`: currency amounts, currency codes, basis points versus percent,
+  negative refunds, exchange rates, transfer caps, and near-matching balances where financial text
+  normalization must preserve exact money, units, signs, and conditions.
 
 ## Manifest Contract
 
-The public comparison manifest is intentionally balanced at 330 cases for now: 66 categories with 5
+The public comparison manifest is intentionally balanced at 335 cases for now: 67 categories with 5
 cases each. Expansion should add complete five-case category batches before deepening existing
 categories.
 

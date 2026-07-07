@@ -1070,6 +1070,14 @@ TTS_CATEGORY_GUIDANCE = {
             "symbol and version disambiguation prosody",
         ],
     ),
+    "currency_financial_delivery": (
+        "currency amounts, codes, basis points, negative refunds, exchange rates, transfer caps, and near-matching balances",
+        [
+            "financial text normalization",
+            "currency and sign phrase grouping",
+            "amount, unit, and condition intelligibility",
+        ],
+    ),
 }
 
 
