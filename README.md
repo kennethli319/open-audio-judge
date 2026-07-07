@@ -253,7 +253,9 @@ The command writes:
 - `synthesis/tts_audio_cases.jsonl`: generated-audio cases with local `audio_path` values.
 - `synthesis/synthesis_failures.jsonl` when `--skip-failed-synthesis` records skipped local TTS
   failures.
-- `model_summary.json`: model id, voice, audio format, and synthesis coverage.
+- `model_summary.json`: model id, voice, audio format, attempted/synthesized counts, synthesis
+  success rate, and failure breakdowns by error type, TTS slice, source category, sample kind, and
+  language.
 - `judge-report/results.jsonl` and `judge-report/report.html`: aggregate naturalness scores, top
   issue categories, priority cases, and sample-by-sample reasons.
 

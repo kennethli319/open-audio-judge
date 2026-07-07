@@ -124,14 +124,22 @@ def write_local_tts_summary_json(
     model: str,
     synthesis_provider: str = "local_chatterbox",
     failures: Iterable[LocalTtsFailure] = (),
+    attempted_source_cases: int | None = None,
 ) -> Path:
     case_list = list(cases)
     failure_list = list(failures)
+    attempted_count = attempted_source_cases
+    if attempted_count is None:
+        attempted_count = len(case_list) + len(failure_list)
+    success_rate = round(len(case_list) / attempted_count, 4) if attempted_count else 0.0
     summary = {
         "source_cases": str(source_cases),
         "candidate_model": model,
         "candidate_generator": synthesis_provider,
         "total_cases": len(case_list),
+        "attempted_source_cases": attempted_count,
+        "synthesized_case_count": len(case_list),
+        "synthesis_success_rate": success_rate,
         "synthesis_failure_count": len(failure_list),
         "case_ids": [case.id for case in case_list],
         "cases_with_audio_path": sum(1 for case in case_list if case.audio_path),
@@ -152,6 +160,12 @@ def write_local_tts_summary_json(
         "by_tts_slice": _count_metadata(case_list, "tts_slice"),
         "synthesis_failures_by_error_type": _count_failure_field(failure_list, "error_type"),
         "synthesis_failures_by_tts_slice": _count_failure_metadata(failure_list, "tts_slice"),
+        "synthesis_failures_by_source_category": _count_failure_metadata(
+            failure_list,
+            "source_category",
+        ),
+        "synthesis_failures_by_sample_kind": _count_failure_metadata(failure_list, "sample_kind"),
+        "synthesis_failures_by_language": _count_failure_language(failure_list),
     }
     path.parent.mkdir(parents=True, exist_ok=True)
     path.write_text(json.dumps(summary, indent=2, sort_keys=True) + "\n", encoding="utf-8")
@@ -552,6 +566,18 @@ def _count_failure_metadata(failures: Iterable[LocalTtsFailure], field: str) -> 
     counts: dict[str, int] = {}
     for failure in failures:
         value = str(failure.metadata.get(field) or "unknown")
+        counts[value] = counts.get(value, 0) + 1
+    return dict(sorted(counts.items()))
+
+
+def _count_failure_language(failures: Iterable[LocalTtsFailure]) -> dict[str, int]:
+    counts: dict[str, int] = {}
+    for failure in failures:
+        value = str(
+            failure.metadata.get("language")
+            or failure.metadata.get("synthesis_lang_code")
+            or "unknown"
+        )
         counts[value] = counts.get(value, 0) + 1
     return dict(sorted(counts.items()))
 

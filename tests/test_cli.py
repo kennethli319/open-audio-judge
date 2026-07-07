@@ -240,7 +240,11 @@ def test_autojudge_local_tts_cli_can_skip_failed_synthesis(
                     "id": "tts-fail",
                     "task": "tts_naturalness",
                     "reference_text": "This one fails.",
-                    "metadata": {"tts_slice": "numbers"},
+                    "metadata": {
+                        "language": "en-US",
+                        "source_category": "instruction_constraints",
+                        "tts_slice": "numbers",
+                    },
                 },
             ]
         )
@@ -304,9 +308,16 @@ def test_autojudge_local_tts_cli_can_skip_failed_synthesis(
     assert failure_record["message"] == "voice unavailable"
     summary = json.loads((out / "model_summary.json").read_text(encoding="utf-8"))
     assert summary["total_cases"] == 1
+    assert summary["attempted_source_cases"] == 2
+    assert summary["synthesized_case_count"] == 1
+    assert summary["synthesis_success_rate"] == 0.5
     assert summary["synthesis_failure_count"] == 1
     assert summary["synthesis_failures_by_error_type"] == {"RuntimeError": 1}
     assert summary["synthesis_failures_by_tts_slice"] == {"numbers": 1}
+    assert summary["synthesis_failures_by_source_category"] == {
+        "instruction_constraints": 1
+    }
+    assert summary["synthesis_failures_by_language"] == {"en-US": 1}
     assert "Failures:" in result.output
 
 

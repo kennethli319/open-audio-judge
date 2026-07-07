@@ -370,6 +370,9 @@ def test_write_local_tts_summary_json(tmp_path: Path) -> None:
     assert data["candidate_model"] == "mlx-community/chatterbox-turbo-6bit"
     assert data["candidate_generator"] == "local_test_tts"
     assert data["cases_with_audio_path"] == 1
+    assert data["attempted_source_cases"] == 1
+    assert data["synthesized_case_count"] == 1
+    assert data["synthesis_success_rate"] == 1.0
     assert data["total_audio_bytes"] == 1234
     assert data["total_audio_duration_seconds"] == 1.234
     assert data["cases_with_audio_duration"] == 1
@@ -387,7 +390,12 @@ def test_write_local_tts_summary_json_counts_failures(tmp_path: Path) -> None:
             case_id="tts-fail",
             error_type="RuntimeError",
             message="voice unavailable",
-            metadata={"tts_slice": "numbers"},
+            metadata={
+                "language": "en-US",
+                "sample_kind": "local_synthetic_tts",
+                "source_category": "instruction_constraints",
+                "tts_slice": "numbers",
+            },
         )
     ]
 
@@ -398,13 +406,20 @@ def test_write_local_tts_summary_json_counts_failures(tmp_path: Path) -> None:
         model="mlx-community/chatterbox-turbo-6bit",
         synthesis_provider="local_test_tts",
         failures=failures,
+        attempted_source_cases=3,
     )
 
     data = json.loads(summary.read_text(encoding="utf-8"))
     assert data["total_cases"] == 0
+    assert data["attempted_source_cases"] == 3
+    assert data["synthesized_case_count"] == 0
+    assert data["synthesis_success_rate"] == 0.0
     assert data["synthesis_failure_count"] == 1
     assert data["synthesis_failures_by_error_type"] == {"RuntimeError": 1}
     assert data["synthesis_failures_by_tts_slice"] == {"numbers": 1}
+    assert data["synthesis_failures_by_source_category"] == {"instruction_constraints": 1}
+    assert data["synthesis_failures_by_sample_kind"] == {"local_synthetic_tts": 1}
+    assert data["synthesis_failures_by_language"] == {"en-US": 1}
 
 
 def test_write_local_tts_failures_jsonl(tmp_path: Path) -> None:

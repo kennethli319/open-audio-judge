@@ -282,6 +282,7 @@ def autojudge_local_tts_command(
         model=model,
         synthesis_provider=synthesis_provider,
         failures=synthesis_result.failures,
+        attempted_source_cases=len(loaded_cases),
     )
     if not synthesized_cases:
         console.print("[bold red]No local TTS cases were synthesized.[/bold red]")
