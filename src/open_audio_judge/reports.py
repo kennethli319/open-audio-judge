@@ -614,6 +614,22 @@ TTS_CATEGORY_GUIDANCE = {
             "end-of-passage stability",
         ],
     ),
+    "text_normalization": (
+        "currency, URLs, email, versions, symbols, addresses, and abbreviations",
+        [
+            "text normalization frontend",
+            "symbol and punctuation verbalization",
+            "number/address disambiguation",
+        ],
+    ),
+    "acoustic_contexts": (
+        "phone support, public address, quiet reminders, navigation, and dispatch delivery",
+        [
+            "style-to-acoustic conditioning",
+            "intelligibility under delivery constraints",
+            "artifact and clipping control",
+        ],
+    ),
 }
 
 

@@ -378,7 +378,7 @@
   --cases examples/tts_multiturn_cases.jsonl \
   --judge-provider gemini \
   --judge-samples 3 \
-  --limit 45 \
+  --limit 55 \
   --out runs/leaderboard/chatterbox</code></pre>
 
     <pre><code>oaj autojudge-local-tts \
@@ -387,7 +387,7 @@
   --cases examples/tts_multiturn_cases.jsonl \
   --judge-provider gemini \
   --judge-samples 3 \
-  --limit 45 \
+  --limit 55 \
   --out runs/leaderboard/kokoro</code></pre>
 
     <pre><code>oaj autojudge-local-tts \
@@ -396,7 +396,7 @@
   --cases examples/tts_multiturn_cases.jsonl \
   --judge-provider gemini \
   --judge-samples 3 \
-  --limit 45 \
+  --limit 55 \
   --out runs/leaderboard/qwen3-tts</code></pre>
 
     <p>
@@ -408,7 +408,7 @@
   --cases examples/tts_multiturn_cases.jsonl \
   --judge-provider gemini \
   --judge-samples 3 \
-  --limit 45 \
+  --limit 55 \
   --out runs/leaderboard/chatterbox</code></pre>
 
     <p>
@@ -453,16 +453,16 @@
     <h2>Sample Report Preview</h2>
     <section class="grid" aria-label="Sample report metrics">
       <div class="metric"><span>Models</span><strong>3</strong></div>
-      <div class="metric"><span>Shared Eval Cases</span><strong>45</strong></div>
+      <div class="metric"><span>Shared Eval Cases</span><strong>55</strong></div>
       <div class="metric"><span>Judge Samples</span><strong>3x</strong></div>
       <div class="metric"><span>Top Avg</span><strong>91.2</strong></div>
       <div class="metric"><span>Lowest Avg</span><strong>84.7</strong></div>
-      <div class="metric"><span>Total Judgments</span><strong>405</strong></div>
+      <div class="metric"><span>Total Judgments</span><strong>495</strong></div>
     </section>
 
     <h2>Eval Set Samples</h2>
     <p>
-      The public demo eval set contains 45 synthetic, public-safe cases grouped into research-backed
+      The public demo eval set contains 55 synthetic, public-safe cases grouped into research-backed
       TTS dimensions. Each category below contributes five shared cases that every model synthesizes
       before Gemini judges the generated audio.
     </p>
@@ -782,6 +782,76 @@
           </article>
         </div>
       </details>
+      <details class="sample-group" data-category="text_normalization">
+        <summary><span>Text Normalization</span><strong>5 cases</strong></summary>
+        <div class="sample-list">
+          <article class="sample-card">
+            <h3><code>tts-text-normalization-currency-001</code></h3>
+            <p><strong>Slice:</strong> <code>currency_percentages</code></p>
+            <p><strong>Prompt:</strong> Read this billing update with the currency, percentage, and comparison easy to catch.</p>
+            <p><strong>Target:</strong> The monthly plan changes from $19.99 to $24.50, while the annual discount stays at 18 percent.</p>
+          </article>
+          <article class="sample-card">
+            <h3><code>tts-text-normalization-url-email-001</code></h3>
+            <p><strong>Slice:</strong> <code>url_email_punctuation</code></p>
+            <p><strong>Prompt:</strong> Read the support contact carefully, spelling punctuation verbally where needed.</p>
+            <p><strong>Target:</strong> Send the log to qa-team@example dot org, then open status dot example slash incident seven.</p>
+          </article>
+          <article class="sample-card">
+            <h3><code>tts-text-normalization-version-001</code></h3>
+            <p><strong>Slice:</strong> <code>versions_ordinals</code></p>
+            <p><strong>Prompt:</strong> Read this release note so version numbers and ordinal labels stay distinct.</p>
+            <p><strong>Target:</strong> Install version 2.10.3 after the fourth database patch, not version 2.1.3.</p>
+          </article>
+          <article class="sample-card">
+            <h3><code>tts-text-normalization-symbols-001</code></h3>
+            <p><strong>Slice:</strong> <code>symbols_math</code></p>
+            <p><strong>Prompt:</strong> Read this formula-like instruction naturally while verbalizing the symbols.</p>
+            <p><strong>Target:</strong> Set A plus B greater than C, then mark the result as pass slash review.</p>
+          </article>
+          <article class="sample-card">
+            <h3><code>tts-text-normalization-address-001</code></h3>
+            <p><strong>Slice:</strong> <code>addresses_abbreviations</code></p>
+            <p><strong>Prompt:</strong> Read this delivery address with abbreviations expanded clearly but not awkwardly.</p>
+            <p><strong>Target:</strong> Bring the sample to 405 North Pine Street, Suite 8B, before 5 PM.</p>
+          </article>
+        </div>
+      </details>
+      <details class="sample-group" data-category="acoustic_contexts">
+        <summary><span>Acoustic Contexts</span><strong>5 cases</strong></summary>
+        <div class="sample-list">
+          <article class="sample-card">
+            <h3><code>tts-acoustic-contexts-phone-001</code></h3>
+            <p><strong>Slice:</strong> <code>telephone_support_clarity</code></p>
+            <p><strong>Prompt:</strong> Read this as a phone support agent, compact but still fully intelligible.</p>
+            <p><strong>Target:</strong> I found the ticket, and the replacement unit should ship after the warehouse scan finishes.</p>
+          </article>
+          <article class="sample-card">
+            <h3><code>tts-acoustic-contexts-pa-001</code></h3>
+            <p><strong>Slice:</strong> <code>public_address_projection</code></p>
+            <p><strong>Prompt:</strong> Read this as a public address announcement with firm projection and clean timing.</p>
+            <p><strong>Target:</strong> Train twelve is now boarding on platform three; please keep bags clear of the yellow line.</p>
+          </article>
+          <article class="sample-card">
+            <h3><code>tts-acoustic-contexts-soft-001</code></h3>
+            <p><strong>Slice:</strong> <code>quiet_audible_reminder</code></p>
+            <p><strong>Prompt:</strong> Read this as a quiet late-night reminder that remains audible and articulate.</p>
+            <p><strong>Target:</strong> Your alarm is set for six fifteen, and the kitchen lights will stay off until sunrise.</p>
+          </article>
+          <article class="sample-card">
+            <h3><code>tts-acoustic-contexts-mobile-001</code></h3>
+            <p><strong>Slice:</strong> <code>mobile_navigation_clarity</code></p>
+            <p><strong>Prompt:</strong> Read this navigation prompt for a moving listener, with the turn and distance easy to catch.</p>
+            <p><strong>Target:</strong> In half a mile, use the right lane, then turn onto Harbor Drive after the second light.</p>
+          </article>
+          <article class="sample-card">
+            <h3><code>tts-acoustic-contexts-radio-001</code></h3>
+            <p><strong>Slice:</strong> <code>radio_dispatch_clarity</code></p>
+            <p><strong>Prompt:</strong> Read this as a clean radio dispatch, clipped enough for urgency but not robotic.</p>
+            <p><strong>Target:</strong> Unit four, hold at the west entrance until the loading bay is clear.</p>
+          </article>
+        </div>
+      </details>
     </section>
 
     <h2>Model Leaderboard</h2>
@@ -801,7 +871,7 @@
           <td data-label="Rank">1</td>
           <td data-label="Model"><code>mlx-community/chatterbox-turbo-6bit</code></td>
           <td data-label="Avg">91.2</td>
-          <td data-label="Accurate">40 / 45</td>
+          <td data-label="Accurate">49 / 55</td>
           <td data-label="Weakest Category"><code>information_tuning</code> avg 84.5</td>
           <td data-label="Likely Fix Focus">number clarity, pauses around dense facts</td>
         </tr>
@@ -809,7 +879,7 @@
           <td data-label="Rank">2</td>
           <td data-label="Model"><code>mlx-community/Kokoro-82M-4bit</code></td>
           <td data-label="Avg">88.6</td>
-          <td data-label="Accurate">36 / 45</td>
+          <td data-label="Accurate">44 / 55</td>
           <td data-label="Weakest Category"><code>speech_steerability</code> avg 80.8</td>
           <td data-label="Likely Fix Focus">style control, emphasis, pacing</td>
         </tr>
@@ -817,7 +887,7 @@
           <td data-label="Rank">3</td>
           <td data-label="Model"><code>mlx-community/Qwen3-TTS-12Hz-0.6B-Base-4bit</code></td>
           <td data-label="Avg">84.7</td>
-          <td data-label="Accurate">28 / 45</td>
+          <td data-label="Accurate">34 / 55</td>
           <td data-label="Weakest Category"><code>paralinguistics</code> avg 77.0</td>
           <td data-label="Likely Fix Focus">emotion rendering, natural prosody</td>
         </tr>
@@ -850,9 +920,9 @@
       </div>
       <div class="panel">
         <h3>Scores By Model</h3>
-        <p><code>mlx-community/chatterbox-turbo-6bit</code><br>avg 90.5 / n 45 / 78-97</p>
-        <p><code>mlx-community/Kokoro-82M-4bit</code><br>avg 87.8 / n 45 / 74-95</p>
-        <p><code>mlx-community/Qwen3-TTS-12Hz-0.6B-Base-4bit</code><br>avg 84.1 / n 45 / 70-93</p>
+        <p><code>mlx-community/chatterbox-turbo-6bit</code><br>avg 90.5 / n 55 / 78-97</p>
+        <p><code>mlx-community/Kokoro-82M-4bit</code><br>avg 87.8 / n 55 / 74-95</p>
+        <p><code>mlx-community/Qwen3-TTS-12Hz-0.6B-Base-4bit</code><br>avg 84.1 / n 55 / 70-93</p>
       </div>
       <div class="panel">
         <h3>Scores By Voice</h3>
@@ -963,7 +1033,7 @@
         <tr>
           <td data-label="Compared Model"><code>mlx-community/Kokoro-82M-4bit</code></td>
           <td data-label="Baseline"><code>mlx-community/chatterbox-turbo-6bit</code></td>
-          <td data-label="Matched Cases">45</td>
+          <td data-label="Matched Cases">55</td>
           <td data-label="Avg Delta">-2.6</td>
           <td data-label="Wins / Ties / Losses">5 / 4 / 21</td>
           <td data-label="Largest Regressions">speech pace and emphasis cases where style control trails the baseline.</td>
@@ -971,7 +1041,7 @@
         <tr>
           <td data-label="Compared Model"><code>mlx-community/Qwen3-TTS-12Hz-0.6B-Base-4bit</code></td>
           <td data-label="Baseline"><code>mlx-community/chatterbox-turbo-6bit</code></td>
-          <td data-label="Matched Cases">45</td>
+          <td data-label="Matched Cases">55</td>
           <td data-label="Avg Delta">-6.5</td>
           <td data-label="Wins / Ties / Losses">3 / 2 / 25</td>
           <td data-label="Largest Regressions">emotion and dense-fact cases with lower naturalness or intelligibility.</td>
@@ -997,7 +1067,7 @@
       </div>
       <div class="panel">
         <h3>Synthesis Model</h3>
-        <p><code>mlx-community/Qwen3-TTS-12Hz-0.6B-Base-4bit</code><br>avg 84.1 / n 45 / range 70-93</p>
+        <p><code>mlx-community/Qwen3-TTS-12Hz-0.6B-Base-4bit</code><br>avg 84.1 / n 55 / range 70-93</p>
         <p class="muted">Compare model-level weak spots before changing prompts, voices, wrappers, or model settings.</p>
       </div>
     </section>
@@ -1040,7 +1110,7 @@
     <h2>Sample-By-Sample Breakdown</h2>
     <p>
       The real combined report contains one row per synthesized model/case pair. This preview shows
-      representative rows across models, categories, slices, and score bands from the 135 generated
+      representative rows across models, categories, slices, and score bands from the 165 generated
       samples.
     </p>
     <table id="sample-breakdown-table">

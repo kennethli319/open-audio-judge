@@ -43,17 +43,22 @@ runs can map private prompts into the same categories without copying private ro
   respectful accent handling.
 - `long_form_discourse`: paragraph-level breath control, list structure, topic transitions,
   parentheticals, and end-of-passage stability.
+- `text_normalization`: currency, percentages, URLs, email addresses, version strings, symbols,
+  addresses, and abbreviations that must be spoken unambiguously.
+- `acoustic_contexts`: phone-like support, public address projection, quiet near-field reminders,
+  mobile navigation, and clean dispatch styles where delivery context can hurt intelligibility.
 
 ## Manifest Contract
 
-The public comparison manifest is intentionally capped at 45 cases for now: 9 categories with 5
-cases each. Expansion should keep category balance or explain why a category needs extra depth.
+The public comparison manifest is intentionally balanced at 55 cases for now: 11 categories with 5
+cases each. Expansion should add complete five-case category batches before deepening existing
+categories.
 
 Every committed case should preserve the following metadata contract:
 
 - `source=research-backed-tts-demo`.
 - `eval_category` must be one of the public categories above.
-- `tts_slice` should be unique within the 45-case seed set so model reports can point to a narrow
+- `tts_slice` should be unique within the public seed set so model reports can point to a narrow
   failure mode before aggregating upward.
 - `style_prompt`, `expected_style`, and `expected_instruction` should describe observable speech
   behavior, not implementation details.
