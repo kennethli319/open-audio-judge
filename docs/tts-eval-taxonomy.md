@@ -53,10 +53,12 @@ runs can map private prompts into the same categories without copying private ro
   friendly guidance to warning, surprise to neutral delivery, and empathy to practical instruction.
 - `punctuation_prosody`: quote boundaries, colon/semicolon grouping, aside phrasing, question-answer
   contours, and ellipsis pauses that should guide prosody without changing the text.
+- `domain_terminology`: clinical, legal, engineering, finance, and science terms that should remain
+  intelligible in realistic domain-specific registers.
 
 ## Manifest Contract
 
-The public comparison manifest is intentionally balanced at 70 cases for now: 14 categories with 5
+The public comparison manifest is intentionally balanced at 75 cases for now: 15 categories with 5
 cases each. Expansion should add complete five-case category batches before deepening existing
 categories.
 

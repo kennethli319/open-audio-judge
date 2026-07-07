@@ -378,7 +378,7 @@
   --cases examples/tts_multiturn_cases.jsonl \
   --judge-provider gemini \
   --judge-samples 3 \
-  --limit 70 \
+  --limit 75 \
   --out runs/leaderboard/chatterbox</code></pre>
 
     <pre><code>oaj autojudge-local-tts \
@@ -387,7 +387,7 @@
   --cases examples/tts_multiturn_cases.jsonl \
   --judge-provider gemini \
   --judge-samples 3 \
-  --limit 70 \
+  --limit 75 \
   --out runs/leaderboard/kokoro</code></pre>
 
     <pre><code>oaj autojudge-local-tts \
@@ -396,7 +396,7 @@
   --cases examples/tts_multiturn_cases.jsonl \
   --judge-provider gemini \
   --judge-samples 3 \
-  --limit 70 \
+  --limit 75 \
   --out runs/leaderboard/qwen3-tts</code></pre>
 
     <p>
@@ -408,7 +408,7 @@
   --cases examples/tts_multiturn_cases.jsonl \
   --judge-provider gemini \
   --judge-samples 3 \
-  --limit 70 \
+  --limit 75 \
   --out runs/leaderboard/chatterbox</code></pre>
 
     <p>
@@ -453,16 +453,16 @@
     <h2>Sample Report Preview</h2>
     <section class="grid" aria-label="Sample report metrics">
       <div class="metric"><span>Models</span><strong>3</strong></div>
-      <div class="metric"><span>Shared Eval Cases</span><strong>70</strong></div>
+      <div class="metric"><span>Shared Eval Cases</span><strong>75</strong></div>
       <div class="metric"><span>Judge Samples</span><strong>3x</strong></div>
       <div class="metric"><span>Top Avg</span><strong>91.2</strong></div>
       <div class="metric"><span>Lowest Avg</span><strong>84.7</strong></div>
-      <div class="metric"><span>Total Judgments</span><strong>630</strong></div>
+      <div class="metric"><span>Total Judgments</span><strong>675</strong></div>
     </section>
 
     <h2>Eval Set Samples</h2>
     <p>
-      The public demo eval set contains 70 synthetic, public-safe cases grouped into research-backed
+      The public demo eval set contains 75 synthetic, public-safe cases grouped into research-backed
       TTS dimensions. Each category below contributes five shared cases that every model synthesizes
       before Gemini judges the generated audio.
     </p>
@@ -957,6 +957,41 @@
           </article>
         </div>
       </details>
+      <details class="sample-group" data-category="domain_terminology">
+        <summary><span>Domain Terminology</span><strong>5 cases</strong></summary>
+        <div class="sample-list">
+          <article class="sample-card">
+            <h3><code>tts-domain-terminology-clinical-001</code></h3>
+            <p><strong>Slice:</strong> <code>clinical_terms</code></p>
+            <p><strong>Prompt:</strong> Read this clinical handoff with the medication and lab terms clear but not overpronounced.</p>
+            <p><strong>Target:</strong> The patient tolerated metformin, reported mild nausea, and the hemoglobin A1C result is pending.</p>
+          </article>
+          <article class="sample-card">
+            <h3><code>tts-domain-terminology-legal-001</code></h3>
+            <p><strong>Slice:</strong> <code>legal_clause_terms</code></p>
+            <p><strong>Prompt:</strong> Read this legal update with formal clarity and distinct clause boundaries.</p>
+            <p><strong>Target:</strong> The addendum supersedes section 4B, but the indemnity clause and audit provision remain unchanged.</p>
+          </article>
+          <article class="sample-card">
+            <h3><code>tts-domain-terminology-engineering-001</code></h3>
+            <p><strong>Slice:</strong> <code>engineering_terms</code></p>
+            <p><strong>Prompt:</strong> Read this engineering status note so the technical nouns do not blur together.</p>
+            <p><strong>Target:</strong> The inverter firmware passed thermal cycling, but the telemetry parser still drops checksum warnings.</p>
+          </article>
+          <article class="sample-card">
+            <h3><code>tts-domain-terminology-finance-001</code></h3>
+            <p><strong>Slice:</strong> <code>finance_terms</code></p>
+            <p><strong>Prompt:</strong> Read this finance brief with the market terms and abbreviations easy to distinguish.</p>
+            <p><strong>Target:</strong> EBITDA improved after the debt refinance, while basis-point spreads narrowed across the short-duration book.</p>
+          </article>
+          <article class="sample-card">
+            <h3><code>tts-domain-terminology-science-001</code></h3>
+            <p><strong>Slice:</strong> <code>science_terms</code></p>
+            <p><strong>Prompt:</strong> Read this science summary with careful pronunciation of the specialized terms.</p>
+            <p><strong>Target:</strong> The perovskite sample showed photoluminescence quenching after the polymer electrolyte was added.</p>
+          </article>
+        </div>
+      </details>
     </section>
 
     <h2>Model Leaderboard</h2>
@@ -976,7 +1011,7 @@
           <td data-label="Rank">1</td>
           <td data-label="Model"><code>mlx-community/chatterbox-turbo-6bit</code></td>
           <td data-label="Avg">91.2</td>
-          <td data-label="Accurate">62 / 70</td>
+          <td data-label="Accurate">66 / 75</td>
           <td data-label="Weakest Category"><code>information_tuning</code> avg 84.5</td>
           <td data-label="Likely Fix Focus">number clarity, pauses around dense facts</td>
         </tr>
@@ -984,7 +1019,7 @@
           <td data-label="Rank">2</td>
           <td data-label="Model"><code>mlx-community/Kokoro-82M-4bit</code></td>
           <td data-label="Avg">88.6</td>
-          <td data-label="Accurate">56 / 70</td>
+          <td data-label="Accurate">60 / 75</td>
           <td data-label="Weakest Category"><code>speech_steerability</code> avg 80.8</td>
           <td data-label="Likely Fix Focus">style control, emphasis, pacing</td>
         </tr>
@@ -992,7 +1027,7 @@
           <td data-label="Rank">3</td>
           <td data-label="Model"><code>mlx-community/Qwen3-TTS-12Hz-0.6B-Base-4bit</code></td>
           <td data-label="Avg">84.7</td>
-          <td data-label="Accurate">43 / 70</td>
+          <td data-label="Accurate">46 / 75</td>
           <td data-label="Weakest Category"><code>paralinguistics</code> avg 77.0</td>
           <td data-label="Likely Fix Focus">emotion rendering, natural prosody</td>
         </tr>
@@ -1027,12 +1062,13 @@
         <p><code>spontaneous_conversation</code><br>avg 83.8 / n 5 / 75-91</p>
         <p><code>affective_transitions</code><br>avg 84.6 / n 5 / 76-92</p>
         <p><code>punctuation_prosody</code><br>avg 86.0 / n 5 / 78-93</p>
+        <p><code>domain_terminology</code><br>avg 85.4 / n 5 / 77-92</p>
       </div>
       <div class="panel">
         <h3>Scores By Model</h3>
-        <p><code>mlx-community/chatterbox-turbo-6bit</code><br>avg 90.5 / n 70 / 78-97</p>
-        <p><code>mlx-community/Kokoro-82M-4bit</code><br>avg 87.8 / n 70 / 74-95</p>
-        <p><code>mlx-community/Qwen3-TTS-12Hz-0.6B-Base-4bit</code><br>avg 84.1 / n 70 / 70-93</p>
+        <p><code>mlx-community/chatterbox-turbo-6bit</code><br>avg 90.5 / n 75 / 78-97</p>
+        <p><code>mlx-community/Kokoro-82M-4bit</code><br>avg 87.8 / n 75 / 74-95</p>
+        <p><code>mlx-community/Qwen3-TTS-12Hz-0.6B-Base-4bit</code><br>avg 84.1 / n 75 / 70-93</p>
       </div>
       <div class="panel">
         <h3>Scores By Voice</h3>
@@ -1178,17 +1214,17 @@
         <tr>
           <td data-label="Compared Model"><code>mlx-community/Kokoro-82M-4bit</code></td>
           <td data-label="Baseline"><code>mlx-community/chatterbox-turbo-6bit</code></td>
-          <td data-label="Matched Cases">70</td>
+          <td data-label="Matched Cases">75</td>
           <td data-label="Avg Delta">-2.6</td>
-          <td data-label="Wins / Ties / Losses">12 / 9 / 49</td>
+          <td data-label="Wins / Ties / Losses">13 / 10 / 52</td>
           <td data-label="Largest Regressions">speech pace and emphasis cases where style control trails the baseline.</td>
         </tr>
         <tr>
           <td data-label="Compared Model"><code>mlx-community/Qwen3-TTS-12Hz-0.6B-Base-4bit</code></td>
           <td data-label="Baseline"><code>mlx-community/chatterbox-turbo-6bit</code></td>
-          <td data-label="Matched Cases">70</td>
+          <td data-label="Matched Cases">75</td>
           <td data-label="Avg Delta">-6.5</td>
-          <td data-label="Wins / Ties / Losses">7 / 5 / 58</td>
+          <td data-label="Wins / Ties / Losses">8 / 6 / 61</td>
           <td data-label="Largest Regressions">emotion and dense-fact cases with lower naturalness or intelligibility.</td>
         </tr>
       </tbody>
@@ -1212,7 +1248,7 @@
       </div>
       <div class="panel">
         <h3>Synthesis Model</h3>
-        <p><code>mlx-community/Qwen3-TTS-12Hz-0.6B-Base-4bit</code><br>avg 84.1 / n 70 / range 70-93</p>
+        <p><code>mlx-community/Qwen3-TTS-12Hz-0.6B-Base-4bit</code><br>avg 84.1 / n 75 / range 70-93</p>
         <p class="muted">Compare model-level weak spots before changing prompts, voices, wrappers, or model settings.</p>
       </div>
     </section>
