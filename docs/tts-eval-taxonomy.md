@@ -135,10 +135,13 @@ runs can map private prompts into the same categories without copying private ro
 - `dialogue_act_prosody`: confirmations, clarifying questions, apologies with repair actions,
   offers, and bounded deferrals where prosody must preserve the intended speech act rather than
   flattening it into a generic assistant sentence.
+- `address_wayfinding_delivery`: street addresses, apartment entry details, intersections, campus
+  rooms, and emergency access points where numbers, names, alphanumeric units, landmarks, and
+  access conditions must be chunked clearly enough for first-listen transcription.
 
 ## Manifest Contract
 
-The public comparison manifest is intentionally balanced at 230 cases for now: 46 categories with 5
+The public comparison manifest is intentionally balanced at 235 cases for now: 47 categories with 5
 cases each. Expansion should add complete five-case category batches before deepening existing
 categories.
 

@@ -364,6 +364,14 @@
           <option value="contextual_abbreviation_expansion">Contextual abbreviation expansion</option>
           <option value="noise_resilience_delivery">Noise resilience delivery</option>
           <option value="audience_register_adaptation">Audience register adaptation</option>
+          <option value="uncertainty_calibration_delivery">Uncertainty calibration delivery</option>
+          <option value="real_time_streaming_delivery">Real-time streaming delivery</option>
+          <option value="numeric_identifier_delivery">Numeric identifier delivery</option>
+          <option value="sentence_boundary_inference">Sentence boundary inference</option>
+          <option value="cross_lingual_name_pronunciation">Cross-lingual name pronunciation</option>
+          <option value="speech_mode_stability">Speech mode stability</option>
+          <option value="dialogue_act_prosody">Dialogue act prosody</option>
+          <option value="address_wayfinding_delivery">Address wayfinding delivery</option>
         </select>
         <select id="label-filter" aria-label="Filter by label">
           <option value="">All labels</option>
@@ -408,7 +416,7 @@
   --cases examples/tts_multiturn_cases.jsonl \
   --judge-provider gemini \
   --judge-samples 3 \
-  --limit 225 \
+  --limit 235 \
   --out runs/leaderboard/chatterbox</code></pre>
 
     <pre><code>oaj autojudge-local-tts \
@@ -417,7 +425,7 @@
   --cases examples/tts_multiturn_cases.jsonl \
   --judge-provider gemini \
   --judge-samples 3 \
-  --limit 225 \
+  --limit 235 \
   --out runs/leaderboard/kokoro</code></pre>
 
     <pre><code>oaj autojudge-local-tts \
@@ -426,7 +434,7 @@
   --cases examples/tts_multiturn_cases.jsonl \
   --judge-provider gemini \
   --judge-samples 3 \
-  --limit 225 \
+  --limit 235 \
   --out runs/leaderboard/qwen3-tts</code></pre>
 
     <p>
@@ -438,7 +446,7 @@
   --cases examples/tts_multiturn_cases.jsonl \
   --judge-provider gemini \
   --judge-samples 3 \
-  --limit 225 \
+  --limit 235 \
   --out runs/leaderboard/chatterbox</code></pre>
 
     <p>
@@ -483,16 +491,16 @@
     <h2>Sample Report Preview</h2>
     <section class="grid" aria-label="Sample report metrics">
       <div class="metric"><span>Models</span><strong>3</strong></div>
-      <div class="metric"><span>Shared Eval Cases</span><strong>225</strong></div>
+      <div class="metric"><span>Shared Eval Cases</span><strong>235</strong></div>
       <div class="metric"><span>Judge Samples</span><strong>3x</strong></div>
       <div class="metric"><span>Top Avg</span><strong>91.2</strong></div>
       <div class="metric"><span>Lowest Avg</span><strong>84.7</strong></div>
-      <div class="metric"><span>Total Judgments</span><strong>2025</strong></div>
+      <div class="metric"><span>Total Judgments</span><strong>2115</strong></div>
     </section>
 
     <h2>Eval Set Samples</h2>
     <p>
-      The public demo eval set contains 230 synthetic, public-safe cases grouped into research-backed
+      The public demo eval set contains 235 synthetic, public-safe cases grouped into research-backed
       TTS dimensions. Each category below contributes five shared cases that every model synthesizes
       before Gemini judges the generated audio.
     </p>
@@ -2104,6 +2112,41 @@
             <p><strong>Slice:</strong> <code>bounded_deferral_next_step</code></p>
             <p><strong>Prompt:</strong> Read this as a bounded deferral with a clear next step, not as a refusal or guarantee.</p>
             <p><strong>Target:</strong> I cannot confirm the final price yet, but I can hold the estimate until the vendor replies.</p>
+          </article>
+        </div>
+      </details>
+      <details class="sample-group" data-category="address_wayfinding_delivery">
+        <summary><span>Address Wayfinding Delivery</span><strong>5 cases</strong></summary>
+        <div class="sample-list">
+          <article class="sample-card">
+            <h3><code>tts-address-wayfinding-delivery-street-suite-001</code></h3>
+            <p><strong>Slice:</strong> <code>street_number_suite_boundary</code></p>
+            <p><strong>Prompt:</strong> Read this delivery address so the street number, street name, and suite are easy to transcribe.</p>
+            <p><strong>Target:</strong> Deliver the kit to 1480 North Harbor Avenue, Suite 305, before the loading desk closes.</p>
+          </article>
+          <article class="sample-card">
+            <h3><code>tts-address-wayfinding-delivery-apartment-entry-001</code></h3>
+            <p><strong>Slice:</strong> <code>apartment_unit_gate_code_sequence</code></p>
+            <p><strong>Prompt:</strong> Read this apartment entry instruction with the building, unit, gate code, and timing clearly separated.</p>
+            <p><strong>Target:</strong> Use Building C, Apartment 4B, then enter gate code 9021 after the second chime.</p>
+          </article>
+          <article class="sample-card">
+            <h3><code>tts-address-wayfinding-delivery-intersection-001</code></h3>
+            <p><strong>Slice:</strong> <code>intersection_side_of_street_pickup</code></p>
+            <p><strong>Prompt:</strong> Read this pickup point so the intersection and side-of-street instruction do not blur together.</p>
+            <p><strong>Target:</strong> Meet at Pine Street and Seventh Avenue, on the library side, beside the red pickup sign.</p>
+          </article>
+          <article class="sample-card">
+            <h3><code>tts-address-wayfinding-delivery-campus-room-001</code></h3>
+            <p><strong>Slice:</strong> <code>building_room_alphanumeric_wayfinding</code></p>
+            <p><strong>Prompt:</strong> Read this campus wayfinding update with the building abbreviation and room number understandable on first listen.</p>
+            <p><strong>Target:</strong> The workshop moved to Hall B, Room 12A, across from the east stairwell.</p>
+          </article>
+          <article class="sample-card">
+            <h3><code>tts-address-wayfinding-delivery-emergency-access-001</code></h3>
+            <p><strong>Slice:</strong> <code>emergency_gate_lane_clearance</code></p>
+            <p><strong>Prompt:</strong> Read this emergency access instruction with composed urgency and exact location wording.</p>
+            <p><strong>Target:</strong> Send the responder to Gate 6, service lane D, and keep the south driveway clear.</p>
           </article>
         </div>
       </details>
