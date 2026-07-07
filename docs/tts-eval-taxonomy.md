@@ -157,10 +157,13 @@ runs can map private prompts into the same categories without copying private ro
 - `priority_escalation_delivery`: critical alerts, severity labels, triage priority, alert
   downgrades, escalation owners, and deadlines where urgency must be calibrated while preserving
   exact action, owner, and condition details.
+- `contrastive_pair_delivery`: A/B options, before/after metrics, left/right visual states,
+  positive/negative controls, and safe/destructive action pairs where prosody must keep both sides
+  balanced, distinct, and exactly attached to their labels.
 
 ## Manifest Contract
 
-The public comparison manifest is intentionally balanced at 265 cases for now: 53 categories with 5
+The public comparison manifest is intentionally balanced at 270 cases for now: 54 categories with 5
 cases each. Expansion should add complete five-case category batches before deepening existing
 categories.
 

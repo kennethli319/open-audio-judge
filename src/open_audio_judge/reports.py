@@ -966,6 +966,14 @@ TTS_CATEGORY_GUIDANCE = {
             "escalation owner/deadline emphasis",
         ],
     ),
+    "contrastive_pair_delivery": (
+        "A/B options, before/after metrics, left/right states, and positive/negative action pairs",
+        [
+            "contrastive emphasis control",
+            "paired-label phrase grouping",
+            "balanced option and outcome prosody",
+        ],
+    ),
 }
 
 
