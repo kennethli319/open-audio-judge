@@ -192,10 +192,13 @@ runs can map private prompts into the same categories without copying private ro
 - `spatial_relation_delivery`: above/below, inside/outside, left/right, behind/in front, and
   under/over relations where prosody must keep spatial words, objects, and rejected alternatives
   attached to the correct location.
+- `homograph_number_format_delivery`: versions versus decimals, room numbers versus extensions,
+  slash dates versus ratios, hash versus pound symbols, and filename suffixes versus semantic
+  versions where context must choose the right spoken normalization.
 
 ## Manifest Contract
 
-The public comparison manifest is intentionally balanced at 325 cases for now: 65 categories with 5
+The public comparison manifest is intentionally balanced at 330 cases for now: 66 categories with 5
 cases each. Expansion should add complete five-case category batches before deepening existing
 categories.
 

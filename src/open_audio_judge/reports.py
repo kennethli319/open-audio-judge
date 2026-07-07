@@ -1062,6 +1062,14 @@ TTS_CATEGORY_GUIDANCE = {
             "contrastive spatial relation intelligibility",
         ],
     ),
+    "homograph_number_format_delivery": (
+        "versions versus decimals, room numbers versus extensions, slash dates versus ratios, hash/pound symbols, and filename/version strings",
+        [
+            "context-sensitive text normalization",
+            "numeric-format chunking",
+            "symbol and version disambiguation prosody",
+        ],
+    ),
 }
 
 
