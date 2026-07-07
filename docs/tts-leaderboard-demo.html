@@ -112,6 +112,44 @@
       border-radius: 8px;
       padding: 12px;
     }
+    .sample-groups {
+      display: grid;
+      gap: 10px;
+    }
+    .sample-group {
+      background: var(--panel);
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      overflow: hidden;
+    }
+    .sample-group summary {
+      align-items: center;
+      cursor: pointer;
+      display: flex;
+      justify-content: space-between;
+      gap: 12px;
+      padding: 13px 16px;
+    }
+    .sample-group summary strong {
+      color: var(--muted);
+      font-size: 13px;
+      white-space: nowrap;
+    }
+    .sample-list {
+      border-top: 1px solid var(--line);
+      display: grid;
+      gap: 0;
+    }
+    .sample-card {
+      border-bottom: 1px solid var(--line);
+      padding: 14px 16px;
+    }
+    .sample-card:last-child {
+      border-bottom: 0;
+    }
+    .sample-card p {
+      margin-bottom: 8px;
+    }
     .scorebar {
       background: #e8edf2;
       border-radius: 999px;
@@ -306,6 +344,330 @@
       <div class="metric"><span>Top Avg</span><strong>91.2</strong></div>
       <div class="metric"><span>Lowest Avg</span><strong>84.7</strong></div>
       <div class="metric"><span>Total Judgments</span><strong>405</strong></div>
+    </section>
+
+    <h2>Eval Set Samples</h2>
+    <p>
+      The public demo eval set contains 45 synthetic, public-safe cases grouped into research-backed
+      TTS dimensions. Each category below contributes five shared cases that every model synthesizes
+      before Gemini judges the generated audio.
+    </p>
+    <section class="sample-groups" aria-label="Eval set samples">
+      <details class="sample-group" open>
+        <summary><span>Paralinguistics</span><strong>5 cases</strong></summary>
+        <div class="sample-list">
+          <article class="sample-card">
+            <h3><code>tts-paralinguistics-reassurance-001</code></h3>
+            <p><strong>Slice:</strong> <code>emotion_reassurance</code></p>
+            <p><strong>Prompt:</strong> Read this as a calm, reassuring assistant after a user reports a stressful day.</p>
+            <p><strong>Target:</strong> Take a slow breath with me. You handled a lot today, and we can take the next step one at a time.</p>
+          </article>
+          <article class="sample-card">
+            <h3><code>tts-paralinguistics-excitement-001</code></h3>
+            <p><strong>Slice:</strong> <code>emotion_excitement</code></p>
+            <p><strong>Prompt:</strong> Read this with bright excitement, but keep it intelligible and not shouty.</p>
+            <p><strong>Target:</strong> Great news, the prototype passed every smoke test, and the demo is ready for the morning review.</p>
+          </article>
+          <article class="sample-card">
+            <h3><code>tts-paralinguistics-urgency-001</code></h3>
+            <p><strong>Slice:</strong> <code>emotion_urgency</code></p>
+            <p><strong>Prompt:</strong> Read this as urgent but composed operations guidance.</p>
+            <p><strong>Target:</strong> Please leave the lab through the north door now, and meet the safety lead by the blue sign.</p>
+          </article>
+          <article class="sample-card">
+            <h3><code>tts-paralinguistics-uncertainty-001</code></h3>
+            <p><strong>Slice:</strong> <code>emotion_uncertainty</code></p>
+            <p><strong>Prompt:</strong> Read this with polite uncertainty, as if confirming a tentative answer.</p>
+            <p><strong>Target:</strong> I think the meeting moved to room four twelve, but I should confirm before you walk over.</p>
+          </article>
+          <article class="sample-card">
+            <h3><code>tts-paralinguistics-confidence-001</code></h3>
+            <p><strong>Slice:</strong> <code>emotion_confidence</code></p>
+            <p><strong>Prompt:</strong> Read this as a confident product update, warm but direct.</p>
+            <p><strong>Target:</strong> The release is stable, customer migration is complete, and support coverage is ready for launch.</p>
+          </article>
+        </div>
+      </details>
+      <details class="sample-group">
+        <summary><span>Instruction Following</span><strong>5 cases</strong></summary>
+        <div class="sample-list">
+          <article class="sample-card">
+            <h3><code>tts-instruction-following-exact-punctuation-001</code></h3>
+            <p><strong>Slice:</strong> <code>punctuation_intonation</code></p>
+            <p><strong>Prompt:</strong> Read exactly what follows, preserving the comma pause and the final question intonation.</p>
+            <p><strong>Target:</strong> Before we ship, can you check the backup, the logs, and the alert threshold?</p>
+          </article>
+          <article class="sample-card">
+            <h3><code>tts-instruction-following-spelled-token-001</code></h3>
+            <p><strong>Slice:</strong> <code>spelled_tokens</code></p>
+            <p><strong>Prompt:</strong> Read the support code clearly. Spell each letter in the code instead of turning it into a word.</p>
+            <p><strong>Target:</strong> Your support code is B Q seven four. Please repeat B Q seven four to confirm.</p>
+          </article>
+          <article class="sample-card">
+            <h3><code>tts-instruction-following-do-not-say-001</code></h3>
+            <p><strong>Slice:</strong> <code>do_not_say_constraint</code></p>
+            <p><strong>Prompt:</strong> Read only the final customer-facing sentence. Do not say the bracketed note.</p>
+            <p><strong>Target:</strong> Your refund has been approved and should appear within three business days.</p>
+          </article>
+          <article class="sample-card">
+            <h3><code>tts-instruction-following-pronunciation-001</code></h3>
+            <p><strong>Slice:</strong> <code>pronunciation_directive</code></p>
+            <p><strong>Prompt:</strong> Read the name as MAY-uh and keep the rest natural.</p>
+            <p><strong>Target:</strong> Maya will join the design review after lunch and present the updated onboarding flow.</p>
+          </article>
+          <article class="sample-card">
+            <h3><code>tts-instruction-following-emphasis-001</code></h3>
+            <p><strong>Slice:</strong> <code>word_emphasis</code></p>
+            <p><strong>Prompt:</strong> Read this sentence with emphasis on only the word final.</p>
+            <p><strong>Target:</strong> Please upload the final invoice before closing the account.</p>
+          </article>
+        </div>
+      </details>
+      <details class="sample-group">
+        <summary><span>Information Tuning</span><strong>5 cases</strong></summary>
+        <div class="sample-list">
+          <article class="sample-card">
+            <h3><code>tts-information-tuning-dense-numbers-001</code></h3>
+            <p><strong>Slice:</strong> <code>dense_numbers</code></p>
+            <p><strong>Prompt:</strong> Read this operational update so the numbers are easy to catch on first listen.</p>
+            <p><strong>Target:</strong> Revenue rose 12.4 percent to 8.6 million dollars, while churn fell from 3.1 percent to 2.7 percent.</p>
+          </article>
+          <article class="sample-card">
+            <h3><code>tts-information-tuning-steps-001</code></h3>
+            <p><strong>Slice:</strong> <code>procedural_steps</code></p>
+            <p><strong>Prompt:</strong> Read this as step-by-step setup guidance with crisp boundaries between steps.</p>
+            <p><strong>Target:</strong> First, plug in the hub. Second, wait for the blue light. Third, open the app and tap Pair new device.</p>
+          </article>
+          <article class="sample-card">
+            <h3><code>tts-information-tuning-dates-times-001</code></h3>
+            <p><strong>Slice:</strong> <code>dates_times</code></p>
+            <p><strong>Prompt:</strong> Read this calendar update so the date, time, and time zone are unmistakable.</p>
+            <p><strong>Target:</strong> The maintenance window starts Thursday, July ninth, at 10:30 PM Pacific time.</p>
+          </article>
+          <article class="sample-card">
+            <h3><code>tts-information-tuning-units-001</code></h3>
+            <p><strong>Slice:</strong> <code>units_measurements</code></p>
+            <p><strong>Prompt:</strong> Read this lab note with the units clear and separate from the values.</p>
+            <p><strong>Target:</strong> Add 2.5 milliliters of buffer, heat the sample to 37 degrees Celsius, and wait eight minutes.</p>
+          </article>
+          <article class="sample-card">
+            <h3><code>tts-information-tuning-safety-critical-001</code></h3>
+            <p><strong>Slice:</strong> <code>safety_critical_wording</code></p>
+            <p><strong>Prompt:</strong> Read this safety-critical instruction with no casual tone.</p>
+            <p><strong>Target:</strong> Do not restart the compressor until the pressure gauge reads zero and the lockout tag is removed.</p>
+          </article>
+        </div>
+      </details>
+      <details class="sample-group">
+        <summary><span>Storytelling Dialogue</span><strong>5 cases</strong></summary>
+        <div class="sample-list">
+          <article class="sample-card">
+            <h3><code>tts-storytelling-bedtime-001</code></h3>
+            <p><strong>Slice:</strong> <code>narrative_gentle</code></p>
+            <p><strong>Prompt:</strong> Read this like the opening of a gentle bedtime story.</p>
+            <p><strong>Target:</strong> At the edge of the quiet harbor, a tiny lantern blinked awake and painted a path across the water.</p>
+          </article>
+          <article class="sample-card">
+            <h3><code>tts-storytelling-suspense-001</code></h3>
+            <p><strong>Slice:</strong> <code>narrative_suspense</code></p>
+            <p><strong>Prompt:</strong> Read this short scene with light suspense, using pauses without becoming melodramatic.</p>
+            <p><strong>Target:</strong> The elevator stopped between floors. For three seconds, nobody moved. Then the emergency phone began to ring.</p>
+          </article>
+          <article class="sample-card">
+            <h3><code>tts-storytelling-character-001</code></h3>
+            <p><strong>Slice:</strong> <code>character_consistency</code></p>
+            <p><strong>Prompt:</strong> Read this as a cheerful shopkeeper greeting a regular customer.</p>
+            <p><strong>Target:</strong> Back again for the cinnamon rolls, Sam? I saved the corner piece because I know it is your favorite.</p>
+          </article>
+          <article class="sample-card">
+            <h3><code>tts-storytelling-conversational-001</code></h3>
+            <p><strong>Slice:</strong> <code>conversational_spontaneity</code></p>
+            <p><strong>Prompt:</strong> Read this like spontaneous dialogue, with natural hesitation but no filler words added.</p>
+            <p><strong>Target:</strong> I was going to take the train, but the rain stopped, so I might walk instead.</p>
+          </article>
+          <article class="sample-card">
+            <h3><code>tts-storytelling-roleplay-001</code></h3>
+            <p><strong>Slice:</strong> <code>roleplay_guide</code></p>
+            <p><strong>Prompt:</strong> Read this as a calm museum guide introducing an exhibit.</p>
+            <p><strong>Target:</strong> This small brass compass crossed two oceans before it found its way into the captain's desk.</p>
+          </article>
+        </div>
+      </details>
+      <details class="sample-group">
+        <summary><span>Speech Steerability</span><strong>5 cases</strong></summary>
+        <div class="sample-list">
+          <article class="sample-card">
+            <h3><code>tts-speech-steerability-formal-001</code></h3>
+            <p><strong>Slice:</strong> <code>formal_register</code></p>
+            <p><strong>Prompt:</strong> Read this in a formal executive briefing voice.</p>
+            <p><strong>Target:</strong> The migration remains on schedule, with the database cutover planned for Friday at 22:00 UTC.</p>
+          </article>
+          <article class="sample-card">
+            <h3><code>tts-speech-steerability-friendly-001</code></h3>
+            <p><strong>Slice:</strong> <code>friendly_register</code></p>
+            <p><strong>Prompt:</strong> Read this as a friendly neighborhood guide, casual but still clear.</p>
+            <p><strong>Target:</strong> Turn left after the bakery, walk past the little green gate, and you will see the library on the corner.</p>
+          </article>
+          <article class="sample-card">
+            <h3><code>tts-speech-steerability-slow-001</code></h3>
+            <p><strong>Slice:</strong> <code>slow_pace</code></p>
+            <p><strong>Prompt:</strong> Read this slowly enough for a beginner to follow.</p>
+            <p><strong>Target:</strong> Place the cursor at the end of the line, press return, and type the next command on a new line.</p>
+          </article>
+          <article class="sample-card">
+            <h3><code>tts-speech-steerability-volume-001</code></h3>
+            <p><strong>Slice:</strong> <code>soft_volume</code></p>
+            <p><strong>Prompt:</strong> Read this like a quiet library announcement, audible but gentle.</p>
+            <p><strong>Target:</strong> The reading room will close in ten minutes, and checked-out materials can be returned at the front desk.</p>
+          </article>
+          <article class="sample-card">
+            <h3><code>tts-speech-steerability-pitch-001</code></h3>
+            <p><strong>Slice:</strong> <code>pitch_control</code></p>
+            <p><strong>Prompt:</strong> Read this with a slightly higher, brighter pitch while staying natural.</p>
+            <p><strong>Target:</strong> Welcome to the morning workshop; coffee is ready, and the first session begins in five minutes.</p>
+          </article>
+        </div>
+      </details>
+      <details class="sample-group">
+        <summary><span>Robustness Intelligibility</span><strong>5 cases</strong></summary>
+        <div class="sample-list">
+          <article class="sample-card">
+            <h3><code>tts-robustness-intelligibility-rare-words-001</code></h3>
+            <p><strong>Slice:</strong> <code>rare_words</code></p>
+            <p><strong>Prompt:</strong> Read these rare words clearly in one fluent sentence.</p>
+            <p><strong>Target:</strong> The archivist cataloged the susurrus, the palimpsest, and the calliope in a single note.</p>
+          </article>
+          <article class="sample-card">
+            <h3><code>tts-robustness-intelligibility-acronyms-001</code></h3>
+            <p><strong>Slice:</strong> <code>acronyms</code></p>
+            <p><strong>Prompt:</strong> Read each acronym clearly without turning the sequence into a word.</p>
+            <p><strong>Target:</strong> The SLA, GPU, and API limits changed after the QA review.</p>
+          </article>
+          <article class="sample-card">
+            <h3><code>tts-robustness-intelligibility-code-like-001</code></h3>
+            <p><strong>Slice:</strong> <code>code_like_strings</code></p>
+            <p><strong>Prompt:</strong> Read this code-like string as support text, preserving symbols verbally.</p>
+            <p><strong>Target:</strong> Set retry count to three, then enter key dash alpha underscore nine in the token field.</p>
+          </article>
+          <article class="sample-card">
+            <h3><code>tts-robustness-intelligibility-long-text-001</code></h3>
+            <p><strong>Slice:</strong> <code>long_text</code></p>
+            <p><strong>Prompt:</strong> Read this longer note with steady breath control and no rushed ending.</p>
+            <p><strong>Target:</strong> After you save the draft, review the attachment list, confirm the recipient group, and schedule the message for Monday morning so the team sees it before standup.</p>
+          </article>
+          <article class="sample-card">
+            <h3><code>tts-robustness-intelligibility-multilingual-001</code></h3>
+            <p><strong>Slice:</strong> <code>multilingual_snippet</code></p>
+            <p><strong>Prompt:</strong> Read this English sentence with the short Spanish greeting clear and respectful.</p>
+            <p><strong>Target:</strong> Start the tour by saying buenos dias, then explain that the garden path is open until sunset.</p>
+          </article>
+        </div>
+      </details>
+      <details class="sample-group">
+        <summary><span>Speaker Voice Consistency</span><strong>5 cases</strong></summary>
+        <div class="sample-list">
+          <article class="sample-card">
+            <h3><code>tts-speaker-voice-consistency-persona-001</code></h3>
+            <p><strong>Slice:</strong> <code>stable_persona</code></p>
+            <p><strong>Prompt:</strong> Read this as the same calm technical mentor across both sentences.</p>
+            <p><strong>Target:</strong> You found the right log file. Now check the final warning line and compare it with the deployment note.</p>
+          </article>
+          <article class="sample-card">
+            <h3><code>tts-speaker-voice-consistency-age-cue-001</code></h3>
+            <p><strong>Slice:</strong> <code>age_role_cue</code></p>
+            <p><strong>Prompt:</strong> Read this as an experienced senior advisor, steady and measured.</p>
+            <p><strong>Target:</strong> The safest decision is to pause the rollout, review the audit trail, and restart only after the owner signs off.</p>
+          </article>
+          <article class="sample-card">
+            <h3><code>tts-speaker-voice-consistency-dialogue-001</code></h3>
+            <p><strong>Slice:</strong> <code>single_voice_dialogue</code></p>
+            <p><strong>Prompt:</strong> Read both quoted lines using one narrator voice, not two separate speakers.</p>
+            <p><strong>Target:</strong> She said the train was late, and he replied that the platform had changed.</p>
+          </article>
+          <article class="sample-card">
+            <h3><code>tts-speaker-voice-consistency-longer-001</code></h3>
+            <p><strong>Slice:</strong> <code>timbre_stability</code></p>
+            <p><strong>Prompt:</strong> Read this longer update with the same voice quality from beginning to end.</p>
+            <p><strong>Target:</strong> The pilot group finished onboarding yesterday, the second group starts on Wednesday, and the support team will collect feedback after the first week.</p>
+          </article>
+          <article class="sample-card">
+            <h3><code>tts-speaker-voice-consistency-soft-spoken-001</code></h3>
+            <p><strong>Slice:</strong> <code>soft_spoken_consistency</code></p>
+            <p><strong>Prompt:</strong> Read this as a soft-spoken support agent while keeping the voice stable.</p>
+            <p><strong>Target:</strong> I can help reset the device now, and I will stay on the line until the status light turns green.</p>
+          </article>
+        </div>
+      </details>
+      <details class="sample-group">
+        <summary><span>Multilingual Code Switching</span><strong>5 cases</strong></summary>
+        <div class="sample-list">
+          <article class="sample-card">
+            <h3><code>tts-multilingual-code-switching-spanish-001</code></h3>
+            <p><strong>Slice:</strong> <code>spanish_phrase</code></p>
+            <p><strong>Prompt:</strong> Read the English sentence with the Spanish phrase clear and natural.</p>
+            <p><strong>Target:</strong> Please tell the group gracias por venir, then invite everyone to take a seat.</p>
+          </article>
+          <article class="sample-card">
+            <h3><code>tts-multilingual-code-switching-french-001</code></h3>
+            <p><strong>Slice:</strong> <code>french_phrase</code></p>
+            <p><strong>Prompt:</strong> Read this with a clear French phrase inside the English sentence.</p>
+            <p><strong>Target:</strong> The guide pointed to the small cafe and said bon appetit before the tasting began.</p>
+          </article>
+          <article class="sample-card">
+            <h3><code>tts-multilingual-code-switching-names-001</code></h3>
+            <p><strong>Slice:</strong> <code>international_names</code></p>
+            <p><strong>Prompt:</strong> Read the international names carefully without flattening them into English-only sounds.</p>
+            <p><strong>Target:</strong> Aiko, Saoirse, and Joaquin will review the agenda before the workshop starts.</p>
+          </article>
+          <article class="sample-card">
+            <h3><code>tts-multilingual-code-switching-loanwords-001</code></h3>
+            <p><strong>Slice:</strong> <code>loanwords</code></p>
+            <p><strong>Prompt:</strong> Read the borrowed words naturally inside the English sentence.</p>
+            <p><strong>Target:</strong> The menu includes ramen, croissants, and tacos, so please ask about allergies before ordering.</p>
+          </article>
+          <article class="sample-card">
+            <h3><code>tts-multilingual-code-switching-bilingual-direction-001</code></h3>
+            <p><strong>Slice:</strong> <code>bilingual_announcement</code></p>
+            <p><strong>Prompt:</strong> Read this bilingual direction clearly for a public announcement.</p>
+            <p><strong>Target:</strong> Boarding is now open at gate five; pasajeros con ninos may come forward first.</p>
+          </article>
+        </div>
+      </details>
+      <details class="sample-group">
+        <summary><span>Long Form Discourse</span><strong>5 cases</strong></summary>
+        <div class="sample-list">
+          <article class="sample-card">
+            <h3><code>tts-long-form-discourse-paragraph-001</code></h3>
+            <p><strong>Slice:</strong> <code>paragraph_flow</code></p>
+            <p><strong>Prompt:</strong> Read this paragraph with stable pacing and clear paragraph-level flow.</p>
+            <p><strong>Target:</strong> The new dashboard will launch in stages. First, managers will see daily summaries. Next, analysts will receive export tools. Finally, the support team will add notes from customer calls.</p>
+          </article>
+          <article class="sample-card">
+            <h3><code>tts-long-form-discourse-list-001</code></h3>
+            <p><strong>Slice:</strong> <code>list_structure</code></p>
+            <p><strong>Prompt:</strong> Read this list as a coherent update, not disconnected fragments.</p>
+            <p><strong>Target:</strong> Three items changed this week: the intake form is shorter, the approval email is clearer, and the archive link now opens in a new tab.</p>
+          </article>
+          <article class="sample-card">
+            <h3><code>tts-long-form-discourse-parenthetical-001</code></h3>
+            <p><strong>Slice:</strong> <code>parenthetical_aside</code></p>
+            <p><strong>Prompt:</strong> Read this with the parenthetical aside lighter than the main message.</p>
+            <p><strong>Target:</strong> The backup finished at midnight, the checksum matched, and the archive, which is stored in cold storage, is ready for audit.</p>
+          </article>
+          <article class="sample-card">
+            <h3><code>tts-long-form-discourse-topic-shift-001</code></h3>
+            <p><strong>Slice:</strong> <code>topic_transition</code></p>
+            <p><strong>Prompt:</strong> Read this with a natural shift from problem to resolution.</p>
+            <p><strong>Target:</strong> The first import failed because the file header was missing. After the team regenerated the export, the second import completed without warnings.</p>
+          </article>
+          <article class="sample-card">
+            <h3><code>tts-long-form-discourse-endurance-001</code></h3>
+            <p><strong>Slice:</strong> <code>endurance_long_sentence</code></p>
+            <p><strong>Prompt:</strong> Read this longer sentence without fading, clipping, or rushing the ending.</p>
+            <p><strong>Target:</strong> Before the training starts, confirm that the projector is connected, the captions are enabled, the microphone is charged, and the remote attendees can hear the room clearly.</p>
+          </article>
+        </div>
+      </details>
     </section>
 
     <h2>Model Leaderboard</h2>

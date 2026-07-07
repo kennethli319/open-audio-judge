@@ -28,6 +28,15 @@ def test_tts_leaderboard_demo_page_documents_workflow() -> None:
         "judge-report/results.jsonl",
         "judge-report/report.html",
         "Sample Report Preview",
+        "Eval Set Samples",
+        "The public demo eval set contains 45 synthetic, public-safe cases",
+        "Paralinguistics",
+        "Instruction Following",
+        "Speaker Voice Consistency",
+        "tts-paralinguistics-reassurance-001",
+        "tts-information-tuning-dense-numbers-001",
+        "tts-multilingual-code-switching-bilingual-direction-001",
+        "tts-long-form-discourse-endurance-001",
         "Model Leaderboard",
         "Category Leaderboard",
         "no error: 104",
@@ -81,6 +90,20 @@ def test_tts_multiturn_examples_cover_requested_categories() -> None:
     assert all(record["metadata"]["style_prompt"] for record in records)
     assert all(record["metadata"]["expected_style"] for record in records)
     assert all(record["metadata"]["expected_instruction"] for record in records)
+
+
+def test_tts_leaderboard_demo_lists_every_eval_case() -> None:
+    html = Path("docs/tts-leaderboard-demo.html").read_text(encoding="utf-8")
+    records = [
+        json.loads(line)
+        for line in Path("examples/tts_multiturn_cases.jsonl").read_text(encoding="utf-8").splitlines()
+        if line.strip()
+    ]
+
+    for record in records:
+        assert record["id"] in html
+        assert record["metadata"]["tts_slice"] in html
+        assert record["reference_text"] in html
 
 
 def test_readme_links_chatterbox_gemini_sample_page() -> None:
