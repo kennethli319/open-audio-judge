@@ -88,10 +88,13 @@ runs can map private prompts into the same categories without copying private ro
 - `lexical_stress_disambiguation`: part-of-speech stress shifts such as record/record,
   permit/permit, project/project, object/object, and conduct/conduct where pronunciation should
   follow sentence meaning without awkward overpronunciation.
+- `pragmatic_intent_delivery`: speech-act intent such as polite refusal, gentle suggestion, firm
+  deadline reminder, supportive boundary-setting, and invitation with opt-out where prosody should
+  preserve intent beyond literal words.
 
 ## Manifest Contract
 
-The public comparison manifest is intentionally balanced at 145 cases for now: 29 categories with 5
+The public comparison manifest is intentionally balanced at 150 cases for now: 30 categories with 5
 cases each. Expansion should add complete five-case category batches before deepening existing
 categories.
 

@@ -398,7 +398,7 @@
   --cases examples/tts_multiturn_cases.jsonl \
   --judge-provider gemini \
   --judge-samples 3 \
-  --limit 145 \
+  --limit 150 \
   --out runs/leaderboard/chatterbox</code></pre>
 
     <pre><code>oaj autojudge-local-tts \
@@ -407,7 +407,7 @@
   --cases examples/tts_multiturn_cases.jsonl \
   --judge-provider gemini \
   --judge-samples 3 \
-  --limit 145 \
+  --limit 150 \
   --out runs/leaderboard/kokoro</code></pre>
 
     <pre><code>oaj autojudge-local-tts \
@@ -416,7 +416,7 @@
   --cases examples/tts_multiturn_cases.jsonl \
   --judge-provider gemini \
   --judge-samples 3 \
-  --limit 145 \
+  --limit 150 \
   --out runs/leaderboard/qwen3-tts</code></pre>
 
     <p>
@@ -428,7 +428,7 @@
   --cases examples/tts_multiturn_cases.jsonl \
   --judge-provider gemini \
   --judge-samples 3 \
-  --limit 145 \
+  --limit 150 \
   --out runs/leaderboard/chatterbox</code></pre>
 
     <p>
@@ -473,16 +473,16 @@
     <h2>Sample Report Preview</h2>
     <section class="grid" aria-label="Sample report metrics">
       <div class="metric"><span>Models</span><strong>3</strong></div>
-      <div class="metric"><span>Shared Eval Cases</span><strong>145</strong></div>
+      <div class="metric"><span>Shared Eval Cases</span><strong>150</strong></div>
       <div class="metric"><span>Judge Samples</span><strong>3x</strong></div>
       <div class="metric"><span>Top Avg</span><strong>91.2</strong></div>
       <div class="metric"><span>Lowest Avg</span><strong>84.7</strong></div>
-      <div class="metric"><span>Total Judgments</span><strong>1305</strong></div>
+      <div class="metric"><span>Total Judgments</span><strong>1350</strong></div>
     </section>
 
     <h2>Eval Set Samples</h2>
     <p>
-      The public demo eval set contains 145 synthetic, public-safe cases grouped into research-backed
+      The public demo eval set contains 150 synthetic, public-safe cases grouped into research-backed
       TTS dimensions. Each category below contributes five shared cases that every model synthesizes
       before Gemini judges the generated audio.
     </p>
@@ -1502,6 +1502,41 @@
           </article>
         </div>
       </details>
+      <details class="sample-group" data-category="pragmatic_intent_delivery">
+        <summary><span>Pragmatic Intent Delivery</span><strong>5 cases</strong></summary>
+        <div class="sample-list">
+          <article class="sample-card">
+            <h3><code>tts-pragmatic-intent-delivery-pol-refusal-001</code></h3>
+            <p><strong>Slice:</strong> <code>polite_refusal_with_alternative</code></p>
+            <p><strong>Prompt:</strong> Read this as a polite refusal that stays warm, not apologetic or harsh.</p>
+            <p><strong>Target:</strong> I cannot approve the refund today, but I can escalate the case for a manager review.</p>
+          </article>
+          <article class="sample-card">
+            <h3><code>tts-pragmatic-intent-delivery-soft-suggestion-001</code></h3>
+            <p><strong>Slice:</strong> <code>gentle_suggestion_not_command</code></p>
+            <p><strong>Prompt:</strong> Read this as a gentle suggestion, not a command.</p>
+            <p><strong>Target:</strong> You might try restarting the router first, then check whether the status light turns blue.</p>
+          </article>
+          <article class="sample-card">
+            <h3><code>tts-pragmatic-intent-delivery-deadline-reminder-001</code></h3>
+            <p><strong>Slice:</strong> <code>firm_deadline_consequence</code></p>
+            <p><strong>Prompt:</strong> Read this as a firm deadline reminder without sounding angry.</p>
+            <p><strong>Target:</strong> The form is due by 5 PM today, and late submissions move to next week's review queue.</p>
+          </article>
+          <article class="sample-card">
+            <h3><code>tts-pragmatic-intent-delivery-reassuring-boundary-001</code></h3>
+            <p><strong>Slice:</strong> <code>supportive_boundary_privacy</code></p>
+            <p><strong>Prompt:</strong> Read this as reassuring boundary-setting, supportive but exact.</p>
+            <p><strong>Target:</strong> I can stay with you through the setup, but I cannot access your private recovery key.</p>
+          </article>
+          <article class="sample-card">
+            <h3><code>tts-pragmatic-intent-delivery-invitation-001</code></h3>
+            <p><strong>Slice:</strong> <code>invitation_with_opt_out</code></p>
+            <p><strong>Prompt:</strong> Read this as an invitation with a clear option to decline, not as pressure.</p>
+            <p><strong>Target:</strong> You are welcome to join the pilot group, or you can wait for the general release next month.</p>
+          </article>
+        </div>
+      </details>
     </section>
 
     <h2>Model Leaderboard</h2>
@@ -1521,7 +1556,7 @@
           <td data-label="Rank">1</td>
           <td data-label="Model"><code>mlx-community/chatterbox-turbo-6bit</code></td>
           <td data-label="Avg">91.2</td>
-          <td data-label="Accurate">92 / 145</td>
+          <td data-label="Accurate">95 / 150</td>
           <td data-label="Weakest Category"><code>information_tuning</code> avg 84.5</td>
           <td data-label="Likely Fix Focus">number clarity, pauses around dense facts</td>
         </tr>
@@ -1529,7 +1564,7 @@
           <td data-label="Rank">2</td>
           <td data-label="Model"><code>mlx-community/Kokoro-82M-4bit</code></td>
           <td data-label="Avg">88.6</td>
-          <td data-label="Accurate">85 / 145</td>
+          <td data-label="Accurate">88 / 150</td>
           <td data-label="Weakest Category"><code>speech_steerability</code> avg 80.8</td>
           <td data-label="Likely Fix Focus">style control, emphasis, pacing</td>
         </tr>
@@ -1537,7 +1572,7 @@
           <td data-label="Rank">3</td>
           <td data-label="Model"><code>mlx-community/Qwen3-TTS-12Hz-0.6B-Base-4bit</code></td>
           <td data-label="Avg">84.7</td>
-          <td data-label="Accurate">63 / 145</td>
+          <td data-label="Accurate">65 / 150</td>
           <td data-label="Weakest Category"><code>paralinguistics</code> avg 77.0</td>
           <td data-label="Likely Fix Focus">emotion rendering, natural prosody</td>
         </tr>
@@ -1585,12 +1620,15 @@
         <p><code>dialogue_turn_management</code><br>avg 86.2 / n 5 / 78-94</p>
         <p><code>compositional_style_control</code><br>avg 83.8 / n 5 / 74-92</p>
         <p><code>named_entity_pronunciation</code><br>avg 84.2 / n 5 / 73-93</p>
+        <p><code>disfluency_repair_control</code><br>avg 84.6 / n 5 / 75-92</p>
+        <p><code>lexical_stress_disambiguation</code><br>avg 84.3 / n 5 / 74-92</p>
+        <p><code>pragmatic_intent_delivery</code><br>avg 84.8 / n 5 / 75-93</p>
       </div>
       <div class="panel">
         <h3>Scores By Model</h3>
-        <p><code>mlx-community/chatterbox-turbo-6bit</code><br>avg 90.1 / n 145 / 78-97</p>
-        <p><code>mlx-community/Kokoro-82M-4bit</code><br>avg 87.2 / n 145 / 73-95</p>
-        <p><code>mlx-community/Qwen3-TTS-12Hz-0.6B-Base-4bit</code><br>avg 83.6 / n 145 / 70-93</p>
+        <p><code>mlx-community/chatterbox-turbo-6bit</code><br>avg 90.1 / n 150 / 78-97</p>
+        <p><code>mlx-community/Kokoro-82M-4bit</code><br>avg 87.2 / n 150 / 73-95</p>
+        <p><code>mlx-community/Qwen3-TTS-12Hz-0.6B-Base-4bit</code><br>avg 83.6 / n 150 / 70-93</p>
       </div>
       <div class="panel">
         <h3>Scores By Voice</h3>
@@ -1771,7 +1809,7 @@
         <tr>
           <td data-label="Compared Model"><code>mlx-community/Kokoro-82M-4bit</code></td>
           <td data-label="Baseline"><code>mlx-community/chatterbox-turbo-6bit</code></td>
-          <td data-label="Matched Cases">145</td>
+          <td data-label="Matched Cases">150</td>
           <td data-label="Avg Delta">-2.6</td>
           <td data-label="Wins / Ties / Losses">22 / 16 / 92</td>
           <td data-label="Largest Regressions">speech pace and emphasis cases where style control trails the baseline.</td>
@@ -1779,7 +1817,7 @@
         <tr>
           <td data-label="Compared Model"><code>mlx-community/Qwen3-TTS-12Hz-0.6B-Base-4bit</code></td>
           <td data-label="Baseline"><code>mlx-community/chatterbox-turbo-6bit</code></td>
-          <td data-label="Matched Cases">145</td>
+          <td data-label="Matched Cases">150</td>
           <td data-label="Avg Delta">-6.5</td>
           <td data-label="Wins / Ties / Losses">14 / 12 / 104</td>
           <td data-label="Largest Regressions">emotion and dense-fact cases with lower naturalness or intelligibility.</td>
@@ -1805,7 +1843,7 @@
       </div>
       <div class="panel">
         <h3>Synthesis Model</h3>
-        <p><code>mlx-community/Qwen3-TTS-12Hz-0.6B-Base-4bit</code><br>avg 83.6 / n 145 / range 70-93</p>
+        <p><code>mlx-community/Qwen3-TTS-12Hz-0.6B-Base-4bit</code><br>avg 83.6 / n 150 / range 70-93</p>
         <p class="muted">Compare model-level weak spots before changing prompts, voices, wrappers, or model settings.</p>
       </div>
     </section>
