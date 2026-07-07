@@ -379,6 +379,7 @@
           <option value="conditional_logic_delivery">Conditional logic delivery</option>
           <option value="priority_escalation_delivery">Priority escalation delivery</option>
           <option value="contrastive_pair_delivery">Contrastive pair delivery</option>
+          <option value="statistical_notation_delivery">Statistical notation delivery</option>
         </select>
         <select id="label-filter" aria-label="Filter by label">
           <option value="">All labels</option>
@@ -423,7 +424,7 @@
   --cases examples/tts_multiturn_cases.jsonl \
   --judge-provider gemini \
   --judge-samples 3 \
-  --limit 270 \
+  --limit 275 \
   --out runs/leaderboard/chatterbox</code></pre>
 
     <pre><code>oaj autojudge-local-tts \
@@ -432,7 +433,7 @@
   --cases examples/tts_multiturn_cases.jsonl \
   --judge-provider gemini \
   --judge-samples 3 \
-  --limit 270 \
+  --limit 275 \
   --out runs/leaderboard/kokoro</code></pre>
 
     <pre><code>oaj autojudge-local-tts \
@@ -441,7 +442,7 @@
   --cases examples/tts_multiturn_cases.jsonl \
   --judge-provider gemini \
   --judge-samples 3 \
-  --limit 270 \
+  --limit 275 \
   --out runs/leaderboard/qwen3-tts</code></pre>
 
     <p>
@@ -453,7 +454,7 @@
   --cases examples/tts_multiturn_cases.jsonl \
   --judge-provider gemini \
   --judge-samples 3 \
-  --limit 270 \
+  --limit 275 \
   --out runs/leaderboard/chatterbox</code></pre>
 
     <p>
@@ -498,7 +499,7 @@
     <h2>Sample Report Preview</h2>
     <section class="grid" aria-label="Sample report metrics">
       <div class="metric"><span>Models</span><strong>3</strong></div>
-      <div class="metric"><span>Shared Eval Cases</span><strong>270</strong></div>
+      <div class="metric"><span>Shared Eval Cases</span><strong>275</strong></div>
       <div class="metric"><span>Judge Samples</span><strong>3x</strong></div>
       <div class="metric"><span>Top Avg</span><strong>91.2</strong></div>
       <div class="metric"><span>Lowest Avg</span><strong>84.7</strong></div>
@@ -507,7 +508,7 @@
 
     <h2>Eval Set Samples</h2>
     <p>
-      The public demo eval set contains 270 synthetic, public-safe cases grouped into research-backed
+      The public demo eval set contains 275 synthetic, public-safe cases grouped into research-backed
       TTS dimensions. Each category below contributes five shared cases that every model synthesizes
       before Gemini judges the generated audio.
     </p>
@@ -2402,6 +2403,41 @@
           </article>
         </div>
       </details>
+      <details class="sample-group" data-category="statistical_notation_delivery">
+        <summary><span>Statistical Notation Delivery</span><strong>5 cases</strong></summary>
+        <div class="sample-list">
+          <article class="sample-card">
+            <h3><code>tts-statistical-notation-delivery-p-value-ci-001</code></h3>
+            <p><strong>Slice:</strong> <code>p_value_confidence_interval_grouping</code></p>
+            <p><strong>Prompt:</strong> Read this study result so the p-value and confidence interval are grouped clearly, not flattened into generic numbers.</p>
+            <p><strong>Target:</strong> The treatment effect was 2.4 points, p equals 0.03, with a 95 percent confidence interval from 0.4 to 4.4.</p>
+          </article>
+          <article class="sample-card">
+            <h3><code>tts-statistical-notation-delivery-scientific-notation-001</code></h3>
+            <p><strong>Slice:</strong> <code>scientific_notation_negative_exponent_unit</code></p>
+            <p><strong>Prompt:</strong> Read this lab concentration so the scientific notation exponent and unit are easy to transcribe on first listen.</p>
+            <p><strong>Target:</strong> The sample concentration is 3.2 times 10 to the minus 6 moles per liter.</p>
+          </article>
+          <article class="sample-card">
+            <h3><code>tts-statistical-notation-delivery-effect-size-001</code></h3>
+            <p><strong>Slice:</strong> <code>effect_size_standard_error_sample_count</code></p>
+            <p><strong>Prompt:</strong> Read this evaluation summary so the effect size and standard error are not confused with the sample count.</p>
+            <p><strong>Target:</strong> For n equals 48 sessions, Cohen's d was 0.62, with a standard error of 0.18.</p>
+          </article>
+          <article class="sample-card">
+            <h3><code>tts-statistical-notation-delivery-percentile-iqr-001</code></h3>
+            <p><strong>Slice:</strong> <code>median_iqr_percentile_latency_summary</code></p>
+            <p><strong>Prompt:</strong> Read this distribution summary so percentiles and the interquartile range remain distinct.</p>
+            <p><strong>Target:</strong> Median latency was 220 milliseconds, with an interquartile range of 180 to 310 and a 95th percentile of 640.</p>
+          </article>
+          <article class="sample-card">
+            <h3><code>tts-statistical-notation-delivery-table-row-001</code></h3>
+            <p><strong>Slice:</strong> <code>compact_table_row_metric_labels</code></p>
+            <p><strong>Prompt:</strong> Read this compact table row as a spoken summary with each statistic label attached to its value.</p>
+            <p><strong>Target:</strong> Model B: accuracy 91.2 percent, false positive rate 4.8 percent, and calibration error 0.07.</p>
+          </article>
+        </div>
+      </details>
     </section>
 
     <h2>Model Leaderboard</h2>
@@ -2421,7 +2457,7 @@
           <td data-label="Rank">1</td>
           <td data-label="Model"><code>mlx-community/chatterbox-turbo-6bit</code></td>
           <td data-label="Avg">91.2</td>
-          <td data-label="Accurate">162 / 270</td>
+          <td data-label="Accurate">162 / 275</td>
           <td data-label="Weakest Category"><code>information_tuning</code> avg 84.5</td>
           <td data-label="Likely Fix Focus">number clarity, pauses around dense facts</td>
         </tr>
@@ -2429,7 +2465,7 @@
           <td data-label="Rank">2</td>
           <td data-label="Model"><code>mlx-community/Kokoro-82M-4bit</code></td>
           <td data-label="Avg">88.6</td>
-          <td data-label="Accurate">151 / 270</td>
+          <td data-label="Accurate">151 / 275</td>
           <td data-label="Weakest Category"><code>speech_steerability</code> avg 80.8</td>
           <td data-label="Likely Fix Focus">style control, emphasis, pacing</td>
         </tr>
@@ -2437,7 +2473,7 @@
           <td data-label="Rank">3</td>
           <td data-label="Model"><code>mlx-community/Qwen3-TTS-12Hz-0.6B-Base-4bit</code></td>
           <td data-label="Avg">84.7</td>
-          <td data-label="Accurate">111 / 270</td>
+          <td data-label="Accurate">111 / 275</td>
           <td data-label="Weakest Category"><code>paralinguistics</code> avg 77.0</td>
           <td data-label="Likely Fix Focus">emotion rendering, natural prosody</td>
         </tr>
@@ -2492,17 +2528,17 @@
       </div>
       <div class="panel">
         <h3>Scores By Model</h3>
-        <p><code>mlx-community/chatterbox-turbo-6bit</code><br>avg 90.1 / n 270 / 78-97</p>
-        <p><code>mlx-community/Kokoro-82M-4bit</code><br>avg 87.2 / n 270 / 73-95</p>
-        <p><code>mlx-community/Qwen3-TTS-12Hz-0.6B-Base-4bit</code><br>avg 83.6 / n 270 / 70-93</p>
+        <p><code>mlx-community/chatterbox-turbo-6bit</code><br>avg 90.1 / n 275 / 78-97</p>
+        <p><code>mlx-community/Kokoro-82M-4bit</code><br>avg 87.2 / n 275 / 73-95</p>
+        <p><code>mlx-community/Qwen3-TTS-12Hz-0.6B-Base-4bit</code><br>avg 83.6 / n 275 / 70-93</p>
       </div>
       <div class="panel">
         <h3>Scores By Voice</h3>
-        <p><code>af_heart</code><br>avg 87.0 / n 810 / 70-97</p>
+        <p><code>af_heart</code><br>avg 87.0 / n 825 / 70-97</p>
       </div>
       <div class="panel">
         <h3>Scores By Language</h3>
-        <p><code>en</code><br>avg 87.0 / n 810 / 70-97</p>
+        <p><code>en</code><br>avg 87.0 / n 825 / 70-97</p>
       </div>
     </section>
 
@@ -2682,7 +2718,7 @@
         <tr>
           <td data-label="Compared Model"><code>mlx-community/Kokoro-82M-4bit</code></td>
           <td data-label="Baseline"><code>mlx-community/chatterbox-turbo-6bit</code></td>
-          <td data-label="Matched Cases">270</td>
+          <td data-label="Matched Cases">275</td>
           <td data-label="Avg Delta">-2.6</td>
           <td data-label="Wins / Ties / Losses">39 / 29 / 197</td>
           <td data-label="Largest Regressions">speech pace, conditional-logic, and escalation-priority cases where style control trails the baseline.</td>
@@ -2690,7 +2726,7 @@
         <tr>
           <td data-label="Compared Model"><code>mlx-community/Qwen3-TTS-12Hz-0.6B-Base-4bit</code></td>
           <td data-label="Baseline"><code>mlx-community/chatterbox-turbo-6bit</code></td>
-          <td data-label="Matched Cases">270</td>
+          <td data-label="Matched Cases">275</td>
           <td data-label="Avg Delta">-6.5</td>
           <td data-label="Wins / Ties / Losses">24 / 21 / 220</td>
           <td data-label="Largest Regressions">emotion, dense-fact, conditional-rule, and critical-alert cases with lower naturalness or intelligibility.</td>
@@ -2716,7 +2752,7 @@
       </div>
       <div class="panel">
         <h3>Synthesis Model</h3>
-        <p><code>mlx-community/Qwen3-TTS-12Hz-0.6B-Base-4bit</code><br>avg 83.6 / n 270 / range 70-93</p>
+        <p><code>mlx-community/Qwen3-TTS-12Hz-0.6B-Base-4bit</code><br>avg 83.6 / n 275 / range 70-93</p>
         <p class="muted">Compare model-level weak spots before changing prompts, voices, wrappers, or model settings.</p>
       </div>
     </section>
@@ -2768,7 +2804,7 @@
     <h2>Sample-By-Sample Breakdown</h2>
     <p>
       The real combined report contains one row per synthesized model/case pair. This preview shows
-      representative rows across models, categories, slices, and score bands from the 810 generated
+      representative rows across models, categories, slices, and score bands from the 825 generated
       samples.
     </p>
     <table id="sample-breakdown-table">

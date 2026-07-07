@@ -160,10 +160,13 @@ runs can map private prompts into the same categories without copying private ro
 - `contrastive_pair_delivery`: A/B options, before/after metrics, left/right visual states,
   positive/negative controls, and safe/destructive action pairs where prosody must keep both sides
   balanced, distinct, and exactly attached to their labels.
+- `statistical_notation_delivery`: p-values, confidence intervals, scientific notation, effect
+  sizes, percentiles, interquartile ranges, and compact metric rows where labels, signs, decimals,
+  ranges, and uncertainty cues must remain attached to the right values.
 
 ## Manifest Contract
 
-The public comparison manifest is intentionally balanced at 270 cases for now: 54 categories with 5
+The public comparison manifest is intentionally balanced at 275 cases for now: 55 categories with 5
 cases each. Expansion should add complete five-case category batches before deepening existing
 categories.
 

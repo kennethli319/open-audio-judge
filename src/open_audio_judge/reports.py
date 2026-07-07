@@ -974,6 +974,14 @@ TTS_CATEGORY_GUIDANCE = {
             "balanced option and outcome prosody",
         ],
     ),
+    "statistical_notation_delivery": (
+        "p-values, confidence intervals, scientific notation, effect sizes, percentiles, and metric rows",
+        [
+            "statistical text normalization",
+            "label-value phrase grouping",
+            "decimal, range, and uncertainty cue intelligibility",
+        ],
+    ),
 }
 
 
