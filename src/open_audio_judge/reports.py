@@ -758,6 +758,54 @@ TTS_CATEGORY_GUIDANCE = {
             "name/place pronunciation dictionaries",
         ],
     ),
+    "disfluency_repair_control": (
+        "false starts, filled pauses, intentional repetition, restart cues, and cautious hesitation",
+        [
+            "spontaneous-speech control",
+            "repair and restart prosody",
+            "disfluency text faithfulness",
+        ],
+    ),
+    "lexical_stress_disambiguation": (
+        "part-of-speech stress shifts such as record, permit, project, object, and conduct",
+        [
+            "context-aware stress assignment",
+            "part-of-speech disambiguation",
+            "pronunciation lexicon coverage",
+        ],
+    ),
+    "pragmatic_intent_delivery": (
+        "polite refusals, suggestions, deadline reminders, boundaries, and invitations with opt-out",
+        [
+            "speech-act prosody",
+            "intent-preserving style control",
+            "politeness and firmness calibration",
+        ],
+    ),
+    "symbolic_math_reading": (
+        "formulas, probability, polynomials, coordinates, ratios, variables, signs, and units",
+        [
+            "math-aware text normalization",
+            "symbol and variable verbalization",
+            "equation phrase grouping",
+        ],
+    ),
+    "multi_speaker_attribution": (
+        "narrator and quote boundaries, labeled speaker turns, handoffs, reported speech, and panel Q&A",
+        [
+            "speaker-turn parsing",
+            "quote and attribution prosody",
+            "role-label preservation",
+        ],
+    ),
+    "structured_enumeration_delivery": (
+        "ranked lists, labeled options, phase checklists, status rows, and nested plan items",
+        [
+            "list-structure prosody",
+            "enumeration and label normalization",
+            "nested item boundary control",
+        ],
+    ),
     "phonetic_confusability": (
         "minimal pairs, confusable codes, similar names, result contrasts, and small function words",
         [
@@ -852,6 +900,46 @@ TTS_CATEGORY_GUIDANCE = {
             "speech-versus-song mode control",
             "loop and chant suppression",
             "rhythmic text faithfulness",
+        ],
+    ),
+    "dialogue_act_prosody": (
+        "confirmations, clarifying questions, apologies with repairs, offers, and bounded deferrals",
+        [
+            "dialogue-act classification",
+            "question and confirmation intonation",
+            "repair and offer prosody",
+        ],
+    ),
+    "address_wayfinding_delivery": (
+        "street addresses, apartment entry, intersections, campus rooms, and emergency access points",
+        [
+            "address and route chunking",
+            "alphanumeric unit normalization",
+            "landmark and access-condition emphasis",
+        ],
+    ),
+    "repair_sensitive_delivery": (
+        "corrections, cancellations, replacements, reversed directions, and status repairs",
+        [
+            "repair cue prosody",
+            "rejected-versus-active value contrast",
+            "negation and replacement text faithfulness",
+        ],
+    ),
+    "pause_breath_control": (
+        "explicit pause lengths, breath-group boundaries, guided breathing phases, asides, and long updates",
+        [
+            "pause-duration control",
+            "breath placement",
+            "phrase-boundary detection",
+        ],
+    ),
+    "citation_reference_delivery": (
+        "academic citations, regulatory sections, table footnotes, DOI identifiers, and clause references",
+        [
+            "citation-aware text normalization",
+            "identifier and section chunking",
+            "source-reference phrase grouping",
         ],
     ),
 }

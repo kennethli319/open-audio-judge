@@ -372,6 +372,9 @@
           <option value="speech_mode_stability">Speech mode stability</option>
           <option value="dialogue_act_prosody">Dialogue act prosody</option>
           <option value="address_wayfinding_delivery">Address wayfinding delivery</option>
+          <option value="repair_sensitive_delivery">Repair sensitive delivery</option>
+          <option value="pause_breath_control">Pause breath control</option>
+          <option value="citation_reference_delivery">Citation reference delivery</option>
         </select>
         <select id="label-filter" aria-label="Filter by label">
           <option value="">All labels</option>
@@ -416,7 +419,7 @@
   --cases examples/tts_multiturn_cases.jsonl \
   --judge-provider gemini \
   --judge-samples 3 \
-  --limit 245 \
+  --limit 250 \
   --out runs/leaderboard/chatterbox</code></pre>
 
     <pre><code>oaj autojudge-local-tts \
@@ -425,7 +428,7 @@
   --cases examples/tts_multiturn_cases.jsonl \
   --judge-provider gemini \
   --judge-samples 3 \
-  --limit 245 \
+  --limit 250 \
   --out runs/leaderboard/kokoro</code></pre>
 
     <pre><code>oaj autojudge-local-tts \
@@ -434,7 +437,7 @@
   --cases examples/tts_multiturn_cases.jsonl \
   --judge-provider gemini \
   --judge-samples 3 \
-  --limit 245 \
+  --limit 250 \
   --out runs/leaderboard/qwen3-tts</code></pre>
 
     <p>
@@ -446,7 +449,7 @@
   --cases examples/tts_multiturn_cases.jsonl \
   --judge-provider gemini \
   --judge-samples 3 \
-  --limit 245 \
+  --limit 250 \
   --out runs/leaderboard/chatterbox</code></pre>
 
     <p>
@@ -491,16 +494,16 @@
     <h2>Sample Report Preview</h2>
     <section class="grid" aria-label="Sample report metrics">
       <div class="metric"><span>Models</span><strong>3</strong></div>
-      <div class="metric"><span>Shared Eval Cases</span><strong>245</strong></div>
+      <div class="metric"><span>Shared Eval Cases</span><strong>250</strong></div>
       <div class="metric"><span>Judge Samples</span><strong>3x</strong></div>
       <div class="metric"><span>Top Avg</span><strong>91.2</strong></div>
       <div class="metric"><span>Lowest Avg</span><strong>84.7</strong></div>
-      <div class="metric"><span>Total Judgments</span><strong>2205</strong></div>
+      <div class="metric"><span>Total Judgments</span><strong>2250</strong></div>
     </section>
 
     <h2>Eval Set Samples</h2>
     <p>
-      The public demo eval set contains 245 synthetic, public-safe cases grouped into research-backed
+      The public demo eval set contains 250 synthetic, public-safe cases grouped into research-backed
       TTS dimensions. Each category below contributes five shared cases that every model synthesizes
       before Gemini judges the generated audio.
     </p>
@@ -2217,6 +2220,41 @@
             <p><strong>Slice:</strong> <code>long_update_natural_breath_boundaries</code></p>
             <p><strong>Prompt:</strong> Read this long customer update with natural breaths only at clause boundaries, not in the middle of names or dates.</p>
             <p><strong>Target:</strong> After the July service window, Morgan will review the access logs, confirm the badge list, and send one final summary.</p>
+          </article>
+        </div>
+      </details>
+      <details class="sample-group" data-category="citation_reference_delivery">
+        <summary><span>Citation Reference Delivery</span><strong>5 cases</strong></summary>
+        <div class="sample-list">
+          <article class="sample-card">
+            <h3><code>tts-citation-reference-delivery-academic-001</code></h3>
+            <p><strong>Slice:</strong> <code>academic_author_year_figure_reference</code></p>
+            <p><strong>Prompt:</strong> Read this academic source reference so the author cue, year, and figure number are all easy to transcribe.</p>
+            <p><strong>Target:</strong> Nguyen et al., 2024, Figure 3, reports a 12 percent relative error reduction.</p>
+          </article>
+          <article class="sample-card">
+            <h3><code>tts-citation-reference-delivery-regulatory-001</code></h3>
+            <p><strong>Slice:</strong> <code>regulatory_part_section_paragraph_reference</code></p>
+            <p><strong>Prompt:</strong> Read this regulatory citation with the part, section, and paragraph boundaries unmistakable.</p>
+            <p><strong>Target:</strong> See 21 C F R Part 11, section 11.10, paragraph e, before approving the audit trail change.</p>
+          </article>
+          <article class="sample-card">
+            <h3><code>tts-citation-reference-delivery-footnote-001</code></h3>
+            <p><strong>Slice:</strong> <code>table_footnote_appendix_reference</code></p>
+            <p><strong>Prompt:</strong> Read this table note so the footnote letter and appendix reference are not swallowed.</p>
+            <p><strong>Target:</strong> Use Table 2, footnote b, and Appendix C for the revised storage temperature range.</p>
+          </article>
+          <article class="sample-card">
+            <h3><code>tts-citation-reference-delivery-doi-001</code></h3>
+            <p><strong>Slice:</strong> <code>doi_identifier_grouping</code></p>
+            <p><strong>Prompt:</strong> Read this DOI reference as a source identifier, using careful grouping rather than a single blurred string.</p>
+            <p><strong>Target:</strong> The source identifier is D O I 10.1145 slash 3613904.3642130.</p>
+          </article>
+          <article class="sample-card">
+            <h3><code>tts-citation-reference-delivery-crossref-001</code></h3>
+            <p><strong>Slice:</strong> <code>internal_clause_step_note_reference</code></p>
+            <p><strong>Prompt:</strong> Read this internal cross-reference so the clause, step, and note labels do not collapse together.</p>
+            <p><strong>Target:</strong> For the exception, read clause 4.2, step 3, note alpha, before closing the checklist.</p>
           </article>
         </div>
       </details>

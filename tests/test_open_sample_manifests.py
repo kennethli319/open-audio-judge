@@ -7,6 +7,7 @@ from types import SimpleNamespace
 import pytest
 
 from open_audio_judge.runner import load_cases
+from open_audio_judge.reports import TTS_CATEGORY_GUIDANCE
 from scripts.gemini_sample_records import missing_records, record_issues, update_records
 
 
@@ -66,6 +67,7 @@ TTS_RESEARCH_CATEGORIES = {
     "address_wayfinding_delivery",
     "repair_sensitive_delivery",
     "pause_breath_control",
+    "citation_reference_delivery",
 }
 TTS_REQUIRED_METADATA = {
     "language",
@@ -119,7 +121,7 @@ def test_open_sample_docs_list_every_case_id() -> None:
 def test_tts_multiturn_manifest_has_research_metadata_contract() -> None:
     cases = load_cases(TTS_MULTITURN_MANIFEST)
 
-    assert len(cases) == 245
+    assert len(cases) == 250
     assert len({case.id for case in cases}) == len(cases)
     assert len({case.metadata["tts_slice"] for case in cases}) == len(cases)
     assert {case.metadata["eval_category"] for case in cases} == TTS_RESEARCH_CATEGORIES
@@ -143,6 +145,10 @@ def test_tts_multiturn_manifest_keeps_five_cases_per_category() -> None:
         counts[category] = counts.get(category, 0) + 1
 
     assert counts == {category: 5 for category in TTS_RESEARCH_CATEGORIES}
+
+
+def test_tts_research_categories_have_report_guidance() -> None:
+    assert set(TTS_CATEGORY_GUIDANCE) >= TTS_RESEARCH_CATEGORIES
 
 
 def test_gemini_sample_records_are_current() -> None:
