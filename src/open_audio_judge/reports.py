@@ -982,6 +982,14 @@ TTS_CATEGORY_GUIDANCE = {
             "decimal, range, and uncertainty cue intelligibility",
         ],
     ),
+    "readback_confirmation_delivery": (
+        "closed-loop confirmations, readbacks, corrections, acknowledgments, and queued future actions",
+        [
+            "readback phrase grouping",
+            "acknowledgment and completion-state prosody",
+            "correction and confirmed-value text faithfulness",
+        ],
+    ),
 }
 
 

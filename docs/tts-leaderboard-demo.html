@@ -380,6 +380,7 @@
           <option value="priority_escalation_delivery">Priority escalation delivery</option>
           <option value="contrastive_pair_delivery">Contrastive pair delivery</option>
           <option value="statistical_notation_delivery">Statistical notation delivery</option>
+          <option value="readback_confirmation_delivery">Readback confirmation delivery</option>
         </select>
         <select id="label-filter" aria-label="Filter by label">
           <option value="">All labels</option>
@@ -424,7 +425,7 @@
   --cases examples/tts_multiturn_cases.jsonl \
   --judge-provider gemini \
   --judge-samples 3 \
-  --limit 275 \
+  --limit 280 \
   --out runs/leaderboard/chatterbox</code></pre>
 
     <pre><code>oaj autojudge-local-tts \
@@ -433,7 +434,7 @@
   --cases examples/tts_multiturn_cases.jsonl \
   --judge-provider gemini \
   --judge-samples 3 \
-  --limit 275 \
+  --limit 280 \
   --out runs/leaderboard/kokoro</code></pre>
 
     <pre><code>oaj autojudge-local-tts \
@@ -442,7 +443,7 @@
   --cases examples/tts_multiturn_cases.jsonl \
   --judge-provider gemini \
   --judge-samples 3 \
-  --limit 275 \
+  --limit 280 \
   --out runs/leaderboard/qwen3-tts</code></pre>
 
     <p>
@@ -454,7 +455,7 @@
   --cases examples/tts_multiturn_cases.jsonl \
   --judge-provider gemini \
   --judge-samples 3 \
-  --limit 275 \
+  --limit 280 \
   --out runs/leaderboard/chatterbox</code></pre>
 
     <p>
@@ -499,16 +500,16 @@
     <h2>Sample Report Preview</h2>
     <section class="grid" aria-label="Sample report metrics">
       <div class="metric"><span>Models</span><strong>3</strong></div>
-      <div class="metric"><span>Shared Eval Cases</span><strong>275</strong></div>
+      <div class="metric"><span>Shared Eval Cases</span><strong>280</strong></div>
       <div class="metric"><span>Judge Samples</span><strong>3x</strong></div>
       <div class="metric"><span>Top Avg</span><strong>91.2</strong></div>
       <div class="metric"><span>Lowest Avg</span><strong>84.7</strong></div>
-      <div class="metric"><span>Total Judgments</span><strong>2430</strong></div>
+      <div class="metric"><span>Total Judgments</span><strong>2520</strong></div>
     </section>
 
     <h2>Eval Set Samples</h2>
     <p>
-      The public demo eval set contains 275 synthetic, public-safe cases grouped into research-backed
+      The public demo eval set contains 280 synthetic, public-safe cases grouped into research-backed
       TTS dimensions. Each category below contributes five shared cases that every model synthesizes
       before Gemini judges the generated audio.
     </p>
@@ -2438,6 +2439,41 @@
           </article>
         </div>
       </details>
+      <details class="sample-group" data-category="readback_confirmation_delivery">
+        <summary><span>Readback Confirmation Delivery</span><strong>5 cases</strong></summary>
+        <div class="sample-list">
+          <article class="sample-card">
+            <h3><code>tts-readback-confirmation-delivery-order-repeat-001</code></h3>
+            <p><strong>Slice:</strong> <code>order_item_quantity_pickup_readback</code></p>
+            <p><strong>Prompt:</strong> Read this order readback so the item, quantity, and pickup time are clearly confirmed without sounding uncertain.</p>
+            <p><strong>Target:</strong> Confirming your order: two turkey sandwiches, one iced tea, pickup at 12:45.</p>
+          </article>
+          <article class="sample-card">
+            <h3><code>tts-readback-confirmation-delivery-medical-dose-001</code></h3>
+            <p><strong>Slice:</strong> <code>clinical_dose_route_schedule_readback</code></p>
+            <p><strong>Prompt:</strong> Read this clinical readback slowly enough that dose, route, and schedule cannot be swapped.</p>
+            <p><strong>Target:</strong> Readback: 5 milligrams by mouth, twice daily, for seven days.</p>
+          </article>
+          <article class="sample-card">
+            <h3><code>tts-readback-confirmation-delivery-dispatch-coordinate-001</code></h3>
+            <p><strong>Slice:</strong> <code>dispatch_unit_gate_standby_readback</code></p>
+            <p><strong>Prompt:</strong> Read this dispatch confirmation so the unit, gate, and standby instruction are easy to verify over radio.</p>
+            <p><strong>Target:</strong> Copy that, Unit 14: proceed to Gate C, then stand by until the supervisor clears entry.</p>
+          </article>
+          <article class="sample-card">
+            <h3><code>tts-readback-confirmation-delivery-correction-001</code></h3>
+            <p><strong>Slice:</strong> <code>corrected_readback_rejected_active_value</code></p>
+            <p><strong>Prompt:</strong> Read this corrected readback so the rejected value and active value are not confused.</p>
+            <p><strong>Target:</strong> Correction noted: not bay 6, bay 16 is the loading point.</p>
+          </article>
+          <article class="sample-card">
+            <h3><code>tts-readback-confirmation-delivery-acknowledge-defer-001</code></h3>
+            <p><strong>Slice:</strong> <code>acknowledged_not_completed_future_action</code></p>
+            <p><strong>Prompt:</strong> Read this confirmation so it acknowledges receipt but does not imply the task is already complete.</p>
+            <p><strong>Target:</strong> Received and queued: I will send the status summary after the final sensor check finishes.</p>
+          </article>
+        </div>
+      </details>
     </section>
 
     <h2>Model Leaderboard</h2>
@@ -2457,7 +2493,7 @@
           <td data-label="Rank">1</td>
           <td data-label="Model"><code>mlx-community/chatterbox-turbo-6bit</code></td>
           <td data-label="Avg">91.2</td>
-          <td data-label="Accurate">162 / 275</td>
+          <td data-label="Accurate">162 / 280</td>
           <td data-label="Weakest Category"><code>information_tuning</code> avg 84.5</td>
           <td data-label="Likely Fix Focus">number clarity, pauses around dense facts</td>
         </tr>
@@ -2465,7 +2501,7 @@
           <td data-label="Rank">2</td>
           <td data-label="Model"><code>mlx-community/Kokoro-82M-4bit</code></td>
           <td data-label="Avg">88.6</td>
-          <td data-label="Accurate">151 / 275</td>
+          <td data-label="Accurate">151 / 280</td>
           <td data-label="Weakest Category"><code>speech_steerability</code> avg 80.8</td>
           <td data-label="Likely Fix Focus">style control, emphasis, pacing</td>
         </tr>
@@ -2473,7 +2509,7 @@
           <td data-label="Rank">3</td>
           <td data-label="Model"><code>mlx-community/Qwen3-TTS-12Hz-0.6B-Base-4bit</code></td>
           <td data-label="Avg">84.7</td>
-          <td data-label="Accurate">111 / 275</td>
+          <td data-label="Accurate">111 / 280</td>
           <td data-label="Weakest Category"><code>paralinguistics</code> avg 77.0</td>
           <td data-label="Likely Fix Focus">emotion rendering, natural prosody</td>
         </tr>
@@ -2528,17 +2564,17 @@
       </div>
       <div class="panel">
         <h3>Scores By Model</h3>
-        <p><code>mlx-community/chatterbox-turbo-6bit</code><br>avg 90.1 / n 275 / 78-97</p>
-        <p><code>mlx-community/Kokoro-82M-4bit</code><br>avg 87.2 / n 275 / 73-95</p>
-        <p><code>mlx-community/Qwen3-TTS-12Hz-0.6B-Base-4bit</code><br>avg 83.6 / n 275 / 70-93</p>
+        <p><code>mlx-community/chatterbox-turbo-6bit</code><br>avg 90.1 / n 280 / 78-97</p>
+        <p><code>mlx-community/Kokoro-82M-4bit</code><br>avg 87.2 / n 280 / 73-95</p>
+        <p><code>mlx-community/Qwen3-TTS-12Hz-0.6B-Base-4bit</code><br>avg 83.6 / n 280 / 70-93</p>
       </div>
       <div class="panel">
         <h3>Scores By Voice</h3>
-        <p><code>af_heart</code><br>avg 87.0 / n 825 / 70-97</p>
+        <p><code>af_heart</code><br>avg 87.0 / n 840 / 70-97</p>
       </div>
       <div class="panel">
         <h3>Scores By Language</h3>
-        <p><code>en</code><br>avg 87.0 / n 825 / 70-97</p>
+        <p><code>en</code><br>avg 87.0 / n 840 / 70-97</p>
       </div>
     </section>
 
@@ -2718,7 +2754,7 @@
         <tr>
           <td data-label="Compared Model"><code>mlx-community/Kokoro-82M-4bit</code></td>
           <td data-label="Baseline"><code>mlx-community/chatterbox-turbo-6bit</code></td>
-          <td data-label="Matched Cases">275</td>
+          <td data-label="Matched Cases">280</td>
           <td data-label="Avg Delta">-2.6</td>
           <td data-label="Wins / Ties / Losses">39 / 29 / 197</td>
           <td data-label="Largest Regressions">speech pace, conditional-logic, and escalation-priority cases where style control trails the baseline.</td>
@@ -2726,7 +2762,7 @@
         <tr>
           <td data-label="Compared Model"><code>mlx-community/Qwen3-TTS-12Hz-0.6B-Base-4bit</code></td>
           <td data-label="Baseline"><code>mlx-community/chatterbox-turbo-6bit</code></td>
-          <td data-label="Matched Cases">275</td>
+          <td data-label="Matched Cases">280</td>
           <td data-label="Avg Delta">-6.5</td>
           <td data-label="Wins / Ties / Losses">24 / 21 / 220</td>
           <td data-label="Largest Regressions">emotion, dense-fact, conditional-rule, and critical-alert cases with lower naturalness or intelligibility.</td>
@@ -2752,7 +2788,7 @@
       </div>
       <div class="panel">
         <h3>Synthesis Model</h3>
-        <p><code>mlx-community/Qwen3-TTS-12Hz-0.6B-Base-4bit</code><br>avg 83.6 / n 275 / range 70-93</p>
+        <p><code>mlx-community/Qwen3-TTS-12Hz-0.6B-Base-4bit</code><br>avg 83.6 / n 280 / range 70-93</p>
         <p class="muted">Compare model-level weak spots before changing prompts, voices, wrappers, or model settings.</p>
       </div>
     </section>
@@ -2804,7 +2840,7 @@
     <h2>Sample-By-Sample Breakdown</h2>
     <p>
       The real combined report contains one row per synthesized model/case pair. This preview shows
-      representative rows across models, categories, slices, and score bands from the 825 generated
+      representative rows across models, categories, slices, and score bands from the 840 generated
       samples.
     </p>
     <table id="sample-breakdown-table">

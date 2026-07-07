@@ -163,10 +163,13 @@ runs can map private prompts into the same categories without copying private ro
 - `statistical_notation_delivery`: p-values, confidence intervals, scientific notation, effect
   sizes, percentiles, interquartile ranges, and compact metric rows where labels, signs, decimals,
   ranges, and uncertainty cues must remain attached to the right values.
+- `readback_confirmation_delivery`: closed-loop confirmations, order readbacks, clinical
+  dose-route-schedule repeats, dispatch acknowledgments, corrected readbacks, and queued future
+  actions where prosody must preserve what was received, corrected, confirmed, or still pending.
 
 ## Manifest Contract
 
-The public comparison manifest is intentionally balanced at 275 cases for now: 55 categories with 5
+The public comparison manifest is intentionally balanced at 280 cases for now: 56 categories with 5
 cases each. Expansion should add complete five-case category batches before deepening existing
 categories.
 
