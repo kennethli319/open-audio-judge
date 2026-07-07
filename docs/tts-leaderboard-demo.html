@@ -344,6 +344,8 @@
           <option value="formatting_markup_robustness">Formatting markup robustness</option>
           <option value="nonverbal_paralinguistic_cues">Nonverbal paralinguistic cues</option>
           <option value="voice_conversion_similarity">Voice conversion similarity</option>
+          <option value="accent_dialect_handling">Accent dialect handling</option>
+          <option value="artifact_suppression">Artifact suppression</option>
         </select>
         <select id="label-filter" aria-label="Filter by label">
           <option value="">All labels</option>
@@ -388,7 +390,7 @@
   --cases examples/tts_multiturn_cases.jsonl \
   --judge-provider gemini \
   --judge-samples 3 \
-  --limit 100 \
+  --limit 105 \
   --out runs/leaderboard/chatterbox</code></pre>
 
     <pre><code>oaj autojudge-local-tts \
@@ -397,7 +399,7 @@
   --cases examples/tts_multiturn_cases.jsonl \
   --judge-provider gemini \
   --judge-samples 3 \
-  --limit 100 \
+  --limit 105 \
   --out runs/leaderboard/kokoro</code></pre>
 
     <pre><code>oaj autojudge-local-tts \
@@ -406,7 +408,7 @@
   --cases examples/tts_multiturn_cases.jsonl \
   --judge-provider gemini \
   --judge-samples 3 \
-  --limit 100 \
+  --limit 105 \
   --out runs/leaderboard/qwen3-tts</code></pre>
 
     <p>
@@ -418,7 +420,7 @@
   --cases examples/tts_multiturn_cases.jsonl \
   --judge-provider gemini \
   --judge-samples 3 \
-  --limit 100 \
+  --limit 105 \
   --out runs/leaderboard/chatterbox</code></pre>
 
     <p>
@@ -463,16 +465,16 @@
     <h2>Sample Report Preview</h2>
     <section class="grid" aria-label="Sample report metrics">
       <div class="metric"><span>Models</span><strong>3</strong></div>
-      <div class="metric"><span>Shared Eval Cases</span><strong>100</strong></div>
+      <div class="metric"><span>Shared Eval Cases</span><strong>105</strong></div>
       <div class="metric"><span>Judge Samples</span><strong>3x</strong></div>
       <div class="metric"><span>Top Avg</span><strong>91.2</strong></div>
       <div class="metric"><span>Lowest Avg</span><strong>84.7</strong></div>
-      <div class="metric"><span>Total Judgments</span><strong>900</strong></div>
+      <div class="metric"><span>Total Judgments</span><strong>945</strong></div>
     </section>
 
     <h2>Eval Set Samples</h2>
     <p>
-      The public demo eval set contains 100 synthetic, public-safe cases grouped into research-backed
+      The public demo eval set contains 105 synthetic, public-safe cases grouped into research-backed
       TTS dimensions. Each category below contributes five shared cases that every model synthesizes
       before Gemini judges the generated audio.
     </p>
@@ -1177,6 +1179,41 @@
           </article>
         </div>
       </details>
+      <details class="sample-group" data-category="artifact_suppression">
+        <summary><span>Artifact Suppression</span><strong>5 cases</strong></summary>
+        <div class="sample-list">
+          <article class="sample-card">
+            <h3><code>tts-artifact-suppression-plosive-clipping-001</code></h3>
+            <p><strong>Slice:</strong> <code>plosive_clipping_control</code></p>
+            <p><strong>Prompt:</strong> Read this close-mic sentence clearly, avoiding pops or clipping on the repeated P and B sounds.</p>
+            <p><strong>Target:</strong> Please pack the backup battery beside the portable printer before boarding begins.</p>
+          </article>
+          <article class="sample-card">
+            <h3><code>tts-artifact-suppression-sibilance-001</code></h3>
+            <p><strong>Slice:</strong> <code>sibilance_harshness_control</code></p>
+            <p><strong>Prompt:</strong> Read this crisp safety line without harsh hiss, metallic buzzing, or swallowed S sounds.</p>
+            <p><strong>Target:</strong> Six stainless sensors stayed stable as the system switched to silent service mode.</p>
+          </article>
+          <article class="sample-card">
+            <h3><code>tts-artifact-suppression-repeat-loop-001</code></h3>
+            <p><strong>Slice:</strong> <code>repeat_loop_resistance</code></p>
+            <p><strong>Prompt:</strong> Read the repeated word exactly as written, but do not fall into a stutter loop or add extra repeats.</p>
+            <p><strong>Target:</strong> The sync status says pending, pending, then complete after the final server check.</p>
+          </article>
+          <article class="sample-card">
+            <h3><code>tts-artifact-suppression-silence-boundary-001</code></h3>
+            <p><strong>Slice:</strong> <code>silence_boundary_stability</code></p>
+            <p><strong>Prompt:</strong> Read this with the short pause implied by the ellipsis, but avoid clicks, dead air, or a sudden restart.</p>
+            <p><strong>Target:</strong> Hold the line for one moment... now the secure channel is ready.</p>
+          </article>
+          <article class="sample-card">
+            <h3><code>tts-artifact-suppression-tail-stability-001</code></h3>
+            <p><strong>Slice:</strong> <code>quiet_tail_noise_floor</code></p>
+            <p><strong>Prompt:</strong> Read this quiet final sentence so the ending remains audible and does not fade into noise.</p>
+            <p><strong>Target:</strong> The lobby lights are dimmed, the doors are locked, and the overnight desk is staffed.</p>
+          </article>
+        </div>
+      </details>
     </section>
 
     <h2>Model Leaderboard</h2>
@@ -1253,12 +1290,13 @@
         <p><code>nonverbal_paralinguistic_cues</code><br>avg 84.2 / n 5 / 75-92</p>
         <p><code>voice_conversion_similarity</code><br>avg 84.0 / n 5 / 74-92</p>
         <p><code>accent_dialect_handling</code><br>avg 83.4 / n 5 / 73-91</p>
+        <p><code>artifact_suppression</code><br>avg 83.0 / n 5 / 72-91</p>
       </div>
       <div class="panel">
         <h3>Scores By Model</h3>
-        <p><code>mlx-community/chatterbox-turbo-6bit</code><br>avg 90.1 / n 100 / 78-97</p>
-        <p><code>mlx-community/Kokoro-82M-4bit</code><br>avg 87.3 / n 100 / 74-95</p>
-        <p><code>mlx-community/Qwen3-TTS-12Hz-0.6B-Base-4bit</code><br>avg 83.7 / n 100 / 70-93</p>
+        <p><code>mlx-community/chatterbox-turbo-6bit</code><br>avg 90.1 / n 105 / 78-97</p>
+        <p><code>mlx-community/Kokoro-82M-4bit</code><br>avg 87.2 / n 105 / 73-95</p>
+        <p><code>mlx-community/Qwen3-TTS-12Hz-0.6B-Base-4bit</code><br>avg 83.6 / n 105 / 70-93</p>
       </div>
       <div class="panel">
         <h3>Scores By Voice</h3>
@@ -1411,7 +1449,7 @@
         <tr>
           <td data-label="Compared Model"><code>mlx-community/Kokoro-82M-4bit</code></td>
           <td data-label="Baseline"><code>mlx-community/chatterbox-turbo-6bit</code></td>
-          <td data-label="Matched Cases">100</td>
+          <td data-label="Matched Cases">105</td>
           <td data-label="Avg Delta">-2.6</td>
           <td data-label="Wins / Ties / Losses">18 / 14 / 68</td>
           <td data-label="Largest Regressions">speech pace and emphasis cases where style control trails the baseline.</td>
@@ -1419,7 +1457,7 @@
         <tr>
           <td data-label="Compared Model"><code>mlx-community/Qwen3-TTS-12Hz-0.6B-Base-4bit</code></td>
           <td data-label="Baseline"><code>mlx-community/chatterbox-turbo-6bit</code></td>
-          <td data-label="Matched Cases">100</td>
+          <td data-label="Matched Cases">105</td>
           <td data-label="Avg Delta">-6.5</td>
           <td data-label="Wins / Ties / Losses">11 / 9 / 80</td>
           <td data-label="Largest Regressions">emotion and dense-fact cases with lower naturalness or intelligibility.</td>
@@ -1445,7 +1483,7 @@
       </div>
       <div class="panel">
         <h3>Synthesis Model</h3>
-        <p><code>mlx-community/Qwen3-TTS-12Hz-0.6B-Base-4bit</code><br>avg 83.7 / n 100 / range 70-93</p>
+        <p><code>mlx-community/Qwen3-TTS-12Hz-0.6B-Base-4bit</code><br>avg 83.6 / n 105 / range 70-93</p>
         <p class="muted">Compare model-level weak spots before changing prompts, voices, wrappers, or model settings.</p>
       </div>
     </section>

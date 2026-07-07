@@ -65,10 +65,12 @@ runs can map private prompts into the same categories without copying private ro
   transfer, prosody retention, anti-generic voice leakage, and identity-preserved style shifts.
 - `accent_dialect_handling`: light regional English accent cues, respectful dialect handling,
   place-name clarity, acronym preservation, and intelligibility without caricature.
+- `artifact_suppression`: plosive and sibilance control, repeat-loop resistance, clean silence
+  boundaries, quiet tail stability, and artifact-free intelligibility under difficult acoustics.
 
 ## Manifest Contract
 
-The public comparison manifest is intentionally balanced at 100 cases for now: 20 categories with 5
+The public comparison manifest is intentionally balanced at 105 cases for now: 21 categories with 5
 cases each. Expansion should add complete five-case category batches before deepening existing
 categories.
 
