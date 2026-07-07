@@ -359,6 +359,7 @@
           <option value="multi_speaker_attribution">Multi speaker attribution</option>
           <option value="structured_enumeration_delivery">Structured enumeration delivery</option>
           <option value="phonetic_confusability">Phonetic confusability</option>
+          <option value="referential_cohesion">Referential cohesion</option>
         </select>
         <select id="label-filter" aria-label="Filter by label">
           <option value="">All labels</option>
@@ -403,7 +404,7 @@
   --cases examples/tts_multiturn_cases.jsonl \
   --judge-provider gemini \
   --judge-samples 3 \
-  --limit 170 \
+  --limit 175 \
   --out runs/leaderboard/chatterbox</code></pre>
 
     <pre><code>oaj autojudge-local-tts \
@@ -412,7 +413,7 @@
   --cases examples/tts_multiturn_cases.jsonl \
   --judge-provider gemini \
   --judge-samples 3 \
-  --limit 170 \
+  --limit 175 \
   --out runs/leaderboard/kokoro</code></pre>
 
     <pre><code>oaj autojudge-local-tts \
@@ -421,7 +422,7 @@
   --cases examples/tts_multiturn_cases.jsonl \
   --judge-provider gemini \
   --judge-samples 3 \
-  --limit 170 \
+  --limit 175 \
   --out runs/leaderboard/qwen3-tts</code></pre>
 
     <p>
@@ -433,7 +434,7 @@
   --cases examples/tts_multiturn_cases.jsonl \
   --judge-provider gemini \
   --judge-samples 3 \
-  --limit 170 \
+  --limit 175 \
   --out runs/leaderboard/chatterbox</code></pre>
 
     <p>
@@ -478,16 +479,16 @@
     <h2>Sample Report Preview</h2>
     <section class="grid" aria-label="Sample report metrics">
       <div class="metric"><span>Models</span><strong>3</strong></div>
-      <div class="metric"><span>Shared Eval Cases</span><strong>170</strong></div>
+      <div class="metric"><span>Shared Eval Cases</span><strong>175</strong></div>
       <div class="metric"><span>Judge Samples</span><strong>3x</strong></div>
       <div class="metric"><span>Top Avg</span><strong>91.2</strong></div>
       <div class="metric"><span>Lowest Avg</span><strong>84.7</strong></div>
-      <div class="metric"><span>Total Judgments</span><strong>1530</strong></div>
+      <div class="metric"><span>Total Judgments</span><strong>1575</strong></div>
     </section>
 
     <h2>Eval Set Samples</h2>
     <p>
-      The public demo eval set contains 170 synthetic, public-safe cases grouped into research-backed
+      The public demo eval set contains 175 synthetic, public-safe cases grouped into research-backed
       TTS dimensions. Each category below contributes five shared cases that every model synthesizes
       before Gemini judges the generated audio.
     </p>
@@ -1679,6 +1680,41 @@
             <p><strong>Slice:</strong> <code>function_word_in_on_contrast</code></p>
             <p><strong>Prompt:</strong> Read this access instruction so the small function words do not disappear.</p>
             <p><strong>Target:</strong> Put the badge in the tray, not on the tray, before you scan it.</p>
+          </article>
+        </div>
+      </details>
+      <details class="sample-group" data-category="referential_cohesion">
+        <summary><span>Referential Cohesion</span><strong>5 cases</strong></summary>
+        <div class="sample-list">
+          <article class="sample-card">
+            <h3><code>tts-referential-cohesion-former-latter-001</code></h3>
+            <p><strong>Slice:</strong> <code>former_latter_equipment_reference</code></p>
+            <p><strong>Prompt:</strong> Read this equipment note so former and latter clearly point to the right items.</p>
+            <p><strong>Target:</strong> The blue cable powers the sensor, and the gray cable powers the charger; keep the former plugged in overnight.</p>
+          </article>
+          <article class="sample-card">
+            <h3><code>tts-referential-cohesion-pronoun-handoff-001</code></h3>
+            <p><strong>Slice:</strong> <code>pronoun_antecedent_handoff</code></p>
+            <p><strong>Prompt:</strong> Read this handoff so the pronoun her stays attached to the correct person.</p>
+            <p><strong>Target:</strong> After Lina missed the lab check, Maya called her and rescheduled the appointment for Friday.</p>
+          </article>
+          <article class="sample-card">
+            <h3><code>tts-referential-cohesion-this-that-001</code></h3>
+            <p><strong>Slice:</strong> <code>this_that_file_contrast</code></p>
+            <p><strong>Prompt:</strong> Read this file-management instruction so this and that remain distinct.</p>
+            <p><strong>Target:</strong> Move this draft to archive, but leave that signed copy in the review folder.</p>
+          </article>
+          <article class="sample-card">
+            <h3><code>tts-referential-cohesion-previous-next-001</code></h3>
+            <p><strong>Slice:</strong> <code>previous_next_negated_reference</code></p>
+            <p><strong>Prompt:</strong> Read this workflow warning so previous and next cannot be swapped by ear.</p>
+            <p><strong>Target:</strong> Open the previous report, not the next report, before you export the summary.</p>
+          </article>
+          <article class="sample-card">
+            <h3><code>tts-referential-cohesion-same-different-001</code></h3>
+            <p><strong>Slice:</strong> <code>same_different_access_reference</code></p>
+            <p><strong>Prompt:</strong> Read this access-control instruction so same and different are easy to distinguish.</p>
+            <p><strong>Target:</strong> Use the same passcode for the gate, but a different passcode for the storage room.</p>
           </article>
         </div>
       </details>

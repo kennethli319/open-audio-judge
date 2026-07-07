@@ -101,10 +101,13 @@ runs can map private prompts into the same categories without copying private ro
 - `phonetic_confusability`: minimal pairs, confusable letter and digit codes, similar names,
   positive/negative contrasts, and small function-word distinctions where intelligibility must
   survive similar sounds.
+- `referential_cohesion`: former/latter references, pronoun antecedents, this/that contrasts,
+  previous/next warnings, and same/different conditions where spoken grouping must preserve which
+  entity or option is being referenced.
 
 ## Manifest Contract
 
-The public comparison manifest is intentionally balanced at 170 cases for now: 34 categories with 5
+The public comparison manifest is intentionally balanced at 175 cases for now: 35 categories with 5
 cases each. Expansion should add complete five-case category batches before deepening existing
 categories.
 
