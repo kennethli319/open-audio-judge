@@ -77,6 +77,7 @@ def render_html_report(
     weakest_segments = _weakest_segments(results)
     model_category_actions = _model_category_actions(results)
     baseline_deltas = _baseline_deltas(results, baseline_model=baseline_model)
+    baseline_segment_deltas = _baseline_segment_deltas(results, baseline_model=baseline_model)
     priority_cases = _priority_cases(results)
     calibration_checks = _calibration_checks(results)
 
@@ -180,6 +181,7 @@ def render_html_report(
     weakest_segments_markup = _render_weakest_segments(weakest_segments)
     model_category_actions_markup = _render_model_category_actions(model_category_actions)
     baseline_deltas_markup = _render_baseline_deltas(baseline_deltas)
+    baseline_segment_deltas_markup = _render_baseline_segment_deltas(baseline_segment_deltas)
     priority_markup = _render_priority_cases(priority_cases)
     calibration_markup = _render_calibration_checks(calibration_checks)
 
@@ -395,6 +397,9 @@ def render_html_report(
     <h2>Baseline Model Deltas</h2>
     {baseline_deltas_markup}
 
+    <h2>Baseline Regression Slices</h2>
+    {baseline_segment_deltas_markup}
+
     <h2>Priority Cases</h2>
     {priority_markup}
 
@@ -567,6 +572,20 @@ class BaselineDeltaSummary:
     wins: int
     ties: int
     losses: int
+    largest_regressions: list[tuple[EvaluationResult, EvaluationResult, int]]
+
+
+@dataclass(frozen=True)
+class BaselineSegmentDeltaSummary:
+    model: str
+    field_label: str
+    segment: str
+    count: int
+    average_delta: float
+    wins: int
+    ties: int
+    losses: int
+    fix_areas: list[str]
     largest_regressions: list[tuple[EvaluationResult, EvaluationResult, int]]
 
 
@@ -1129,6 +1148,146 @@ def _render_baseline_delta_row(item: BaselineDeltaSummary) -> str:
   <td data-label="Avg Delta"><strong>{item.average_delta:+.1f}</strong></td>
   <td data-label="Wins / Ties / Losses">{item.wins} / {item.ties} / {item.losses}</td>
   <td data-label="Largest Regressions"><ul class="counts">{regression_markup}</ul></td>
+</tr>"""
+
+
+BASELINE_SEGMENT_FIELDS = (
+    ("Evaluation Category", "evaluation_category"),
+    ("TTS Slice", "tts_slice"),
+)
+
+
+def _baseline_segment_deltas(
+    results: list[EvaluationResult],
+    *,
+    baseline_model: str = BASELINE_SYNTHESIS_MODEL,
+    limit: int = 10,
+    regression_limit: int = 2,
+) -> list[BaselineSegmentDeltaSummary]:
+    pairs = _matched_baseline_pairs(results, baseline_model=baseline_model)
+    grouped: dict[
+        tuple[str, str, str],
+        list[tuple[EvaluationResult, EvaluationResult, int]],
+    ] = {}
+    for result, baseline, delta in pairs:
+        model = _metadata_group_value(result, "synthesis_model")
+        if model is None:
+            continue
+        for field_label, field in BASELINE_SEGMENT_FIELDS:
+            segment = _metadata_group_value(result, field) or _metadata_group_value(baseline, field)
+            if segment is None:
+                continue
+            grouped.setdefault((model, field_label, segment), []).append((result, baseline, delta))
+
+    summaries: list[BaselineSegmentDeltaSummary] = []
+    for (model, field_label, segment), segment_pairs in grouped.items():
+        deltas = [delta for _result, _baseline, delta in segment_pairs]
+        regressions = [pair for pair in segment_pairs if pair[2] < 0]
+        issue_counts = _segment_issue_counts([result for result, _baseline, _delta in regressions])
+        status_counts = _segment_status_counts([result for result, _baseline, _delta in regressions])
+        summaries.append(
+            BaselineSegmentDeltaSummary(
+                model=model,
+                field_label=field_label,
+                segment=segment,
+                count=len(segment_pairs),
+                average_delta=statistics.mean(deltas),
+                wins=sum(1 for delta in deltas if delta > 0),
+                ties=sum(1 for delta in deltas if delta == 0),
+                losses=sum(1 for delta in deltas if delta < 0),
+                fix_areas=_fix_areas_for_segment(issue_counts, status_counts),
+                largest_regressions=sorted(
+                    regressions,
+                    key=lambda item: (item[2], item[0].case_id),
+                )[:regression_limit],
+            )
+        )
+    return sorted(
+        summaries,
+        key=lambda item: (item.average_delta, item.model, item.field_label, item.segment),
+    )[:limit]
+
+
+def _matched_baseline_pairs(
+    results: list[EvaluationResult],
+    *,
+    baseline_model: str,
+) -> list[tuple[EvaluationResult, EvaluationResult, int]]:
+    baseline_by_case: dict[str, EvaluationResult] = {}
+    candidates: list[EvaluationResult] = []
+    for result in results:
+        model = _metadata_group_value(result, "synthesis_model")
+        source_case_id = _source_case_key(result)
+        if model is None or source_case_id is None:
+            continue
+        if model == baseline_model:
+            existing = baseline_by_case.get(source_case_id)
+            if existing is None or result.status == "ok":
+                baseline_by_case[source_case_id] = result
+        else:
+            candidates.append(result)
+
+    pairs: list[tuple[EvaluationResult, EvaluationResult, int]] = []
+    for result in candidates:
+        source_case_id = _source_case_key(result)
+        if source_case_id is None:
+            continue
+        baseline = baseline_by_case.get(source_case_id)
+        if baseline is None:
+            continue
+        pairs.append((result, baseline, result.overall_score - baseline.overall_score))
+    return pairs
+
+
+def _render_baseline_segment_deltas(items: list[BaselineSegmentDeltaSummary]) -> str:
+    if not items:
+        return (
+            '<div class="metric"><strong class="muted">'
+            "No matched baseline category or slice regressions available"
+            "</strong></div>"
+        )
+
+    rows = "\n".join(_render_baseline_segment_delta_row(item) for item in items)
+    return f"""<table>
+      <thead>
+        <tr>
+          <th>Compared Model</th>
+          <th>Segment</th>
+          <th>Matched Cases</th>
+          <th>Avg Delta</th>
+          <th>Wins / Ties / Losses</th>
+          <th>Likely Fix Areas</th>
+          <th>Regression Examples</th>
+        </tr>
+      </thead>
+      <tbody>
+        {rows}
+      </tbody>
+    </table>"""
+
+
+def _render_baseline_segment_delta_row(item: BaselineSegmentDeltaSummary) -> str:
+    regression_markup = "".join(
+        "<li>"
+        f"<span>{html.escape(_source_case_key(result) or result.case_id)}</span> "
+        f"<strong>{delta:+d}</strong>"
+        f"<br><span class=\"muted\">{html.escape(result.case_id)}: "
+        f"{result.overall_score} vs baseline {baseline.overall_score}</span>"
+        "</li>"
+        for result, baseline, delta in item.largest_regressions
+    )
+    if not regression_markup:
+        regression_markup = '<li><span class="muted">No regressions</span></li>'
+    fix_markup = _render_inline_tags(item.fix_areas, empty_label="Inspect judge rationale")
+    segment = f"{item.field_label}: {item.segment.replace('_', ' ')}"
+    return f"""<tr class="{_delta_severity_class(item.average_delta)}">
+  <td data-label="Compared Model">{html.escape(item.model)}</td>
+  <td data-label="Segment">{html.escape(segment)}</td>
+  <td data-label="Matched Cases">{item.count}</td>
+  <td data-label="Avg Delta"><strong>{item.average_delta:+.1f}</strong></td>
+  <td data-label="Wins / Ties / Losses">{item.wins} / {item.ties} / {item.losses}</td>
+  <td data-label="Likely Fix Areas">{fix_markup}</td>
+  <td data-label="Regression Examples"><ul class="counts">{regression_markup}</ul></td>
 </tr>"""
 
 
