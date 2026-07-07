@@ -407,6 +407,7 @@
           <option value="calendar_schedule_delivery">Calendar schedule delivery</option>
           <option value="instruction_conflict_resolution_delivery">Instruction conflict resolution delivery</option>
           <option value="tool_result_state_delivery">Tool result state delivery</option>
+          <option value="authorization_access_delivery">Authorization access delivery</option>
         </select>
         <select id="label-filter" aria-label="Filter by label">
           <option value="">All labels</option>
@@ -451,7 +452,7 @@
   --cases examples/tts_multiturn_cases.jsonl \
   --judge-provider gemini \
   --judge-samples 3 \
-  --limit 410 \
+  --limit 415 \
   --out runs/leaderboard/chatterbox</code></pre>
 
     <pre><code>oaj autojudge-local-tts \
@@ -460,7 +461,7 @@
   --cases examples/tts_multiturn_cases.jsonl \
   --judge-provider gemini \
   --judge-samples 3 \
-  --limit 410 \
+  --limit 415 \
   --out runs/leaderboard/kokoro</code></pre>
 
     <pre><code>oaj autojudge-local-tts \
@@ -469,7 +470,7 @@
   --cases examples/tts_multiturn_cases.jsonl \
   --judge-provider gemini \
   --judge-samples 3 \
-  --limit 410 \
+  --limit 415 \
   --out runs/leaderboard/qwen3-tts</code></pre>
 
     <p>
@@ -481,7 +482,7 @@
   --cases examples/tts_multiturn_cases.jsonl \
   --judge-provider gemini \
   --judge-samples 3 \
-  --limit 410 \
+  --limit 415 \
   --out runs/leaderboard/chatterbox</code></pre>
 
     <p>
@@ -526,16 +527,16 @@
     <h2>Sample Report Preview</h2>
     <section class="grid" aria-label="Sample report metrics">
       <div class="metric"><span>Models</span><strong>3</strong></div>
-      <div class="metric"><span>Shared Eval Cases</span><strong>410</strong></div>
+      <div class="metric"><span>Shared Eval Cases</span><strong>415</strong></div>
       <div class="metric"><span>Judge Samples</span><strong>3x</strong></div>
       <div class="metric"><span>Top Avg</span><strong>91.2</strong></div>
       <div class="metric"><span>Lowest Avg</span><strong>84.7</strong></div>
-      <div class="metric"><span>Total Judgments</span><strong>3690</strong></div>
+      <div class="metric"><span>Total Judgments</span><strong>3735</strong></div>
     </section>
 
     <h2>Eval Set Samples</h2>
     <p>
-      The public demo eval set contains 410 synthetic, public-safe cases grouped into research-backed
+      The public demo eval set contains 415 synthetic, public-safe cases grouped into research-backed
       TTS dimensions. Each category below contributes five shared cases that every model synthesizes
       before Gemini judges the generated audio.
     </p>
@@ -3407,6 +3408,41 @@
             <p><strong>Slice:</strong> <code>map_12_minute_drive_transit_unavailable_fallback</code></p>
             <p><strong>Prompt:</strong> Read this tool comparison so the two sources and the recommended fallback do not blur together.</p>
             <p><strong>Target:</strong> The map tool shows a 12 minute drive, while transit data is unavailable; use the driving estimate for now.</p>
+          </article>
+        </div>
+      </details>
+      <details class="sample-group" data-category="authorization_access_delivery">
+        <summary><span>Authorization Access Delivery</span><strong>5 cases</strong></summary>
+        <div class="sample-list">
+          <article class="sample-card">
+            <h3><code>tts-authorization-access-delivery-role-scope-001</code></h3>
+            <p><strong>Slice:</strong> <code>viewer_access_project_atlas_cannot_approve_budget</code></p>
+            <p><strong>Prompt:</strong> Read this access note so the role scope and denied action stay separate.</p>
+            <p><strong>Target:</strong> Rina has viewer access to Project Atlas, but she cannot approve budget changes.</p>
+          </article>
+          <article class="sample-card">
+            <h3><code>tts-authorization-access-delivery-expiring-access-001</code></h3>
+            <p><strong>Slice:</strong> <code>temporary_lab_access_expires_friday_6pm_unless_extended</code></p>
+            <p><strong>Prompt:</strong> Read this temporary access reminder so the expiration time is not mistaken for the start time.</p>
+            <p><strong>Target:</strong> Temporary lab access starts now and expires Friday at 6 PM unless Security extends it.</p>
+          </article>
+          <article class="sample-card">
+            <h3><code>tts-authorization-access-delivery-step-up-auth-001</code></h3>
+            <p><strong>Slice:</strong> <code>password_accepted_payroll_export_requires_manager_approval</code></p>
+            <p><strong>Prompt:</strong> Read this login result so the completed sign-in and required extra approval remain distinct.</p>
+            <p><strong>Target:</strong> Your password was accepted, but payroll export still requires manager approval.</p>
+          </article>
+          <article class="sample-card">
+            <h3><code>tts-authorization-access-delivery-delegated-permission-001</code></h3>
+            <p><strong>Slice:</strong> <code>shift_lead_unlock_bay_3_assistants_view_only</code></p>
+            <p><strong>Prompt:</strong> Read this delegation rule so who can act and who can only view are unmistakable.</p>
+            <p><strong>Target:</strong> Only the shift lead may unlock Bay 3; assistants may view the checklist but not open the door.</p>
+          </article>
+          <article class="sample-card">
+            <h3><code>tts-authorization-access-delivery-revoked-access-001</code></h3>
+            <p><strong>Slice:</strong> <code>remove_admin_group_keep_read_only_incident_archive</code></p>
+            <p><strong>Prompt:</strong> Read this account update so the revoked access and remaining access are not blended.</p>
+            <p><strong>Target:</strong> Remove Leo from the admin group, but keep his read-only access to the incident archive.</p>
           </article>
         </div>
       </details>

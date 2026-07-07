@@ -242,10 +242,13 @@ runs can map private prompts into the same categories without copying private ro
 - `tool_result_state_delivery`: tool-result summaries, partial results, stale-data caveats,
   permission blocks, and unavailable sources where speech must preserve which action succeeded,
   which action failed or timed out, and what fallback or next step remains active.
+- `authorization_access_delivery`: role scopes, expiring access, step-up approval, delegated
+  permissions, and revoked-versus-retained access where speech must preserve who can do what, when
+  the permission changes, and which actions remain blocked.
 
 ## Manifest Contract
 
-The public comparison manifest is intentionally balanced at 410 cases for now: 82 categories with 5
+The public comparison manifest is intentionally balanced at 415 cases for now: 83 categories with 5
 cases each. Expansion should add complete five-case category batches before deepening existing
 categories.
 

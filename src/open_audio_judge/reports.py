@@ -1198,6 +1198,14 @@ TTS_CATEGORY_GUIDANCE = {
             "fallback and next-action prosody",
         ],
     ),
+    "authorization_access_delivery": (
+        "role scopes, expiring access, step-up approval, delegated permissions, and revoked-versus-retained access",
+        [
+            "permission and role-scope prosody",
+            "allow, deny, expiry, and approval-state distinction",
+            "actor, resource, and blocked-action attachment",
+        ],
+    ),
 }
 
 
