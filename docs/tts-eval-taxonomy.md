@@ -93,10 +93,13 @@ runs can map private prompts into the same categories without copying private ro
   preserve intent beyond literal words.
 - `symbolic_math_reading`: formulas, conditional probability, polynomial terms, coordinate pairs,
   ratios, variables, signs, and units where exact symbolic structure must remain intelligible.
+- `multi_speaker_attribution`: narrator/quote boundaries, labeled speaker turns, handoff ownership,
+  embedded reported speech, and panel Q&A roles where the right words must stay attached to the
+  right speaker or actor.
 
 ## Manifest Contract
 
-The public comparison manifest is intentionally balanced at 155 cases for now: 31 categories with 5
+The public comparison manifest is intentionally balanced at 160 cases for now: 32 categories with 5
 cases each. Expansion should add complete five-case category batches before deepening existing
 categories.
 

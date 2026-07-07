@@ -40,7 +40,7 @@ def test_tts_leaderboard_demo_page_documents_workflow() -> None:
         "function applyFilters()",
         "function sortRows()",
         "Eval Set Samples",
-        "The public demo eval set contains 155 synthetic, public-safe cases",
+        "The public demo eval set contains 160 synthetic, public-safe cases",
         "Paralinguistics",
         "Instruction Following",
         "Speaker Voice Consistency",
@@ -62,6 +62,7 @@ def test_tts_leaderboard_demo_page_documents_workflow() -> None:
         "tts-compositional-style-control-quiet-urgent-clinic-001",
         "tts-disfluency-repair-control-false-start-001",
         "tts-lexical-stress-disambiguation-record-001",
+        "tts-multi-speaker-attribution-quote-boundary-001",
         "Model Leaderboard",
         "Category Leaderboard",
         "no error: 104",
@@ -103,7 +104,7 @@ def test_tts_multiturn_examples_cover_requested_categories() -> None:
         category = record["metadata"]["eval_category"]
         categories[category] = categories.get(category, 0) + 1
 
-    assert len(records) == 155
+    assert len(records) == 160
     assert categories == {
         "paralinguistics": 5,
         "instruction_following": 5,
@@ -136,6 +137,7 @@ def test_tts_multiturn_examples_cover_requested_categories() -> None:
         "lexical_stress_disambiguation": 5,
         "pragmatic_intent_delivery": 5,
         "symbolic_math_reading": 5,
+        "multi_speaker_attribution": 5,
     }
     assert all(record["turns"] for record in records)
     assert all(record["reference_text"] for record in records)
