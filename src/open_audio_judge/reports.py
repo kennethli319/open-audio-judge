@@ -1006,6 +1006,14 @@ TTS_CATEGORY_GUIDANCE = {
             "field attachment and value ordering",
         ],
     ),
+    "commitment_scope_delivery": (
+        "apologies, partial commitments, clinical limits, security prerequisites, and operations promises",
+        [
+            "commitment and refusal prosody",
+            "conditional boundary phrase grouping",
+            "scope-limited promise text faithfulness",
+        ],
+    ),
 }
 
 

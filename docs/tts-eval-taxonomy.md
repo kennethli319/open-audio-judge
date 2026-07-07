@@ -171,10 +171,13 @@ runs can map private prompts into the same categories without copying private ro
   broadly negated.
 - `slot_value_pairing_delivery`: form fields, inventory rows, calendar records, lab requisitions,
   and API status payloads where spoken labels must stay attached to their exact values.
+- `commitment_scope_delivery`: apologies, partial commitments, clinical support limits, security
+  prerequisites, and operations promises where prosody must preserve what is committed, refused,
+  conditional, or explicitly outside scope.
 
 ## Manifest Contract
 
-The public comparison manifest is intentionally balanced at 290 cases for now: 58 categories with 5
+The public comparison manifest is intentionally balanced at 295 cases for now: 59 categories with 5
 cases each. Expansion should add complete five-case category batches before deepening existing
 categories.
 
