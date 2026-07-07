@@ -404,7 +404,7 @@
   --cases examples/tts_multiturn_cases.jsonl \
   --judge-provider gemini \
   --judge-samples 3 \
-  --limit 175 \
+  --limit 180 \
   --out runs/leaderboard/chatterbox</code></pre>
 
     <pre><code>oaj autojudge-local-tts \
@@ -413,7 +413,7 @@
   --cases examples/tts_multiturn_cases.jsonl \
   --judge-provider gemini \
   --judge-samples 3 \
-  --limit 175 \
+  --limit 180 \
   --out runs/leaderboard/kokoro</code></pre>
 
     <pre><code>oaj autojudge-local-tts \
@@ -422,7 +422,7 @@
   --cases examples/tts_multiturn_cases.jsonl \
   --judge-provider gemini \
   --judge-samples 3 \
-  --limit 175 \
+  --limit 180 \
   --out runs/leaderboard/qwen3-tts</code></pre>
 
     <p>
@@ -434,7 +434,7 @@
   --cases examples/tts_multiturn_cases.jsonl \
   --judge-provider gemini \
   --judge-samples 3 \
-  --limit 175 \
+  --limit 180 \
   --out runs/leaderboard/chatterbox</code></pre>
 
     <p>
@@ -479,16 +479,16 @@
     <h2>Sample Report Preview</h2>
     <section class="grid" aria-label="Sample report metrics">
       <div class="metric"><span>Models</span><strong>3</strong></div>
-      <div class="metric"><span>Shared Eval Cases</span><strong>175</strong></div>
+      <div class="metric"><span>Shared Eval Cases</span><strong>180</strong></div>
       <div class="metric"><span>Judge Samples</span><strong>3x</strong></div>
       <div class="metric"><span>Top Avg</span><strong>91.2</strong></div>
       <div class="metric"><span>Lowest Avg</span><strong>84.7</strong></div>
-      <div class="metric"><span>Total Judgments</span><strong>1575</strong></div>
+      <div class="metric"><span>Total Judgments</span><strong>1620</strong></div>
     </section>
 
     <h2>Eval Set Samples</h2>
     <p>
-      The public demo eval set contains 175 synthetic, public-safe cases grouped into research-backed
+      The public demo eval set contains 180 synthetic, public-safe cases grouped into research-backed
       TTS dimensions. Each category below contributes five shared cases that every model synthesizes
       before Gemini judges the generated audio.
     </p>
@@ -1715,6 +1715,41 @@
             <p><strong>Slice:</strong> <code>same_different_access_reference</code></p>
             <p><strong>Prompt:</strong> Read this access-control instruction so same and different are easy to distinguish.</p>
             <p><strong>Target:</strong> Use the same passcode for the gate, but a different passcode for the storage room.</p>
+          </article>
+        </div>
+      </details>
+      <details class="sample-group" data-category="measurement_unit_disambiguation">
+        <summary><span>Measurement Unit Disambiguation</span><strong>5 cases</strong></summary>
+        <div class="sample-list">
+          <article class="sample-card">
+            <h3><code>tts-measurement-unit-disambiguation-medication-label-001</code></h3>
+            <p><strong>Slice:</strong> <code>mg_ml_medication_label_contrast</code></p>
+            <p><strong>Prompt:</strong> Read this simulated medication label so milligrams and milliliters cannot be confused.</p>
+            <p><strong>Target:</strong> The label lists 5 mg of active ingredient in each 2 mL measured dose.</p>
+          </article>
+          <article class="sample-card">
+            <h3><code>tts-measurement-unit-disambiguation-engineering-gap-001</code></h3>
+            <p><strong>Slice:</strong> <code>mm_m_engineering_gap_contrast</code></p>
+            <p><strong>Prompt:</strong> Read this engineering note so millimeters and meters stay clearly different.</p>
+            <p><strong>Target:</strong> Set the bracket gap to 0.5 mm, not 0.5 m, before tightening the frame.</p>
+          </article>
+          <article class="sample-card">
+            <h3><code>tts-measurement-unit-disambiguation-latency-window-001</code></h3>
+            <p><strong>Slice:</strong> <code>ms_min_performance_metric_contrast</code></p>
+            <p><strong>Prompt:</strong> Read this performance summary so milliseconds and minutes do not blur together.</p>
+            <p><strong>Target:</strong> Average latency was 18 ms, while the batch window stayed at 18 min.</p>
+          </article>
+          <article class="sample-card">
+            <h3><code>tts-measurement-unit-disambiguation-package-weight-001</code></h3>
+            <p><strong>Slice:</strong> <code>lb_oz_ml_shipping_sample_units</code></p>
+            <p><strong>Prompt:</strong> Read this shipping line so pounds, ounces, and milliliters are each intelligible.</p>
+            <p><strong>Target:</strong> Package A weighs 3 lb 4 oz, and the sample vial contains 30 mL.</p>
+          </article>
+          <article class="sample-card">
+            <h3><code>tts-measurement-unit-disambiguation-power-capacity-001</code></h3>
+            <p><strong>Slice:</strong> <code>w_wh_device_spec_contrast</code></p>
+            <p><strong>Prompt:</strong> Read this device spec so watts and watt-hours are not treated as the same unit.</p>
+            <p><strong>Target:</strong> The charger is rated for 65 W, and the battery capacity is 55 Wh.</p>
           </article>
         </div>
       </details>

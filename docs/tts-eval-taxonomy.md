@@ -104,10 +104,13 @@ runs can map private prompts into the same categories without copying private ro
 - `referential_cohesion`: former/latter references, pronoun antecedents, this/that contrasts,
   previous/next warnings, and same/different conditions where spoken grouping must preserve which
   entity or option is being referenced.
+- `measurement_unit_disambiguation`: abbreviated and confusable measurement units such as mg/mL,
+  mm/m, ms/min, lb/oz/mL, and W/Wh where TTS must preserve exact unit meaning under realistic
+  clinical, engineering, logistics, and device-spec wording.
 
 ## Manifest Contract
 
-The public comparison manifest is intentionally balanced at 175 cases for now: 35 categories with 5
+The public comparison manifest is intentionally balanced at 180 cases for now: 36 categories with 5
 cases each. Expansion should add complete five-case category batches before deepening existing
 categories.
 
