@@ -189,10 +189,13 @@ runs can map private prompts into the same categories without copying private ro
 - `acronym_initialism_delivery`: spoken acronyms, letter-by-letter initialisms, medical and
   technical abbreviations, mixed acronym-number identifiers, and confusable product suffixes where
   text normalization must preserve intelligibility and exact letter/digit boundaries.
+- `spatial_relation_delivery`: above/below, inside/outside, left/right, behind/in front, and
+  under/over relations where prosody must keep spatial words, objects, and rejected alternatives
+  attached to the correct location.
 
 ## Manifest Contract
 
-The public comparison manifest is intentionally balanced at 320 cases for now: 64 categories with 5
+The public comparison manifest is intentionally balanced at 325 cases for now: 65 categories with 5
 cases each. Expansion should add complete five-case category batches before deepening existing
 categories.
 

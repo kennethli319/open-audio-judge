@@ -389,6 +389,7 @@
           <option value="syntactic_attachment_delivery">Syntactic attachment delivery</option>
           <option value="quantifier_scope_delivery">Quantifier scope delivery</option>
           <option value="acronym_initialism_delivery">Acronym initialism delivery</option>
+          <option value="spatial_relation_delivery">Spatial relation delivery</option>
         </select>
         <select id="label-filter" aria-label="Filter by label">
           <option value="">All labels</option>
@@ -433,7 +434,7 @@
   --cases examples/tts_multiturn_cases.jsonl \
   --judge-provider gemini \
   --judge-samples 3 \
-  --limit 320 \
+  --limit 325 \
   --out runs/leaderboard/chatterbox</code></pre>
 
     <pre><code>oaj autojudge-local-tts \
@@ -442,7 +443,7 @@
   --cases examples/tts_multiturn_cases.jsonl \
   --judge-provider gemini \
   --judge-samples 3 \
-  --limit 320 \
+  --limit 325 \
   --out runs/leaderboard/kokoro</code></pre>
 
     <pre><code>oaj autojudge-local-tts \
@@ -451,7 +452,7 @@
   --cases examples/tts_multiturn_cases.jsonl \
   --judge-provider gemini \
   --judge-samples 3 \
-  --limit 320 \
+  --limit 325 \
   --out runs/leaderboard/qwen3-tts</code></pre>
 
     <p>
@@ -463,7 +464,7 @@
   --cases examples/tts_multiturn_cases.jsonl \
   --judge-provider gemini \
   --judge-samples 3 \
-  --limit 320 \
+  --limit 325 \
   --out runs/leaderboard/chatterbox</code></pre>
 
     <p>
@@ -508,16 +509,16 @@
     <h2>Sample Report Preview</h2>
     <section class="grid" aria-label="Sample report metrics">
       <div class="metric"><span>Models</span><strong>3</strong></div>
-      <div class="metric"><span>Shared Eval Cases</span><strong>320</strong></div>
+      <div class="metric"><span>Shared Eval Cases</span><strong>325</strong></div>
       <div class="metric"><span>Judge Samples</span><strong>3x</strong></div>
       <div class="metric"><span>Top Avg</span><strong>91.2</strong></div>
       <div class="metric"><span>Lowest Avg</span><strong>84.7</strong></div>
-      <div class="metric"><span>Total Judgments</span><strong>2880</strong></div>
+      <div class="metric"><span>Total Judgments</span><strong>2925</strong></div>
     </section>
 
     <h2>Eval Set Samples</h2>
     <p>
-      The public demo eval set contains 320 synthetic, public-safe cases grouped into research-backed
+      The public demo eval set contains 325 synthetic, public-safe cases grouped into research-backed
       TTS dimensions. Each category below contributes five shared cases that every model synthesizes
       before Gemini judges the generated audio.
     </p>
@@ -2759,6 +2760,41 @@
             <p><strong>Slice:</strong> <code>nfc_ax10_not_ax1o_model_contrast</code></p>
             <p><strong>Prompt:</strong> Read this product support note so the product acronym, model number, and similar-looking suffix do not merge.</p>
             <p><strong>Target:</strong> Pair the NFC tag with model AX-10, not model AX-1O, before reopening the support ticket.</p>
+          </article>
+        </div>
+      </details>
+      <details class="sample-group" data-category="spatial_relation_delivery">
+        <summary><span>Spatial Relation Delivery</span><strong>5 cases</strong></summary>
+        <div class="sample-list">
+          <article class="sample-card">
+            <h3><code>tts-spatial-relation-delivery-tray-placement-001</code></h3>
+            <p><strong>Slice:</strong> <code>lab_above_not_below_monitor</code></p>
+            <p><strong>Prompt:</strong> Read this lab setup note so above and below cannot be swapped.</p>
+            <p><strong>Target:</strong> Set the blue tray above the monitor, not below it, before starting the calibration.</p>
+          </article>
+          <article class="sample-card">
+            <h3><code>tts-spatial-relation-delivery-pickup-point-001</code></h3>
+            <p><strong>Slice:</strong> <code>pickup_outside_east_not_lobby_west</code></p>
+            <p><strong>Prompt:</strong> Read this pickup instruction so outside, east entrance, and not inside remain clear.</p>
+            <p><strong>Target:</strong> Meet the driver outside the east entrance, not inside the lobby or beside the west elevator.</p>
+          </article>
+          <article class="sample-card">
+            <h3><code>tts-spatial-relation-delivery-ui-card-001</code></h3>
+            <p><strong>Slice:</strong> <code>ui_left_column_right_edge_attachment</code></p>
+            <p><strong>Prompt:</strong> Read this interface instruction so left column and right edge attach to the right objects.</p>
+            <p><strong>Target:</strong> Move the task card to the left column, then place the red flag on its right edge.</p>
+          </article>
+          <article class="sample-card">
+            <h3><code>tts-spatial-relation-delivery-warehouse-bins-001</code></h3>
+            <p><strong>Slice:</strong> <code>warehouse_a3_behind_a4_front_shelf</code></p>
+            <p><strong>Prompt:</strong> Read this warehouse note so behind, in front, and the two bin labels are easy to transcribe.</p>
+            <p><strong>Target:</strong> Place bin A3 behind shelf seven, and keep bin A4 in front of the same shelf.</p>
+          </article>
+          <article class="sample-card">
+            <h3><code>tts-spatial-relation-delivery-document-layout-001</code></h3>
+            <p><strong>Slice:</strong> <code>document_signature_under_stamp_over</code></p>
+            <p><strong>Prompt:</strong> Read this document review note so under, over, date line, and case number stay attached correctly.</p>
+            <p><strong>Target:</strong> The signature is under the date line, while the approval stamp sits over the case number.</p>
           </article>
         </div>
       </details>

@@ -1054,6 +1054,14 @@ TTS_CATEGORY_GUIDANCE = {
             "domain-specific abbreviation pronunciation",
         ],
     ),
+    "spatial_relation_delivery": (
+        "above/below, inside/outside, left/right, behind/in front, and under/over location relations",
+        [
+            "spatial phrase grouping",
+            "object-location attachment prosody",
+            "contrastive spatial relation intelligibility",
+        ],
+    ),
 }
 
 
