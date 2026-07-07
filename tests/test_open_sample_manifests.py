@@ -38,6 +38,7 @@ TTS_RESEARCH_CATEGORIES = {
     "voice_conversion_similarity",
     "accent_dialect_handling",
     "artifact_suppression",
+    "temporal_rhythm_control",
 }
 TTS_REQUIRED_METADATA = {
     "language",
@@ -91,7 +92,7 @@ def test_open_sample_docs_list_every_case_id() -> None:
 def test_tts_multiturn_manifest_has_research_metadata_contract() -> None:
     cases = load_cases(TTS_MULTITURN_MANIFEST)
 
-    assert len(cases) == 105
+    assert len(cases) == 110
     assert len({case.id for case in cases}) == len(cases)
     assert len({case.metadata["tts_slice"] for case in cases}) == len(cases)
     assert {case.metadata["eval_category"] for case in cases} == TTS_RESEARCH_CATEGORIES

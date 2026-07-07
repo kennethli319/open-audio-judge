@@ -67,10 +67,12 @@ runs can map private prompts into the same categories without copying private ro
   place-name clarity, acronym preservation, and intelligibility without caricature.
 - `artifact_suppression`: plosive and sibilance control, repeat-loop resistance, clean silence
   boundaries, quiet tail stability, and artifact-free intelligibility under difficult acoustics.
+- `temporal_rhythm_control`: countdown spacing, relative pause duration, tempo ramps, repeated
+  phrase rhythm, and short-clause timing that should stay spoken rather than sung or flattened.
 
 ## Manifest Contract
 
-The public comparison manifest is intentionally balanced at 105 cases for now: 21 categories with 5
+The public comparison manifest is intentionally balanced at 110 cases for now: 22 categories with 5
 cases each. Expansion should add complete five-case category batches before deepening existing
 categories.
 
