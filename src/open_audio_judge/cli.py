@@ -29,7 +29,8 @@ from open_audio_judge.local_tts import (
 )
 from open_audio_judge.prompting import load_prompt
 from open_audio_judge.providers import build_provider
-from open_audio_judge.runner import evaluate_cases, load_cases
+from open_audio_judge.reports import write_html_report
+from open_audio_judge.runner import evaluate_cases, load_cases, load_results_jsonl, write_results_jsonl
 
 console = Console()
 app = typer.Typer(no_args_is_help=True, help="Open Audio Judge CLI")
@@ -420,6 +421,48 @@ def build_tts_cases_command(
             include_example_source_ids=include_summary_examples,
         )
         console.print(f"Summary: {summary_out}")
+
+
+@app.command("report")
+def report_command(
+    results: Annotated[
+        list[Path],
+        typer.Option(
+            "--results",
+            "-r",
+            help="One or more results.jsonl files to combine into a single report.",
+        ),
+    ],
+    out: Annotated[
+        Path,
+        typer.Option("--out", "-o", help="Output directory for the combined report."),
+    ] = Path("runs/comparison-report"),
+) -> None:
+    combined_results = [
+        result
+        for results_path in results
+        for result in load_results_jsonl(results_path)
+    ]
+    if not combined_results:
+        raise typer.BadParameter("No evaluation results were loaded.")
+
+    out.mkdir(parents=True, exist_ok=True)
+    combined_path = out / "results.jsonl"
+    report_path = out / "report.html"
+    write_results_jsonl(combined_results, combined_path)
+    write_html_report(combined_results, report_path)
+    model_count = len(
+        {
+            model
+            for result in combined_results
+            if isinstance((model := result.metadata.get("synthesis_model")), str) and model.strip()
+        }
+    )
+    console.print(f"[bold]Wrote combined report for {len(combined_results)} results[/bold]")
+    if model_count:
+        console.print(f"Models:  {model_count}")
+    console.print(f"Results: {combined_path}")
+    console.print(f"Report:  {report_path}")
 
 
 @app.command("serve")

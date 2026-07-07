@@ -145,6 +145,14 @@ def write_results_jsonl(results: list[EvaluationResult], path: Path) -> Path:
     return path
 
 
+def load_results_jsonl(path: Path) -> list[EvaluationResult]:
+    return [
+        EvaluationResult.model_validate(json.loads(line))
+        for line in path.read_text(encoding="utf-8").splitlines()
+        if line.strip()
+    ]
+
+
 def _provider_error_metadata(exc: Exception) -> dict[str, str]:
     message = str(exc).strip().replace("\n", " ")
     if len(message) > 500:

@@ -259,6 +259,16 @@
   --limit 30 \
   --out runs/leaderboard/chatterbox</code></pre>
 
+    <p>
+      Once each model run has written <code>judge-report/results.jsonl</code>, combine those result
+      files into one side-by-side report:
+    </p>
+    <pre><code>oaj report \
+  --results runs/leaderboard/chatterbox/judge-report/results.jsonl \
+  --results runs/leaderboard/kokoro/judge-report/results.jsonl \
+  --results runs/leaderboard/qwen3-tts/judge-report/results.jsonl \
+  --out runs/leaderboard/comparison-report</code></pre>
+
     <h2>Expected Output Files</h2>
     <table>
       <thead>

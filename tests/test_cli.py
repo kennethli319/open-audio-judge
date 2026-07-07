@@ -379,6 +379,82 @@ def test_build_tts_cases_writes_metadata_summary(tmp_path: Path) -> None:
     assert "source_task" not in written_case["metadata"]
 
 
+def test_report_cli_combines_model_result_files(tmp_path: Path) -> None:
+    first = tmp_path / "chatterbox-results.jsonl"
+    second = tmp_path / "kokoro-results.jsonl"
+    out = tmp_path / "combined"
+    first.write_text(
+        json.dumps(
+            {
+                "case_id": "tts-date-chatterbox",
+                "task": "tts_naturalness",
+                "judge_id": "tts_naturalness",
+                "judge_version": "0.1.0",
+                "provider": "mock",
+                "overall_score": 88,
+                "reason": "Clear date and number delivery.",
+                "error_categories": ["no_error"],
+                "label": "accurate",
+                "metadata": {
+                    "eval_category": "information_tuning",
+                    "tts_slice": "dates_times",
+                    "synthesis_model": "mlx-community/chatterbox-turbo-6bit",
+                },
+            }
+        )
+        + "\n",
+        encoding="utf-8",
+    )
+    second.write_text(
+        json.dumps(
+            {
+                "case_id": "tts-date-kokoro",
+                "task": "tts_naturalness",
+                "judge_id": "tts_naturalness",
+                "judge_version": "0.1.0",
+                "provider": "mock",
+                "overall_score": 62,
+                "reason": "The date was rushed and hard to understand.",
+                "error_categories": ["intelligibility_issue"],
+                "label": "needs_review",
+                "metadata": {
+                    "eval_category": "information_tuning",
+                    "tts_slice": "dates_times",
+                    "synthesis_model": "mlx-community/Kokoro-82M-4bit",
+                },
+            }
+        )
+        + "\n",
+        encoding="utf-8",
+    )
+
+    result = CliRunner().invoke(
+        app,
+        [
+            "report",
+            "--results",
+            str(first),
+            "--results",
+            str(second),
+            "--out",
+            str(out),
+        ],
+    )
+
+    assert result.exit_code == 0
+    assert (out / "results.jsonl").exists()
+    assert (out / "report.html").exists()
+    report_html = (out / "report.html").read_text(encoding="utf-8")
+    combined = [json.loads(line) for line in (out / "results.jsonl").read_text().splitlines()]
+    assert len(combined) == 2
+    assert "Wrote combined report for 2 results" in result.output
+    assert "Models:  2" in result.output
+    assert "Model-Category Action Matrix" in report_html
+    assert "mlx-community/chatterbox-turbo-6bit" in report_html
+    assert "mlx-community/Kokoro-82M-4bit" in report_html
+    assert "intelligibility" in report_html
+
+
 def test_build_tts_cases_cli_can_include_source_task(tmp_path: Path) -> None:
     source = tmp_path / "source.jsonl"
     out = tmp_path / "cases.jsonl"

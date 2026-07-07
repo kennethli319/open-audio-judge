@@ -277,6 +277,20 @@ The command writes:
 Use `--judge-provider mock` for a cheap pipeline check. Use an audio-capable judge such as Gemini or
 a local Qwen/Qwen3-Omni endpoint for real perceptual judging.
 
+After running the same case file through multiple local TTS wrappers, combine their
+`judge-report/results.jsonl` files into one model-comparison report:
+
+```bash
+oaj report \
+  --results runs/leaderboard/chatterbox/judge-report/results.jsonl \
+  --results runs/leaderboard/kokoro/judge-report/results.jsonl \
+  --results runs/leaderboard/qwen3-tts/judge-report/results.jsonl \
+  --out runs/leaderboard/comparison-report
+```
+
+The combined report reuses the same score, category, slice, voice, language, weakest-segment, and
+model-category action matrix views across all supplied result files.
+
 For non-Chatterbox wrappers that accept the same `local-tts-speak` arguments, pass `--tts-bin` and
 `--synthesis-provider` so generated case metadata and report aggregates identify the actual local
 backend. Use `--tts-timeout-seconds` to fail a single stuck synthesis call with captured stdout and
