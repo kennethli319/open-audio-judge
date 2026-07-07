@@ -213,10 +213,13 @@ runs can map private prompts into the same categories without copying private ro
 - `deictic_reference_delivery`: this/that, here/there, now/then, previous/next, and
   screen-relative references where spoken anchoring must preserve which visible, temporal, or
   sequential referent receives each action.
+- `ellipsis_fragment_delivery`: short answers, clipped confirmations, label-value fragments,
+  headline-style updates, and repair fragments where TTS must preserve exact words without filling
+  in omitted context or flattening the fragment's pragmatic role.
 
 ## Manifest Contract
 
-The public comparison manifest is intentionally balanced at 360 cases for now: 72 categories with 5
+The public comparison manifest is intentionally balanced at 365 cases for now: 73 categories with 5
 cases each. Expansion should add complete five-case category batches before deepening existing
 categories.
 

@@ -1118,6 +1118,14 @@ TTS_CATEGORY_GUIDANCE = {
             "referent-to-action phrase grouping",
         ],
     ),
+    "ellipsis_fragment_delivery": (
+        "short answers, clipped confirmations, label-value fragments, headline-style updates, and repair fragments",
+        [
+            "fragment-aware phrase grouping",
+            "exact-text preservation without filler insertion",
+            "short-answer and repair prosody",
+        ],
+    ),
 }
 
 

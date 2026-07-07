@@ -395,6 +395,9 @@
           <option value="medication_dosage_delivery">Medication dosage delivery</option>
           <option value="morphosyntactic_marker_delivery">Morphosyntactic marker delivery</option>
           <option value="operator_precedence_delivery">Operator precedence delivery</option>
+          <option value="discourse_marker_intonation">Discourse marker intonation</option>
+          <option value="deictic_reference_delivery">Deictic reference delivery</option>
+          <option value="ellipsis_fragment_delivery">Ellipsis fragment delivery</option>
         </select>
         <select id="label-filter" aria-label="Filter by label">
           <option value="">All labels</option>
@@ -439,7 +442,7 @@
   --cases examples/tts_multiturn_cases.jsonl \
   --judge-provider gemini \
   --judge-samples 3 \
-  --limit 360 \
+  --limit 365 \
   --out runs/leaderboard/chatterbox</code></pre>
 
     <pre><code>oaj autojudge-local-tts \
@@ -448,7 +451,7 @@
   --cases examples/tts_multiturn_cases.jsonl \
   --judge-provider gemini \
   --judge-samples 3 \
-  --limit 360 \
+  --limit 365 \
   --out runs/leaderboard/kokoro</code></pre>
 
     <pre><code>oaj autojudge-local-tts \
@@ -457,7 +460,7 @@
   --cases examples/tts_multiturn_cases.jsonl \
   --judge-provider gemini \
   --judge-samples 3 \
-  --limit 360 \
+  --limit 365 \
   --out runs/leaderboard/qwen3-tts</code></pre>
 
     <p>
@@ -469,7 +472,7 @@
   --cases examples/tts_multiturn_cases.jsonl \
   --judge-provider gemini \
   --judge-samples 3 \
-  --limit 360 \
+  --limit 365 \
   --out runs/leaderboard/chatterbox</code></pre>
 
     <p>
@@ -514,7 +517,7 @@
     <h2>Sample Report Preview</h2>
     <section class="grid" aria-label="Sample report metrics">
       <div class="metric"><span>Models</span><strong>3</strong></div>
-      <div class="metric"><span>Shared Eval Cases</span><strong>360</strong></div>
+      <div class="metric"><span>Shared Eval Cases</span><strong>365</strong></div>
       <div class="metric"><span>Judge Samples</span><strong>3x</strong></div>
       <div class="metric"><span>Top Avg</span><strong>91.2</strong></div>
       <div class="metric"><span>Lowest Avg</span><strong>84.7</strong></div>
@@ -523,7 +526,7 @@
 
     <h2>Eval Set Samples</h2>
     <p>
-      The public demo eval set contains 360 synthetic, public-safe cases grouped into research-backed
+      The public demo eval set contains 365 synthetic, public-safe cases grouped into research-backed
       TTS dimensions. Each category below contributes five shared cases that every model synthesizes
       before Gemini judges the generated audio.
     </p>
@@ -3045,6 +3048,41 @@
             <p><strong>Slice:</strong> <code>previous_form_signature_next_form_date_only</code></p>
             <p><strong>Prompt:</strong> Read this form review note so previous and next refer to different records.</p>
             <p><strong>Target:</strong> The previous form needs a signature; the next form only needs the date field checked.</p>
+          </article>
+        </div>
+      </details>
+      <details class="sample-group" data-category="ellipsis_fragment_delivery">
+        <summary><span>Ellipsis Fragment Delivery</span><strong>5 cases</strong></summary>
+        <div class="sample-list">
+          <article class="sample-card">
+            <h3><code>tts-ellipsis-fragment-delivery-short-answer-001</code></h3>
+            <p><strong>Slice:</strong> <code>only_after_condition_fragment</code></p>
+            <p><strong>Prompt:</strong> Read this fragmentary answer naturally, without adding a subject, verb, or explanation.</p>
+            <p><strong>Target:</strong> Only after the badge light turns green.</p>
+          </article>
+          <article class="sample-card">
+            <h3><code>tts-ellipsis-fragment-delivery-confirmation-fragment-001</code></h3>
+            <p><strong>Slice:</strong> <code>yes_location_contrast_fragment</code></p>
+            <p><strong>Prompt:</strong> Read this confirmation fragment as a complete spoken reply, not as a trailing clause.</p>
+            <p><strong>Target:</strong> Yes, the west entrance, not the loading dock.</p>
+          </article>
+          <article class="sample-card">
+            <h3><code>tts-ellipsis-fragment-delivery-label-value-fragment-001</code></h3>
+            <p><strong>Slice:</strong> <code>clipped_status_label_value_fragments</code></p>
+            <p><strong>Prompt:</strong> Read this clipped status row so the label and value remain attached.</p>
+            <p><strong>Target:</strong> Current owner: Priya. Next checkpoint: Friday at 9.</p>
+          </article>
+          <article class="sample-card">
+            <h3><code>tts-ellipsis-fragment-delivery-headline-style-001</code></h3>
+            <p><strong>Slice:</strong> <code>headline_style_transit_update</code></p>
+            <p><strong>Prompt:</strong> Read this headline-style update with clear grouping, but do not make it sound like a dramatic news promo.</p>
+            <p><strong>Target:</strong> New delay on Line 3; shuttle buses from Central until noon.</p>
+          </article>
+          <article class="sample-card">
+            <h3><code>tts-ellipsis-fragment-delivery-repair-fragment-001</code></h3>
+            <p><strong>Slice:</strong> <code>not_tuesday_wednesday_repair_fragment</code></p>
+            <p><strong>Prompt:</strong> Read this correction fragment so the replacement value is clear without adding a full sentence.</p>
+            <p><strong>Target:</strong> Not Tuesday, Wednesday morning.</p>
           </article>
         </div>
       </details>
