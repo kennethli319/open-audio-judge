@@ -408,7 +408,7 @@
   --cases examples/tts_multiturn_cases.jsonl \
   --judge-provider gemini \
   --judge-samples 3 \
-  --limit 200 \
+  --limit 205 \
   --out runs/leaderboard/chatterbox</code></pre>
 
     <pre><code>oaj autojudge-local-tts \
@@ -417,7 +417,7 @@
   --cases examples/tts_multiturn_cases.jsonl \
   --judge-provider gemini \
   --judge-samples 3 \
-  --limit 200 \
+  --limit 205 \
   --out runs/leaderboard/kokoro</code></pre>
 
     <pre><code>oaj autojudge-local-tts \
@@ -426,7 +426,7 @@
   --cases examples/tts_multiturn_cases.jsonl \
   --judge-provider gemini \
   --judge-samples 3 \
-  --limit 200 \
+  --limit 205 \
   --out runs/leaderboard/qwen3-tts</code></pre>
 
     <p>
@@ -438,7 +438,7 @@
   --cases examples/tts_multiturn_cases.jsonl \
   --judge-provider gemini \
   --judge-samples 3 \
-  --limit 200 \
+  --limit 205 \
   --out runs/leaderboard/chatterbox</code></pre>
 
     <p>
@@ -483,16 +483,16 @@
     <h2>Sample Report Preview</h2>
     <section class="grid" aria-label="Sample report metrics">
       <div class="metric"><span>Models</span><strong>3</strong></div>
-      <div class="metric"><span>Shared Eval Cases</span><strong>200</strong></div>
+      <div class="metric"><span>Shared Eval Cases</span><strong>205</strong></div>
       <div class="metric"><span>Judge Samples</span><strong>3x</strong></div>
       <div class="metric"><span>Top Avg</span><strong>91.2</strong></div>
       <div class="metric"><span>Lowest Avg</span><strong>84.7</strong></div>
-      <div class="metric"><span>Total Judgments</span><strong>1800</strong></div>
+      <div class="metric"><span>Total Judgments</span><strong>1845</strong></div>
     </section>
 
     <h2>Eval Set Samples</h2>
     <p>
-      The public demo eval set contains 200 synthetic, public-safe cases grouped into research-backed
+      The public demo eval set contains 205 synthetic, public-safe cases grouped into research-backed
       TTS dimensions. Each category below contributes five shared cases that every model synthesizes
       before Gemini judges the generated audio.
     </p>
@@ -1894,6 +1894,41 @@
             <p><strong>Slice:</strong> <code>time_estimate_range_dependency</code></p>
             <p><strong>Prompt:</strong> Read this estimate with a range and dependency, so it does not sound like a fixed promise.</p>
             <p><strong>Target:</strong> Setup should take between fifteen and twenty minutes if the network test passes on the first try.</p>
+          </article>
+        </div>
+      </details>
+      <details class="sample-group" data-category="real_time_streaming_delivery">
+        <summary><span>Real Time Streaming Delivery</span><strong>5 cases</strong></summary>
+        <div class="sample-list">
+          <article class="sample-card">
+            <h3><code>tts-real-time-streaming-delivery-first-token-001</code></h3>
+            <p><strong>Slice:</strong> <code>first_token_transit_answer</code></p>
+            <p><strong>Prompt:</strong> Read this voice-assistant reply as if audio begins streaming immediately; the opening should be useful and not clipped.</p>
+            <p><strong>Target:</strong> Yes, the next train leaves from platform three in four minutes, so start walking now.</p>
+          </article>
+          <article class="sample-card">
+            <h3><code>tts-real-time-streaming-delivery-chunk-boundary-001</code></h3>
+            <p><strong>Slice:</strong> <code>chunk_boundary_step_sequence</code></p>
+            <p><strong>Prompt:</strong> Read this streamed troubleshooting answer with natural chunk boundaries, not as one breathless sentence.</p>
+            <p><strong>Target:</strong> First, reconnect the charging cable. Then wait ten seconds before pressing the power button again.</p>
+          </article>
+          <article class="sample-card">
+            <h3><code>tts-real-time-streaming-delivery-barge-in-repair-001</code></h3>
+            <p><strong>Slice:</strong> <code>barge_in_correction_resume</code></p>
+            <p><strong>Prompt:</strong> Read this after a user interrupts the assistant; acknowledge the correction and resume without sounding broken.</p>
+            <p><strong>Target:</strong> Got it, not the blue folder. Open the green folder labeled invoices and choose the April file.</p>
+          </article>
+          <article class="sample-card">
+            <h3><code>tts-real-time-streaming-delivery-short-alert-001</code></h3>
+            <p><strong>Slice:</strong> <code>low_latency_household_alert</code></p>
+            <p><strong>Prompt:</strong> Read this short streamed alert with a tight cadence, but avoid sounding like an alarm tone.</p>
+            <p><strong>Target:</strong> Door left open. Please close the refrigerator within two minutes to keep the food cold.</p>
+          </article>
+          <article class="sample-card">
+            <h3><code>tts-real-time-streaming-delivery-progressive-disclosure-001</code></h3>
+            <p><strong>Slice:</strong> <code>progressive_navigation_guidance</code></p>
+            <p><strong>Prompt:</strong> Read this navigation guidance as progressive streaming: give the immediate action first, then the later landmark.</p>
+            <p><strong>Target:</strong> Turn right at the next light, then stay in the left lane until you pass the library.</p>
           </article>
         </div>
       </details>

@@ -119,10 +119,13 @@ runs can map private prompts into the same categories without copying private ro
 - `uncertainty_calibration_delivery`: probability forecasts, diagnostic caveats, confidence
   scores, escalation handoffs, and estimate ranges where prosody must preserve calibrated
   uncertainty without turning cautious statements into guarantees.
+- `real_time_streaming_delivery`: first-token openings, streamed chunk boundaries, barge-in repair,
+  concise alerts, and progressive guidance where low-latency delivery must stay intelligible,
+  stable, and interruption-aware.
 
 ## Manifest Contract
 
-The public comparison manifest is intentionally balanced at 200 cases for now: 40 categories with 5
+The public comparison manifest is intentionally balanced at 205 cases for now: 41 categories with 5
 cases each. Expansion should add complete five-case category batches before deepening existing
 categories.
 
