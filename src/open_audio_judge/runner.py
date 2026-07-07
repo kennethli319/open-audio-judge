@@ -35,12 +35,58 @@ def evaluate_cases(
     prompt: JudgePrompt,
     provider: JudgeProvider,
     out_dir: Path,
+    *,
+    judge_samples: int = 1,
 ) -> list[EvaluationResult]:
+    if judge_samples < 1:
+        raise ValueError("judge_samples must be at least 1.")
     out_dir.mkdir(parents=True, exist_ok=True)
-    results = [evaluate_case(case, prompt, provider) for case in cases]
+    results = [
+        evaluate_case(case, prompt, provider)
+        if judge_samples == 1
+        else evaluate_case_with_sampling(case, prompt, provider, judge_samples=judge_samples)
+        for case in cases
+    ]
     write_results_jsonl(results, out_dir / "results.jsonl")
     write_html_report(results, out_dir / "report.html")
     return results
+
+
+def evaluate_case_with_sampling(
+    case: EvaluationCase,
+    prompt: JudgePrompt,
+    provider: JudgeProvider,
+    *,
+    judge_samples: int,
+) -> EvaluationResult:
+    if judge_samples < 1:
+        raise ValueError("judge_samples must be at least 1.")
+    attempts = [evaluate_case(case, prompt, provider) for _ in range(judge_samples)]
+    scores = [attempt.overall_score for attempt in attempts]
+    average_score = round(sum(scores) / len(scores), 2)
+    final_score = max(1, min(100, int(round(average_score))))
+    representative = _representative_attempt(attempts)
+    metadata = dict(representative.metadata)
+    metadata.update(
+        {
+            "judge_sample_count": judge_samples,
+            "judge_sample_scores": scores,
+            "judge_sample_average": average_score,
+            "judge_sample_statuses": [attempt.status for attempt in attempts],
+        }
+    )
+
+    return representative.model_copy(
+        update={
+            "overall_score": final_score,
+            "label": label_for_score(final_score),
+            "reason": _sampled_reason(attempts, average_score),
+            "metadata": metadata,
+            "raw_response": {
+                "judge_samples": [_sample_attempt_record(index, attempt) for index, attempt in enumerate(attempts, 1)]
+            },
+        }
+    )
 
 
 def evaluate_case(
@@ -106,6 +152,36 @@ def _provider_error_metadata(exc: Exception) -> dict[str, str]:
     return {
         "error_type": type(exc).__name__,
         "message": message,
+    }
+
+
+def _representative_attempt(attempts: list[EvaluationResult]) -> EvaluationResult:
+    ok_attempts = [attempt for attempt in attempts if attempt.status == "ok"]
+    candidates = ok_attempts or attempts
+    return sorted(candidates, key=lambda attempt: (attempt.overall_score, attempt.case_id))[
+        len(candidates) // 2
+    ]
+
+
+def _sampled_reason(attempts: list[EvaluationResult], average_score: float) -> str:
+    scores = ", ".join(str(attempt.overall_score) for attempt in attempts)
+    representative = _representative_attempt(attempts)
+    return (
+        f"Average of {len(attempts)} judge samples: {average_score:.2f} "
+        f"(scores: {scores}). Representative reason: {representative.reason}"
+    )
+
+
+def _sample_attempt_record(index: int, attempt: EvaluationResult) -> dict[str, object]:
+    return {
+        "sample_index": index,
+        "status": attempt.status,
+        "overall_score": attempt.overall_score,
+        "label": attempt.label,
+        "reason": attempt.reason,
+        "error_categories": attempt.error_categories,
+        "semantic_error_summary": attempt.semantic_error_summary,
+        "error": attempt.error,
     }
 
 

@@ -40,12 +40,19 @@ def eval_command(
     cases: Annotated[Path, typer.Option("--cases", "-c", help="JSONL or JSON case file.")],
     judge: Annotated[str, typer.Option("--judge", "-j", help="Judge prompt id or path.")] = "asr_error",
     provider: Annotated[str, typer.Option("--provider", "-p", help="Provider name.")] = "qwen",
+    judge_samples: Annotated[
+        int,
+        typer.Option(
+            "--judge-samples",
+            help="Number of independent judge calls to average per case.",
+        ),
+    ] = 1,
     out: Annotated[Path, typer.Option("--out", "-o", help="Output directory.")] = Path("runs/latest"),
 ) -> None:
     prompt = load_prompt(judge)
     judge_provider = build_provider(provider)
     loaded_cases = load_cases(cases)
-    results = evaluate_cases(loaded_cases, prompt, judge_provider, out)
+    results = evaluate_cases(loaded_cases, prompt, judge_provider, out, judge_samples=judge_samples)
     ok_count = sum(1 for result in results if result.status == "ok")
     console.print(f"[bold]Evaluated {len(results)} cases[/bold] ({ok_count} ok)")
     console.print(f"Results: {out / 'results.jsonl'}")
@@ -73,6 +80,13 @@ def autojudge_hf_asr_command(
         typer.Option("--device", help="Transformers pipeline device, such as cpu, mps, cuda, or 0."),
     ] = "cpu",
     limit: Annotated[int | None, typer.Option("--limit", help="Maximum cases to evaluate.")] = None,
+    judge_samples: Annotated[
+        int,
+        typer.Option(
+            "--judge-samples",
+            help="Number of independent judge calls to average per case.",
+        ),
+    ] = 1,
 ) -> None:
     loaded_cases = load_cases(cases)
     if limit is not None:
@@ -96,7 +110,7 @@ def autojudge_hf_asr_command(
 
     prompt = load_prompt(judge)
     provider = build_provider(judge_provider)
-    results = evaluate_cases(candidate_cases, prompt, provider, judge_out)
+    results = evaluate_cases(candidate_cases, prompt, provider, judge_out, judge_samples=judge_samples)
     ok_count = sum(1 for result in results if result.status == "ok")
     console.print(f"[bold]AutoJudged {len(results)} Hugging Face ASR cases[/bold] ({ok_count} ok)")
     console.print(f"Model:   {model}")
@@ -211,6 +225,13 @@ def autojudge_local_tts_command(
             help="Record failed local TTS samples and judge the successfully synthesized samples.",
         ),
     ] = False,
+    judge_samples: Annotated[
+        int,
+        typer.Option(
+            "--judge-samples",
+            help="Number of independent judge calls to average per synthesized sample.",
+        ),
+    ] = 1,
     limit: Annotated[int | None, typer.Option("--limit", help="Maximum cases to synthesize.")] = None,
 ) -> None:
     if (cases is None) == (evalset_source is None):
@@ -294,7 +315,7 @@ def autojudge_local_tts_command(
     prompt = load_prompt(judge)
     provider = build_provider(judge_provider)
     resolved_cases = load_cases(candidate_path)
-    results = evaluate_cases(resolved_cases, prompt, provider, judge_out)
+    results = evaluate_cases(resolved_cases, prompt, provider, judge_out, judge_samples=judge_samples)
     ok_count = sum(1 for result in results if result.status == "ok")
     console.print(f"[bold]AutoJudged {len(results)} local TTS cases[/bold] ({ok_count} ok)")
     console.print(f"Model:   {model}")

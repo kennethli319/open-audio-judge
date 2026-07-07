@@ -52,6 +52,8 @@ def test_autojudge_hf_asr_cli_writes_candidate_cases_and_report(
             "openai/whisper-tiny",
             "--judge-provider",
             "mock",
+            "--judge-samples",
+            "3",
             "--out",
             str(out),
         ],
@@ -125,6 +127,8 @@ def test_autojudge_local_tts_cli_writes_synthesized_cases_and_report(
             "3.5",
             "--judge-provider",
             "mock",
+            "--judge-samples",
+            "3",
             "--out",
             str(out),
         ],
@@ -142,6 +146,9 @@ def test_autojudge_local_tts_cli_writes_synthesized_cases_and_report(
     assert written_case["metadata"]["synthesis_provider"] == "local_test_tts"
     summary = json.loads((out / "model_summary.json").read_text(encoding="utf-8"))
     assert summary["candidate_generator"] == "local_test_tts"
+    result_record = json.loads((out / "judge-report" / "results.jsonl").read_text(encoding="utf-8"))
+    assert result_record["metadata"]["judge_sample_count"] == 3
+    assert result_record["metadata"]["judge_sample_scores"] == [75, 75, 75]
     assert "AutoJudged 1 local TTS cases" in result.output
 
 

@@ -205,26 +205,28 @@
       <p>
         This sample shows the TTS-first AutoJudge workflow: build or load TTS cases,
         synthesize audio with a local open model, send the generated audio plus target
-        text to Gemini, and review an aggregate report with per-sample diagnostics.
+        text to Gemini, and review an aggregate report with per-sample diagnostics,
+        category averages, and multi-judge sampled scores.
       </p>
       <div class="flow" aria-label="Workflow">
         <div><strong>1. Cases</strong><br><span class="muted">JSONL cases with target text, turns, and metadata.</span></div>
         <div><strong>2. Generator</strong><br><span class="muted">Chatterbox writes local audio files under <code>runs/</code>.</span></div>
-        <div><strong>3. Judge</strong><br><span class="muted">Gemini listens to audio and returns strict JSON scores.</span></div>
-        <div><strong>4. Report</strong><br><span class="muted">HTML and JSONL summarize issues, scores, and provenance.</span></div>
+        <div><strong>3. Judge</strong><br><span class="muted">Gemini listens three times per sample and returns strict JSON scores.</span></div>
+        <div><strong>4. Report</strong><br><span class="muted">HTML and JSONL summarize category scores, individual samples, and provenance.</span></div>
       </div>
     </section>
 
     <h2>How To Run It</h2>
     <p>
-      Use this command for a small safe demo case. Source <code>GEMINI_API_KEY</code>
+      Use this command for the expanded category demo. Source <code>GEMINI_API_KEY</code>
       at runtime; do not commit it to the repository.
     </p>
     <pre><code>oaj autojudge-local-tts \
   --model mlx-community/chatterbox-turbo-6bit \
   --cases examples/tts_multiturn_cases.jsonl \
   --judge-provider gemini \
-  --limit 1 \
+  --judge-samples 3 \
+  --limit 10 \
   --out runs/chatterbox-tts-autojudge-smoke</code></pre>
 
     <p>
@@ -235,7 +237,8 @@
   --model mlx-community/chatterbox-turbo-6bit \
   --cases examples/tts_multiturn_cases.jsonl \
   --judge-provider gemini \
-  --limit 1 \
+  --judge-samples 3 \
+  --limit 10 \
   --out runs/chatterbox-tts-autojudge-smoke</code></pre>
 
     <h2>Expected Output Files</h2>
@@ -257,7 +260,7 @@
         </tr>
         <tr>
           <td data-label="Path"><code>judge-report/results.jsonl</code></td>
-          <td data-label="Purpose">One strict JSON result per judged sample: score, reason, categories, notes, status, and provenance.</td>
+          <td data-label="Purpose">One JSON result per audio sample: averaged score, individual judge scores, reason, categories, notes, status, and provenance.</td>
         </tr>
         <tr>
           <td data-label="Path"><code>judge-report/report.html</code></td>
@@ -268,25 +271,37 @@
 
     <h2>Sample Report Preview</h2>
     <section class="grid" aria-label="Sample report metrics">
-      <div class="metric"><span>Cases</span><strong>1</strong></div>
-      <div class="metric"><span>Average</span><strong>95.0</strong></div>
-      <div class="metric"><span>Median</span><strong>95.0</strong></div>
-      <div class="metric"><span>Accurate</span><strong>1</strong></div>
-      <div class="metric"><span>Needs Review</span><strong>0</strong></div>
+      <div class="metric"><span>Cases</span><strong>10</strong></div>
+      <div class="metric"><span>Average</span><strong>88.4</strong></div>
+      <div class="metric"><span>Median</span><strong>89.0</strong></div>
+      <div class="metric"><span>Accurate</span><strong>8</strong></div>
+      <div class="metric"><span>Needs Review</span><strong>2</strong></div>
       <div class="metric"><span>Inaccurate</span><strong>0</strong></div>
     </section>
 
     <h2>Score Distribution</h2>
     <div class="panel">
-      <p><strong>81-100</strong> <span class="muted">1 sample</span></p>
+      <p><strong>81-100</strong> <span class="muted">8 samples</span></p>
       <div class="scorebar" aria-label="Score distribution 81 to 100"><div></div></div>
+      <p><strong>61-80</strong> <span class="muted">2 samples</span></p>
+      <div class="scorebar" aria-label="Score distribution 61 to 80"><div style="width:20%"></div></div>
     </div>
 
     <h2>Top Diagnostics</h2>
     <section class="grid">
       <div class="panel">
         <h3>Error Categories</h3>
-        <p class="good">no error: 1</p>
+        <p class="good">no error: 7</p>
+        <p>awkward pacing: 2</p>
+        <p>pronunciation error: 1</p>
+      </div>
+      <div class="panel">
+        <h3>Scores By Category</h3>
+        <p><code>paralinguistics</code><br>avg 86.5 / n 2 / 78-95</p>
+        <p><code>instruction_following</code><br>avg 88.0 / n 2 / 82-94</p>
+        <p><code>information_tuning</code><br>avg 84.5 / n 2 / 76-93</p>
+        <p><code>storytelling</code><br>avg 91.5 / n 2 / 88-95</p>
+        <p><code>speech_steerability</code><br>avg 91.5 / n 2 / 89-94</p>
       </div>
       <div class="panel">
         <h3>Scores By Model</h3>
@@ -315,14 +330,15 @@
       </thead>
       <tbody>
         <tr>
-          <td data-label="Case"><code>tts-multiturn-demo-001-local-tts</code></td>
-          <td data-label="Score">95</td>
+          <td data-label="Case"><code>tts-storytelling-bedtime-001-local-tts</code></td>
+          <td data-label="Score">95<br><span class="muted">judge samples: 94, 96, 95; avg 95.00</span></td>
           <td data-label="Label" class="good">accurate</td>
           <td data-label="Reason">
             The speech is highly natural, fluent, intelligible, and faithful to the target text.
           </td>
           <td data-label="Provenance">
             model: <code>mlx-community/chatterbox-turbo-6bit</code><br>
+            category: <code>storytelling</code><br>
             voice: <code>af_heart</code><br>
             sample kind: <code>local_synthetic_tts</code><br>
             duration: <code>3.1s</code>
@@ -333,7 +349,7 @@
 
     <h2>Representative Result JSON</h2>
     <pre><code>{
-  "case_id": "tts-multiturn-demo-001-local-tts",
+  "case_id": "tts-storytelling-bedtime-001-local-tts",
   "task": "tts_naturalness",
   "provider": "gemini",
   "overall_score": 95,
@@ -348,17 +364,22 @@
     "synthesis_model": "mlx-community/chatterbox-turbo-6bit",
     "synthesis_voice": "af_heart",
     "synthesis_lang_code": "en",
-    "sample_kind": "local_synthetic_tts"
+    "eval_category": "storytelling",
+    "sample_kind": "local_synthetic_tts",
+    "judge_sample_count": 3,
+    "judge_sample_scores": [94, 96, 95],
+    "judge_sample_average": 95.0
   }
 }</code></pre>
 
     <h2>How To Read The Report</h2>
     <p>
       Start with average score and label counts, then inspect score breakdowns by
-      TTS slice, model, voice, and language. Use the top diagnostics to find
+      evaluation category, TTS slice, model, voice, and language. Use the top diagnostics to find
       repeated issue clusters such as pronunciation errors, artifact classes, or
-      weak slices. Finally, open the per-sample rows to inspect the exact Gemini
-      reason, target text hash, generated-audio provenance, and any researcher notes.
+      weak slices. Finally, open the per-sample rows to inspect the averaged score,
+      the three underlying Gemini scores, target text hash, generated-audio provenance,
+      and any researcher notes.
     </p>
 
     <p class="muted">

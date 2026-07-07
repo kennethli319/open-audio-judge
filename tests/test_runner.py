@@ -1,9 +1,10 @@
+import json
 from pathlib import Path
 
 from open_audio_judge.models import EvaluationCase, ProviderResponse, RenderedPrompt
 from open_audio_judge.prompting import load_prompt
 from open_audio_judge.providers.mock import MockProvider
-from open_audio_judge.runner import evaluate_case, evaluate_cases, load_cases
+from open_audio_judge.runner import evaluate_case, evaluate_case_with_sampling, evaluate_cases, load_cases
 
 
 class MalformedJsonProvider:
@@ -33,6 +34,31 @@ class FailingProvider:
         raise RuntimeError(f"temporary outage\n{'x' * 600}")
 
 
+class SequencedTtsProvider:
+    name = "sequenced-tts-provider"
+
+    def __init__(self, scores: list[int]) -> None:
+        self.scores = scores
+        self.index = 0
+
+    def generate(self, case: EvaluationCase, prompt: RenderedPrompt) -> ProviderResponse:
+        score = self.scores[self.index]
+        self.index += 1
+        return ProviderResponse(
+            content=json.dumps(
+                {
+                    "overall_score": score,
+                    "reason": f"Attempt scored {score}.",
+                    "semantic_error_summary": "Naturalness varied across samples.",
+                    "key_differences": [],
+                    "error_categories": ["no_error"] if score >= 80 else ["awkward_pacing"],
+                    "researcher_notes": ["Inspect sampling variance."],
+                }
+            ),
+            raw={"attempt_score": score},
+        )
+
+
 def test_evaluate_cases_with_mock(tmp_path: Path) -> None:
     cases = load_cases(Path("examples/asr_cases.jsonl"))
     prompt = load_prompt("asr_error")
@@ -51,7 +77,6 @@ def test_evaluate_cases_with_mock(tmp_path: Path) -> None:
     assert "date_time_error" in by_id["asr-calibration-date-001"].error_categories
     assert "date_time_error" in by_id["asr-calibration-time-001"].error_categories
     assert "unit_error" in by_id["asr-calibration-unit-001"].error_categories
-
 
 def test_evaluate_tts_case_with_mock_matches_tts_schema() -> None:
     prompt = load_prompt("tts_naturalness")
@@ -128,3 +153,54 @@ def test_provider_error_preserves_bounded_diagnostic_metadata() -> None:
     assert result.raw_response["message"].startswith("temporary outage x")
     assert "\n" not in result.raw_response["message"]
     assert len(result.raw_response["message"]) <= 503
+
+
+def test_evaluate_case_with_sampling_averages_scores_and_preserves_attempts() -> None:
+    prompt = load_prompt("tts_naturalness")
+    result = evaluate_case_with_sampling(
+        EvaluationCase(
+            id="sampled-tts",
+            task="tts_naturalness",
+            audio_url="https://example.test/audio.wav",
+            reference_text="Read this naturally.",
+            metadata={"eval_category": "storytelling"},
+        ),
+        prompt,
+        SequencedTtsProvider([70, 80, 90]),
+        judge_samples=3,
+    )
+
+    assert result.overall_score == 80
+    assert result.label == "accurate"
+    assert result.metadata["judge_sample_count"] == 3
+    assert result.metadata["judge_sample_scores"] == [70, 80, 90]
+    assert result.metadata["judge_sample_average"] == 80.0
+    assert result.metadata["eval_category"] == "storytelling"
+    assert "Average of 3 judge samples" in result.reason
+    assert result.raw_response["judge_samples"][0]["overall_score"] == 70
+
+
+def test_evaluate_cases_accepts_judge_samples(tmp_path: Path) -> None:
+    cases = [
+        EvaluationCase(
+            id="sampled-tts",
+            task="tts_naturalness",
+            audio_url="https://example.test/audio.wav",
+            reference_text="Read this naturally.",
+        )
+    ]
+    prompt = load_prompt("tts_naturalness")
+    results = evaluate_cases(
+        cases,
+        prompt,
+        SequencedTtsProvider([61, 62, 63]),
+        tmp_path,
+        judge_samples=3,
+    )
+
+    assert results[0].overall_score == 62
+    written = json.loads((tmp_path / "results.jsonl").read_text(encoding="utf-8"))
+    assert written["metadata"]["judge_sample_scores"] == [61, 62, 63]
+    assert "judge samples: 61, 62, 63; avg 62.00" in (
+        tmp_path / "report.html"
+    ).read_text(encoding="utf-8")

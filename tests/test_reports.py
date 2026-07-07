@@ -94,11 +94,14 @@ def test_write_html_report_aggregates_tts_candidate_metadata(tmp_path: Path) -> 
             error_categories=["prosody_issue"],
             label="needs_review",
             metadata={
+                "eval_category": "information_tuning",
                 "tts_slice": "dates_times",
                 "synthesis_model": "mlx-community/chatterbox-turbo-6bit",
                 "synthesis_voice": "af_heart",
                 "synthesis_lang_code": "en",
                 "sample_kind": "local_synthetic_tts",
+                "judge_sample_scores": [65, 75],
+                "judge_sample_average": 70.0,
             },
         ),
         EvaluationResult(
@@ -113,6 +116,7 @@ def test_write_html_report_aggregates_tts_candidate_metadata(tmp_path: Path) -> 
             error_categories=["no_error"],
             label="accurate",
             metadata={
+                "eval_category": "instruction_following",
                 "tts_slice": "code_like",
                 "synthesis_model": "mlx-community/chatterbox-turbo-6bit",
                 "synthesis_voice": "af_heart",
@@ -133,6 +137,7 @@ def test_write_html_report_aggregates_tts_candidate_metadata(tmp_path: Path) -> 
             status="provider_error",
             error="upstream timeout",
             metadata={
+                "eval_category": "storytelling",
                 "tts_slice": "structured_json",
                 "synthesis_model": "mlx-community/chatterbox-turbo-6bit",
                 "synthesis_voice": "af_heart",
@@ -155,10 +160,17 @@ def test_write_html_report_aggregates_tts_candidate_metadata(tmp_path: Path) -> 
     assert "af heart" in html
     assert "Language" in html
     assert "en-US" in html
+    assert "Evaluation Category" in html
+    assert "information tuning" in html
+    assert "instruction following" in html
     assert "Sample Kind" in html
     assert "local synthetic tts" in html
+    assert "Issues By Category" in html
+    assert "information tuning / prosody issue" in html
     assert "Issues By TTS Slice" in html
     assert "Failures By TTS Slice" in html
+    assert "Failures By Category" in html
+    assert "storytelling / provider error" in html
     assert "structured json / provider error" in html
     assert "Issues By Model" in html
     assert "mlx-community/chatterbox-turbo-6bit / prosody issue" in html
@@ -167,6 +179,7 @@ def test_write_html_report_aggregates_tts_candidate_metadata(tmp_path: Path) -> 
     assert "Issues By Language" in html
     assert "en / prosody issue" in html
     assert "Scores By TTS Slice" in html
+    assert "Scores By Category" in html
     assert "Scores By Model" in html
     assert "Scores By Voice" in html
     assert "Scores By Language" in html
@@ -181,6 +194,7 @@ def test_write_html_report_aggregates_tts_candidate_metadata(tmp_path: Path) -> 
     assert "Failures By Sample Kind" in html
     assert "local synthetic tts / provider error" in html
     assert "dates times / prosody issue" in html
+    assert "judge samples: 65, 75; avg 70.00" in html
 
 
 def test_write_html_report_shows_sample_provenance_per_row(tmp_path: Path) -> None:

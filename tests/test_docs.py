@@ -1,3 +1,4 @@
+import json
 from html.parser import HTMLParser
 from pathlib import Path
 
@@ -20,18 +21,44 @@ def test_chatterbox_gemini_sample_page_documents_workflow() -> None:
         "Chatterbox TTS generation scored by the Gemini audio judge",
         "oaj autojudge-local-tts",
         "--judge-provider gemini",
+        "--judge-samples 3",
         "Expected Output Files",
         "synthesis/tts_audio_cases.jsonl",
         "model_summary.json",
         "judge-report/results.jsonl",
         "judge-report/report.html",
         "Sample Report Preview",
+        "Scores By Category",
         "Sample-By-Sample Breakdown",
         "Representative Result JSON",
+        "judge_sample_scores",
         "mlx-community/chatterbox-turbo-6bit",
     ]
     for text in required_text:
         assert text in html
+
+
+def test_tts_multiturn_examples_cover_requested_categories() -> None:
+    records = [
+        json.loads(line)
+        for line in Path("examples/tts_multiturn_cases.jsonl").read_text(encoding="utf-8").splitlines()
+        if line.strip()
+    ]
+    categories: dict[str, int] = {}
+    for record in records:
+        category = record["metadata"]["eval_category"]
+        categories[category] = categories.get(category, 0) + 1
+
+    assert len(records) == 10
+    assert categories == {
+        "paralinguistics": 2,
+        "instruction_following": 2,
+        "information_tuning": 2,
+        "storytelling": 2,
+        "speech_steerability": 2,
+    }
+    assert all(record["turns"] for record in records)
+    assert all(record["reference_text"] for record in records)
 
 
 def test_readme_links_chatterbox_gemini_sample_page() -> None:

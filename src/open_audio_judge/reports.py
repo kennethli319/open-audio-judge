@@ -37,15 +37,22 @@ def render_html_report(results: list[EvaluationResult]) -> str:
     synthesis_model_counts = _metadata_counts(results, "synthesis_model")
     synthesis_voice_counts = _metadata_counts(results, "synthesis_voice")
     language_counts = _language_counts(results)
+    evaluation_category_counts = _evaluation_category_counts(results)
     sample_kind_counts = _metadata_counts(results, "sample_kind")
+    issue_by_evaluation_category_counts = _issue_counts_by_metadata(results, "evaluation_category")
     issue_by_slice_counts = _issue_counts_by_metadata(results, "tts_slice")
     issue_by_model_counts = _issue_counts_by_metadata(results, "synthesis_model")
     issue_by_voice_counts = _issue_counts_by_metadata(results, "synthesis_voice")
     issue_by_language_counts = _issue_counts_by_metadata(results, "language")
+    scores_by_evaluation_category = _score_summaries_by_metadata(results, "evaluation_category")
     scores_by_slice = _score_summaries_by_metadata(results, "tts_slice")
     scores_by_model = _score_summaries_by_metadata(results, "synthesis_model")
     scores_by_voice = _score_summaries_by_metadata(results, "synthesis_voice")
     scores_by_language = _score_summaries_by_metadata(results, "language")
+    status_by_evaluation_category_counts = _status_counts_by_metadata(
+        results,
+        "evaluation_category",
+    )
     status_by_slice_counts = _status_counts_by_metadata(results, "tts_slice")
     status_by_model_counts = _status_counts_by_metadata(results, "synthesis_model")
     status_by_voice_counts = _status_counts_by_metadata(results, "synthesis_voice")
@@ -81,7 +88,15 @@ def render_html_report(results: list[EvaluationResult]) -> str:
         empty_label="No synthesis voices",
     )
     language_markup = _render_count_list(language_counts, empty_label="No languages")
+    evaluation_category_markup = _render_count_list(
+        evaluation_category_counts,
+        empty_label="No evaluation categories",
+    )
     sample_kind_markup = _render_count_list(sample_kind_counts, empty_label="No sample kinds")
+    issue_by_evaluation_category_markup = _render_count_list(
+        issue_by_evaluation_category_counts,
+        empty_label="No category issue categories",
+    )
     issue_by_slice_markup = _render_count_list(
         issue_by_slice_counts,
         empty_label="No slice issue categories",
@@ -113,6 +128,14 @@ def render_html_report(results: list[EvaluationResult]) -> str:
     scores_by_language_markup = _render_score_summary_list(
         scores_by_language,
         empty_label="No language scores",
+    )
+    scores_by_evaluation_category_markup = _render_score_summary_list(
+        scores_by_evaluation_category,
+        empty_label="No category scores",
+    )
+    status_by_evaluation_category_markup = _render_count_list(
+        status_by_evaluation_category_counts,
+        empty_label="No category failures",
     )
     status_by_slice_markup = _render_count_list(
         status_by_slice_counts,
@@ -264,15 +287,19 @@ def render_html_report(results: list[EvaluationResult]) -> str:
       <div class="metric"><span>Synthesis Model</span>{synthesis_model_markup}</div>
       <div class="metric"><span>Synthesis Voice</span>{synthesis_voice_markup}</div>
       <div class="metric"><span>Language</span>{language_markup}</div>
+      <div class="metric"><span>Evaluation Category</span>{evaluation_category_markup}</div>
       <div class="metric"><span>Sample Kind</span>{sample_kind_markup}</div>
+      <div class="metric"><span>Issues By Category</span>{issue_by_evaluation_category_markup}</div>
       <div class="metric"><span>Issues By TTS Slice</span>{issue_by_slice_markup}</div>
       <div class="metric"><span>Issues By Model</span>{issue_by_model_markup}</div>
       <div class="metric"><span>Issues By Voice</span>{issue_by_voice_markup}</div>
       <div class="metric"><span>Issues By Language</span>{issue_by_language_markup}</div>
+      <div class="metric"><span>Scores By Category</span>{scores_by_evaluation_category_markup}</div>
       <div class="metric"><span>Scores By TTS Slice</span>{scores_by_slice_markup}</div>
       <div class="metric"><span>Scores By Model</span>{scores_by_model_markup}</div>
       <div class="metric"><span>Scores By Voice</span>{scores_by_voice_markup}</div>
       <div class="metric"><span>Scores By Language</span>{scores_by_language_markup}</div>
+      <div class="metric"><span>Failures By Category</span>{status_by_evaluation_category_markup}</div>
       <div class="metric"><span>Failures By TTS Slice</span>{status_by_slice_markup}</div>
       <div class="metric"><span>Failures By Model</span>{status_by_model_markup}</div>
       <div class="metric"><span>Failures By Voice</span>{status_by_voice_markup}</div>
@@ -328,11 +355,13 @@ MEANING_SEVERITY = {
 def _render_row(result: EvaluationResult) -> str:
     score = result.overall_score
     label = result.label
+    score_detail = _render_judge_sample_scores(result)
     return f"""<tr>
   <td data-label="Case">{html.escape(result.case_id)}</td>
   <td data-label="Provenance">{_render_provenance(result)}</td>
   <td data-label="Score" class="scorebar"><strong>{score}</strong>
     <div class="bar"><div class="{label}-fill" style="width:{score}%"></div></div>
+    {score_detail}
   </td>
   <td data-label="Label" class="{label}">{html.escape(label.replace("_", " "))}</td>
   <td data-label="Reason" class="reason">{html.escape(result.reason)}</td>
@@ -391,6 +420,15 @@ def _language_counts(results: list[EvaluationResult]) -> list[tuple[str, int]]:
         language = _language_value(result)
         if language is not None:
             counts[language] += 1
+    return counts.most_common()
+
+
+def _evaluation_category_counts(results: list[EvaluationResult]) -> list[tuple[str, int]]:
+    counts: Counter[str] = Counter()
+    for result in results:
+        category = _evaluation_category_value(result)
+        if category is not None:
+            counts[category] += 1
     return counts.most_common()
 
 
@@ -453,6 +491,8 @@ def _status_counts_by_metadata(
 def _metadata_group_value(result: EvaluationResult, field: str) -> str | None:
     if field == "language":
         return _language_value(result)
+    if field == "evaluation_category":
+        return _evaluation_category_value(result)
     value = result.metadata.get(field)
     if isinstance(value, str) and value.strip():
         return value.strip()
@@ -461,6 +501,14 @@ def _metadata_group_value(result: EvaluationResult, field: str) -> str | None:
 
 def _language_value(result: EvaluationResult) -> str | None:
     for field in ("language", "synthesis_lang_code"):
+        value = result.metadata.get(field)
+        if isinstance(value, str) and value.strip():
+            return value.strip()
+    return None
+
+
+def _evaluation_category_value(result: EvaluationResult) -> str | None:
+    for field in ("eval_category", "evaluation_category", "source_category"):
         value = result.metadata.get(field)
         if isinstance(value, str) and value.strip():
             return value.strip()
@@ -651,6 +699,7 @@ def _render_diagnostics(result: EvaluationResult) -> str:
 
 def _render_provenance(result: EvaluationResult) -> str:
     fields = [
+        ("Category", "eval_category"),
         ("Slice", "tts_slice"),
         ("Model", "synthesis_model"),
         ("Voice", "synthesis_voice"),
@@ -674,6 +723,20 @@ def _render_provenance(result: EvaluationResult) -> str:
     if not items:
         return '<span class="muted">None</span>'
     return f'<ul class="counts provenance">{"".join(items)}</ul>'
+
+
+def _render_judge_sample_scores(result: EvaluationResult) -> str:
+    scores = result.metadata.get("judge_sample_scores")
+    average = result.metadata.get("judge_sample_average")
+    if not isinstance(scores, list) or len(scores) <= 1:
+        return ""
+    score_text = ", ".join(str(score) for score in scores)
+    average_text = f"{average:.2f}" if isinstance(average, (int, float)) else str(result.overall_score)
+    return (
+        '<div class="muted" style="margin-top:6px">'
+        f"judge samples: {html.escape(score_text)}; avg {html.escape(average_text)}"
+        "</div>"
+    )
 
 
 def _has_display_value(value: object) -> bool:

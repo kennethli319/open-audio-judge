@@ -227,7 +227,8 @@ oaj autojudge-local-tts \
   --model mlx-community/chatterbox-turbo-6bit \
   --cases examples/tts_multiturn_cases.jsonl \
   --judge-provider gemini \
-  --limit 3 \
+  --judge-samples 3 \
+  --limit 10 \
   --out runs/chatterbox-tts-autojudge
 ```
 
@@ -245,6 +246,7 @@ oaj autojudge-local-tts \
   --model mlx-community/chatterbox-turbo-6bit \
   --tts-timeout-seconds 180 \
   --judge-provider gemini \
+  --judge-samples 3 \
   --limit 8 \
   --out runs/chatterbox-tts-evalset-autojudge
 ```
@@ -261,7 +263,9 @@ The command writes:
   `audio_format_mismatch`, plus synthesis provider/model/voice/language, audio format, TTS slice,
   source category, and sample kind.
 - `judge-report/results.jsonl` and `judge-report/report.html`: aggregate naturalness scores, top
-  issue categories, priority cases, and sample-by-sample reasons.
+  issue categories, priority cases, category score breakdowns, and sample-by-sample reasons. Use
+  `--judge-samples` to run multiple independent judge calls per synthesized sample and report the
+  averaged score plus the individual judge scores.
 
 Use `--judge-provider mock` for a cheap pipeline check. Use an audio-capable judge such as Gemini or
 a local Qwen/Qwen3-Omni endpoint for real perceptual judging.
