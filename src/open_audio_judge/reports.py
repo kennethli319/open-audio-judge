@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import html
 from collections import Counter
+from dataclasses import dataclass
 import statistics
 from pathlib import Path
 from typing import Iterable
@@ -58,6 +59,7 @@ def render_html_report(results: list[EvaluationResult]) -> str:
     status_by_voice_counts = _status_counts_by_metadata(results, "synthesis_voice")
     status_by_language_counts = _status_counts_by_metadata(results, "language")
     status_by_sample_kind_counts = _status_counts_by_metadata(results, "sample_kind")
+    weakest_segments = _weakest_segments(results)
     priority_cases = _priority_cases(results)
     calibration_checks = _calibration_checks(results)
 
@@ -157,6 +159,7 @@ def render_html_report(results: list[EvaluationResult]) -> str:
         status_by_sample_kind_counts,
         empty_label="No sample-kind failures",
     )
+    weakest_segments_markup = _render_weakest_segments(weakest_segments)
     priority_markup = _render_priority_cases(priority_cases)
     calibration_markup = _render_calibration_checks(calibration_checks)
 
@@ -244,6 +247,19 @@ def render_html_report(results: list[EvaluationResult]) -> str:
     li {{ margin: 3px 0; }}
     .counts {{ list-style: none; margin: 10px 0 0; }}
     .counts li {{ display: flex; justify-content: space-between; gap: 14px; }}
+    .severity-low {{ border-left: 4px solid var(--bad); }}
+    .severity-medium {{ border-left: 4px solid var(--warn); }}
+    .severity-high {{ border-left: 4px solid var(--good); }}
+    .tag {{
+      display: inline-block;
+      margin: 3px 4px 3px 0;
+      padding: 2px 7px;
+      border: 1px solid var(--line);
+      border-radius: 999px;
+      background: #fbfcfd;
+      font-size: 12px;
+      color: var(--muted);
+    }}
     @media (max-width: 760px) {{
       header {{ padding: 22px 18px 16px; }}
       main {{ padding: 18px 12px 28px; }}
@@ -310,6 +326,9 @@ def render_html_report(results: list[EvaluationResult]) -> str:
     <h2>Calibration Checks</h2>
     {calibration_markup}
 
+    <h2>Weakest Segments</h2>
+    {weakest_segments_markup}
+
     <h2>Priority Cases</h2>
     {priority_markup}
 
@@ -350,6 +369,52 @@ MEANING_SEVERITY = {
     "minor_loss": 2,
     "preserved": 1,
 }
+SEGMENT_FIELDS = (
+    ("Model", "synthesis_model"),
+    ("Evaluation Category", "evaluation_category"),
+    ("TTS Slice", "tts_slice"),
+    ("Voice", "synthesis_voice"),
+    ("Language", "language"),
+)
+ISSUE_FIX_AREAS = {
+    "pronunciation_issue": "pronunciation",
+    "mispronunciation": "pronunciation",
+    "prosody_issue": "prosody/pacing",
+    "pacing_issue": "prosody/pacing",
+    "rhythm_issue": "prosody/pacing",
+    "text_faithfulness_issue": "text faithfulness",
+    "omission": "text faithfulness",
+    "insertion": "text faithfulness",
+    "number_error": "text faithfulness",
+    "date_time_error": "text faithfulness",
+    "unit_error": "text faithfulness",
+    "instruction_following_issue": "instruction/style following",
+    "style_mismatch": "instruction/style following",
+    "emotion_mismatch": "instruction/style following",
+    "artifact": "artifacts",
+    "audio_artifact": "artifacts",
+    "clipping": "artifacts",
+    "intelligibility_issue": "intelligibility",
+    "unclear_speech": "intelligibility",
+    "voice_consistency_issue": "voice consistency",
+    "speaker_drift": "voice consistency",
+    "provider_error": "synthesis failures",
+    "parse_error": "synthesis failures",
+}
+
+
+@dataclass(frozen=True)
+class SegmentSummary:
+    field_label: str
+    name: str
+    count: int
+    average: float
+    low: int
+    high: int
+    issue_counts: list[tuple[str, int]]
+    status_counts: list[tuple[str, int]]
+    fix_areas: list[str]
+    representative_cases: list[EvaluationResult]
 
 
 def _render_row(result: EvaluationResult) -> str:
@@ -486,6 +551,131 @@ def _status_counts_by_metadata(
             continue
         counts[f"{value} / {result.status}"] += 1
     return counts.most_common(8)
+
+
+def _weakest_segments(
+    results: list[EvaluationResult],
+    *,
+    per_field_limit: int = 3,
+    representative_limit: int = 3,
+) -> list[SegmentSummary]:
+    summaries: list[SegmentSummary] = []
+    for field_label, field in SEGMENT_FIELDS:
+        groups: dict[str, list[EvaluationResult]] = {}
+        for result in results:
+            value = _metadata_group_value(result, field)
+            if value is None:
+                continue
+            groups.setdefault(value, []).append(result)
+
+        field_summaries: list[SegmentSummary] = []
+        for name, group_results in groups.items():
+            scores = [result.overall_score for result in group_results]
+            issue_counts = _segment_issue_counts(group_results)
+            status_counts = _segment_status_counts(group_results)
+            representative_cases = sorted(
+                group_results,
+                key=lambda result: (
+                    result.status == "ok",
+                    result.overall_score,
+                    result.case_id,
+                ),
+            )[:representative_limit]
+            field_summaries.append(
+                SegmentSummary(
+                    field_label=field_label,
+                    name=name,
+                    count=len(group_results),
+                    average=statistics.mean(scores),
+                    low=min(scores),
+                    high=max(scores),
+                    issue_counts=issue_counts,
+                    status_counts=status_counts,
+                    fix_areas=_fix_areas_for_segment(issue_counts, status_counts),
+                    representative_cases=representative_cases,
+                )
+            )
+        summaries.extend(
+            sorted(field_summaries, key=lambda item: (item.average, item.name))[:per_field_limit]
+        )
+    return summaries
+
+
+def _segment_issue_counts(results: list[EvaluationResult]) -> list[tuple[str, int]]:
+    counts: Counter[str] = Counter()
+    for result in results:
+        counts.update(category for category in result.error_categories if category != "no_error")
+    return counts.most_common(4)
+
+
+def _segment_status_counts(results: list[EvaluationResult]) -> list[tuple[str, int]]:
+    counts: Counter[str] = Counter(result.status for result in results if result.status != "ok")
+    return counts.most_common(3)
+
+
+def _fix_areas_for_segment(
+    issue_counts: list[tuple[str, int]],
+    status_counts: list[tuple[str, int]],
+) -> list[str]:
+    areas: list[str] = []
+    for issue, _count in [*issue_counts, *status_counts]:
+        mapped = ISSUE_FIX_AREAS.get(issue, issue.replace("_", " "))
+        if mapped not in areas:
+            areas.append(mapped)
+    if not areas:
+        areas.append("inspect low-score audio and judge rationale")
+    return areas[:4]
+
+
+def _render_weakest_segments(items: list[SegmentSummary]) -> str:
+    if not items:
+        return '<div class="metric"><strong class="muted">No segment metadata available</strong></div>'
+
+    cards = "\n".join(_render_weakest_segment_card(item) for item in items)
+    return f'<section class="summary">{cards}</section>'
+
+
+def _render_weakest_segment_card(item: SegmentSummary) -> str:
+    severity_class = _segment_severity_class(item.average)
+    issue_markup = _render_inline_tags(
+        [f"{name.replace('_', ' ')} x{count}" for name, count in item.issue_counts],
+        empty_label="No judge issue categories",
+    )
+    status_markup = _render_inline_tags(
+        [f"{name.replace('_', ' ')} x{count}" for name, count in item.status_counts],
+        empty_label="No failed evaluations",
+    )
+    fix_markup = _render_inline_tags(item.fix_areas, empty_label="Inspect judge rationale")
+    case_markup = "".join(
+        "<li>"
+        f"<span>{html.escape(result.case_id)}</span> "
+        f"<strong>{result.overall_score} / {html.escape(result.label.replace('_', ' '))}</strong>"
+        "</li>"
+        for result in item.representative_cases
+    )
+    return f"""<div class="metric {severity_class}">
+      <span>{html.escape(item.field_label)}</span>
+      <strong>{html.escape(item.name.replace("_", " "))}</strong>
+      <div class="muted">avg {item.average:.1f} / n {item.count} / range {item.low}-{item.high}</div>
+      <div><span class="muted">Likely fix areas</span><br>{fix_markup}</div>
+      <div><span class="muted">Issue categories</span><br>{issue_markup}</div>
+      <div><span class="muted">Evaluation failures</span><br>{status_markup}</div>
+      <div><span class="muted">Representative cases</span><ul class="counts">{case_markup}</ul></div>
+    </div>"""
+
+
+def _segment_severity_class(average: float) -> str:
+    if average < 60:
+        return "severity-low"
+    if average < 80:
+        return "severity-medium"
+    return "severity-high"
+
+
+def _render_inline_tags(items: list[str], empty_label: str) -> str:
+    if not items:
+        return f'<span class="muted">{html.escape(empty_label)}</span>'
+    return "".join(f'<span class="tag">{html.escape(item)}</span>' for item in items)
 
 
 def _metadata_group_value(result: EvaluationResult, field: str) -> str | None:

@@ -29,6 +29,8 @@ def test_chatterbox_gemini_sample_page_documents_workflow() -> None:
         "judge-report/report.html",
         "Sample Report Preview",
         "Scores By Category",
+        "Weakest Segments",
+        "Likely fix areas",
         "Sample-By-Sample Breakdown",
         "Representative Result JSON",
         "judge_sample_scores",

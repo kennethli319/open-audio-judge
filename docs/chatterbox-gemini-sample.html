@@ -264,7 +264,7 @@
         </tr>
         <tr>
           <td data-label="Path"><code>judge-report/report.html</code></td>
-          <td data-label="Purpose">Human-readable report with aggregate scores, top issues, priority cases, and sample-by-sample details.</td>
+          <td data-label="Purpose">Human-readable report with aggregate scores, weakest segments, likely fix areas, priority cases, and sample-by-sample details.</td>
         </tr>
       </tbody>
     </table>
@@ -314,6 +314,27 @@
       <div class="panel">
         <h3>Scores By Language</h3>
         <p><code>en</code><br>avg 95.0 / n 1 / 95-95</p>
+      </div>
+    </section>
+
+    <h2>Weakest Segments</h2>
+    <section class="grid">
+      <div class="panel">
+        <h3>Evaluation Category</h3>
+        <p><code>information_tuning</code><br>avg 84.5 / n 2 / range 76-93</p>
+        <p class="muted">Likely fix areas: pronunciation, prosody/pacing, text faithfulness.</p>
+        <p class="muted">Representative cases: dense dates, numbers, and units.</p>
+      </div>
+      <div class="panel">
+        <h3>TTS Slice</h3>
+        <p><code>dates_times</code><br>avg 76.0 / n 1 / range 76-76</p>
+        <p class="muted">Likely fix areas: text faithfulness and intelligibility.</p>
+        <p class="muted">Inspect low-score rows before tuning prompts, voices, or model wrappers.</p>
+      </div>
+      <div class="panel">
+        <h3>Synthesis Model</h3>
+        <p><code>mlx-community/chatterbox-turbo-6bit</code><br>avg 88.4 / n 10 / range 76-95</p>
+        <p class="muted">Use the same section to compare Chatterbox against Kokoro, Qwen3-TTS, or another compatible wrapper.</p>
       </div>
     </section>
 
@@ -375,9 +396,10 @@
     <h2>How To Read The Report</h2>
     <p>
       Start with average score and label counts, then inspect score breakdowns by
-      evaluation category, TTS slice, model, voice, and language. Use the top diagnostics to find
-      repeated issue clusters such as pronunciation errors, artifact classes, or
-      weak slices. Finally, open the per-sample rows to inspect the averaged score,
+      evaluation category, TTS slice, model, voice, and language. Use the Weakest Segments cards to
+      find low-scoring model/category/slice groups, likely solution areas, and representative cases.
+      Then use the top diagnostics to confirm repeated issue clusters such as pronunciation errors,
+      artifact classes, or weak slices. Finally, open the per-sample rows to inspect the averaged score,
       the three underlying Gemini scores, target text hash, generated-audio provenance,
       and any researcher notes.
     </p>

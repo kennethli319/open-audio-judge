@@ -125,6 +125,26 @@ def test_write_html_report_aggregates_tts_candidate_metadata(tmp_path: Path) -> 
             },
         ),
         EvaluationResult(
+            case_id="tts-kokoro-date-local-tts",
+            task="tts_naturalness",
+            judge_id="tts_naturalness",
+            judge_version="0.1.0",
+            provider="gemini",
+            overall_score=45,
+            reason="The number and date were hard to understand.",
+            semantic_error_summary="Dense facts became unclear.",
+            error_categories=["intelligibility_issue", "number_error"],
+            label="inaccurate",
+            metadata={
+                "eval_category": "information_tuning",
+                "tts_slice": "dates_times",
+                "synthesis_model": "mlx-community/Kokoro-82M-4bit",
+                "synthesis_voice": "af_heart",
+                "synthesis_lang_code": "en",
+                "sample_kind": "local_synthetic_tts",
+            },
+        ),
+        EvaluationResult(
             case_id="tts-json-local-tts",
             task="tts_naturalness",
             judge_id="tts_naturalness",
@@ -183,7 +203,7 @@ def test_write_html_report_aggregates_tts_candidate_metadata(tmp_path: Path) -> 
     assert "Scores By Model" in html
     assert "Scores By Voice" in html
     assert "Scores By Language" in html
-    assert "avg 70.0 / n 1 / 70-70" in html
+    assert "avg 57.5 / n 2 / 45-70" in html
     assert "avg 80.5 / n 2 / 70-91" in html
     assert "Failures By Model" in html
     assert "mlx-community/chatterbox-turbo-6bit / provider error" in html
@@ -195,6 +215,11 @@ def test_write_html_report_aggregates_tts_candidate_metadata(tmp_path: Path) -> 
     assert "local synthetic tts / provider error" in html
     assert "dates times / prosody issue" in html
     assert "judge samples: 65, 75; avg 70.00" in html
+    assert "Weakest Segments" in html
+    assert "mlx-community/Kokoro-82M-4bit" in html
+    assert "intelligibility" in html
+    assert "text faithfulness" in html
+    assert "tts-kokoro-date-local-tts" in html
 
 
 def test_write_html_report_shows_sample_provenance_per_row(tmp_path: Path) -> None:
