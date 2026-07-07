@@ -1174,6 +1174,14 @@ TTS_CATEGORY_GUIDANCE = {
             "spreadsheet coordinate and shared-header scope preservation",
         ],
     ),
+    "calendar_schedule_delivery": (
+        "recurring meeting rules, tentative holds, time-zone conversions, RSVP deadlines, attendee status, cancellations, and reschedules",
+        [
+            "calendar state and action prosody",
+            "date/time and time-zone text normalization",
+            "optional, confirmed, canceled, and rescheduled event distinction",
+        ],
+    ),
 }
 
 

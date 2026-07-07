@@ -233,10 +233,13 @@ runs can map private prompts into the same categories without copying private ro
 - `table_matrix_reading`: row/column/value lookups, compact metric rows, missing-value markers,
   shared headers, and grid coordinates where spoken grouping must preserve table structure without
   the visual layout.
+- `calendar_schedule_delivery`: recurring meeting rules, tentative holds, time-zone conversions,
+  RSVP deadlines, optional/required attendees, cancellations, and reschedules where spoken grouping
+  must preserve calendar state and action semantics.
 
 ## Manifest Contract
 
-The public comparison manifest is intentionally balanced at 395 cases for now: 79 categories with 5
+The public comparison manifest is intentionally balanced at 400 cases for now: 80 categories with 5
 cases each. Expansion should add complete five-case category batches before deepening existing
 categories.
 

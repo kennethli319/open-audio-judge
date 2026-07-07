@@ -404,6 +404,7 @@
           <option value="range_interval_delivery">Range interval delivery</option>
           <option value="email_thread_context_delivery">Email thread context delivery</option>
           <option value="table_matrix_reading">Table matrix reading</option>
+          <option value="calendar_schedule_delivery">Calendar schedule delivery</option>
         </select>
         <select id="label-filter" aria-label="Filter by label">
           <option value="">All labels</option>
@@ -448,7 +449,7 @@
   --cases examples/tts_multiturn_cases.jsonl \
   --judge-provider gemini \
   --judge-samples 3 \
-  --limit 395 \
+  --limit 400 \
   --out runs/leaderboard/chatterbox</code></pre>
 
     <pre><code>oaj autojudge-local-tts \
@@ -457,7 +458,7 @@
   --cases examples/tts_multiturn_cases.jsonl \
   --judge-provider gemini \
   --judge-samples 3 \
-  --limit 395 \
+  --limit 400 \
   --out runs/leaderboard/kokoro</code></pre>
 
     <pre><code>oaj autojudge-local-tts \
@@ -466,7 +467,7 @@
   --cases examples/tts_multiturn_cases.jsonl \
   --judge-provider gemini \
   --judge-samples 3 \
-  --limit 395 \
+  --limit 400 \
   --out runs/leaderboard/qwen3-tts</code></pre>
 
     <p>
@@ -478,7 +479,7 @@
   --cases examples/tts_multiturn_cases.jsonl \
   --judge-provider gemini \
   --judge-samples 3 \
-  --limit 395 \
+  --limit 400 \
   --out runs/leaderboard/chatterbox</code></pre>
 
     <p>
@@ -523,7 +524,7 @@
     <h2>Sample Report Preview</h2>
     <section class="grid" aria-label="Sample report metrics">
       <div class="metric"><span>Models</span><strong>3</strong></div>
-      <div class="metric"><span>Shared Eval Cases</span><strong>395</strong></div>
+      <div class="metric"><span>Shared Eval Cases</span><strong>400</strong></div>
       <div class="metric"><span>Judge Samples</span><strong>3x</strong></div>
       <div class="metric"><span>Top Avg</span><strong>91.2</strong></div>
       <div class="metric"><span>Lowest Avg</span><strong>84.7</strong></div>
@@ -532,7 +533,7 @@
 
     <h2>Eval Set Samples</h2>
     <p>
-      The public demo eval set contains 395 synthetic, public-safe cases grouped into research-backed
+      The public demo eval set contains 400 synthetic, public-safe cases grouped into research-backed
       TTS dimensions. Each category below contributes five shared cases that every model synthesizes
       before Gemini judges the generated audio.
     </p>
@@ -3299,6 +3300,41 @@
             <p><strong>Slice:</strong> <code>cell_b2_review_needed_d4_cleared</code></p>
             <p><strong>Prompt:</strong> Read this grid coordinate result so B two and D four are not swapped.</p>
             <p><strong>Target:</strong> Cell B2 is marked review needed, while cell D4 is marked cleared for release.</p>
+          </article>
+        </div>
+      </details>
+      <details class="sample-group" data-category="calendar_schedule_delivery">
+        <summary><span>Calendar Schedule Delivery</span><strong>5 cases</strong></summary>
+        <div class="sample-list">
+          <article class="sample-card">
+            <h3><code>tts-calendar-schedule-delivery-recurring-exception-001</code></h3>
+            <p><strong>Slice:</strong> <code>weekly_standup_exception_july_14_1030</code></p>
+            <p><strong>Prompt:</strong> Read this calendar rule so the recurring pattern and single exception do not blur together.</p>
+            <p><strong>Target:</strong> Standup repeats every Tuesday at 9 AM, except July 14, when it moves to 10:30.</p>
+          </article>
+          <article class="sample-card">
+            <h3><code>tts-calendar-schedule-delivery-hold-versus-confirmed-001</code></h3>
+            <p><strong>Slice:</strong> <code>tentative_hold_design_confirmed_vendor_room_4b</code></p>
+            <p><strong>Prompt:</strong> Read this scheduling update so the tentative hold and confirmed meeting are clearly different.</p>
+            <p><strong>Target:</strong> Keep the 2 PM hold with Design, but the confirmed vendor review starts at 3:15 in Room 4B.</p>
+          </article>
+          <article class="sample-card">
+            <h3><code>tts-calendar-schedule-delivery-timezone-conversion-001</code></h3>
+            <p><strong>Slice:</strong> <code>tokyo_jst_to_pacific_previous_day</code></p>
+            <p><strong>Prompt:</strong> Read this invite summary so the source time zone and local time remain distinct.</p>
+            <p><strong>Target:</strong> The Tokyo partner call is 11 AM JST, which appears on your calendar as 7 PM Pacific the previous day.</p>
+          </article>
+          <article class="sample-card">
+            <h3><code>tts-calendar-schedule-delivery-rsvp-optional-attendee-001</code></h3>
+            <p><strong>Slice:</strong> <code>rsvp_deadline_optional_maya_required_omar</code></p>
+            <p><strong>Prompt:</strong> Read this invite note so the RSVP deadline and optional attendee status are not confused.</p>
+            <p><strong>Target:</strong> Please RSVP by Friday at noon; Maya is optional, but Omar must attend the budget review.</p>
+          </article>
+          <article class="sample-card">
+            <h3><code>tts-calendar-schedule-delivery-cancel-reschedule-001</code></h3>
+            <p><strong>Slice:</strong> <code>cancel_monday_845_reschedule_wednesday_120</code></p>
+            <p><strong>Prompt:</strong> Read this calendar change so the canceled event and replacement slot are unmistakable.</p>
+            <p><strong>Target:</strong> Cancel Monday's 8:45 check-in and reschedule it for Wednesday at 1:20 after the lab tour.</p>
           </article>
         </div>
       </details>
