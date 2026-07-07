@@ -308,12 +308,12 @@
   <main>
     <section class="panel control-bar" aria-label="Demo controls">
       <div class="view-tabs" aria-label="Report views">
-        <button type="button" class="active" data-view="all">All</button>
-        <button type="button" data-view="overview">Overview</button>
+        <button type="button" class="active" data-view="demo">Demo Run</button>
+        <button type="button" data-view="usage">Usage</button>
         <button type="button" data-view="eval">Eval Set</button>
-        <button type="button" data-view="leaderboard">Leaderboard</button>
-        <button type="button" data-view="diagnostics">Diagnostics</button>
-        <button type="button" data-view="samples">Samples</button>
+        <button type="button" data-view="samples">Sample Rows</button>
+        <button type="button" data-view="reference">Reference</button>
+        <button type="button" data-view="all">All</button>
       </div>
       <div class="control-grid">
         <input id="report-search" type="search" placeholder="Search cases, models, categories, reasons" aria-label="Search report">
@@ -349,7 +349,7 @@
         </select>
         <button type="button" id="reset-controls">Reset</button>
       </div>
-      <p id="filter-status" class="filter-status">Showing all demo content.</p>
+      <p id="filter-status" class="filter-status">Demo Run view is selected.</p>
     </section>
 
     <section class="panel">
@@ -1185,29 +1185,24 @@
   </main>
   <script>
     const sectionViews = {
-      all: null,
-      overview: new Set([
-        "What This Demonstrates",
-        "How To Run It",
-        "Expected Output Files",
+      demo: new Set([
         "Sample Report Preview",
-      ]),
-      eval: new Set(["Eval Set Samples"]),
-      leaderboard: new Set([
         "Model Leaderboard",
+        "Top Diagnostics",
         "Category Leaderboard",
         "Baseline Model Deltas",
-      ]),
-      diagnostics: new Set([
-        "Top Diagnostics",
         "Weakest Segments",
         "Model-Category Action Matrix",
       ]),
-      samples: new Set([
-        "Sample-By-Sample Breakdown",
-        "Representative Result JSON",
-        "How To Read The Report",
+      usage: new Set([
+        "What This Demonstrates",
+        "How To Run It",
+        "Expected Output Files",
       ]),
+      eval: new Set(["Eval Set Samples"]),
+      samples: new Set(["Sample-By-Sample Breakdown"]),
+      reference: new Set(["Representative Result JSON", "How To Read The Report"]),
+      all: null,
     };
 
     const controls = {
@@ -1224,7 +1219,8 @@
     const evalGroups = Array.from(document.querySelectorAll(".sample-group"));
     const sampleRows = Array.from(document.querySelectorAll("#sample-breakdown-table tbody tr"));
     const sampleBody = document.querySelector("#sample-breakdown-table tbody");
-    let activeView = "all";
+    const requestedView = location.hash.slice(1);
+    let activeView = Object.prototype.hasOwnProperty.call(sectionViews, requestedView) ? requestedView : "demo";
 
     function textOf(node) {
       return node.textContent.trim().toLowerCase();
@@ -1250,6 +1246,11 @@
       controls.viewButtons.forEach((button) => {
         button.classList.toggle("active", button.dataset.view === activeView);
       });
+    }
+
+    function viewLabel() {
+      const activeButton = controls.viewButtons.find((button) => button.dataset.view === activeView);
+      return activeButton ? activeButton.textContent.trim() : "Demo Run";
     }
 
     function matchesQuery(node, query) {
@@ -1310,7 +1311,7 @@
         }
       });
       sortRows();
-      controls.status.textContent = `Showing ${visibleRows} sample rows and ${visibleCards} eval-set cases.`;
+      controls.status.textContent = `${viewLabel()} view. Showing ${visibleRows} sample rows and ${visibleCards} eval-set cases.`;
     }
 
     function resetControls() {
@@ -1319,7 +1320,8 @@
       controls.category.value = "";
       controls.label.value = "";
       controls.sort.value = "score-asc";
-      activeView = "all";
+      activeView = "demo";
+      history.replaceState(null, "", "#demo");
       applyView();
       applyFilters();
     }
@@ -1327,7 +1329,9 @@
     controls.viewButtons.forEach((button) => {
       button.addEventListener("click", () => {
         activeView = button.dataset.view;
+        history.replaceState(null, "", `#${activeView}`);
         applyView();
+        applyFilters();
       });
     });
     [controls.search, controls.model, controls.category, controls.label, controls.sort].forEach((control) => {
