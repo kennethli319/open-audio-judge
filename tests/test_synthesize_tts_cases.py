@@ -56,6 +56,7 @@ def test_synthesize_cases_dry_run_writes_local_audio_manifest(tmp_path: Path) ->
     assert written[0]["audio_path"] == "audio/tts-eval-001.wav"
     assert written[0]["reference_text"] == "Call me at 09:45."
     assert written[0]["metadata"]["sample_kind"] == "local_synthetic_tts"
+    assert written[0]["metadata"]["synthesis_provider"] == "local_chatterbox"
     assert written[0]["metadata"]["source_case_id"] == "tts eval/001"
     assert written[0]["metadata"]["synthesis_audio_format"] == "wav"
     assert written[0]["metadata"]["text_context_fields"] == ["reference_text", "turns"]
@@ -76,6 +77,45 @@ def test_synthesize_cases_dry_run_writes_local_audio_manifest(tmp_path: Path) ->
             require_text_context_metadata=True,
             require_synthesis_metadata=True,
             require_text_sidecars=True,
+        )
+        == []
+    )
+
+
+def test_synthesize_cases_can_label_non_chatterbox_wrapper(tmp_path: Path) -> None:
+    cases_path = tmp_path / "tts_cases.jsonl"
+    cases_path.write_text(
+        json.dumps(
+            {
+                "id": "tts-kokoro-001",
+                "task": "tts_naturalness",
+                "reference_text": "Please read this comparison sample.",
+            }
+        )
+        + "\n",
+        encoding="utf-8",
+    )
+
+    derived = synthesize_cases(
+        cases_path=cases_path,
+        out_dir=tmp_path / "out",
+        tts_bin=Path("/missing/kokoro-wrapper"),
+        model="mlx-community/Kokoro-82M-4bit",
+        synthesis_provider="local_kokoro_mlx",
+        voice="af_heart",
+        lang_code="en",
+        audio_format="wav",
+        dry_run=True,
+    )
+
+    metadata = derived[0]["metadata"]
+    assert metadata["synthesis_provider"] == "local_kokoro_mlx"
+    assert metadata["synthesis_model"] == "mlx-community/Kokoro-82M-4bit"
+    assert (
+        validate_synthesized_manifest(
+            cases_path=tmp_path / "out" / "tts_audio_cases.jsonl",
+            require_local_audio=False,
+            require_synthesis_metadata=True,
         )
         == []
     )
@@ -593,10 +633,6 @@ def test_validate_synthesized_manifest_reports_stale_synthesis_metadata(
         ),
         (
             "tts-source-local-tts",
-            "metadata.synthesis_provider has unexpected value: expected local_chatterbox, got other.",
-        ),
-        (
-            "tts-source-local-tts",
             "metadata.source_case_id does not match synthesized case id: "
             "expected tts-source, got different-source.",
         ),
@@ -620,7 +656,7 @@ def test_validate_synthesized_manifest_rejects_empty_synthesis_trace_fields(
                 "reference_text": "Synthetic sample.",
                 "metadata": {
                     "sample_kind": "local_synthetic_tts",
-                    "synthesis_provider": "local_chatterbox",
+                    "synthesis_provider": "",
                     "synthesis_model": " ",
                     "synthesis_voice": "",
                     "synthesis_lang_code": "en",
@@ -639,6 +675,7 @@ def test_validate_synthesized_manifest_rejects_empty_synthesis_trace_fields(
     issues = validate_synthesized_manifest(cases_path=cases_path, require_local_audio=False)
 
     assert [(issue.case_id, issue.reason) for issue in issues] == [
+        ("tts-source-local-tts", "metadata.synthesis_provider must not be empty."),
         ("tts-source-local-tts", "metadata.synthesis_model must not be empty."),
         ("tts-source-local-tts", "metadata.synthesis_voice must not be empty."),
         ("tts-source-local-tts", "metadata.synthesis_audio_format must not be empty."),
@@ -749,6 +786,10 @@ def test_write_synthesis_summary_is_metadata_only_for_dry_run(tmp_path: Path) ->
         "audio_duration_seconds": {"average": None, "max": None, "min": None, "total": None},
         "by_sample_kind": {"local_synthetic_tts": 1},
         "by_synthesis_audio_format": {"wav": 1},
+        "by_synthesis_lang_code": {"en": 1},
+        "by_synthesis_model": {"mlx-community/chatterbox-turbo-6bit": 1},
+        "by_synthesis_provider": {"local_chatterbox": 1},
+        "by_synthesis_voice": {"af_heart": 1},
         "by_slice": {"dates_times": 1},
         "by_source_category": {"instruction_constraints": 1},
         "by_text_context_fields": {"reference_text": 1},

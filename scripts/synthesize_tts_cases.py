@@ -44,6 +44,11 @@ def main() -> None:
     parser.add_argument("--out", type=Path, default=DEFAULT_OUT, help="Ignored output directory.")
     parser.add_argument("--tts-bin", type=Path, default=DEFAULT_TTS, help="local-tts-speak path.")
     parser.add_argument("--model", default=DEFAULT_MODEL)
+    parser.add_argument(
+        "--synthesis-provider",
+        default="local_chatterbox",
+        help="Metadata label for the local TTS backend or wrapper.",
+    )
     parser.add_argument("--voice", default="af_heart")
     parser.add_argument("--lang-code", default="en")
     parser.add_argument("--audio-format", choices=("wav", "flac", "mp3"), default="wav")
@@ -125,6 +130,7 @@ def main() -> None:
         out_dir=args.out,
         tts_bin=args.tts_bin,
         model=args.model,
+        synthesis_provider=args.synthesis_provider,
         voice=args.voice,
         lang_code=args.lang_code,
         audio_format=args.audio_format,
@@ -146,6 +152,7 @@ def synthesize_cases(
     voice: str,
     lang_code: str,
     audio_format: str,
+    synthesis_provider: str = "local_chatterbox",
     limit: int | None = None,
     keep_text_sidecars: bool = True,
     dry_run: bool = False,
@@ -213,7 +220,7 @@ def synthesize_cases(
         metadata.update(
             {
                 "sample_kind": "local_synthetic_tts",
-                "synthesis_provider": "local_chatterbox",
+                "synthesis_provider": synthesis_provider,
                 "synthesis_model": model,
                 "synthesis_voice": voice,
                 "synthesis_lang_code": lang_code,
@@ -268,6 +275,18 @@ def summarize_synthesized_cases(cases: Iterable[dict[str, Any]]) -> dict[str, An
         ),
         "by_sample_kind": _sorted_counts(
             str(metadata.get("sample_kind") or "unknown") for metadata in metadata_list
+        ),
+        "by_synthesis_provider": _sorted_counts(
+            str(metadata.get("synthesis_provider") or "unknown") for metadata in metadata_list
+        ),
+        "by_synthesis_model": _sorted_counts(
+            str(metadata.get("synthesis_model") or "unknown") for metadata in metadata_list
+        ),
+        "by_synthesis_voice": _sorted_counts(
+            str(metadata.get("synthesis_voice") or "unknown") for metadata in metadata_list
+        ),
+        "by_synthesis_lang_code": _sorted_counts(
+            str(metadata.get("synthesis_lang_code") or "unknown") for metadata in metadata_list
         ),
         "by_synthesis_audio_format": _sorted_counts(
             str(metadata.get("synthesis_audio_format") or "unknown") for metadata in metadata_list
@@ -426,7 +445,6 @@ def _validate_synthesis_metadata(
     metadata = case.metadata
     required_fields = {
         "sample_kind": "local_synthetic_tts",
-        "synthesis_provider": "local_chatterbox",
     }
     for field, expected_value in required_fields.items():
         observed_value = metadata.get(field)
@@ -450,6 +468,7 @@ def _validate_synthesis_metadata(
             )
 
     for field in [
+        "synthesis_provider",
         "synthesis_model",
         "synthesis_voice",
         "synthesis_lang_code",
