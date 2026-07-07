@@ -151,10 +151,16 @@ runs can map private prompts into the same categories without copying private ro
 - `digital_locator_delivery`: email aliases, URLs with query strings, file paths, meeting links,
   passcodes, social handles, and chat channels where punctuation, separators, and identifier
   boundaries must be grouped clearly enough for first-listen transcription.
+- `conditional_logic_delivery`: unless, only-if, if/otherwise, nested conditions, and exception
+  boundaries where prosody must preserve the controlling condition and active action without
+  weakening safety-critical logic.
+- `priority_escalation_delivery`: critical alerts, severity labels, triage priority, alert
+  downgrades, escalation owners, and deadlines where urgency must be calibrated while preserving
+  exact action, owner, and condition details.
 
 ## Manifest Contract
 
-The public comparison manifest is intentionally balanced at 255 cases for now: 51 categories with 5
+The public comparison manifest is intentionally balanced at 265 cases for now: 53 categories with 5
 cases each. Expansion should add complete five-case category batches before deepening existing
 categories.
 

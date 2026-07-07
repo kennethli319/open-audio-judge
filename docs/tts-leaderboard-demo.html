@@ -376,6 +376,8 @@
           <option value="pause_breath_control">Pause breath control</option>
           <option value="citation_reference_delivery">Citation reference delivery</option>
           <option value="digital_locator_delivery">Digital locator delivery</option>
+          <option value="conditional_logic_delivery">Conditional logic delivery</option>
+          <option value="priority_escalation_delivery">Priority escalation delivery</option>
         </select>
         <select id="label-filter" aria-label="Filter by label">
           <option value="">All labels</option>
@@ -420,7 +422,7 @@
   --cases examples/tts_multiturn_cases.jsonl \
   --judge-provider gemini \
   --judge-samples 3 \
-  --limit 255 \
+  --limit 265 \
   --out runs/leaderboard/chatterbox</code></pre>
 
     <pre><code>oaj autojudge-local-tts \
@@ -429,7 +431,7 @@
   --cases examples/tts_multiturn_cases.jsonl \
   --judge-provider gemini \
   --judge-samples 3 \
-  --limit 255 \
+  --limit 265 \
   --out runs/leaderboard/kokoro</code></pre>
 
     <pre><code>oaj autojudge-local-tts \
@@ -438,7 +440,7 @@
   --cases examples/tts_multiturn_cases.jsonl \
   --judge-provider gemini \
   --judge-samples 3 \
-  --limit 255 \
+  --limit 265 \
   --out runs/leaderboard/qwen3-tts</code></pre>
 
     <p>
@@ -450,7 +452,7 @@
   --cases examples/tts_multiturn_cases.jsonl \
   --judge-provider gemini \
   --judge-samples 3 \
-  --limit 255 \
+  --limit 265 \
   --out runs/leaderboard/chatterbox</code></pre>
 
     <p>
@@ -495,16 +497,16 @@
     <h2>Sample Report Preview</h2>
     <section class="grid" aria-label="Sample report metrics">
       <div class="metric"><span>Models</span><strong>3</strong></div>
-      <div class="metric"><span>Shared Eval Cases</span><strong>255</strong></div>
+      <div class="metric"><span>Shared Eval Cases</span><strong>265</strong></div>
       <div class="metric"><span>Judge Samples</span><strong>3x</strong></div>
       <div class="metric"><span>Top Avg</span><strong>91.2</strong></div>
       <div class="metric"><span>Lowest Avg</span><strong>84.7</strong></div>
-      <div class="metric"><span>Total Judgments</span><strong>2295</strong></div>
+      <div class="metric"><span>Total Judgments</span><strong>2385</strong></div>
     </section>
 
     <h2>Eval Set Samples</h2>
     <p>
-      The public demo eval set contains 255 synthetic, public-safe cases grouped into research-backed
+      The public demo eval set contains 265 synthetic, public-safe cases grouped into research-backed
       TTS dimensions. Each category below contributes five shared cases that every model synthesizes
       before Gemini judges the generated audio.
     </p>
@@ -2294,6 +2296,76 @@
           </article>
         </div>
       </details>
+      <details class="sample-group" data-category="conditional_logic_delivery">
+        <summary><span>Conditional Logic Delivery</span><strong>5 cases</strong></summary>
+        <div class="sample-list">
+          <article class="sample-card">
+            <h3><code>tts-conditional-logic-delivery-unless-exception-001</code></h3>
+            <p><strong>Slice:</strong> <code>unless_exception_safety_condition</code></p>
+            <p><strong>Prompt:</strong> Read this policy condition so the unless clause sounds like the only exception, not an optional aside.</p>
+            <p><strong>Target:</strong> Do not unlock the cabinet unless both supervisors approve the request in writing.</p>
+          </article>
+          <article class="sample-card">
+            <h3><code>tts-conditional-logic-delivery-only-if-threshold-001</code></h3>
+            <p><strong>Slice:</strong> <code>only_if_numeric_threshold_condition</code></p>
+            <p><strong>Prompt:</strong> Read this threshold rule so only if controls the action and the numeric limit is not softened.</p>
+            <p><strong>Target:</strong> Start the backup pump only if tank pressure stays below 45 P S I for two full minutes.</p>
+          </article>
+          <article class="sample-card">
+            <h3><code>tts-conditional-logic-delivery-either-or-decision-001</code></h3>
+            <p><strong>Slice:</strong> <code>if_otherwise_route_decision</code></p>
+            <p><strong>Prompt:</strong> Read this either-or rule with balanced alternatives and a clear final action.</p>
+            <p><strong>Target:</strong> If the east gate is blocked, use the south entrance; otherwise, keep the original pickup route.</p>
+          </article>
+          <article class="sample-card">
+            <h3><code>tts-conditional-logic-delivery-nested-condition-001</code></h3>
+            <p><strong>Slice:</strong> <code>two_stage_if_condition_sequence</code></p>
+            <p><strong>Prompt:</strong> Read this nested condition so the listener can follow both tests without hearing a run-on sentence.</p>
+            <p><strong>Target:</strong> If the badge reader flashes amber, wait ten seconds; if it turns red, call security before trying again.</p>
+          </article>
+          <article class="sample-card">
+            <h3><code>tts-conditional-logic-delivery-except-boundary-001</code></h3>
+            <p><strong>Slice:</strong> <code>weekday_except_friday_schedule_boundary</code></p>
+            <p><strong>Prompt:</strong> Read this exception boundary so the excluded day does not sound like part of the normal schedule.</p>
+            <p><strong>Target:</strong> Send the reminder every weekday except Friday, when the office closes at noon.</p>
+          </article>
+        </div>
+      </details>
+      <details class="sample-group" data-category="priority_escalation_delivery">
+        <summary><span>Priority Escalation Delivery</span><strong>5 cases</strong></summary>
+        <div class="sample-list">
+          <article class="sample-card">
+            <h3><code>tts-priority-escalation-delivery-critical-alert-001</code></h3>
+            <p><strong>Slice:</strong> <code>critical_alert_room_action_escalation</code></p>
+            <p><strong>Prompt:</strong> Read this critical alert with urgency, but keep the room and action clear enough for a noisy hallway.</p>
+            <p><strong>Target:</strong> Critical alert: close the oxygen valve in Room 4C and call the floor lead now.</p>
+          </article>
+          <article class="sample-card">
+            <h3><code>tts-priority-escalation-delivery-severity-label-001</code></h3>
+            <p><strong>Slice:</strong> <code>severity_label_on_call_escalation</code></p>
+            <p><strong>Prompt:</strong> Read this incident update so severity two and the escalation target do not get swallowed.</p>
+            <p><strong>Target:</strong> Mark this as severity two, escalate to the on-call engineer, and attach the last five log lines.</p>
+          </article>
+          <article class="sample-card">
+            <h3><code>tts-priority-escalation-delivery-triage-order-001</code></h3>
+            <p><strong>Slice:</strong> <code>triage_priority_label_assignment</code></p>
+            <p><strong>Prompt:</strong> Read this triage order with the priority labels clear and no casual friendliness.</p>
+            <p><strong>Target:</strong> Priority A goes to the chest pain case; Priority B goes to the ankle injury by the front desk.</p>
+          </article>
+          <article class="sample-card">
+            <h3><code>tts-priority-escalation-delivery-downgrade-warning-001</code></h3>
+            <p><strong>Slice:</strong> <code>alert_downgrade_with_remaining_condition</code></p>
+            <p><strong>Prompt:</strong> Read this downgrade notice so it sounds careful, not like the risk disappeared.</p>
+            <p><strong>Target:</strong> Downgrade the alert to watch status, but keep the south exit monitored until the smoke clears.</p>
+          </article>
+          <article class="sample-card">
+            <h3><code>tts-priority-escalation-delivery-handoff-deadline-001</code></h3>
+            <p><strong>Slice:</strong> <code>escalation_owner_deadline_reason</code></p>
+            <p><strong>Prompt:</strong> Read this escalation handoff so the deadline and owner are easy to catch on first listen.</p>
+            <p><strong>Target:</strong> Escalate the payment review to Dana before 3 PM, because the release hold expires at 4.</p>
+          </article>
+        </div>
+      </details>
     </section>
 
     <h2>Model Leaderboard</h2>
@@ -2313,7 +2385,7 @@
           <td data-label="Rank">1</td>
           <td data-label="Model"><code>mlx-community/chatterbox-turbo-6bit</code></td>
           <td data-label="Avg">91.2</td>
-          <td data-label="Accurate">101 / 165</td>
+          <td data-label="Accurate">162 / 265</td>
           <td data-label="Weakest Category"><code>information_tuning</code> avg 84.5</td>
           <td data-label="Likely Fix Focus">number clarity, pauses around dense facts</td>
         </tr>
@@ -2321,7 +2393,7 @@
           <td data-label="Rank">2</td>
           <td data-label="Model"><code>mlx-community/Kokoro-82M-4bit</code></td>
           <td data-label="Avg">88.6</td>
-          <td data-label="Accurate">94 / 165</td>
+          <td data-label="Accurate">151 / 265</td>
           <td data-label="Weakest Category"><code>speech_steerability</code> avg 80.8</td>
           <td data-label="Likely Fix Focus">style control, emphasis, pacing</td>
         </tr>
@@ -2329,7 +2401,7 @@
           <td data-label="Rank">3</td>
           <td data-label="Model"><code>mlx-community/Qwen3-TTS-12Hz-0.6B-Base-4bit</code></td>
           <td data-label="Avg">84.7</td>
-          <td data-label="Accurate">69 / 165</td>
+          <td data-label="Accurate">111 / 265</td>
           <td data-label="Weakest Category"><code>paralinguistics</code> avg 77.0</td>
           <td data-label="Likely Fix Focus">emotion rendering, natural prosody</td>
         </tr>
@@ -2340,13 +2412,13 @@
     <section class="grid">
       <div class="panel">
         <h3>Error Categories</h3>
-        <p class="good">no error: 104</p>
-        <p>awkward pacing: 10</p>
-        <p>style/instruction mismatch: 7</p>
-        <p>pronunciation error: 5</p>
-        <p>prosody/emotion mismatch: 4</p>
-        <p>intelligibility/artifact: 3</p>
-        <p>voice drift: 2</p>
+        <p class="good">no error: 167</p>
+        <p>awkward pacing: 16</p>
+        <p>style/instruction mismatch: 11</p>
+        <p>pronunciation error: 8</p>
+        <p>prosody/emotion mismatch: 7</p>
+        <p>intelligibility/artifact: 5</p>
+        <p>voice drift: 3</p>
       </div>
       <div class="panel">
         <h3>Scores By Category</h3>
@@ -2384,17 +2456,17 @@
       </div>
       <div class="panel">
         <h3>Scores By Model</h3>
-        <p><code>mlx-community/chatterbox-turbo-6bit</code><br>avg 90.1 / n 165 / 78-97</p>
-        <p><code>mlx-community/Kokoro-82M-4bit</code><br>avg 87.2 / n 165 / 73-95</p>
-        <p><code>mlx-community/Qwen3-TTS-12Hz-0.6B-Base-4bit</code><br>avg 83.6 / n 165 / 70-93</p>
+        <p><code>mlx-community/chatterbox-turbo-6bit</code><br>avg 90.1 / n 265 / 78-97</p>
+        <p><code>mlx-community/Kokoro-82M-4bit</code><br>avg 87.2 / n 265 / 73-95</p>
+        <p><code>mlx-community/Qwen3-TTS-12Hz-0.6B-Base-4bit</code><br>avg 83.6 / n 265 / 70-93</p>
       </div>
       <div class="panel">
         <h3>Scores By Voice</h3>
-        <p><code>af_heart</code><br>avg 95.0 / n 1 / 95-95</p>
+        <p><code>af_heart</code><br>avg 87.0 / n 795 / 70-97</p>
       </div>
       <div class="panel">
         <h3>Scores By Language</h3>
-        <p><code>en</code><br>avg 95.0 / n 1 / 95-95</p>
+        <p><code>en</code><br>avg 87.0 / n 795 / 70-97</p>
       </div>
     </section>
 

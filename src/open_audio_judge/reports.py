@@ -950,6 +950,22 @@ TTS_CATEGORY_GUIDANCE = {
             "identifier boundary chunking",
         ],
     ),
+    "conditional_logic_delivery": (
+        "unless, only-if, if/otherwise, nested conditions, and exception boundaries",
+        [
+            "conditional phrase parsing",
+            "exception and default-action prosody",
+            "safety-critical logic faithfulness",
+        ],
+    ),
+    "priority_escalation_delivery": (
+        "critical alerts, severity labels, triage priorities, downgrades, owners, and deadlines",
+        [
+            "urgency calibration",
+            "priority and severity text normalization",
+            "escalation owner/deadline emphasis",
+        ],
+    ),
 }
 
 

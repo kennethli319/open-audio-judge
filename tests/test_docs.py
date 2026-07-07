@@ -40,7 +40,7 @@ def test_tts_leaderboard_demo_page_documents_workflow() -> None:
         "function applyFilters()",
         "function sortRows()",
         "Eval Set Samples",
-        "The public demo eval set contains 255 synthetic, public-safe cases",
+        "The public demo eval set contains 265 synthetic, public-safe cases",
         "Paralinguistics",
         "Instruction Following",
         "Speaker Voice Consistency",
@@ -76,11 +76,13 @@ def test_tts_leaderboard_demo_page_documents_workflow() -> None:
         "tts-pause-breath-control-brief-long-pause-001",
         "tts-citation-reference-delivery-academic-001",
         "tts-digital-locator-delivery-email-alias-001",
+        "tts-conditional-logic-delivery-unless-exception-001",
+        "tts-priority-escalation-delivery-critical-alert-001",
         "Model Leaderboard",
         "Category Leaderboard",
-        "no error: 104",
-        "style/instruction mismatch: 7",
-        "voice drift: 2",
+        "no error: 167",
+        "style/instruction mismatch: 11",
+        "voice drift: 3",
         "Scores By Category",
         "Baseline Model Deltas",
         "Wins / Ties / Losses",
@@ -117,7 +119,7 @@ def test_tts_multiturn_examples_cover_requested_categories() -> None:
         category = record["metadata"]["eval_category"]
         categories[category] = categories.get(category, 0) + 1
 
-    assert len(records) == 255
+    assert len(records) == 265
     assert categories == {
         "paralinguistics": 5,
         "instruction_following": 5,
@@ -170,6 +172,8 @@ def test_tts_multiturn_examples_cover_requested_categories() -> None:
         "pause_breath_control": 5,
         "citation_reference_delivery": 5,
         "digital_locator_delivery": 5,
+        "conditional_logic_delivery": 5,
+        "priority_escalation_delivery": 5,
     }
     assert all(record["turns"] for record in records)
     assert all(record["reference_text"] for record in records)
