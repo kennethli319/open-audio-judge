@@ -391,7 +391,7 @@
   --cases examples/tts_multiturn_cases.jsonl \
   --judge-provider gemini \
   --judge-samples 3 \
-  --limit 110 \
+  --limit 115 \
   --out runs/leaderboard/chatterbox</code></pre>
 
     <pre><code>oaj autojudge-local-tts \
@@ -400,7 +400,7 @@
   --cases examples/tts_multiturn_cases.jsonl \
   --judge-provider gemini \
   --judge-samples 3 \
-  --limit 110 \
+  --limit 115 \
   --out runs/leaderboard/kokoro</code></pre>
 
     <pre><code>oaj autojudge-local-tts \
@@ -409,7 +409,7 @@
   --cases examples/tts_multiturn_cases.jsonl \
   --judge-provider gemini \
   --judge-samples 3 \
-  --limit 110 \
+  --limit 115 \
   --out runs/leaderboard/qwen3-tts</code></pre>
 
     <p>
@@ -421,7 +421,7 @@
   --cases examples/tts_multiturn_cases.jsonl \
   --judge-provider gemini \
   --judge-samples 3 \
-  --limit 110 \
+  --limit 115 \
   --out runs/leaderboard/chatterbox</code></pre>
 
     <p>
@@ -466,16 +466,16 @@
     <h2>Sample Report Preview</h2>
     <section class="grid" aria-label="Sample report metrics">
       <div class="metric"><span>Models</span><strong>3</strong></div>
-      <div class="metric"><span>Shared Eval Cases</span><strong>110</strong></div>
+      <div class="metric"><span>Shared Eval Cases</span><strong>115</strong></div>
       <div class="metric"><span>Judge Samples</span><strong>3x</strong></div>
       <div class="metric"><span>Top Avg</span><strong>91.2</strong></div>
       <div class="metric"><span>Lowest Avg</span><strong>84.7</strong></div>
-      <div class="metric"><span>Total Judgments</span><strong>990</strong></div>
+      <div class="metric"><span>Total Judgments</span><strong>1035</strong></div>
     </section>
 
     <h2>Eval Set Samples</h2>
     <p>
-      The public demo eval set contains 110 synthetic, public-safe cases grouped into research-backed
+      The public demo eval set contains 115 synthetic, public-safe cases grouped into research-backed
       TTS dimensions. Each category below contributes five shared cases that every model synthesizes
       before Gemini judges the generated audio.
     </p>
@@ -1250,6 +1250,41 @@
           </article>
         </div>
       </details>
+      <details class="sample-group" data-category="safety_privacy_delivery">
+        <summary><span>Safety Privacy Delivery</span><strong>5 cases</strong></summary>
+        <div class="sample-list">
+          <article class="sample-card">
+            <h3><code>tts-safety-privacy-delivery-consent-notice-001</code></h3>
+            <p><strong>Slice:</strong> <code>consent_notice_clarity</code></p>
+            <p><strong>Prompt:</strong> Read this consent notice with neutral clarity and no rushed legal tone.</p>
+            <p><strong>Target:</strong> This call may be recorded for quality review, and you can ask to stop recording at any time.</p>
+          </article>
+          <article class="sample-card">
+            <h3><code>tts-safety-privacy-delivery-secret-warning-001</code></h3>
+            <p><strong>Slice:</strong> <code>credential_warning_negation</code></p>
+            <p><strong>Prompt:</strong> Read this account-safety warning firmly, with the never clause unmistakable.</p>
+            <p><strong>Target:</strong> A support agent will never ask for your password, full card number, or one-time code.</p>
+          </article>
+          <article class="sample-card">
+            <h3><code>tts-safety-privacy-delivery-redacted-id-001</code></h3>
+            <p><strong>Slice:</strong> <code>redacted_identifier_handling</code></p>
+            <p><strong>Prompt:</strong> Read this privacy-preserving case note without inventing the redacted identifier.</p>
+            <p><strong>Target:</strong> The case note says user ID redacted, followed by account ending in 4821.</p>
+          </article>
+          <article class="sample-card">
+            <h3><code>tts-safety-privacy-delivery-location-choice-001</code></h3>
+            <p><strong>Slice:</strong> <code>location_consent_emergency</code></p>
+            <p><strong>Prompt:</strong> Read this sensitive safety guidance with care, preserving the user's choice and emergency condition.</p>
+            <p><strong>Target:</strong> Share your location only if you choose to, and call local emergency services if you are in immediate danger.</p>
+          </article>
+          <article class="sample-card">
+            <h3><code>tts-safety-privacy-delivery-deletion-warning-001</code></h3>
+            <p><strong>Slice:</strong> <code>irreversible_action_warning</code></p>
+            <p><strong>Prompt:</strong> Read this irreversible-action warning with measured seriousness and clear consequence order.</p>
+            <p><strong>Target:</strong> Deleting this workspace removes shared files for everyone, so export your records before you continue.</p>
+          </article>
+        </div>
+      </details>
     </section>
 
     <h2>Model Leaderboard</h2>
@@ -1327,12 +1362,13 @@
         <p><code>voice_conversion_similarity</code><br>avg 84.0 / n 5 / 74-92</p>
         <p><code>accent_dialect_handling</code><br>avg 83.4 / n 5 / 73-91</p>
         <p><code>artifact_suppression</code><br>avg 83.0 / n 5 / 72-91</p>
+        <p><code>safety_privacy_delivery</code><br>avg 84.5 / n 5 / 74-92</p>
       </div>
       <div class="panel">
         <h3>Scores By Model</h3>
-        <p><code>mlx-community/chatterbox-turbo-6bit</code><br>avg 90.1 / n 110 / 78-97</p>
-        <p><code>mlx-community/Kokoro-82M-4bit</code><br>avg 87.2 / n 110 / 73-95</p>
-        <p><code>mlx-community/Qwen3-TTS-12Hz-0.6B-Base-4bit</code><br>avg 83.6 / n 110 / 70-93</p>
+        <p><code>mlx-community/chatterbox-turbo-6bit</code><br>avg 90.1 / n 115 / 78-97</p>
+        <p><code>mlx-community/Kokoro-82M-4bit</code><br>avg 87.2 / n 115 / 73-95</p>
+        <p><code>mlx-community/Qwen3-TTS-12Hz-0.6B-Base-4bit</code><br>avg 83.6 / n 115 / 70-93</p>
       </div>
       <div class="panel">
         <h3>Scores By Voice</h3>
@@ -1461,6 +1497,13 @@
           <td data-label="Qwen3-TTS">79.5</td>
           <td data-label="What To Inspect">speaker similarity, content preservation, reference prosody, identity leakage</td>
         </tr>
+        <tr>
+          <td data-label="Category"><code>safety_privacy_delivery</code></td>
+          <td data-label="Chatterbox">89.0</td>
+          <td data-label="Kokoro">85.0</td>
+          <td data-label="Qwen3-TTS">80.5</td>
+          <td data-label="What To Inspect">consent wording, credential warnings, redactions, negation, irreversible-action clarity</td>
+        </tr>
       </tbody>
     </table>
 
@@ -1485,17 +1528,17 @@
         <tr>
           <td data-label="Compared Model"><code>mlx-community/Kokoro-82M-4bit</code></td>
           <td data-label="Baseline"><code>mlx-community/chatterbox-turbo-6bit</code></td>
-          <td data-label="Matched Cases">110</td>
+          <td data-label="Matched Cases">115</td>
           <td data-label="Avg Delta">-2.6</td>
-          <td data-label="Wins / Ties / Losses">20 / 14 / 76</td>
+          <td data-label="Wins / Ties / Losses">21 / 15 / 79</td>
           <td data-label="Largest Regressions">speech pace and emphasis cases where style control trails the baseline.</td>
         </tr>
         <tr>
           <td data-label="Compared Model"><code>mlx-community/Qwen3-TTS-12Hz-0.6B-Base-4bit</code></td>
           <td data-label="Baseline"><code>mlx-community/chatterbox-turbo-6bit</code></td>
-          <td data-label="Matched Cases">110</td>
+          <td data-label="Matched Cases">115</td>
           <td data-label="Avg Delta">-6.5</td>
-          <td data-label="Wins / Ties / Losses">12 / 10 / 88</td>
+          <td data-label="Wins / Ties / Losses">13 / 11 / 91</td>
           <td data-label="Largest Regressions">emotion and dense-fact cases with lower naturalness or intelligibility.</td>
         </tr>
       </tbody>
@@ -1519,7 +1562,7 @@
       </div>
       <div class="panel">
         <h3>Synthesis Model</h3>
-        <p><code>mlx-community/Qwen3-TTS-12Hz-0.6B-Base-4bit</code><br>avg 83.6 / n 110 / range 70-93</p>
+        <p><code>mlx-community/Qwen3-TTS-12Hz-0.6B-Base-4bit</code><br>avg 83.6 / n 115 / range 70-93</p>
         <p class="muted">Compare model-level weak spots before changing prompts, voices, wrappers, or model settings.</p>
       </div>
     </section>
@@ -1562,7 +1605,7 @@
     <h2>Sample-By-Sample Breakdown</h2>
     <p>
       The real combined report contains one row per synthesized model/case pair. This preview shows
-      representative rows across models, categories, slices, and score bands from the 210 generated
+      representative rows across models, categories, slices, and score bands from the 345 generated
       samples.
     </p>
     <table id="sample-breakdown-table">

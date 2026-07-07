@@ -69,10 +69,12 @@ runs can map private prompts into the same categories without copying private ro
   boundaries, quiet tail stability, and artifact-free intelligibility under difficult acoustics.
 - `temporal_rhythm_control`: countdown spacing, relative pause duration, tempo ramps, repeated
   phrase rhythm, and short-clause timing that should stay spoken rather than sung or flattened.
+- `safety_privacy_delivery`: consent notices, credential warnings, redacted identifiers, location
+  choice, and irreversible-action warnings that must preserve exact safety and privacy conditions.
 
 ## Manifest Contract
 
-The public comparison manifest is intentionally balanced at 110 cases for now: 22 categories with 5
+The public comparison manifest is intentionally balanced at 115 cases for now: 23 categories with 5
 cases each. Expansion should add complete five-case category batches before deepening existing
 categories.
 

@@ -694,6 +694,38 @@ TTS_CATEGORY_GUIDANCE = {
             "identity/prosody disentanglement",
         ],
     ),
+    "accent_dialect_handling": (
+        "respectful regional accent cues, place-name clarity, and intelligibility without caricature",
+        [
+            "accent-conditioned phonemization",
+            "regional style calibration",
+            "place-name and acronym clarity",
+        ],
+    ),
+    "artifact_suppression": (
+        "plosive/sibilance control, repeat-loop resistance, clean pauses, and stable quiet tails",
+        [
+            "decoder artifact control",
+            "audio post-processing",
+            "pause and tail-boundary stability",
+        ],
+    ),
+    "temporal_rhythm_control": (
+        "countdown spacing, relative pause duration, tempo ramps, rhythmic emphasis, and clause timing",
+        [
+            "duration and pause modeling",
+            "tempo-control conditioning",
+            "prosodic phrase timing",
+        ],
+    ),
+    "safety_privacy_delivery": (
+        "consent notices, credential warnings, redactions, location choice, and irreversible actions",
+        [
+            "safety-critical text faithfulness",
+            "privacy/redaction normalization",
+            "conditional and negation emphasis",
+        ],
+    ),
 }
 
 
