@@ -40,7 +40,7 @@ def test_tts_leaderboard_demo_page_documents_workflow() -> None:
         "function applyFilters()",
         "function sortRows()",
         "Eval Set Samples",
-        "The public demo eval set contains 280 synthetic, public-safe cases",
+        "The public demo eval set contains 285 synthetic, public-safe cases",
         "Paralinguistics",
         "Instruction Following",
         "Speaker Voice Consistency",
@@ -81,6 +81,7 @@ def test_tts_leaderboard_demo_page_documents_workflow() -> None:
         "tts-contrastive-pair-delivery-option-ab-001",
         "tts-statistical-notation-delivery-p-value-ci-001",
         "tts-readback-confirmation-delivery-order-repeat-001",
+        "tts-focus-particle-scope-delivery-only-shift-001",
         "Model Leaderboard",
         "Category Leaderboard",
         "no error: 167",
@@ -89,13 +90,13 @@ def test_tts_leaderboard_demo_page_documents_workflow() -> None:
         "Scores By Category",
         "Baseline Model Deltas",
         "Wins / Ties / Losses",
-        "39 / 29 / 197",
+        "42 / 31 / 212",
         "Weakest Segments",
         "conditional_logic_delivery",
         "critical_alert_room_action_escalation",
         "Likely fix areas",
         "priority_escalation_delivery",
-        "840 generated",
+        "855 generated",
         "Category Guidance",
         "Focus: unless, only-if, if/otherwise, nested conditions, and exception boundaries.",
         "Source basis: VoiceBench safety/robustness behavior and Seed-TTS-Eval intelligibility checks",
@@ -127,7 +128,7 @@ def test_tts_multiturn_examples_cover_requested_categories() -> None:
         category = record["metadata"]["eval_category"]
         categories[category] = categories.get(category, 0) + 1
 
-    assert len(records) == 280
+    assert len(records) == 285
     assert categories == {
         "paralinguistics": 5,
         "instruction_following": 5,
@@ -185,6 +186,7 @@ def test_tts_multiturn_examples_cover_requested_categories() -> None:
         "contrastive_pair_delivery": 5,
         "statistical_notation_delivery": 5,
         "readback_confirmation_delivery": 5,
+        "focus_particle_scope_delivery": 5,
     }
     assert all(record["turns"] for record in records)
     assert all(record["reference_text"] for record in records)

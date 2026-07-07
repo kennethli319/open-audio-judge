@@ -381,6 +381,7 @@
           <option value="contrastive_pair_delivery">Contrastive pair delivery</option>
           <option value="statistical_notation_delivery">Statistical notation delivery</option>
           <option value="readback_confirmation_delivery">Readback confirmation delivery</option>
+          <option value="focus_particle_scope_delivery">Focus particle scope delivery</option>
         </select>
         <select id="label-filter" aria-label="Filter by label">
           <option value="">All labels</option>
@@ -425,7 +426,7 @@
   --cases examples/tts_multiturn_cases.jsonl \
   --judge-provider gemini \
   --judge-samples 3 \
-  --limit 280 \
+  --limit 285 \
   --out runs/leaderboard/chatterbox</code></pre>
 
     <pre><code>oaj autojudge-local-tts \
@@ -434,7 +435,7 @@
   --cases examples/tts_multiturn_cases.jsonl \
   --judge-provider gemini \
   --judge-samples 3 \
-  --limit 280 \
+  --limit 285 \
   --out runs/leaderboard/kokoro</code></pre>
 
     <pre><code>oaj autojudge-local-tts \
@@ -443,7 +444,7 @@
   --cases examples/tts_multiturn_cases.jsonl \
   --judge-provider gemini \
   --judge-samples 3 \
-  --limit 280 \
+  --limit 285 \
   --out runs/leaderboard/qwen3-tts</code></pre>
 
     <p>
@@ -455,7 +456,7 @@
   --cases examples/tts_multiturn_cases.jsonl \
   --judge-provider gemini \
   --judge-samples 3 \
-  --limit 280 \
+  --limit 285 \
   --out runs/leaderboard/chatterbox</code></pre>
 
     <p>
@@ -500,16 +501,16 @@
     <h2>Sample Report Preview</h2>
     <section class="grid" aria-label="Sample report metrics">
       <div class="metric"><span>Models</span><strong>3</strong></div>
-      <div class="metric"><span>Shared Eval Cases</span><strong>280</strong></div>
+      <div class="metric"><span>Shared Eval Cases</span><strong>285</strong></div>
       <div class="metric"><span>Judge Samples</span><strong>3x</strong></div>
       <div class="metric"><span>Top Avg</span><strong>91.2</strong></div>
       <div class="metric"><span>Lowest Avg</span><strong>84.7</strong></div>
-      <div class="metric"><span>Total Judgments</span><strong>2520</strong></div>
+      <div class="metric"><span>Total Judgments</span><strong>2565</strong></div>
     </section>
 
     <h2>Eval Set Samples</h2>
     <p>
-      The public demo eval set contains 280 synthetic, public-safe cases grouped into research-backed
+      The public demo eval set contains 285 synthetic, public-safe cases grouped into research-backed
       TTS dimensions. Each category below contributes five shared cases that every model synthesizes
       before Gemini judges the generated audio.
     </p>
@@ -2474,6 +2475,41 @@
           </article>
         </div>
       </details>
+      <details class="sample-group" data-category="focus_particle_scope_delivery">
+        <summary><span>Focus Particle Scope Delivery</span><strong>5 cases</strong></summary>
+        <div class="sample-list">
+          <article class="sample-card">
+            <h3><code>tts-focus-particle-scope-delivery-only-shift-001</code></h3>
+            <p><strong>Slice:</strong> <code>only_night_shift_alarm_reset_scope</code></p>
+            <p><strong>Prompt:</strong> Read this access rule so only scopes the night shift and does not sound like a general alarm reset instruction.</p>
+            <p><strong>Target:</strong> Only the night shift should reset the alarm, not the day team.</p>
+          </article>
+          <article class="sample-card">
+            <h3><code>tts-focus-particle-scope-delivery-also-archive-001</code></h3>
+            <p><strong>Slice:</strong> <code>also_archive_folder_additive_scope</code></p>
+            <p><strong>Prompt:</strong> Read this backup note so also clearly adds the archive folder rather than replacing the inbox.</p>
+            <p><strong>Target:</strong> The backup also includes the archive folder, not just the inbox.</p>
+          </article>
+          <article class="sample-card">
+            <h3><code>tts-focus-particle-scope-delivery-even-dry-run-001</code></h3>
+            <p><strong>Slice:</strong> <code>even_dry_run_writes_log_warning</code></p>
+            <p><strong>Prompt:</strong> Read this engineering caution so even scopes the dry-run command and keeps the log warning clear.</p>
+            <p><strong>Target:</strong> Even the dry-run command writes a log, so check it before rerunning.</p>
+          </article>
+          <article class="sample-card">
+            <h3><code>tts-focus-particle-scope-delivery-just-summary-001</code></h3>
+            <p><strong>Slice:</strong> <code>just_summary_not_full_report_scope</code></p>
+            <p><strong>Prompt:</strong> Read this sharing instruction so just limits what gets sent and does not soften the privacy boundary.</p>
+            <p><strong>Target:</strong> Just send the summary to the owner, not the full report.</p>
+          </article>
+          <article class="sample-card">
+            <h3><code>tts-focus-particle-scope-delivery-not-all-rooms-001</code></h3>
+            <p><strong>Slice:</strong> <code>not_all_rooms_only_lab_wing_badges</code></p>
+            <p><strong>Prompt:</strong> Read this facility rule so not all and only the lab wing are grouped without implying every room needs badges.</p>
+            <p><strong>Target:</strong> Not all rooms need badges; only the lab wing requires badge access.</p>
+          </article>
+        </div>
+      </details>
     </section>
 
     <h2>Model Leaderboard</h2>
@@ -2493,7 +2529,7 @@
           <td data-label="Rank">1</td>
           <td data-label="Model"><code>mlx-community/chatterbox-turbo-6bit</code></td>
           <td data-label="Avg">91.2</td>
-          <td data-label="Accurate">162 / 280</td>
+          <td data-label="Accurate">162 / 285</td>
           <td data-label="Weakest Category"><code>information_tuning</code> avg 84.5</td>
           <td data-label="Likely Fix Focus">number clarity, pauses around dense facts</td>
         </tr>
@@ -2501,7 +2537,7 @@
           <td data-label="Rank">2</td>
           <td data-label="Model"><code>mlx-community/Kokoro-82M-4bit</code></td>
           <td data-label="Avg">88.6</td>
-          <td data-label="Accurate">151 / 280</td>
+          <td data-label="Accurate">151 / 285</td>
           <td data-label="Weakest Category"><code>speech_steerability</code> avg 80.8</td>
           <td data-label="Likely Fix Focus">style control, emphasis, pacing</td>
         </tr>
@@ -2509,7 +2545,7 @@
           <td data-label="Rank">3</td>
           <td data-label="Model"><code>mlx-community/Qwen3-TTS-12Hz-0.6B-Base-4bit</code></td>
           <td data-label="Avg">84.7</td>
-          <td data-label="Accurate">111 / 280</td>
+          <td data-label="Accurate">111 / 285</td>
           <td data-label="Weakest Category"><code>paralinguistics</code> avg 77.0</td>
           <td data-label="Likely Fix Focus">emotion rendering, natural prosody</td>
         </tr>
@@ -2564,17 +2600,17 @@
       </div>
       <div class="panel">
         <h3>Scores By Model</h3>
-        <p><code>mlx-community/chatterbox-turbo-6bit</code><br>avg 90.1 / n 280 / 78-97</p>
-        <p><code>mlx-community/Kokoro-82M-4bit</code><br>avg 87.2 / n 280 / 73-95</p>
-        <p><code>mlx-community/Qwen3-TTS-12Hz-0.6B-Base-4bit</code><br>avg 83.6 / n 280 / 70-93</p>
+        <p><code>mlx-community/chatterbox-turbo-6bit</code><br>avg 90.1 / n 285 / 78-97</p>
+        <p><code>mlx-community/Kokoro-82M-4bit</code><br>avg 87.2 / n 285 / 73-95</p>
+        <p><code>mlx-community/Qwen3-TTS-12Hz-0.6B-Base-4bit</code><br>avg 83.6 / n 285 / 70-93</p>
       </div>
       <div class="panel">
         <h3>Scores By Voice</h3>
-        <p><code>af_heart</code><br>avg 87.0 / n 840 / 70-97</p>
+        <p><code>af_heart</code><br>avg 87.0 / n 855 / 70-97</p>
       </div>
       <div class="panel">
         <h3>Scores By Language</h3>
-        <p><code>en</code><br>avg 87.0 / n 840 / 70-97</p>
+        <p><code>en</code><br>avg 87.0 / n 855 / 70-97</p>
       </div>
     </section>
 
@@ -2754,17 +2790,17 @@
         <tr>
           <td data-label="Compared Model"><code>mlx-community/Kokoro-82M-4bit</code></td>
           <td data-label="Baseline"><code>mlx-community/chatterbox-turbo-6bit</code></td>
-          <td data-label="Matched Cases">280</td>
+          <td data-label="Matched Cases">285</td>
           <td data-label="Avg Delta">-2.6</td>
-          <td data-label="Wins / Ties / Losses">39 / 29 / 197</td>
+          <td data-label="Wins / Ties / Losses">42 / 31 / 212</td>
           <td data-label="Largest Regressions">speech pace, conditional-logic, and escalation-priority cases where style control trails the baseline.</td>
         </tr>
         <tr>
           <td data-label="Compared Model"><code>mlx-community/Qwen3-TTS-12Hz-0.6B-Base-4bit</code></td>
           <td data-label="Baseline"><code>mlx-community/chatterbox-turbo-6bit</code></td>
-          <td data-label="Matched Cases">280</td>
+          <td data-label="Matched Cases">285</td>
           <td data-label="Avg Delta">-6.5</td>
-          <td data-label="Wins / Ties / Losses">24 / 21 / 220</td>
+          <td data-label="Wins / Ties / Losses">25 / 22 / 238</td>
           <td data-label="Largest Regressions">emotion, dense-fact, conditional-rule, and critical-alert cases with lower naturalness or intelligibility.</td>
         </tr>
       </tbody>
@@ -2788,7 +2824,7 @@
       </div>
       <div class="panel">
         <h3>Synthesis Model</h3>
-        <p><code>mlx-community/Qwen3-TTS-12Hz-0.6B-Base-4bit</code><br>avg 83.6 / n 280 / range 70-93</p>
+        <p><code>mlx-community/Qwen3-TTS-12Hz-0.6B-Base-4bit</code><br>avg 83.6 / n 285 / range 70-93</p>
         <p class="muted">Compare model-level weak spots before changing prompts, voices, wrappers, or model settings.</p>
       </div>
     </section>
@@ -2840,7 +2876,7 @@
     <h2>Sample-By-Sample Breakdown</h2>
     <p>
       The real combined report contains one row per synthesized model/case pair. This preview shows
-      representative rows across models, categories, slices, and score bands from the 840 generated
+      representative rows across models, categories, slices, and score bands from the 855 generated
       samples.
     </p>
     <table id="sample-breakdown-table">

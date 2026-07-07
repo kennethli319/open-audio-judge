@@ -990,6 +990,14 @@ TTS_CATEGORY_GUIDANCE = {
             "correction and confirmed-value text faithfulness",
         ],
     ),
+    "focus_particle_scope_delivery": (
+        "focus particles such as only, also, even, just, and not all that control scope and contrast",
+        [
+            "focus-particle prosody",
+            "scope and contrast phrase grouping",
+            "exclusive/additive cue text faithfulness",
+        ],
+    ),
 }
 
 

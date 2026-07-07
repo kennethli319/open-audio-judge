@@ -166,10 +166,13 @@ runs can map private prompts into the same categories without copying private ro
 - `readback_confirmation_delivery`: closed-loop confirmations, order readbacks, clinical
   dose-route-schedule repeats, dispatch acknowledgments, corrected readbacks, and queued future
   actions where prosody must preserve what was received, corrected, confirmed, or still pending.
+- `focus_particle_scope_delivery`: focus particles such as only, also, even, just, and not all
+  where prosody must preserve whether a condition is exclusive, additive, unexpected, limited, or
+  broadly negated.
 
 ## Manifest Contract
 
-The public comparison manifest is intentionally balanced at 280 cases for now: 56 categories with 5
+The public comparison manifest is intentionally balanced at 285 cases for now: 57 categories with 5
 cases each. Expansion should add complete five-case category batches before deepening existing
 categories.
 
