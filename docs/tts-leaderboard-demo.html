@@ -393,7 +393,7 @@
   --cases examples/tts_multiturn_cases.jsonl \
   --judge-provider gemini \
   --judge-samples 3 \
-  --limit 120 \
+  --limit 125 \
   --out runs/leaderboard/chatterbox</code></pre>
 
     <pre><code>oaj autojudge-local-tts \
@@ -402,7 +402,7 @@
   --cases examples/tts_multiturn_cases.jsonl \
   --judge-provider gemini \
   --judge-samples 3 \
-  --limit 120 \
+  --limit 125 \
   --out runs/leaderboard/kokoro</code></pre>
 
     <pre><code>oaj autojudge-local-tts \
@@ -411,7 +411,7 @@
   --cases examples/tts_multiturn_cases.jsonl \
   --judge-provider gemini \
   --judge-samples 3 \
-  --limit 120 \
+  --limit 125 \
   --out runs/leaderboard/qwen3-tts</code></pre>
 
     <p>
@@ -423,7 +423,7 @@
   --cases examples/tts_multiturn_cases.jsonl \
   --judge-provider gemini \
   --judge-samples 3 \
-  --limit 120 \
+  --limit 125 \
   --out runs/leaderboard/chatterbox</code></pre>
 
     <p>
@@ -468,16 +468,16 @@
     <h2>Sample Report Preview</h2>
     <section class="grid" aria-label="Sample report metrics">
       <div class="metric"><span>Models</span><strong>3</strong></div>
-      <div class="metric"><span>Shared Eval Cases</span><strong>120</strong></div>
+      <div class="metric"><span>Shared Eval Cases</span><strong>125</strong></div>
       <div class="metric"><span>Judge Samples</span><strong>3x</strong></div>
       <div class="metric"><span>Top Avg</span><strong>91.2</strong></div>
       <div class="metric"><span>Lowest Avg</span><strong>84.7</strong></div>
-      <div class="metric"><span>Total Judgments</span><strong>1080</strong></div>
+      <div class="metric"><span>Total Judgments</span><strong>1125</strong></div>
     </section>
 
     <h2>Eval Set Samples</h2>
     <p>
-      The public demo eval set contains 120 synthetic, public-safe cases grouped into research-backed
+      The public demo eval set contains 125 synthetic, public-safe cases grouped into research-backed
       TTS dimensions. Each category below contributes five shared cases that every model synthesizes
       before Gemini judges the generated audio.
     </p>
@@ -1322,6 +1322,41 @@
           </article>
         </div>
       </details>
+      <details class="sample-group" data-category="dialogue_turn_management">
+        <summary><span>Dialogue Turn Management</span><strong>5 cases</strong></summary>
+        <div class="sample-list">
+          <article class="sample-card">
+            <h3><code>tts-dialogue-turn-management-acknowledgment-001</code></h3>
+            <p><strong>Slice:</strong> <code>acknowledgment_to_first_question</code></p>
+            <p><strong>Prompt:</strong> Read this support reply with a brief acknowledgment, then a clear first question.</p>
+            <p><strong>Target:</strong> Yes, I can help with that. First, tell me which device is showing the red light.</p>
+          </article>
+          <article class="sample-card">
+            <h3><code>tts-dialogue-turn-management-clarification-001</code></h3>
+            <p><strong>Slice:</strong> <code>balanced_clarification_question</code></p>
+            <p><strong>Prompt:</strong> Read this clarification question so both alternatives are balanced and easy to distinguish.</p>
+            <p><strong>Target:</strong> Do you mean the invoice from May, or the receipt for the replacement charger?</p>
+          </article>
+          <article class="sample-card">
+            <h3><code>tts-dialogue-turn-management-restart-001</code></h3>
+            <p><strong>Slice:</strong> <code>self_repair_restart_with_time</code></p>
+            <p><strong>Prompt:</strong> Read this repair turn as a concise restart after a confusing previous answer.</p>
+            <p><strong>Target:</strong> Sorry, let me restart that clearly: your train leaves from platform eight at 6:40.</p>
+          </article>
+          <article class="sample-card">
+            <h3><code>tts-dialogue-turn-management-handoff-001</code></h3>
+            <p><strong>Slice:</strong> <code>handoff_with_spelled_ticket</code></p>
+            <p><strong>Prompt:</strong> Read this handoff notice with the ticket code spelled clearly and no rushed ending.</p>
+            <p><strong>Target:</strong> I will transfer you to billing now; keep this ticket number handy: B L 319.</p>
+          </article>
+          <article class="sample-card">
+            <h3><code>tts-dialogue-turn-management-closure-001</code></h3>
+            <p><strong>Slice:</strong> <code>task_closure_next_action</code></p>
+            <p><strong>Prompt:</strong> Read this conversation-closing instruction as complete, calm, and not dismissive.</p>
+            <p><strong>Target:</strong> That completes the setup. You can close this window and restart the app when you are ready.</p>
+          </article>
+        </div>
+      </details>
     </section>
 
     <h2>Model Leaderboard</h2>
@@ -1341,7 +1376,7 @@
           <td data-label="Rank">1</td>
           <td data-label="Model"><code>mlx-community/chatterbox-turbo-6bit</code></td>
           <td data-label="Avg">91.2</td>
-          <td data-label="Accurate">86 / 120</td>
+          <td data-label="Accurate">86 / 125</td>
           <td data-label="Weakest Category"><code>information_tuning</code> avg 84.5</td>
           <td data-label="Likely Fix Focus">number clarity, pauses around dense facts</td>
         </tr>
@@ -1349,7 +1384,7 @@
           <td data-label="Rank">2</td>
           <td data-label="Model"><code>mlx-community/Kokoro-82M-4bit</code></td>
           <td data-label="Avg">88.6</td>
-          <td data-label="Accurate">79 / 120</td>
+          <td data-label="Accurate">79 / 125</td>
           <td data-label="Weakest Category"><code>speech_steerability</code> avg 80.8</td>
           <td data-label="Likely Fix Focus">style control, emphasis, pacing</td>
         </tr>
@@ -1357,7 +1392,7 @@
           <td data-label="Rank">3</td>
           <td data-label="Model"><code>mlx-community/Qwen3-TTS-12Hz-0.6B-Base-4bit</code></td>
           <td data-label="Avg">84.7</td>
-          <td data-label="Accurate">59 / 120</td>
+          <td data-label="Accurate">59 / 125</td>
           <td data-label="Weakest Category"><code>paralinguistics</code> avg 77.0</td>
           <td data-label="Likely Fix Focus">emotion rendering, natural prosody</td>
         </tr>
@@ -1403,9 +1438,9 @@
       </div>
       <div class="panel">
         <h3>Scores By Model</h3>
-        <p><code>mlx-community/chatterbox-turbo-6bit</code><br>avg 90.1 / n 120 / 78-97</p>
-        <p><code>mlx-community/Kokoro-82M-4bit</code><br>avg 87.2 / n 120 / 73-95</p>
-        <p><code>mlx-community/Qwen3-TTS-12Hz-0.6B-Base-4bit</code><br>avg 83.6 / n 120 / 70-93</p>
+        <p><code>mlx-community/chatterbox-turbo-6bit</code><br>avg 90.1 / n 125 / 78-97</p>
+        <p><code>mlx-community/Kokoro-82M-4bit</code><br>avg 87.2 / n 125 / 73-95</p>
+        <p><code>mlx-community/Qwen3-TTS-12Hz-0.6B-Base-4bit</code><br>avg 83.6 / n 125 / 70-93</p>
       </div>
       <div class="panel">
         <h3>Scores By Voice</h3>
@@ -1565,17 +1600,17 @@
         <tr>
           <td data-label="Compared Model"><code>mlx-community/Kokoro-82M-4bit</code></td>
           <td data-label="Baseline"><code>mlx-community/chatterbox-turbo-6bit</code></td>
-          <td data-label="Matched Cases">120</td>
+          <td data-label="Matched Cases">125</td>
           <td data-label="Avg Delta">-2.6</td>
-          <td data-label="Wins / Ties / Losses">21 / 15 / 84</td>
+          <td data-label="Wins / Ties / Losses">21 / 15 / 89</td>
           <td data-label="Largest Regressions">speech pace and emphasis cases where style control trails the baseline.</td>
         </tr>
         <tr>
           <td data-label="Compared Model"><code>mlx-community/Qwen3-TTS-12Hz-0.6B-Base-4bit</code></td>
           <td data-label="Baseline"><code>mlx-community/chatterbox-turbo-6bit</code></td>
-          <td data-label="Matched Cases">120</td>
+          <td data-label="Matched Cases">125</td>
           <td data-label="Avg Delta">-6.5</td>
-          <td data-label="Wins / Ties / Losses">13 / 11 / 96</td>
+          <td data-label="Wins / Ties / Losses">13 / 11 / 101</td>
           <td data-label="Largest Regressions">emotion and dense-fact cases with lower naturalness or intelligibility.</td>
         </tr>
       </tbody>
@@ -1599,7 +1634,7 @@
       </div>
       <div class="panel">
         <h3>Synthesis Model</h3>
-        <p><code>mlx-community/Qwen3-TTS-12Hz-0.6B-Base-4bit</code><br>avg 83.6 / n 120 / range 70-93</p>
+        <p><code>mlx-community/Qwen3-TTS-12Hz-0.6B-Base-4bit</code><br>avg 83.6 / n 125 / range 70-93</p>
         <p class="muted">Compare model-level weak spots before changing prompts, voices, wrappers, or model settings.</p>
       </div>
     </section>
@@ -1642,7 +1677,7 @@
     <h2>Sample-By-Sample Breakdown</h2>
     <p>
       The real combined report contains one row per synthesized model/case pair. This preview shows
-      representative rows across models, categories, slices, and score bands from the 345 generated
+      representative rows across models, categories, slices, and score bands from the 375 generated
       samples.
     </p>
     <table id="sample-breakdown-table">

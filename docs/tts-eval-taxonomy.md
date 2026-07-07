@@ -74,10 +74,13 @@ runs can map private prompts into the same categories without copying private ro
 - `semantic_contrast_focus`: negation scope, exception boundaries, corrections, balanced
   alternatives, and threshold conditions where the model must preserve meaning through emphasis and
   prosodic grouping.
+- `dialogue_turn_management`: spoken-assistant acknowledgments, clarification questions, repair
+  restarts, service handoffs, and task-closing next actions where turn boundaries must stay natural
+  and exact.
 
 ## Manifest Contract
 
-The public comparison manifest is intentionally balanced at 120 cases for now: 24 categories with 5
+The public comparison manifest is intentionally balanced at 125 cases for now: 25 categories with 5
 cases each. Expansion should add complete five-case category batches before deepening existing
 categories.
 
