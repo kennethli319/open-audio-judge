@@ -55,16 +55,21 @@ def test_tts_multiturn_examples_cover_requested_categories() -> None:
         category = record["metadata"]["eval_category"]
         categories[category] = categories.get(category, 0) + 1
 
-    assert len(records) == 10
+    assert len(records) == 30
     assert categories == {
-        "paralinguistics": 2,
-        "instruction_following": 2,
-        "information_tuning": 2,
-        "storytelling": 2,
-        "speech_steerability": 2,
+        "paralinguistics": 5,
+        "instruction_following": 5,
+        "information_tuning": 5,
+        "storytelling_dialogue": 5,
+        "speech_steerability": 5,
+        "robustness_intelligibility": 5,
     }
     assert all(record["turns"] for record in records)
     assert all(record["reference_text"] for record in records)
+    assert all(record["metadata"]["tts_slice"] for record in records)
+    assert all(record["metadata"]["style_prompt"] for record in records)
+    assert all(record["metadata"]["expected_style"] for record in records)
+    assert all(record["metadata"]["expected_instruction"] for record in records)
 
 
 def test_readme_links_chatterbox_gemini_sample_page() -> None:
