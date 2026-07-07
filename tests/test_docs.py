@@ -40,7 +40,7 @@ def test_tts_leaderboard_demo_page_documents_workflow() -> None:
         "function applyFilters()",
         "function sortRows()",
         "Eval Set Samples",
-        "The public demo eval set contains 315 synthetic, public-safe cases",
+        "The public demo eval set contains 320 synthetic, public-safe cases",
         "Paralinguistics",
         "Instruction Following",
         "Speaker Voice Consistency",
@@ -86,6 +86,7 @@ def test_tts_leaderboard_demo_page_documents_workflow() -> None:
         "tts-commitment-scope-delivery-apology-boundary-001",
         "tts-ordinal-ranking-delivery-triage-rerank-001",
         "tts-temporal-relation-delivery-migration-window-001",
+        "tts-acronym-initialism-delivery-nasa-eta-001",
         "Model Leaderboard",
         "Category Leaderboard",
         "no error: 167",
@@ -100,7 +101,7 @@ def test_tts_leaderboard_demo_page_documents_workflow() -> None:
         "critical_alert_room_action_escalation",
         "Likely fix areas",
         "priority_escalation_delivery",
-        "900 generated",
+        "960 generated",
         "Category Guidance",
         "Focus: unless, only-if, if/otherwise, nested conditions, and exception boundaries.",
         "Source basis: VoiceBench safety/robustness behavior and Seed-TTS-Eval intelligibility checks",
@@ -132,7 +133,7 @@ def test_tts_multiturn_examples_cover_requested_categories() -> None:
         category = record["metadata"]["eval_category"]
         categories[category] = categories.get(category, 0) + 1
 
-    assert len(records) == 315
+    assert len(records) == 320
     assert categories == {
         "paralinguistics": 5,
         "instruction_following": 5,
@@ -197,6 +198,7 @@ def test_tts_multiturn_examples_cover_requested_categories() -> None:
         "temporal_relation_delivery": 5,
         "syntactic_attachment_delivery": 5,
         "quantifier_scope_delivery": 5,
+        "acronym_initialism_delivery": 5,
     }
     assert all(record["turns"] for record in records)
     assert all(record["reference_text"] for record in records)

@@ -186,10 +186,13 @@ runs can map private prompts into the same categories without copying private ro
 - `quantifier_scope_delivery`: all/except, not every, at least/at most, every/except, exactly one,
   and neither constructions where prosody must preserve set membership, exclusions, lower and upper
   bounds, and exact cardinality.
+- `acronym_initialism_delivery`: spoken acronyms, letter-by-letter initialisms, medical and
+  technical abbreviations, mixed acronym-number identifiers, and confusable product suffixes where
+  text normalization must preserve intelligibility and exact letter/digit boundaries.
 
 ## Manifest Contract
 
-The public comparison manifest is intentionally balanced at 315 cases for now: 63 categories with 5
+The public comparison manifest is intentionally balanced at 320 cases for now: 64 categories with 5
 cases each. Expansion should add complete five-case category batches before deepening existing
 categories.
 

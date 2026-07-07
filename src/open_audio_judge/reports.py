@@ -1046,6 +1046,14 @@ TTS_CATEGORY_GUIDANCE = {
             "lower-bound, upper-bound, and negative-scope prosody",
         ],
     ),
+    "acronym_initialism_delivery": (
+        "spoken acronyms, lettered initialisms, mixed acronym-number identifiers, and confusable suffixes",
+        [
+            "acronym and initialism normalization",
+            "letter-digit boundary chunking",
+            "domain-specific abbreviation pronunciation",
+        ],
+    ),
 }
 
 
