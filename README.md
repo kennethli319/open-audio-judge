@@ -2,7 +2,7 @@
 
 Open Audio Judge is a prompt-based evaluation harness for audio LLM judges. The goal is to make ASR, TTS, VAD, diarization, speech translation, and speech-event evaluations comparable even when teams run the judge on private datasets.
 
-**Live sample:** [Chatterbox TTS + Gemini AutoJudge report walkthrough](https://kennethli319.github.io/open-audio-judge/chatterbox-gemini-sample.html)
+**Live sample:** [TTS model leaderboard judged by Gemini](https://kennethli319.github.io/open-audio-judge/chatterbox-gemini-sample.html)
 
 The first MVP focuses on:
 

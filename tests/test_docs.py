@@ -17,8 +17,8 @@ def test_chatterbox_gemini_sample_page_documents_workflow() -> None:
     parser.close()
 
     required_text = [
-        "Open Audio Judge Sample",
-        "Chatterbox TTS generation scored by the Gemini audio judge",
+        "Open Audio Judge TTS Leaderboard",
+        "Multiple MLX Community TTS models generate the same eval set",
         "oaj autojudge-local-tts",
         "--judge-provider gemini",
         "--judge-samples 3",
@@ -28,6 +28,8 @@ def test_chatterbox_gemini_sample_page_documents_workflow() -> None:
         "judge-report/results.jsonl",
         "judge-report/report.html",
         "Sample Report Preview",
+        "Model Leaderboard",
+        "Category Leaderboard",
         "Scores By Category",
         "Weakest Segments",
         "Likely fix areas",
@@ -35,6 +37,8 @@ def test_chatterbox_gemini_sample_page_documents_workflow() -> None:
         "Representative Result JSON",
         "judge_sample_scores",
         "mlx-community/chatterbox-turbo-6bit",
+        "mlx-community/Kokoro-82M-4bit",
+        "mlx-community/Qwen3-TTS-12Hz-0.6B-Base-4bit",
     ]
     for text in required_text:
         assert text in html
@@ -67,3 +71,4 @@ def test_readme_links_chatterbox_gemini_sample_page() -> None:
     readme = Path("README.md").read_text(encoding="utf-8")
 
     assert "docs/chatterbox-gemini-sample.html" in readme
+    assert "TTS model leaderboard judged by Gemini" in readme

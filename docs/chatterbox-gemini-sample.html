@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Open Audio Judge Sample: Chatterbox TTS + Gemini Judge</title>
+  <title>Open Audio Judge Sample: TTS Model Leaderboard + Gemini Judge</title>
   <style>
     :root {
       --ink: #172026;
@@ -194,8 +194,8 @@
 <body>
   <header>
     <div class="header-inner">
-      <h1>Open Audio Judge Sample</h1>
-      <p class="muted">Chatterbox TTS generation scored by the Gemini audio judge.</p>
+      <h1>Open Audio Judge TTS Leaderboard</h1>
+      <p class="muted">Multiple MLX Community TTS models generate the same eval set, then Gemini scores every sample.</p>
     </div>
   </header>
 
@@ -203,23 +203,23 @@
     <section class="panel">
       <h2>What This Demonstrates</h2>
       <p>
-        This sample shows the TTS-first AutoJudge workflow: build or load TTS cases,
-        synthesize audio with a local open model, send the generated audio plus target
-        text to Gemini, and review an aggregate report with per-sample diagnostics,
-        category averages, and multi-judge sampled scores.
+        This sample shows the model-comparison AutoJudge workflow: build or load one shared
+        TTS eval set, synthesize the same cases with multiple local MLX Community models,
+        send every generated audio sample plus target text to Gemini, and review a leaderboard
+        with model rankings, category averages, weakest segments, and per-sample diagnostics.
       </p>
       <div class="flow" aria-label="Workflow">
         <div><strong>1. Cases</strong><br><span class="muted">JSONL cases with target text, turns, and metadata.</span></div>
-        <div><strong>2. Generator</strong><br><span class="muted">Chatterbox writes local audio files under <code>runs/</code>.</span></div>
+        <div><strong>2. Generators</strong><br><span class="muted">Chatterbox, Kokoro, and Qwen3-TTS-compatible wrappers write comparable audio files.</span></div>
         <div><strong>3. Judge</strong><br><span class="muted">Gemini listens three times per sample and returns strict JSON scores.</span></div>
-        <div><strong>4. Report</strong><br><span class="muted">HTML and JSONL summarize category scores, individual samples, and provenance.</span></div>
+        <div><strong>4. Leaderboard</strong><br><span class="muted">HTML and JSONL compare models, categories, individual samples, and provenance.</span></div>
       </div>
     </section>
 
     <h2>How To Run It</h2>
     <p>
-      Use this command for the expanded category demo. Source <code>GEMINI_API_KEY</code>
-      at runtime; do not commit it to the repository.
+      Run each compatible TTS wrapper on the same case file and write each run under a distinct
+      output directory. Source <code>GEMINI_API_KEY</code> at runtime; do not commit it to the repository.
     </p>
     <pre><code>oaj autojudge-local-tts \
   --model mlx-community/chatterbox-turbo-6bit \
@@ -227,11 +227,29 @@
   --judge-provider gemini \
   --judge-samples 3 \
   --limit 10 \
-  --out runs/chatterbox-tts-autojudge-smoke</code></pre>
+  --out runs/leaderboard/chatterbox</code></pre>
+
+    <pre><code>oaj autojudge-local-tts \
+  --model mlx-community/Kokoro-82M-4bit \
+  --synthesis-provider mlx_community_kokoro \
+  --cases examples/tts_multiturn_cases.jsonl \
+  --judge-provider gemini \
+  --judge-samples 3 \
+  --limit 10 \
+  --out runs/leaderboard/kokoro</code></pre>
+
+    <pre><code>oaj autojudge-local-tts \
+  --model mlx-community/Qwen3-TTS-12Hz-0.6B-Base-4bit \
+  --synthesis-provider mlx_community_qwen3_tts \
+  --cases examples/tts_multiturn_cases.jsonl \
+  --judge-provider gemini \
+  --judge-samples 3 \
+  --limit 10 \
+  --out runs/leaderboard/qwen3-tts</code></pre>
 
     <p>
       If the local console script is stale while developing from source, run the
-      same command through the module entry point:
+      same commands through the module entry point:
     </p>
     <pre><code>PYTHONPATH=src:. .venv/bin/python -m open_audio_judge.cli autojudge-local-tts \
   --model mlx-community/chatterbox-turbo-6bit \
@@ -239,7 +257,7 @@
   --judge-provider gemini \
   --judge-samples 3 \
   --limit 10 \
-  --out runs/chatterbox-tts-autojudge-smoke</code></pre>
+  --out runs/leaderboard/chatterbox</code></pre>
 
     <h2>Expected Output Files</h2>
     <table>
@@ -271,21 +289,53 @@
 
     <h2>Sample Report Preview</h2>
     <section class="grid" aria-label="Sample report metrics">
-      <div class="metric"><span>Cases</span><strong>10</strong></div>
-      <div class="metric"><span>Average</span><strong>88.4</strong></div>
-      <div class="metric"><span>Median</span><strong>89.0</strong></div>
-      <div class="metric"><span>Accurate</span><strong>8</strong></div>
-      <div class="metric"><span>Needs Review</span><strong>2</strong></div>
-      <div class="metric"><span>Inaccurate</span><strong>0</strong></div>
+      <div class="metric"><span>Models</span><strong>3</strong></div>
+      <div class="metric"><span>Shared Eval Cases</span><strong>10</strong></div>
+      <div class="metric"><span>Judge Samples</span><strong>3x</strong></div>
+      <div class="metric"><span>Top Avg</span><strong>91.2</strong></div>
+      <div class="metric"><span>Lowest Avg</span><strong>84.7</strong></div>
+      <div class="metric"><span>Total Judgments</span><strong>90</strong></div>
     </section>
 
-    <h2>Score Distribution</h2>
-    <div class="panel">
-      <p><strong>81-100</strong> <span class="muted">8 samples</span></p>
-      <div class="scorebar" aria-label="Score distribution 81 to 100"><div></div></div>
-      <p><strong>61-80</strong> <span class="muted">2 samples</span></p>
-      <div class="scorebar" aria-label="Score distribution 61 to 80"><div style="width:20%"></div></div>
-    </div>
+    <h2>Model Leaderboard</h2>
+    <table>
+      <thead>
+        <tr>
+          <th>Rank</th>
+          <th>Model</th>
+          <th>Avg</th>
+          <th>Accurate</th>
+          <th>Weakest Category</th>
+          <th>Likely Fix Focus</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td data-label="Rank">1</td>
+          <td data-label="Model"><code>mlx-community/chatterbox-turbo-6bit</code></td>
+          <td data-label="Avg">91.2</td>
+          <td data-label="Accurate">9 / 10</td>
+          <td data-label="Weakest Category"><code>information_tuning</code> avg 84.5</td>
+          <td data-label="Likely Fix Focus">number clarity, pauses around dense facts</td>
+        </tr>
+        <tr>
+          <td data-label="Rank">2</td>
+          <td data-label="Model"><code>mlx-community/Kokoro-82M-4bit</code></td>
+          <td data-label="Avg">88.6</td>
+          <td data-label="Accurate">8 / 10</td>
+          <td data-label="Weakest Category"><code>speech_steerability</code> avg 80.8</td>
+          <td data-label="Likely Fix Focus">style control, emphasis, pacing</td>
+        </tr>
+        <tr>
+          <td data-label="Rank">3</td>
+          <td data-label="Model"><code>mlx-community/Qwen3-TTS-12Hz-0.6B-Base-4bit</code></td>
+          <td data-label="Avg">84.7</td>
+          <td data-label="Accurate">6 / 10</td>
+          <td data-label="Weakest Category"><code>paralinguistics</code> avg 77.0</td>
+          <td data-label="Likely Fix Focus">emotion rendering, natural prosody</td>
+        </tr>
+      </tbody>
+    </table>
 
     <h2>Top Diagnostics</h2>
     <section class="grid">
@@ -305,7 +355,9 @@
       </div>
       <div class="panel">
         <h3>Scores By Model</h3>
-        <p><code>mlx-community/chatterbox-turbo-6bit</code><br>avg 95.0 / n 1 / 95-95</p>
+        <p><code>mlx-community/chatterbox-turbo-6bit</code><br>avg 91.2 / n 10 / 79-97</p>
+        <p><code>mlx-community/Kokoro-82M-4bit</code><br>avg 88.6 / n 10 / 76-95</p>
+        <p><code>mlx-community/Qwen3-TTS-12Hz-0.6B-Base-4bit</code><br>avg 84.7 / n 10 / 72-93</p>
       </div>
       <div class="panel">
         <h3>Scores By Voice</h3>
@@ -316,6 +368,56 @@
         <p><code>en</code><br>avg 95.0 / n 1 / 95-95</p>
       </div>
     </section>
+
+    <h2>Category Leaderboard</h2>
+    <table>
+      <thead>
+        <tr>
+          <th>Category</th>
+          <th>Chatterbox</th>
+          <th>Kokoro</th>
+          <th>Qwen3-TTS</th>
+          <th>What To Inspect</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td data-label="Category"><code>paralinguistics</code></td>
+          <td data-label="Chatterbox">92.0</td>
+          <td data-label="Kokoro">87.5</td>
+          <td data-label="Qwen3-TTS">77.0</td>
+          <td data-label="What To Inspect">emotion strength, warmth, urgency, natural prosody</td>
+        </tr>
+        <tr>
+          <td data-label="Category"><code>instruction_following</code></td>
+          <td data-label="Chatterbox">93.5</td>
+          <td data-label="Kokoro">89.0</td>
+          <td data-label="Qwen3-TTS">86.0</td>
+          <td data-label="What To Inspect">exact text, spelled tokens, punctuation, forbidden words</td>
+        </tr>
+        <tr>
+          <td data-label="Category"><code>information_tuning</code></td>
+          <td data-label="Chatterbox">84.5</td>
+          <td data-label="Kokoro">86.0</td>
+          <td data-label="Qwen3-TTS">83.0</td>
+          <td data-label="What To Inspect">numbers, units, dense facts, step boundaries</td>
+        </tr>
+        <tr>
+          <td data-label="Category"><code>storytelling</code></td>
+          <td data-label="Chatterbox">94.0</td>
+          <td data-label="Kokoro">91.0</td>
+          <td data-label="Qwen3-TTS">89.5</td>
+          <td data-label="What To Inspect">narrative pacing, suspense, character consistency</td>
+        </tr>
+        <tr>
+          <td data-label="Category"><code>speech_steerability</code></td>
+          <td data-label="Chatterbox">92.0</td>
+          <td data-label="Kokoro">80.8</td>
+          <td data-label="Qwen3-TTS">88.0</td>
+          <td data-label="What To Inspect">formal/casual register, pace, pitch, emphasis</td>
+        </tr>
+      </tbody>
+    </table>
 
     <h2>Weakest Segments</h2>
     <section class="grid">
@@ -333,8 +435,8 @@
       </div>
       <div class="panel">
         <h3>Synthesis Model</h3>
-        <p><code>mlx-community/chatterbox-turbo-6bit</code><br>avg 88.4 / n 10 / range 76-95</p>
-        <p class="muted">Use the same section to compare Chatterbox against Kokoro, Qwen3-TTS, or another compatible wrapper.</p>
+        <p><code>mlx-community/Qwen3-TTS-12Hz-0.6B-Base-4bit</code><br>avg 84.7 / n 10 / range 72-93</p>
+        <p class="muted">Compare model-level weak spots before changing prompts, voices, wrappers, or model settings.</p>
       </div>
     </section>
 
@@ -359,6 +461,7 @@
           </td>
           <td data-label="Provenance">
             model: <code>mlx-community/chatterbox-turbo-6bit</code><br>
+            rank context: <code>leaderboard rank 1</code><br>
             category: <code>storytelling</code><br>
             voice: <code>af_heart</code><br>
             sample kind: <code>local_synthetic_tts</code><br>
@@ -396,12 +499,12 @@
     <h2>How To Read The Report</h2>
     <p>
       Start with average score and label counts, then inspect score breakdowns by
-      evaluation category, TTS slice, model, voice, and language. Use the Weakest Segments cards to
-      find low-scoring model/category/slice groups, likely solution areas, and representative cases.
-      Then use the top diagnostics to confirm repeated issue clusters such as pronunciation errors,
-      artifact classes, or weak slices. Finally, open the per-sample rows to inspect the averaged score,
-      the three underlying Gemini scores, target text hash, generated-audio provenance,
-      and any researcher notes.
+      the model leaderboard, then inspect category-level rankings to find where one generator loses
+      to another on the same eval set. Use the Weakest Segments cards to find low-scoring
+      model/category/slice groups, likely solution areas, and representative cases. Then use the top
+      diagnostics to confirm repeated issue clusters such as pronunciation errors, artifact classes,
+      or weak slices. Finally, open the per-sample rows to inspect the averaged score, the three
+      underlying Gemini scores, target text hash, generated-audio provenance, and any researcher notes.
     </p>
 
     <p class="muted">
