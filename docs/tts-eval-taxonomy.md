@@ -132,10 +132,13 @@ runs can map private prompts into the same categories without copying private ro
   English utterances without caricature.
 - `speech_mode_stability`: rhymes, countdowns, slogans, repeated phrases, and stage-like cues that
   should remain spoken rather than drifting into chant, song, loops, or exaggerated performance.
+- `dialogue_act_prosody`: confirmations, clarifying questions, apologies with repair actions,
+  offers, and bounded deferrals where prosody must preserve the intended speech act rather than
+  flattening it into a generic assistant sentence.
 
 ## Manifest Contract
 
-The public comparison manifest is intentionally balanced at 225 cases for now: 45 categories with 5
+The public comparison manifest is intentionally balanced at 230 cases for now: 46 categories with 5
 cases each. Expansion should add complete five-case category batches before deepening existing
 categories.
 

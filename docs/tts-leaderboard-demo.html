@@ -492,7 +492,7 @@
 
     <h2>Eval Set Samples</h2>
     <p>
-      The public demo eval set contains 225 synthetic, public-safe cases grouped into research-backed
+      The public demo eval set contains 230 synthetic, public-safe cases grouped into research-backed
       TTS dimensions. Each category below contributes five shared cases that every model synthesizes
       before Gemini judges the generated audio.
     </p>
@@ -2069,6 +2069,41 @@
             <p><strong>Slice:</strong> <code>stage_cue_spoken_production_note</code></p>
             <p><strong>Prompt:</strong> Read this stage cue as a calm spoken production note, not theatrical singing or exaggerated performance.</p>
             <p><strong>Target:</strong> Lights rise slowly, voices stay low, and the narrator waits until the door closes.</p>
+          </article>
+        </div>
+      </details>
+      <details class="sample-group" data-category="dialogue_act_prosody">
+        <summary><span>Dialogue Act Prosody</span><strong>5 cases</strong></summary>
+        <div class="sample-list">
+          <article class="sample-card">
+            <h3><code>tts-dialogue-act-prosody-confirmation-001</code></h3>
+            <p><strong>Slice:</strong> <code>confirmation_not_question</code></p>
+            <p><strong>Prompt:</strong> Read this as a concise confirmation, not as a new question or uncertain guess.</p>
+            <p><strong>Target:</strong> Yes, I moved the delivery window to Friday morning and kept the original address.</p>
+          </article>
+          <article class="sample-card">
+            <h3><code>tts-dialogue-act-prosody-clarifying-question-001</code></h3>
+            <p><strong>Slice:</strong> <code>clarifying_choice_question</code></p>
+            <p><strong>Prompt:</strong> Read this as a single clarifying question with polite uncertainty and no answer-like final cadence.</p>
+            <p><strong>Target:</strong> Do you want the quiet room near reception, or the larger room beside the elevators?</p>
+          </article>
+          <article class="sample-card">
+            <h3><code>tts-dialogue-act-prosody-apology-repair-001</code></h3>
+            <p><strong>Slice:</strong> <code>apology_then_repair_action</code></p>
+            <p><strong>Prompt:</strong> Read this as an apology followed by a repair action, not as a casual status update.</p>
+            <p><strong>Target:</strong> I am sorry for the mix-up; I corrected the invoice and sent the updated copy to your account.</p>
+          </article>
+          <article class="sample-card">
+            <h3><code>tts-dialogue-act-prosody-offer-001</code></h3>
+            <p><strong>Slice:</strong> <code>offer_with_two_options</code></p>
+            <p><strong>Prompt:</strong> Read this as an offer of help with a light option boundary, not as a command.</p>
+            <p><strong>Target:</strong> I can walk you through the reset now, or send a short checklist for later.</p>
+          </article>
+          <article class="sample-card">
+            <h3><code>tts-dialogue-act-prosody-deferral-001</code></h3>
+            <p><strong>Slice:</strong> <code>bounded_deferral_next_step</code></p>
+            <p><strong>Prompt:</strong> Read this as a bounded deferral with a clear next step, not as a refusal or guarantee.</p>
+            <p><strong>Target:</strong> I cannot confirm the final price yet, but I can hold the estimate until the vendor replies.</p>
           </article>
         </div>
       </details>
