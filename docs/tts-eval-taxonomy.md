@@ -239,10 +239,13 @@ runs can map private prompts into the same categories without copying private ro
 - `instruction_conflict_resolution_delivery`: latest corrections, default-versus-override
   instructions, superseded policies, conflicting location cues, and final formatting requirements
   where prosody must make the active instruction win without losing the rejected alternative.
+- `tool_result_state_delivery`: tool-result summaries, partial results, stale-data caveats,
+  permission blocks, and unavailable sources where speech must preserve which action succeeded,
+  which action failed or timed out, and what fallback or next step remains active.
 
 ## Manifest Contract
 
-The public comparison manifest is intentionally balanced at 405 cases for now: 81 categories with 5
+The public comparison manifest is intentionally balanced at 410 cases for now: 82 categories with 5
 cases each. Expansion should add complete five-case category batches before deepening existing
 categories.
 

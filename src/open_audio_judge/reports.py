@@ -1190,6 +1190,14 @@ TTS_CATEGORY_GUIDANCE = {
             "default, exception, and superseded-rule distinction",
         ],
     ),
+    "tool_result_state_delivery": (
+        "tool-result summaries, partial results, stale-data caveats, permission blocks, unavailable sources, and fallback recommendations",
+        [
+            "completed, skipped, blocked, and timed-out state distinction",
+            "tool-source and timestamp attachment",
+            "fallback and next-action prosody",
+        ],
+    ),
 }
 
 

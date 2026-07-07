@@ -406,6 +406,7 @@
           <option value="table_matrix_reading">Table matrix reading</option>
           <option value="calendar_schedule_delivery">Calendar schedule delivery</option>
           <option value="instruction_conflict_resolution_delivery">Instruction conflict resolution delivery</option>
+          <option value="tool_result_state_delivery">Tool result state delivery</option>
         </select>
         <select id="label-filter" aria-label="Filter by label">
           <option value="">All labels</option>
@@ -450,7 +451,7 @@
   --cases examples/tts_multiturn_cases.jsonl \
   --judge-provider gemini \
   --judge-samples 3 \
-  --limit 405 \
+  --limit 410 \
   --out runs/leaderboard/chatterbox</code></pre>
 
     <pre><code>oaj autojudge-local-tts \
@@ -459,7 +460,7 @@
   --cases examples/tts_multiturn_cases.jsonl \
   --judge-provider gemini \
   --judge-samples 3 \
-  --limit 405 \
+  --limit 410 \
   --out runs/leaderboard/kokoro</code></pre>
 
     <pre><code>oaj autojudge-local-tts \
@@ -468,7 +469,7 @@
   --cases examples/tts_multiturn_cases.jsonl \
   --judge-provider gemini \
   --judge-samples 3 \
-  --limit 405 \
+  --limit 410 \
   --out runs/leaderboard/qwen3-tts</code></pre>
 
     <p>
@@ -480,7 +481,7 @@
   --cases examples/tts_multiturn_cases.jsonl \
   --judge-provider gemini \
   --judge-samples 3 \
-  --limit 405 \
+  --limit 410 \
   --out runs/leaderboard/chatterbox</code></pre>
 
     <p>
@@ -525,16 +526,16 @@
     <h2>Sample Report Preview</h2>
     <section class="grid" aria-label="Sample report metrics">
       <div class="metric"><span>Models</span><strong>3</strong></div>
-      <div class="metric"><span>Shared Eval Cases</span><strong>400</strong></div>
+      <div class="metric"><span>Shared Eval Cases</span><strong>410</strong></div>
       <div class="metric"><span>Judge Samples</span><strong>3x</strong></div>
       <div class="metric"><span>Top Avg</span><strong>91.2</strong></div>
       <div class="metric"><span>Lowest Avg</span><strong>84.7</strong></div>
-      <div class="metric"><span>Total Judgments</span><strong>3240</strong></div>
+      <div class="metric"><span>Total Judgments</span><strong>3690</strong></div>
     </section>
 
     <h2>Eval Set Samples</h2>
     <p>
-      The public demo eval set contains 400 synthetic, public-safe cases grouped into research-backed
+      The public demo eval set contains 410 synthetic, public-safe cases grouped into research-backed
       TTS dimensions. Each category below contributes five shared cases that every model synthesizes
       before Gemini judges the generated audio.
     </p>
@@ -3371,6 +3372,41 @@
             <p><strong>Slice:</strong> <code>do_not_bullet_list_plain_paragraph_deadline_first</code></p>
             <p><strong>Prompt:</strong> Read this formatting instruction so the final override wins over the earlier template.</p>
             <p><strong>Target:</strong> Do not send the brief as a bullet list; send one plain paragraph with the deadline in the first sentence.</p>
+          </article>
+        </div>
+      </details>
+      <details class="sample-group" data-category="tool_result_state_delivery">
+        <summary><span>Tool Result State Delivery</span><strong>5 cases</strong></summary>
+        <div class="sample-list">
+          <article class="sample-card">
+            <h3><code>tts-tool-result-state-delivery-success-warning-001</code></h3>
+            <p><strong>Slice:</strong> <code>backup_success_two_files_skipped_warning</code></p>
+            <p><strong>Prompt:</strong> Read this tool result so the successful action and warning remain distinct.</p>
+            <p><strong>Target:</strong> The backup finished successfully, but two files were skipped because they are still open.</p>
+          </article>
+          <article class="sample-card">
+            <h3><code>tts-tool-result-state-delivery-partial-results-001</code></h3>
+            <p><strong>Slice:</strong> <code>store_a_c_found_store_b_timeout</code></p>
+            <p><strong>Prompt:</strong> Read this lookup result so the partial coverage and missing source are clear.</p>
+            <p><strong>Target:</strong> I found prices from Store A and Store C; Store B did not return a result before timeout.</p>
+          </article>
+          <article class="sample-card">
+            <h3><code>tts-tool-result-state-delivery-stale-data-001</code></h3>
+            <p><strong>Slice:</strong> <code>forecast_rain_after_6_data_updated_310</code></p>
+            <p><strong>Prompt:</strong> Read this weather-tool response so the timestamp caveat is not mistaken for the forecast.</p>
+            <p><strong>Target:</strong> The forecast says light rain after 6 PM, based on data last updated at 3:10 PM.</p>
+          </article>
+          <article class="sample-card">
+            <h3><code>tts-tool-result-state-delivery-permission-blocked-001</code></h3>
+            <p><strong>Slice:</strong> <code>draft_created_sending_blocked_mailbox_access</code></p>
+            <p><strong>Prompt:</strong> Read this automation result so the blocked step and next permission action stay attached.</p>
+            <p><strong>Target:</strong> The draft was created, but sending is blocked until Morgan grants mailbox access.</p>
+          </article>
+          <article class="sample-card">
+            <h3><code>tts-tool-result-state-delivery-conflicting-tools-001</code></h3>
+            <p><strong>Slice:</strong> <code>map_12_minute_drive_transit_unavailable_fallback</code></p>
+            <p><strong>Prompt:</strong> Read this tool comparison so the two sources and the recommended fallback do not blur together.</p>
+            <p><strong>Target:</strong> The map tool shows a 12 minute drive, while transit data is unavailable; use the driving estimate for now.</p>
           </article>
         </div>
       </details>
