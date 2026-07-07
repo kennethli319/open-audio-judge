@@ -436,6 +436,8 @@ def test_report_cli_combines_model_result_files(tmp_path: Path) -> None:
             str(first),
             "--results",
             str(second),
+            "--baseline-model",
+            "mlx-community/Kokoro-82M-4bit",
             "--out",
             str(out),
         ],
@@ -449,6 +451,7 @@ def test_report_cli_combines_model_result_files(tmp_path: Path) -> None:
     assert len(combined) == 2
     assert "Wrote combined report for 2 results" in result.output
     assert "Models:  2" in result.output
+    assert "Baseline: mlx-community/Kokoro-82M-4bit" in result.output
     assert "Model-Category Action Matrix" in report_html
     assert "mlx-community/chatterbox-turbo-6bit" in report_html
     assert "mlx-community/Kokoro-82M-4bit" in report_html

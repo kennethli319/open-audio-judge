@@ -29,7 +29,7 @@ from open_audio_judge.local_tts import (
 )
 from open_audio_judge.prompting import load_prompt
 from open_audio_judge.providers import build_provider
-from open_audio_judge.reports import write_html_report
+from open_audio_judge.reports import BASELINE_SYNTHESIS_MODEL, write_html_report
 from open_audio_judge.runner import evaluate_cases, load_cases, load_results_jsonl, write_results_jsonl
 
 console = Console()
@@ -437,6 +437,13 @@ def report_command(
         Path,
         typer.Option("--out", "-o", help="Output directory for the combined report."),
     ] = Path("runs/comparison-report"),
+    baseline_model: Annotated[
+        str,
+        typer.Option(
+            "--baseline-model",
+            help="Synthesis model id used for matched-case baseline deltas.",
+        ),
+    ] = BASELINE_SYNTHESIS_MODEL,
 ) -> None:
     combined_results = [
         result
@@ -450,7 +457,7 @@ def report_command(
     combined_path = out / "results.jsonl"
     report_path = out / "report.html"
     write_results_jsonl(combined_results, combined_path)
-    write_html_report(combined_results, report_path)
+    write_html_report(combined_results, report_path, baseline_model=baseline_model)
     model_count = len(
         {
             model
@@ -461,6 +468,7 @@ def report_command(
     console.print(f"[bold]Wrote combined report for {len(combined_results)} results[/bold]")
     if model_count:
         console.print(f"Models:  {model_count}")
+    console.print(f"Baseline: {baseline_model}")
     console.print(f"Results: {combined_path}")
     console.print(f"Report:  {report_path}")
 

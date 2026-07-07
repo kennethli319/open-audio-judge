@@ -47,4 +47,6 @@ runs can map private prompts into the same categories without copying private ro
 Each category should have up to five public-safe examples before expanding breadth further. Every
 case should include `eval_category`, `tts_slice`, `style_prompt`, `expected_style`, and
 `expected_instruction` metadata so reports can aggregate by model/category and engineers can map low
-scores back to likely fix areas.
+scores back to likely fix areas. Public demo cases should also use
+`source=research-backed-tts-demo` and a short `source_basis` that names the research signal or eval
+set family behind the slice.

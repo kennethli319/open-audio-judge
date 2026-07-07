@@ -30,6 +30,9 @@ def test_chatterbox_gemini_sample_page_documents_workflow() -> None:
         "Sample Report Preview",
         "Model Leaderboard",
         "Category Leaderboard",
+        "no error: 104",
+        "style/instruction mismatch: 7",
+        "voice drift: 2",
         "Scores By Category",
         "Baseline Model Deltas",
         "Wins / Ties / Losses",
@@ -73,6 +76,8 @@ def test_tts_multiturn_examples_cover_requested_categories() -> None:
     assert all(record["turns"] for record in records)
     assert all(record["reference_text"] for record in records)
     assert all(record["metadata"]["tts_slice"] for record in records)
+    assert all(record["metadata"]["source"] == "research-backed-tts-demo" for record in records)
+    assert all(record["metadata"]["source_basis"] for record in records)
     assert all(record["metadata"]["style_prompt"] for record in records)
     assert all(record["metadata"]["expected_style"] for record in records)
     assert all(record["metadata"]["expected_instruction"] for record in records)

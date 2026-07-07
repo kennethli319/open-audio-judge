@@ -10,6 +10,9 @@ from typing import Iterable
 from open_audio_judge.models import EvaluationResult
 
 
+BASELINE_SYNTHESIS_MODEL = "mlx-community/chatterbox-turbo-6bit"
+
+
 def label_for_score(score: int, accurate_threshold: int = 80, review_threshold: int = 60) -> str:
     if score >= accurate_threshold:
         return "accurate"
@@ -18,13 +21,25 @@ def label_for_score(score: int, accurate_threshold: int = 80, review_threshold: 
     return "inaccurate"
 
 
-def write_html_report(results: list[EvaluationResult], output_path: Path) -> Path:
+def write_html_report(
+    results: list[EvaluationResult],
+    output_path: Path,
+    *,
+    baseline_model: str = BASELINE_SYNTHESIS_MODEL,
+) -> Path:
     output_path.parent.mkdir(parents=True, exist_ok=True)
-    output_path.write_text(render_html_report(results), encoding="utf-8")
+    output_path.write_text(
+        render_html_report(results, baseline_model=baseline_model),
+        encoding="utf-8",
+    )
     return output_path
 
 
-def render_html_report(results: list[EvaluationResult]) -> str:
+def render_html_report(
+    results: list[EvaluationResult],
+    *,
+    baseline_model: str = BASELINE_SYNTHESIS_MODEL,
+) -> str:
     scores = [result.overall_score for result in results]
     average = statistics.mean(scores) if scores else 0
     median = statistics.median(scores) if scores else 0
@@ -61,7 +76,7 @@ def render_html_report(results: list[EvaluationResult]) -> str:
     status_by_sample_kind_counts = _status_counts_by_metadata(results, "sample_kind")
     weakest_segments = _weakest_segments(results)
     model_category_actions = _model_category_actions(results)
-    baseline_deltas = _baseline_deltas(results)
+    baseline_deltas = _baseline_deltas(results, baseline_model=baseline_model)
     priority_cases = _priority_cases(results)
     calibration_checks = _calibration_checks(results)
 
@@ -515,9 +530,6 @@ ISSUE_FIX_AREAS = {
     "provider_error": "synthesis failures",
     "parse_error": "synthesis failures",
 }
-BASELINE_SYNTHESIS_MODEL = "mlx-community/chatterbox-turbo-6bit"
-
-
 @dataclass(frozen=True)
 class SegmentSummary:
     field_label: str
@@ -548,6 +560,7 @@ class ModelCategoryAction:
 
 @dataclass(frozen=True)
 class BaselineDeltaSummary:
+    baseline_model: str
     model: str
     count: int
     average_delta: float
@@ -1055,6 +1068,7 @@ def _baseline_deltas(
         regressions = [pair for pair in pairs if pair[2] < 0]
         summaries.append(
             BaselineDeltaSummary(
+                baseline_model=baseline_model,
                 model=model,
                 count=len(pairs),
                 average_delta=statistics.mean(deltas),
@@ -1110,7 +1124,7 @@ def _render_baseline_delta_row(item: BaselineDeltaSummary) -> str:
         regression_markup = '<li><span class="muted">No regressions</span></li>'
     return f"""<tr class="{_delta_severity_class(item.average_delta)}">
   <td data-label="Compared Model">{html.escape(item.model)}</td>
-  <td data-label="Baseline">{html.escape(BASELINE_SYNTHESIS_MODEL)}</td>
+  <td data-label="Baseline">{html.escape(item.baseline_model)}</td>
   <td data-label="Matched Cases">{item.count}</td>
   <td data-label="Avg Delta"><strong>{item.average_delta:+.1f}</strong></td>
   <td data-label="Wins / Ties / Losses">{item.wins} / {item.ties} / {item.losses}</td>
