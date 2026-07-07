@@ -254,8 +254,8 @@ The command writes:
 - `synthesis/synthesis_failures.jsonl` when `--skip-failed-synthesis` records skipped local TTS
   failures.
 - `model_summary.json`: model id, voice, audio format, attempted/synthesized counts, synthesis
-  success rate, and failure breakdowns by error type, TTS slice, source category, sample kind, and
-  language.
+  success rate, and failure breakdowns by error type, synthesis provider/model/voice/language,
+  audio format, TTS slice, source category, and sample kind.
 - `judge-report/results.jsonl` and `judge-report/report.html`: aggregate naturalness scores, top
   issue categories, priority cases, and sample-by-sample reasons.
 
@@ -271,7 +271,9 @@ wrapper only writes files, Open Audio Judge will use a matching newly created or
 and reject unchanged leftovers from an earlier run.
 By default, a synthesis error fails the command before judging. Add `--skip-failed-synthesis` for
 larger batches where the run should write `synthesis_failures.jsonl`, include failure counts in
-`model_summary.json`, and judge the samples that did synthesize successfully.
+`model_summary.json`, and judge the samples that did synthesize successfully. Failure records keep
+the attempted synthesis provider, model, voice, language, audio format, source case id, and target
+text hash for provenance without storing the target text.
 
 ## REST API
 

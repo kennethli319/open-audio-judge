@@ -96,7 +96,7 @@ def synthesize_cases_with_local_tts_batch(
         except Exception as exc:
             if not continue_on_error:
                 raise
-            failures.append(_failure_for_case(case, exc))
+            failures.append(_failure_for_case(case, exc, config=config))
     return LocalTtsBatchResult(cases=synthesized, failures=failures)
 
 
@@ -159,6 +159,20 @@ def write_local_tts_summary_json(
         "by_synthesis_audio_format": _count_metadata(case_list, "synthesis_audio_format"),
         "by_tts_slice": _count_metadata(case_list, "tts_slice"),
         "synthesis_failures_by_error_type": _count_failure_field(failure_list, "error_type"),
+        "synthesis_failures_by_provider": _count_failure_metadata(
+            failure_list,
+            "synthesis_provider",
+        ),
+        "synthesis_failures_by_model": _count_failure_metadata(failure_list, "synthesis_model"),
+        "synthesis_failures_by_voice": _count_failure_metadata(failure_list, "synthesis_voice"),
+        "synthesis_failures_by_lang_code": _count_failure_metadata(
+            failure_list,
+            "synthesis_lang_code",
+        ),
+        "synthesis_failures_by_audio_format": _count_failure_metadata(
+            failure_list,
+            "synthesis_audio_format",
+        ),
         "synthesis_failures_by_tts_slice": _count_failure_metadata(failure_list, "tts_slice"),
         "synthesis_failures_by_source_category": _count_failure_metadata(
             failure_list,
@@ -356,12 +370,30 @@ def _format_tts_failure(exc: subprocess.CalledProcessError, tts_bin: Path) -> st
     return "; ".join(details)
 
 
-def _failure_for_case(case: EvaluationCase, exc: Exception) -> LocalTtsFailure:
+def _failure_for_case(
+    case: EvaluationCase,
+    exc: Exception,
+    *,
+    config: LocalTtsConfig,
+) -> LocalTtsFailure:
+    target_text = (case.reference_text or "").strip()
+    metadata = dict(case.metadata)
+    metadata.update(
+        {
+            "synthesis_provider": config.synthesis_provider,
+            "synthesis_model": config.model,
+            "synthesis_voice": config.voice,
+            "synthesis_lang_code": config.lang_code,
+            "synthesis_audio_format": config.audio_format,
+            "source_case_id": case.id,
+            "reference_text_sha256": _sha256_text(target_text),
+        }
+    )
     return LocalTtsFailure(
         case_id=case.id,
         error_type=type(exc).__name__,
         message=_compact_error_message(exc),
-        metadata=dict(case.metadata),
+        metadata=metadata,
     )
 
 

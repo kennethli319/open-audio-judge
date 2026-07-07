@@ -154,7 +154,14 @@ def test_synthesize_cases_with_local_tts_batch_can_continue_after_failure(
     assert result.failures[0].case_id == "tts-fail"
     assert result.failures[0].error_type == "RuntimeError"
     assert "voice unavailable" in result.failures[0].message
-    assert result.failures[0].metadata == {"tts_slice": "numbers"}
+    assert result.failures[0].metadata["tts_slice"] == "numbers"
+    assert result.failures[0].metadata["synthesis_provider"] == "local_chatterbox"
+    assert result.failures[0].metadata["synthesis_model"] == "mlx-community/chatterbox-turbo-6bit"
+    assert result.failures[0].metadata["synthesis_voice"] == "af_heart"
+    assert result.failures[0].metadata["synthesis_lang_code"] == "en"
+    assert result.failures[0].metadata["synthesis_audio_format"] == "wav"
+    assert result.failures[0].metadata["source_case_id"] == "tts-fail"
+    assert "reference_text_sha256" in result.failures[0].metadata
 
 
 def test_synthesize_cases_with_local_tts_reports_timeout(
@@ -393,6 +400,11 @@ def test_write_local_tts_summary_json_counts_failures(tmp_path: Path) -> None:
             metadata={
                 "language": "en-US",
                 "sample_kind": "local_synthetic_tts",
+                "synthesis_audio_format": "wav",
+                "synthesis_lang_code": "en-US",
+                "synthesis_model": "test-model",
+                "synthesis_provider": "local_test_tts",
+                "synthesis_voice": "af_test",
                 "source_category": "instruction_constraints",
                 "tts_slice": "numbers",
             },
@@ -416,6 +428,11 @@ def test_write_local_tts_summary_json_counts_failures(tmp_path: Path) -> None:
     assert data["synthesis_success_rate"] == 0.0
     assert data["synthesis_failure_count"] == 1
     assert data["synthesis_failures_by_error_type"] == {"RuntimeError": 1}
+    assert data["synthesis_failures_by_provider"] == {"local_test_tts": 1}
+    assert data["synthesis_failures_by_model"] == {"test-model": 1}
+    assert data["synthesis_failures_by_voice"] == {"af_test": 1}
+    assert data["synthesis_failures_by_lang_code"] == {"en-US": 1}
+    assert data["synthesis_failures_by_audio_format"] == {"wav": 1}
     assert data["synthesis_failures_by_tts_slice"] == {"numbers": 1}
     assert data["synthesis_failures_by_source_category"] == {"instruction_constraints": 1}
     assert data["synthesis_failures_by_sample_kind"] == {"local_synthetic_tts": 1}
