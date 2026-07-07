@@ -464,6 +464,7 @@ def test_write_local_tts_summary_json(tmp_path: Path) -> None:
             "synthesis_model": "mlx-community/chatterbox-turbo-6bit",
             "synthesis_lang_code": "en",
             "synthesis_audio_format": "wav",
+            "eval_category": "paralinguistics",
             "tts_slice": "general",
             "audio_bytes": 1234,
             "audio_duration_seconds": 1.234,
@@ -492,6 +493,7 @@ def test_write_local_tts_summary_json(tmp_path: Path) -> None:
     assert data["by_synthesis_model"] == {"mlx-community/chatterbox-turbo-6bit": 1}
     assert data["by_synthesis_voice"] == {"af_heart": 1}
     assert data["by_synthesis_lang_code"] == {"en": 1}
+    assert data["by_eval_category"] == {"paralinguistics": 1}
     assert data["synthesis_failure_count"] == 0
 
 
@@ -510,6 +512,7 @@ def test_write_local_tts_summary_json_counts_failures(tmp_path: Path) -> None:
                 "synthesis_model": "test-model",
                 "synthesis_provider": "local_test_tts",
                 "synthesis_voice": "af_test",
+                "eval_category": "instruction_following",
                 "source_category": "instruction_constraints",
                 "tts_slice": "numbers",
             },
@@ -538,6 +541,7 @@ def test_write_local_tts_summary_json_counts_failures(tmp_path: Path) -> None:
     assert data["synthesis_failures_by_voice"] == {"af_test": 1}
     assert data["synthesis_failures_by_lang_code"] == {"en-US": 1}
     assert data["synthesis_failures_by_audio_format"] == {"wav": 1}
+    assert data["synthesis_failures_by_eval_category"] == {"instruction_following": 1}
     assert data["synthesis_failures_by_tts_slice"] == {"numbers": 1}
     assert data["synthesis_failures_by_source_category"] == {"instruction_constraints": 1}
     assert data["synthesis_failures_by_sample_kind"] == {"local_synthetic_tts": 1}

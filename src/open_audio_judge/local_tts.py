@@ -157,6 +157,7 @@ def write_local_tts_summary_json(
         "by_synthesis_voice": _count_metadata(case_list, "synthesis_voice"),
         "by_synthesis_lang_code": _count_metadata(case_list, "synthesis_lang_code"),
         "by_synthesis_audio_format": _count_metadata(case_list, "synthesis_audio_format"),
+        "by_eval_category": _count_metadata(case_list, "eval_category"),
         "by_tts_slice": _count_metadata(case_list, "tts_slice"),
         "synthesis_failures_by_error_type": _count_failure_field(failure_list, "error_type"),
         "synthesis_failures_by_provider": _count_failure_metadata(
@@ -172,6 +173,10 @@ def write_local_tts_summary_json(
         "synthesis_failures_by_audio_format": _count_failure_metadata(
             failure_list,
             "synthesis_audio_format",
+        ),
+        "synthesis_failures_by_eval_category": _count_failure_metadata(
+            failure_list,
+            "eval_category",
         ),
         "synthesis_failures_by_tts_slice": _count_failure_metadata(failure_list, "tts_slice"),
         "synthesis_failures_by_source_category": _count_failure_metadata(
