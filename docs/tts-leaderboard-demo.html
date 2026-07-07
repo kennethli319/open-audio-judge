@@ -383,6 +383,8 @@
           <option value="readback_confirmation_delivery">Readback confirmation delivery</option>
           <option value="focus_particle_scope_delivery">Focus particle scope delivery</option>
           <option value="slot_value_pairing_delivery">Slot value pairing delivery</option>
+          <option value="commitment_scope_delivery">Commitment scope delivery</option>
+          <option value="ordinal_ranking_delivery">Ordinal ranking delivery</option>
         </select>
         <select id="label-filter" aria-label="Filter by label">
           <option value="">All labels</option>
@@ -427,7 +429,7 @@
   --cases examples/tts_multiturn_cases.jsonl \
   --judge-provider gemini \
   --judge-samples 3 \
-  --limit 295 \
+  --limit 300 \
   --out runs/leaderboard/chatterbox</code></pre>
 
     <pre><code>oaj autojudge-local-tts \
@@ -436,7 +438,7 @@
   --cases examples/tts_multiturn_cases.jsonl \
   --judge-provider gemini \
   --judge-samples 3 \
-  --limit 295 \
+  --limit 300 \
   --out runs/leaderboard/kokoro</code></pre>
 
     <pre><code>oaj autojudge-local-tts \
@@ -445,7 +447,7 @@
   --cases examples/tts_multiturn_cases.jsonl \
   --judge-provider gemini \
   --judge-samples 3 \
-  --limit 295 \
+  --limit 300 \
   --out runs/leaderboard/qwen3-tts</code></pre>
 
     <p>
@@ -457,7 +459,7 @@
   --cases examples/tts_multiturn_cases.jsonl \
   --judge-provider gemini \
   --judge-samples 3 \
-  --limit 295 \
+  --limit 300 \
   --out runs/leaderboard/chatterbox</code></pre>
 
     <p>
@@ -502,16 +504,16 @@
     <h2>Sample Report Preview</h2>
     <section class="grid" aria-label="Sample report metrics">
       <div class="metric"><span>Models</span><strong>3</strong></div>
-      <div class="metric"><span>Shared Eval Cases</span><strong>295</strong></div>
+      <div class="metric"><span>Shared Eval Cases</span><strong>300</strong></div>
       <div class="metric"><span>Judge Samples</span><strong>3x</strong></div>
       <div class="metric"><span>Top Avg</span><strong>91.2</strong></div>
       <div class="metric"><span>Lowest Avg</span><strong>84.7</strong></div>
-      <div class="metric"><span>Total Judgments</span><strong>2655</strong></div>
+      <div class="metric"><span>Total Judgments</span><strong>2700</strong></div>
     </section>
 
     <h2>Eval Set Samples</h2>
     <p>
-      The public demo eval set contains 295 synthetic, public-safe cases grouped into research-backed
+      The public demo eval set contains 300 synthetic, public-safe cases grouped into research-backed
       TTS dimensions. Each category below contributes five shared cases that every model synthesizes
       before Gemini judges the generated audio.
     </p>
@@ -2581,6 +2583,41 @@
           </article>
         </div>
       </details>
+      <details class="sample-group" data-category="ordinal_ranking_delivery">
+        <summary><span>Ordinal Ranking Delivery</span><strong>5 cases</strong></summary>
+        <div class="sample-list">
+          <article class="sample-card">
+            <h3><code>tts-ordinal-ranking-delivery-triage-rerank-001</code></h3>
+            <p><strong>Slice:</strong> <code>triage_priority_order_conditional_rerank</code></p>
+            <p><strong>Prompt:</strong> Read this triage update so the original ranking and the conditional rerank are both clear.</p>
+            <p><strong>Target:</strong> First priority is restoring the database. Second priority is rolling back DNS, unless the restore fails; then DNS becomes first.</p>
+          </article>
+          <article class="sample-card">
+            <h3><code>tts-ordinal-ranking-delivery-floor-sequence-001</code></h3>
+            <p><strong>Slice:</strong> <code>floor_level_order_lower_level_last</code></p>
+            <p><strong>Prompt:</strong> Read this route so floor order and lower-level wording cannot be mistaken.</p>
+            <p><strong>Target:</strong> Stop at level two first, level twelve second, and lower level one last.</p>
+          </article>
+          <article class="sample-card">
+            <h3><code>tts-ordinal-ranking-delivery-award-tie-001</code></h3>
+            <p><strong>Slice:</strong> <code>award_results_first_second_tie_third</code></p>
+            <p><strong>Prompt:</strong> Read these award results so first, second-tie, and third place remain attached to the right names.</p>
+            <p><strong>Target:</strong> Bea finished first. Chen and Dev tied for second. Ari finished third after the tie-break review.</p>
+          </article>
+          <article class="sample-card">
+            <h3><code>tts-ordinal-ranking-delivery-rubric-levels-001</code></h3>
+            <p><strong>Slice:</strong> <code>rubric_level_quality_label_pairing</code></p>
+            <p><strong>Prompt:</strong> Read this rubric note so level numbers and quality labels stay paired.</p>
+            <p><strong>Target:</strong> Level one means draft only. Level two means ready for review. Level three means approved for release.</p>
+          </article>
+          <article class="sample-card">
+            <h3><code>tts-ordinal-ranking-delivery-version-order-001</code></h3>
+            <p><strong>Slice:</strong> <code>version_label_first_second_final_order</code></p>
+            <p><strong>Prompt:</strong> Read this QA note so version labels do not sound numerically reordered.</p>
+            <p><strong>Target:</strong> Run version 2.01 as the first baseline, version 2.1 as the second check, and version 2.10 as the final comparison.</p>
+          </article>
+        </div>
+      </details>
     </section>
 
     <h2>Model Leaderboard</h2>
@@ -2600,7 +2637,7 @@
           <td data-label="Rank">1</td>
           <td data-label="Model"><code>mlx-community/chatterbox-turbo-6bit</code></td>
           <td data-label="Avg">91.2</td>
-          <td data-label="Accurate">162 / 295</td>
+          <td data-label="Accurate">162 / 300</td>
           <td data-label="Weakest Category"><code>information_tuning</code> avg 84.5</td>
           <td data-label="Likely Fix Focus">number clarity, pauses around dense facts</td>
         </tr>
@@ -2608,7 +2645,7 @@
           <td data-label="Rank">2</td>
           <td data-label="Model"><code>mlx-community/Kokoro-82M-4bit</code></td>
           <td data-label="Avg">88.6</td>
-          <td data-label="Accurate">151 / 295</td>
+          <td data-label="Accurate">151 / 300</td>
           <td data-label="Weakest Category"><code>speech_steerability</code> avg 80.8</td>
           <td data-label="Likely Fix Focus">style control, emphasis, pacing</td>
         </tr>
@@ -2616,7 +2653,7 @@
           <td data-label="Rank">3</td>
           <td data-label="Model"><code>mlx-community/Qwen3-TTS-12Hz-0.6B-Base-4bit</code></td>
           <td data-label="Avg">84.7</td>
-          <td data-label="Accurate">111 / 295</td>
+          <td data-label="Accurate">111 / 300</td>
           <td data-label="Weakest Category"><code>paralinguistics</code> avg 77.0</td>
           <td data-label="Likely Fix Focus">emotion rendering, natural prosody</td>
         </tr>
@@ -2671,9 +2708,9 @@
       </div>
       <div class="panel">
         <h3>Scores By Model</h3>
-        <p><code>mlx-community/chatterbox-turbo-6bit</code><br>avg 90.1 / n 295 / 78-97</p>
-        <p><code>mlx-community/Kokoro-82M-4bit</code><br>avg 87.2 / n 295 / 73-95</p>
-        <p><code>mlx-community/Qwen3-TTS-12Hz-0.6B-Base-4bit</code><br>avg 83.6 / n 295 / 70-93</p>
+        <p><code>mlx-community/chatterbox-turbo-6bit</code><br>avg 90.1 / n 300 / 78-97</p>
+        <p><code>mlx-community/Kokoro-82M-4bit</code><br>avg 87.2 / n 300 / 73-95</p>
+        <p><code>mlx-community/Qwen3-TTS-12Hz-0.6B-Base-4bit</code><br>avg 83.6 / n 300 / 70-93</p>
       </div>
       <div class="panel">
         <h3>Scores By Voice</h3>
@@ -2861,7 +2898,7 @@
         <tr>
           <td data-label="Compared Model"><code>mlx-community/Kokoro-82M-4bit</code></td>
           <td data-label="Baseline"><code>mlx-community/chatterbox-turbo-6bit</code></td>
-          <td data-label="Matched Cases">295</td>
+          <td data-label="Matched Cases">300</td>
           <td data-label="Avg Delta">-2.6</td>
           <td data-label="Wins / Ties / Losses">42 / 31 / 222</td>
           <td data-label="Largest Regressions">speech pace, conditional-logic, and escalation-priority cases where style control trails the baseline.</td>
@@ -2869,7 +2906,7 @@
         <tr>
           <td data-label="Compared Model"><code>mlx-community/Qwen3-TTS-12Hz-0.6B-Base-4bit</code></td>
           <td data-label="Baseline"><code>mlx-community/chatterbox-turbo-6bit</code></td>
-          <td data-label="Matched Cases">295</td>
+          <td data-label="Matched Cases">300</td>
           <td data-label="Avg Delta">-6.5</td>
           <td data-label="Wins / Ties / Losses">25 / 22 / 248</td>
           <td data-label="Largest Regressions">emotion, dense-fact, conditional-rule, and critical-alert cases with lower naturalness or intelligibility.</td>
@@ -2895,7 +2932,7 @@
       </div>
       <div class="panel">
         <h3>Synthesis Model</h3>
-        <p><code>mlx-community/Qwen3-TTS-12Hz-0.6B-Base-4bit</code><br>avg 83.6 / n 295 / range 70-93</p>
+        <p><code>mlx-community/Qwen3-TTS-12Hz-0.6B-Base-4bit</code><br>avg 83.6 / n 300 / range 70-93</p>
         <p class="muted">Compare model-level weak spots before changing prompts, voices, wrappers, or model settings.</p>
       </div>
     </section>
@@ -2947,7 +2984,7 @@
     <h2>Sample-By-Sample Breakdown</h2>
     <p>
       The real combined report contains one row per synthesized model/case pair. This preview shows
-      representative rows across models, categories, slices, and score bands from the 885 generated
+      representative rows across models, categories, slices, and score bands from the 900 generated
       samples.
     </p>
     <table id="sample-breakdown-table">

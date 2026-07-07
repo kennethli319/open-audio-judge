@@ -174,10 +174,13 @@ runs can map private prompts into the same categories without copying private ro
 - `commitment_scope_delivery`: apologies, partial commitments, clinical support limits, security
   prerequisites, and operations promises where prosody must preserve what is committed, refused,
   conditional, or explicitly outside scope.
+- `ordinal_ranking_delivery`: priority order, floor sequences, tied ranks, rubric levels, and
+  version-order instructions where ordinal words, numeric labels, and relation changes must stay
+  attached to the right item.
 
 ## Manifest Contract
 
-The public comparison manifest is intentionally balanced at 295 cases for now: 59 categories with 5
+The public comparison manifest is intentionally balanced at 300 cases for now: 60 categories with 5
 cases each. Expansion should add complete five-case category batches before deepening existing
 categories.
 

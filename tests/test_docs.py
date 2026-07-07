@@ -40,7 +40,7 @@ def test_tts_leaderboard_demo_page_documents_workflow() -> None:
         "function applyFilters()",
         "function sortRows()",
         "Eval Set Samples",
-        "The public demo eval set contains 295 synthetic, public-safe cases",
+        "The public demo eval set contains 300 synthetic, public-safe cases",
         "Paralinguistics",
         "Instruction Following",
         "Speaker Voice Consistency",
@@ -83,6 +83,8 @@ def test_tts_leaderboard_demo_page_documents_workflow() -> None:
         "tts-readback-confirmation-delivery-order-repeat-001",
         "tts-focus-particle-scope-delivery-only-shift-001",
         "tts-slot-value-pairing-delivery-intake-form-001",
+        "tts-commitment-scope-delivery-apology-boundary-001",
+        "tts-ordinal-ranking-delivery-triage-rerank-001",
         "Model Leaderboard",
         "Category Leaderboard",
         "no error: 167",
@@ -97,7 +99,7 @@ def test_tts_leaderboard_demo_page_documents_workflow() -> None:
         "critical_alert_room_action_escalation",
         "Likely fix areas",
         "priority_escalation_delivery",
-        "885 generated",
+        "900 generated",
         "Category Guidance",
         "Focus: unless, only-if, if/otherwise, nested conditions, and exception boundaries.",
         "Source basis: VoiceBench safety/robustness behavior and Seed-TTS-Eval intelligibility checks",
@@ -129,7 +131,7 @@ def test_tts_multiturn_examples_cover_requested_categories() -> None:
         category = record["metadata"]["eval_category"]
         categories[category] = categories.get(category, 0) + 1
 
-    assert len(records) == 295
+    assert len(records) == 300
     assert categories == {
         "paralinguistics": 5,
         "instruction_following": 5,
@@ -190,6 +192,7 @@ def test_tts_multiturn_examples_cover_requested_categories() -> None:
         "focus_particle_scope_delivery": 5,
         "slot_value_pairing_delivery": 5,
         "commitment_scope_delivery": 5,
+        "ordinal_ranking_delivery": 5,
     }
     assert all(record["turns"] for record in records)
     assert all(record["reference_text"] for record in records)

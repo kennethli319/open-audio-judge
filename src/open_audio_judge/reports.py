@@ -1014,6 +1014,14 @@ TTS_CATEGORY_GUIDANCE = {
             "scope-limited promise text faithfulness",
         ],
     ),
+    "ordinal_ranking_delivery": (
+        "priority order, floor sequences, tied ranks, rubric levels, and version-order instructions",
+        [
+            "ordinal and rank phrase grouping",
+            "number and version text normalization",
+            "relation-change prosody",
+        ],
+    ),
 }
 
 

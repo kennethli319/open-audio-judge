@@ -236,7 +236,7 @@ oaj autojudge-local-tts \
   --cases examples/tts_multiturn_cases.jsonl \
   --judge-provider gemini \
   --judge-samples 3 \
-  --limit 295 \
+  --limit 300 \
   --out runs/chatterbox-tts-autojudge
 ```
 
