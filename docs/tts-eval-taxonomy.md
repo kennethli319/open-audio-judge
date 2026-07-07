@@ -59,10 +59,12 @@ runs can map private prompts into the same categories without copying private ro
   bass/bass, minute/minute, and polish/Polish that should be resolved from sentence meaning.
 - `formatting_markup_robustness`: markdown emphasis, bracketed labels, inline bullets, code-style
   identifiers, and symbolic emoticon text that should not produce literal or hallucinated speech.
+- `nonverbal_paralinguistic_cues`: controlled chuckles, sighs, whisper-like delivery, amused
+  restraint, and breath management that should add expression without harming intelligibility.
 
 ## Manifest Contract
 
-The public comparison manifest is intentionally balanced at 85 cases for now: 17 categories with 5
+The public comparison manifest is intentionally balanced at 90 cases for now: 18 categories with 5
 cases each. Expansion should add complete five-case category batches before deepening existing
 categories.
 

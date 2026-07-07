@@ -378,7 +378,7 @@
   --cases examples/tts_multiturn_cases.jsonl \
   --judge-provider gemini \
   --judge-samples 3 \
-  --limit 85 \
+  --limit 90 \
   --out runs/leaderboard/chatterbox</code></pre>
 
     <pre><code>oaj autojudge-local-tts \
@@ -387,7 +387,7 @@
   --cases examples/tts_multiturn_cases.jsonl \
   --judge-provider gemini \
   --judge-samples 3 \
-  --limit 85 \
+  --limit 90 \
   --out runs/leaderboard/kokoro</code></pre>
 
     <pre><code>oaj autojudge-local-tts \
@@ -396,7 +396,7 @@
   --cases examples/tts_multiturn_cases.jsonl \
   --judge-provider gemini \
   --judge-samples 3 \
-  --limit 85 \
+  --limit 90 \
   --out runs/leaderboard/qwen3-tts</code></pre>
 
     <p>
@@ -408,7 +408,7 @@
   --cases examples/tts_multiturn_cases.jsonl \
   --judge-provider gemini \
   --judge-samples 3 \
-  --limit 85 \
+  --limit 90 \
   --out runs/leaderboard/chatterbox</code></pre>
 
     <p>
@@ -453,16 +453,16 @@
     <h2>Sample Report Preview</h2>
     <section class="grid" aria-label="Sample report metrics">
       <div class="metric"><span>Models</span><strong>3</strong></div>
-      <div class="metric"><span>Shared Eval Cases</span><strong>85</strong></div>
+      <div class="metric"><span>Shared Eval Cases</span><strong>90</strong></div>
       <div class="metric"><span>Judge Samples</span><strong>3x</strong></div>
       <div class="metric"><span>Top Avg</span><strong>91.2</strong></div>
       <div class="metric"><span>Lowest Avg</span><strong>84.7</strong></div>
-      <div class="metric"><span>Total Judgments</span><strong>765</strong></div>
+      <div class="metric"><span>Total Judgments</span><strong>810</strong></div>
     </section>
 
     <h2>Eval Set Samples</h2>
     <p>
-      The public demo eval set contains 85 synthetic, public-safe cases grouped into research-backed
+      The public demo eval set contains 90 synthetic, public-safe cases grouped into research-backed
       TTS dimensions. Each category below contributes five shared cases that every model synthesizes
       before Gemini judges the generated audio.
     </p>
@@ -941,7 +941,7 @@
             <h3><code>tts-punctuation-prosody-dash-001</code></h3>
             <p><strong>Slice:</strong> <code>aside_phrase_grouping</code></p>
             <p><strong>Prompt:</strong> Read this with the dash as a quick aside, then return to the main sentence.</p>
-            <p><strong>Target:</strong> The sensor passed calibration, just barely, and the final reading stayed within tolerance.</p>
+            <p><strong>Target:</strong> The sensor passed calibration - just barely - and the final reading stayed within tolerance.</p>
           </article>
           <article class="sample-card">
             <h3><code>tts-punctuation-prosody-question-001</code></h3>
@@ -1062,6 +1062,41 @@
           </article>
         </div>
       </details>
+      <details class="sample-group" data-category="nonverbal_paralinguistic_cues">
+        <summary><span>Nonverbal Paralinguistic Cues</span><strong>5 cases</strong></summary>
+        <div class="sample-list">
+          <article class="sample-card">
+            <h3><code>tts-nonverbal-paralinguistic-cues-chuckle-001</code></h3>
+            <p><strong>Slice:</strong> <code>controlled_chuckle_recovery</code></p>
+            <p><strong>Prompt:</strong> Read this with a tiny friendly chuckle at the opening, then return to a clear sentence.</p>
+            <p><strong>Target:</strong> Ha, I finally found the missing adapter, and it was plugged into the spare monitor.</p>
+          </article>
+          <article class="sample-card">
+            <h3><code>tts-nonverbal-paralinguistic-cues-sigh-001</code></h3>
+            <p><strong>Slice:</strong> <code>relieved_sigh_then_update</code></p>
+            <p><strong>Prompt:</strong> Read this with a restrained relieved sigh before the update, not as frustration.</p>
+            <p><strong>Target:</strong> Okay, the backup restored successfully, and no customer records were lost.</p>
+          </article>
+          <article class="sample-card">
+            <h3><code>tts-nonverbal-paralinguistic-cues-whisper-001</code></h3>
+            <p><strong>Slice:</strong> <code>whispered_intelligibility</code></p>
+            <p><strong>Prompt:</strong> Read this as a quiet library whisper while keeping every word understandable.</p>
+            <p><strong>Target:</strong> Please meet me by the reference desk, and keep your phone on silent until we leave.</p>
+          </article>
+          <article class="sample-card">
+            <h3><code>tts-nonverbal-paralinguistic-cues-laugh-suppression-001</code></h3>
+            <p><strong>Slice:</strong> <code>suppressed_laugh_professional</code></p>
+            <p><strong>Prompt:</strong> Read this with amused restraint, as if holding back a laugh but staying professional.</p>
+            <p><strong>Target:</strong> The test robot waved at the empty hallway, then logged it as a successful greeting.</p>
+          </article>
+          <article class="sample-card">
+            <h3><code>tts-nonverbal-paralinguistic-cues-breath-control-001</code></h3>
+            <p><strong>Slice:</strong> <code>breath_control_long_notice</code></p>
+            <p><strong>Prompt:</strong> Read this long notice with natural breath control and no audible gasp between clauses.</p>
+            <p><strong>Target:</strong> After the doors close, the shuttle will pause at the west gate, continue past the service road, and stop beside the visitor center.</p>
+          </article>
+        </div>
+      </details>
     </section>
 
     <h2>Model Leaderboard</h2>
@@ -1081,7 +1116,7 @@
           <td data-label="Rank">1</td>
           <td data-label="Model"><code>mlx-community/chatterbox-turbo-6bit</code></td>
           <td data-label="Avg">91.2</td>
-          <td data-label="Accurate">74 / 85</td>
+          <td data-label="Accurate">78 / 90</td>
           <td data-label="Weakest Category"><code>information_tuning</code> avg 84.5</td>
           <td data-label="Likely Fix Focus">number clarity, pauses around dense facts</td>
         </tr>
@@ -1089,7 +1124,7 @@
           <td data-label="Rank">2</td>
           <td data-label="Model"><code>mlx-community/Kokoro-82M-4bit</code></td>
           <td data-label="Avg">88.6</td>
-          <td data-label="Accurate">67 / 85</td>
+          <td data-label="Accurate">71 / 90</td>
           <td data-label="Weakest Category"><code>speech_steerability</code> avg 80.8</td>
           <td data-label="Likely Fix Focus">style control, emphasis, pacing</td>
         </tr>
@@ -1097,7 +1132,7 @@
           <td data-label="Rank">3</td>
           <td data-label="Model"><code>mlx-community/Qwen3-TTS-12Hz-0.6B-Base-4bit</code></td>
           <td data-label="Avg">84.7</td>
-          <td data-label="Accurate">50 / 85</td>
+          <td data-label="Accurate">53 / 90</td>
           <td data-label="Weakest Category"><code>paralinguistics</code> avg 77.0</td>
           <td data-label="Likely Fix Focus">emotion rendering, natural prosody</td>
         </tr>
@@ -1135,12 +1170,13 @@
         <p><code>domain_terminology</code><br>avg 85.4 / n 5 / 77-92</p>
         <p><code>heteronym_disambiguation</code><br>avg 84.8 / n 5 / 75-92</p>
         <p><code>formatting_markup_robustness</code><br>avg 83.6 / n 5 / 74-91</p>
+        <p><code>nonverbal_paralinguistic_cues</code><br>avg 84.2 / n 5 / 75-92</p>
       </div>
       <div class="panel">
         <h3>Scores By Model</h3>
-        <p><code>mlx-community/chatterbox-turbo-6bit</code><br>avg 90.3 / n 85 / 78-97</p>
-        <p><code>mlx-community/Kokoro-82M-4bit</code><br>avg 87.5 / n 85 / 74-95</p>
-        <p><code>mlx-community/Qwen3-TTS-12Hz-0.6B-Base-4bit</code><br>avg 83.9 / n 85 / 70-93</p>
+        <p><code>mlx-community/chatterbox-turbo-6bit</code><br>avg 90.1 / n 90 / 78-97</p>
+        <p><code>mlx-community/Kokoro-82M-4bit</code><br>avg 87.3 / n 90 / 74-95</p>
+        <p><code>mlx-community/Qwen3-TTS-12Hz-0.6B-Base-4bit</code><br>avg 83.7 / n 90 / 70-93</p>
       </div>
       <div class="panel">
         <h3>Scores By Voice</h3>
@@ -1286,17 +1322,17 @@
         <tr>
           <td data-label="Compared Model"><code>mlx-community/Kokoro-82M-4bit</code></td>
           <td data-label="Baseline"><code>mlx-community/chatterbox-turbo-6bit</code></td>
-          <td data-label="Matched Cases">85</td>
+          <td data-label="Matched Cases">90</td>
           <td data-label="Avg Delta">-2.6</td>
-          <td data-label="Wins / Ties / Losses">15 / 11 / 59</td>
+          <td data-label="Wins / Ties / Losses">16 / 12 / 62</td>
           <td data-label="Largest Regressions">speech pace and emphasis cases where style control trails the baseline.</td>
         </tr>
         <tr>
           <td data-label="Compared Model"><code>mlx-community/Qwen3-TTS-12Hz-0.6B-Base-4bit</code></td>
           <td data-label="Baseline"><code>mlx-community/chatterbox-turbo-6bit</code></td>
-          <td data-label="Matched Cases">85</td>
+          <td data-label="Matched Cases">90</td>
           <td data-label="Avg Delta">-6.5</td>
-          <td data-label="Wins / Ties / Losses">9 / 7 / 69</td>
+          <td data-label="Wins / Ties / Losses">10 / 8 / 72</td>
           <td data-label="Largest Regressions">emotion and dense-fact cases with lower naturalness or intelligibility.</td>
         </tr>
       </tbody>
@@ -1320,7 +1356,7 @@
       </div>
       <div class="panel">
         <h3>Synthesis Model</h3>
-        <p><code>mlx-community/Qwen3-TTS-12Hz-0.6B-Base-4bit</code><br>avg 83.9 / n 85 / range 70-93</p>
+        <p><code>mlx-community/Qwen3-TTS-12Hz-0.6B-Base-4bit</code><br>avg 83.7 / n 90 / range 70-93</p>
         <p class="muted">Compare model-level weak spots before changing prompts, voices, wrappers, or model settings.</p>
       </div>
     </section>
