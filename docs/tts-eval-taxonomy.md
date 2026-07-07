@@ -138,10 +138,13 @@ runs can map private prompts into the same categories without copying private ro
 - `address_wayfinding_delivery`: street addresses, apartment entry details, intersections, campus
   rooms, and emergency access points where numbers, names, alphanumeric units, landmarks, and
   access conditions must be chunked clearly enough for first-listen transcription.
+- `repair_sensitive_delivery`: corrections, cancellations, replacements, reversed directions, and
+  status repairs where the model must make the rejected value and active value unmistakable without
+  adding words or flattening the repair cue.
 
 ## Manifest Contract
 
-The public comparison manifest is intentionally balanced at 235 cases for now: 47 categories with 5
+The public comparison manifest is intentionally balanced at 240 cases for now: 48 categories with 5
 cases each. Expansion should add complete five-case category batches before deepening existing
 categories.
 

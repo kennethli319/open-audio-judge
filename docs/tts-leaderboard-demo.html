@@ -416,7 +416,7 @@
   --cases examples/tts_multiturn_cases.jsonl \
   --judge-provider gemini \
   --judge-samples 3 \
-  --limit 235 \
+  --limit 240 \
   --out runs/leaderboard/chatterbox</code></pre>
 
     <pre><code>oaj autojudge-local-tts \
@@ -425,7 +425,7 @@
   --cases examples/tts_multiturn_cases.jsonl \
   --judge-provider gemini \
   --judge-samples 3 \
-  --limit 235 \
+  --limit 240 \
   --out runs/leaderboard/kokoro</code></pre>
 
     <pre><code>oaj autojudge-local-tts \
@@ -434,7 +434,7 @@
   --cases examples/tts_multiturn_cases.jsonl \
   --judge-provider gemini \
   --judge-samples 3 \
-  --limit 235 \
+  --limit 240 \
   --out runs/leaderboard/qwen3-tts</code></pre>
 
     <p>
@@ -446,7 +446,7 @@
   --cases examples/tts_multiturn_cases.jsonl \
   --judge-provider gemini \
   --judge-samples 3 \
-  --limit 235 \
+  --limit 240 \
   --out runs/leaderboard/chatterbox</code></pre>
 
     <p>
@@ -491,16 +491,16 @@
     <h2>Sample Report Preview</h2>
     <section class="grid" aria-label="Sample report metrics">
       <div class="metric"><span>Models</span><strong>3</strong></div>
-      <div class="metric"><span>Shared Eval Cases</span><strong>235</strong></div>
+      <div class="metric"><span>Shared Eval Cases</span><strong>240</strong></div>
       <div class="metric"><span>Judge Samples</span><strong>3x</strong></div>
       <div class="metric"><span>Top Avg</span><strong>91.2</strong></div>
       <div class="metric"><span>Lowest Avg</span><strong>84.7</strong></div>
-      <div class="metric"><span>Total Judgments</span><strong>2115</strong></div>
+      <div class="metric"><span>Total Judgments</span><strong>2160</strong></div>
     </section>
 
     <h2>Eval Set Samples</h2>
     <p>
-      The public demo eval set contains 235 synthetic, public-safe cases grouped into research-backed
+      The public demo eval set contains 240 synthetic, public-safe cases grouped into research-backed
       TTS dimensions. Each category below contributes five shared cases that every model synthesizes
       before Gemini judges the generated audio.
     </p>
@@ -2147,6 +2147,41 @@
             <p><strong>Slice:</strong> <code>emergency_gate_lane_clearance</code></p>
             <p><strong>Prompt:</strong> Read this emergency access instruction with composed urgency and exact location wording.</p>
             <p><strong>Target:</strong> Send the responder to Gate 6, service lane D, and keep the south driveway clear.</p>
+          </article>
+        </div>
+      </details>
+      <details class="sample-group" data-category="repair_sensitive_delivery">
+        <summary><span>Repair Sensitive Delivery</span><strong>5 cases</strong></summary>
+        <div class="sample-list">
+          <article class="sample-card">
+            <h3><code>tts-repair-sensitive-delivery-corrected-time-001</code></h3>
+            <p><strong>Slice:</strong> <code>corrected_time_replaces_previous_time</code></p>
+            <p><strong>Prompt:</strong> Read this correction so the old time is clearly replaced by the new time, not blended together.</p>
+            <p><strong>Target:</strong> Correction: ignore the 4:15 pickup time; the van now leaves at 4:50 from the west curb.</p>
+          </article>
+          <article class="sample-card">
+            <h3><code>tts-repair-sensitive-delivery-cancelled-dose-001</code></h3>
+            <p><strong>Slice:</strong> <code>cancelled_measurement_replaced_by_updated_dose</code></p>
+            <p><strong>Prompt:</strong> Read this clinical correction with the canceled amount and replacement amount unambiguous.</p>
+            <p><strong>Target:</strong> Cancel the note that said 10 milligrams; the updated dose is 5 milligrams after dinner.</p>
+          </article>
+          <article class="sample-card">
+            <h3><code>tts-repair-sensitive-delivery-name-spelling-001</code></h3>
+            <p><strong>Slice:</strong> <code>name_spelling_repair_letter_contrast</code></p>
+            <p><strong>Prompt:</strong> Read this spelling repair so the listener knows which name spelling is wrong and which is correct.</p>
+            <p><strong>Target:</strong> I misspelled the guest name as Kara with a K; please use Cara with a C on the badge.</p>
+          </article>
+          <article class="sample-card">
+            <h3><code>tts-repair-sensitive-delivery-route-reversal-001</code></h3>
+            <p><strong>Slice:</strong> <code>route_direction_reversal_with_landmark</code></p>
+            <p><strong>Prompt:</strong> Read this navigation repair so the reversed direction does not sound like an extra optional step.</p>
+            <p><strong>Target:</strong> Scratch the left turn after the bridge; turn right after the bridge, then stop by loading door two.</p>
+          </article>
+          <article class="sample-card">
+            <h3><code>tts-repair-sensitive-delivery-status-correction-001</code></h3>
+            <p><strong>Slice:</strong> <code>status_label_negation_then_replacement</code></p>
+            <p><strong>Prompt:</strong> Read this status correction so the first label is rejected and the replacement label is easy to log.</p>
+            <p><strong>Target:</strong> The account is not closed; mark it pending review until the signed form arrives.</p>
           </article>
         </div>
       </details>
