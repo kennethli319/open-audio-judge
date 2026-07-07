@@ -227,10 +227,16 @@ runs can map private prompts into the same categories without copying private ro
 - `range_interval_delivery`: inclusive ranges, exclusive thresholds, alphanumeric spans, time
   windows, and version intervals where endpoints, exceptions, and units must remain attached to the
   correct range semantics.
+- `email_thread_context_delivery`: reply prefixes, quoted history, To/Cc/Bcc fields, attachment
+  filenames, sender attribution, and cross-time-zone reply deadlines where thread context must not
+  be mistaken for the current action.
+- `table_matrix_reading`: row/column/value lookups, compact metric rows, missing-value markers,
+  shared headers, and grid coordinates where spoken grouping must preserve table structure without
+  the visual layout.
 
 ## Manifest Contract
 
-The public comparison manifest is intentionally balanced at 385 cases for now: 77 categories with 5
+The public comparison manifest is intentionally balanced at 395 cases for now: 79 categories with 5
 cases each. Expansion should add complete five-case category batches before deepening existing
 categories.
 

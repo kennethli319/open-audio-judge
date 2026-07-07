@@ -402,6 +402,8 @@
           <option value="modal_negation_scope_delivery">Modal negation scope delivery</option>
           <option value="compound_proper_noun_delivery">Compound proper noun delivery</option>
           <option value="range_interval_delivery">Range interval delivery</option>
+          <option value="email_thread_context_delivery">Email thread context delivery</option>
+          <option value="table_matrix_reading">Table matrix reading</option>
         </select>
         <select id="label-filter" aria-label="Filter by label">
           <option value="">All labels</option>
@@ -446,7 +448,7 @@
   --cases examples/tts_multiturn_cases.jsonl \
   --judge-provider gemini \
   --judge-samples 3 \
-  --limit 385 \
+  --limit 395 \
   --out runs/leaderboard/chatterbox</code></pre>
 
     <pre><code>oaj autojudge-local-tts \
@@ -455,7 +457,7 @@
   --cases examples/tts_multiturn_cases.jsonl \
   --judge-provider gemini \
   --judge-samples 3 \
-  --limit 385 \
+  --limit 395 \
   --out runs/leaderboard/kokoro</code></pre>
 
     <pre><code>oaj autojudge-local-tts \
@@ -464,7 +466,7 @@
   --cases examples/tts_multiturn_cases.jsonl \
   --judge-provider gemini \
   --judge-samples 3 \
-  --limit 385 \
+  --limit 395 \
   --out runs/leaderboard/qwen3-tts</code></pre>
 
     <p>
@@ -476,7 +478,7 @@
   --cases examples/tts_multiturn_cases.jsonl \
   --judge-provider gemini \
   --judge-samples 3 \
-  --limit 385 \
+  --limit 395 \
   --out runs/leaderboard/chatterbox</code></pre>
 
     <p>
@@ -521,7 +523,7 @@
     <h2>Sample Report Preview</h2>
     <section class="grid" aria-label="Sample report metrics">
       <div class="metric"><span>Models</span><strong>3</strong></div>
-      <div class="metric"><span>Shared Eval Cases</span><strong>385</strong></div>
+      <div class="metric"><span>Shared Eval Cases</span><strong>395</strong></div>
       <div class="metric"><span>Judge Samples</span><strong>3x</strong></div>
       <div class="metric"><span>Top Avg</span><strong>91.2</strong></div>
       <div class="metric"><span>Lowest Avg</span><strong>84.7</strong></div>
@@ -530,7 +532,7 @@
 
     <h2>Eval Set Samples</h2>
     <p>
-      The public demo eval set contains 385 synthetic, public-safe cases grouped into research-backed
+      The public demo eval set contains 395 synthetic, public-safe cases grouped into research-backed
       TTS dimensions. Each category below contributes five shared cases that every model synthesizes
       before Gemini judges the generated audio.
     </p>
@@ -3227,6 +3229,76 @@
             <p><strong>Slice:</strong> <code>versions_2_4_through_2_6_except_2_5_beta</code></p>
             <p><strong>Prompt:</strong> Read this compatibility note so the version range and exception stay clear.</p>
             <p><strong>Target:</strong> Install the patch on versions 2.4 through 2.6, except build 2.5 beta.</p>
+          </article>
+        </div>
+      </details>
+      <details class="sample-group" data-category="email_thread_context_delivery">
+        <summary><span>Email Thread Context Delivery</span><strong>5 cases</strong></summary>
+        <div class="sample-list">
+          <article class="sample-card">
+            <h3><code>tts-email-thread-context-delivery-reply-prefix-001</code></h3>
+            <p><strong>Slice:</strong> <code>reply_prefix_subject_south_gate_exception</code></p>
+            <p><strong>Prompt:</strong> Read this inbox summary so the reply prefix and subject are clear but not overemphasized.</p>
+            <p><strong>Target:</strong> Re: site access update, Mara says the south gate opens at 7:15, but the loading dock stays closed.</p>
+          </article>
+          <article class="sample-card">
+            <h3><code>tts-email-thread-context-delivery-quoted-history-001</code></h3>
+            <p><strong>Slice:</strong> <code>current_reply_versus_quoted_old_request</code></p>
+            <p><strong>Prompt:</strong> Read this email note so the quoted old request is not mistaken for the current action.</p>
+            <p><strong>Target:</strong> Current reply: approve the revised quote today. Earlier, Sam wrote, "Hold the order until finance reviews it."</p>
+          </article>
+          <article class="sample-card">
+            <h3><code>tts-email-thread-context-delivery-cc-bcc-001</code></h3>
+            <p><strong>Slice:</strong> <code>to_cc_bcc_recipient_field_boundaries</code></p>
+            <p><strong>Prompt:</strong> Read this send note so Cc and Bcc are distinct recipient fields.</p>
+            <p><strong>Target:</strong> Send the draft to Priya, Cc the legal alias, and Bcc the audit mailbox before 4 PM.</p>
+          </article>
+          <article class="sample-card">
+            <h3><code>tts-email-thread-context-delivery-attachment-forward-001</code></h3>
+            <p><strong>Slice:</strong> <code>forwarded_note_attachment_filename_remove_draft</code></p>
+            <p><strong>Prompt:</strong> Read this forwarded-message summary so the attachment name and forwarding action remain separate.</p>
+            <p><strong>Target:</strong> Forward Lena's note with attachment Q3 forecast final.xlsx, but remove the outdated draft before sending.</p>
+          </article>
+          <article class="sample-card">
+            <h3><code>tts-email-thread-context-delivery-timezone-sender-001</code></h3>
+            <p><strong>Slice:</strong> <code>sender_timezone_response_deadline_contrast</code></p>
+            <p><strong>Prompt:</strong> Read this thread update so the sender, time zone, and response deadline do not blur together.</p>
+            <p><strong>Target:</strong> Noor replied from London at 09:20 BST; please answer by 2 PM Pacific with the revised delivery date.</p>
+          </article>
+        </div>
+      </details>
+      <details class="sample-group" data-category="table_matrix_reading">
+        <summary><span>Table Matrix Reading</span><strong>5 cases</strong></summary>
+        <div class="sample-list">
+          <article class="sample-card">
+            <h3><code>tts-table-matrix-reading-row-column-001</code></h3>
+            <p><strong>Slice:</strong> <code>row_batch_7_column_temperature_value</code></p>
+            <p><strong>Prompt:</strong> Read this table lookup so the row, column, and value stay attached.</p>
+            <p><strong>Target:</strong> For row Batch 7 and column Temperature, the value is 68 degrees Fahrenheit.</p>
+          </article>
+          <article class="sample-card">
+            <h3><code>tts-table-matrix-reading-header-units-001</code></h3>
+            <p><strong>Slice:</strong> <code>line_a_headers_units_speed_load_error_rate</code></p>
+            <p><strong>Prompt:</strong> Read this compact table row so each header keeps its unit.</p>
+            <p><strong>Target:</strong> Line A shows speed, 12 meters per second; load, 4.5 kilograms; and error rate, 0.8 percent.</p>
+          </article>
+          <article class="sample-card">
+            <h3><code>tts-table-matrix-reading-missing-value-001</code></h3>
+            <p><strong>Slice:</strong> <code>missing_owner_dash_not_minus</code></p>
+            <p><strong>Prompt:</strong> Read this table status so the dash is understood as missing, not the word minus.</p>
+            <p><strong>Target:</strong> Column Status is complete, column Owner is dash for missing, and column Due Date is Friday.</p>
+          </article>
+          <article class="sample-card">
+            <h3><code>tts-table-matrix-reading-merged-header-001</code></h3>
+            <p><strong>Slice:</strong> <code>q4_forecast_shared_header_revenue_margin</code></p>
+            <p><strong>Prompt:</strong> Read this spreadsheet summary so the shared quarter header applies to both metric cells.</p>
+            <p><strong>Target:</strong> Under Q4 forecast, revenue is 1.2 million dollars and margin is 18 percent.</p>
+          </article>
+          <article class="sample-card">
+            <h3><code>tts-table-matrix-reading-grid-coordinate-001</code></h3>
+            <p><strong>Slice:</strong> <code>cell_b2_review_needed_d4_cleared</code></p>
+            <p><strong>Prompt:</strong> Read this grid coordinate result so B two and D four are not swapped.</p>
+            <p><strong>Target:</strong> Cell B2 is marked review needed, while cell D4 is marked cleared for release.</p>
           </article>
         </div>
       </details>

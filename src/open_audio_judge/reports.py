@@ -1158,6 +1158,22 @@ TTS_CATEGORY_GUIDANCE = {
             "numeric and alphanumeric chunking",
         ],
     ),
+    "email_thread_context_delivery": (
+        "reply prefixes, quoted history, recipient fields, attachment names, sender attribution, and cross-time-zone reply deadlines",
+        [
+            "thread-context and quote-boundary prosody",
+            "email header and recipient field grouping",
+            "filename, deadline, and sender attribution intelligibility",
+        ],
+    ),
+    "table_matrix_reading": (
+        "row/column/value lookups, compact metric rows, missing-value markers, shared headers, and grid coordinates",
+        [
+            "row-column-value phrase grouping",
+            "header, unit, and missing-marker text normalization",
+            "spreadsheet coordinate and shared-header scope preservation",
+        ],
+    ),
 }
 
 
