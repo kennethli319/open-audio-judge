@@ -9,6 +9,7 @@ from open_audio_judge.local_tts import (
     LocalTtsFailure,
     _output_path_from_stdout,
     _require_output_path_in_audio_dir,
+    _require_output_path_audio_format,
     synthesize_cases_with_local_tts,
     synthesize_cases_with_local_tts_batch,
     write_local_tts_failures_jsonl,
@@ -344,6 +345,45 @@ def test_require_output_path_in_audio_dir_rejects_stale_outside_paths(tmp_path: 
 
     with pytest.raises(ValueError, match="outside the synthesis audio directory"):
         _require_output_path_in_audio_dir(stale_audio, audio_dir)
+
+
+def test_require_output_path_audio_format_rejects_mismatched_extensions() -> None:
+    with pytest.raises(ValueError, match="expected \\.wav for --audio-format wav"):
+        _require_output_path_audio_format(Path("tts-case.mp3"), "wav")
+
+
+def test_synthesize_cases_with_local_tts_rejects_reported_audio_format_mismatch(
+    tmp_path: Path,
+    monkeypatch,
+) -> None:
+    tts_bin = tmp_path / "bin" / "local-tts-speak"
+    tts_bin.parent.mkdir()
+    tts_bin.write_text("#!/bin/sh\n", encoding="utf-8")
+    case = EvaluationCase(
+        id="tts-format-mismatch",
+        task="tts_naturalness",
+        reference_text="This should not write misleading format provenance.",
+    )
+
+    def fake_run(command, check, capture_output, text, timeout):
+        output_dir = Path(command[command.index("--output-dir") + 1])
+        audio_path = output_dir / "tts-format-mismatch.mp3"
+        audio_path.write_bytes(b"mp3-audio")
+        return subprocess.CompletedProcess(
+            command,
+            0,
+            stdout=json.dumps({"output_path": str(audio_path)}) + "\n",
+            stderr="",
+        )
+
+    monkeypatch.setattr("open_audio_judge.local_tts.subprocess.run", fake_run)
+
+    with pytest.raises(ValueError, match="extension \\.mp3; expected \\.wav"):
+        synthesize_cases_with_local_tts(
+            [case],
+            out_dir=tmp_path / "synthesis",
+            config=LocalTtsConfig(tts_bin=tts_bin, audio_format="wav"),
+        )
 
 
 def test_write_local_tts_summary_json(tmp_path: Path) -> None:

@@ -306,6 +306,7 @@ def _run_local_tts(
     output_path = _output_path_from_stdout(completed.stdout, base_dir=audio_dir)
     if output_path is not None:
         _require_output_path_in_audio_dir(output_path, audio_dir)
+        _require_output_path_audio_format(output_path, config.audio_format)
         return output_path
 
     fallback_output = _latest_new_or_changed_audio_path(
@@ -449,6 +450,16 @@ def _require_output_path_in_audio_dir(output_path: Path, audio_dir: Path) -> Non
             "local TTS command reported an output audio file outside the synthesis "
             f"audio directory: {output_path}"
         ) from exc
+
+
+def _require_output_path_audio_format(output_path: Path, audio_format: str) -> None:
+    expected_suffix = f".{audio_format.lstrip('.').lower()}"
+    if output_path.suffix.lower() != expected_suffix:
+        raise ValueError(
+            "local TTS command reported an output audio file with extension "
+            f"{output_path.suffix or '<none>'}; expected {expected_suffix} for "
+            f"--audio-format {audio_format}."
+        )
 
 
 def _audio_metadata(audio_path: Path) -> dict[str, Any]:
