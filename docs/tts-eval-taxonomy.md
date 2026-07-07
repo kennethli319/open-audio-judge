@@ -63,10 +63,12 @@ runs can map private prompts into the same categories without copying private ro
   restraint, and breath management that should add expression without harming intelligibility.
 - `voice_conversion_similarity`: reference-style transfer, content preservation under speaker
   transfer, prosody retention, anti-generic voice leakage, and identity-preserved style shifts.
+- `accent_dialect_handling`: light regional English accent cues, respectful dialect handling,
+  place-name clarity, acronym preservation, and intelligibility without caricature.
 
 ## Manifest Contract
 
-The public comparison manifest is intentionally balanced at 95 cases for now: 19 categories with 5
+The public comparison manifest is intentionally balanced at 100 cases for now: 20 categories with 5
 cases each. Expansion should add complete five-case category batches before deepening existing
 categories.
 

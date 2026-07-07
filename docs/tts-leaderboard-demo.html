@@ -388,7 +388,7 @@
   --cases examples/tts_multiturn_cases.jsonl \
   --judge-provider gemini \
   --judge-samples 3 \
-  --limit 95 \
+  --limit 100 \
   --out runs/leaderboard/chatterbox</code></pre>
 
     <pre><code>oaj autojudge-local-tts \
@@ -397,7 +397,7 @@
   --cases examples/tts_multiturn_cases.jsonl \
   --judge-provider gemini \
   --judge-samples 3 \
-  --limit 95 \
+  --limit 100 \
   --out runs/leaderboard/kokoro</code></pre>
 
     <pre><code>oaj autojudge-local-tts \
@@ -406,7 +406,7 @@
   --cases examples/tts_multiturn_cases.jsonl \
   --judge-provider gemini \
   --judge-samples 3 \
-  --limit 95 \
+  --limit 100 \
   --out runs/leaderboard/qwen3-tts</code></pre>
 
     <p>
@@ -418,7 +418,7 @@
   --cases examples/tts_multiturn_cases.jsonl \
   --judge-provider gemini \
   --judge-samples 3 \
-  --limit 95 \
+  --limit 100 \
   --out runs/leaderboard/chatterbox</code></pre>
 
     <p>
@@ -463,16 +463,16 @@
     <h2>Sample Report Preview</h2>
     <section class="grid" aria-label="Sample report metrics">
       <div class="metric"><span>Models</span><strong>3</strong></div>
-      <div class="metric"><span>Shared Eval Cases</span><strong>95</strong></div>
+      <div class="metric"><span>Shared Eval Cases</span><strong>100</strong></div>
       <div class="metric"><span>Judge Samples</span><strong>3x</strong></div>
       <div class="metric"><span>Top Avg</span><strong>91.2</strong></div>
       <div class="metric"><span>Lowest Avg</span><strong>84.7</strong></div>
-      <div class="metric"><span>Total Judgments</span><strong>855</strong></div>
+      <div class="metric"><span>Total Judgments</span><strong>900</strong></div>
     </section>
 
     <h2>Eval Set Samples</h2>
     <p>
-      The public demo eval set contains 95 synthetic, public-safe cases grouped into research-backed
+      The public demo eval set contains 100 synthetic, public-safe cases grouped into research-backed
       TTS dimensions. Each category below contributes five shared cases that every model synthesizes
       before Gemini judges the generated audio.
     </p>
@@ -1142,6 +1142,41 @@
           </article>
         </div>
       </details>
+      <details class="sample-group" data-category="accent_dialect_handling">
+        <summary><span>Accent Dialect Handling</span><strong>5 cases</strong></summary>
+        <div class="sample-list">
+          <article class="sample-card">
+            <h3><code>tts-accent-dialect-handling-southern-weather-001</code></h3>
+            <p><strong>Slice:</strong> <code>light_southern_weather_notice</code></p>
+            <p><strong>Prompt:</strong> Read this with a light Southern U.S. regional accent while keeping the weather details crisp and respectful.</p>
+            <p><strong>Target:</strong> The rain should clear by three, but the low bridge on County Road 12 may stay closed until dusk.</p>
+          </article>
+          <article class="sample-card">
+            <h3><code>tts-accent-dialect-handling-london-museum-001</code></h3>
+            <p><strong>Slice:</strong> <code>london_museum_announcement</code></p>
+            <p><strong>Prompt:</strong> Read this in a light London English style, polished but not theatrical, with the exhibit names clear.</p>
+            <p><strong>Target:</strong> Gallery five closes at half past four, and the Turner sketch room reopens after the curator talk.</p>
+          </article>
+          <article class="sample-card">
+            <h3><code>tts-accent-dialect-handling-australian-field-001</code></h3>
+            <p><strong>Slice:</strong> <code>australian_field_report</code></p>
+            <p><strong>Prompt:</strong> Read this with a light Australian English accent while preserving the measurement and location details.</p>
+            <p><strong>Target:</strong> The field team logged 18 millimeters of rain near the east ridge and moved the sensors inland.</p>
+          </article>
+          <article class="sample-card">
+            <h3><code>tts-accent-dialect-handling-indian-support-001</code></h3>
+            <p><strong>Slice:</strong> <code>indian_english_support_acronym</code></p>
+            <p><strong>Prompt:</strong> Read this in a clear Indian English support-agent style without flattening the acronym or ticket number.</p>
+            <p><strong>Target:</strong> Your VPN profile was reset, and ticket K F 2048 will remain open until you confirm access.</p>
+          </article>
+          <article class="sample-card">
+            <h3><code>tts-accent-dialect-handling-scottish-travel-001</code></h3>
+            <p><strong>Slice:</strong> <code>scottish_travel_routes</code></p>
+            <p><strong>Prompt:</strong> Read this with a light Scottish English accent and enough pacing for travelers to catch the route names.</p>
+            <p><strong>Target:</strong> The Glasgow service now boards from platform seven, with a connection to Inverness after Perth.</p>
+          </article>
+        </div>
+      </details>
     </section>
 
     <h2>Model Leaderboard</h2>
@@ -1161,7 +1196,7 @@
           <td data-label="Rank">1</td>
           <td data-label="Model"><code>mlx-community/chatterbox-turbo-6bit</code></td>
           <td data-label="Avg">91.2</td>
-          <td data-label="Accurate">82 / 95</td>
+          <td data-label="Accurate">86 / 100</td>
           <td data-label="Weakest Category"><code>information_tuning</code> avg 84.5</td>
           <td data-label="Likely Fix Focus">number clarity, pauses around dense facts</td>
         </tr>
@@ -1169,7 +1204,7 @@
           <td data-label="Rank">2</td>
           <td data-label="Model"><code>mlx-community/Kokoro-82M-4bit</code></td>
           <td data-label="Avg">88.6</td>
-          <td data-label="Accurate">75 / 95</td>
+          <td data-label="Accurate">79 / 100</td>
           <td data-label="Weakest Category"><code>speech_steerability</code> avg 80.8</td>
           <td data-label="Likely Fix Focus">style control, emphasis, pacing</td>
         </tr>
@@ -1177,7 +1212,7 @@
           <td data-label="Rank">3</td>
           <td data-label="Model"><code>mlx-community/Qwen3-TTS-12Hz-0.6B-Base-4bit</code></td>
           <td data-label="Avg">84.7</td>
-          <td data-label="Accurate">56 / 95</td>
+          <td data-label="Accurate">59 / 100</td>
           <td data-label="Weakest Category"><code>paralinguistics</code> avg 77.0</td>
           <td data-label="Likely Fix Focus">emotion rendering, natural prosody</td>
         </tr>
@@ -1217,12 +1252,13 @@
         <p><code>formatting_markup_robustness</code><br>avg 83.6 / n 5 / 74-91</p>
         <p><code>nonverbal_paralinguistic_cues</code><br>avg 84.2 / n 5 / 75-92</p>
         <p><code>voice_conversion_similarity</code><br>avg 84.0 / n 5 / 74-92</p>
+        <p><code>accent_dialect_handling</code><br>avg 83.4 / n 5 / 73-91</p>
       </div>
       <div class="panel">
         <h3>Scores By Model</h3>
-        <p><code>mlx-community/chatterbox-turbo-6bit</code><br>avg 90.1 / n 95 / 78-97</p>
-        <p><code>mlx-community/Kokoro-82M-4bit</code><br>avg 87.3 / n 95 / 74-95</p>
-        <p><code>mlx-community/Qwen3-TTS-12Hz-0.6B-Base-4bit</code><br>avg 83.7 / n 95 / 70-93</p>
+        <p><code>mlx-community/chatterbox-turbo-6bit</code><br>avg 90.1 / n 100 / 78-97</p>
+        <p><code>mlx-community/Kokoro-82M-4bit</code><br>avg 87.3 / n 100 / 74-95</p>
+        <p><code>mlx-community/Qwen3-TTS-12Hz-0.6B-Base-4bit</code><br>avg 83.7 / n 100 / 70-93</p>
       </div>
       <div class="panel">
         <h3>Scores By Voice</h3>
@@ -1375,17 +1411,17 @@
         <tr>
           <td data-label="Compared Model"><code>mlx-community/Kokoro-82M-4bit</code></td>
           <td data-label="Baseline"><code>mlx-community/chatterbox-turbo-6bit</code></td>
-          <td data-label="Matched Cases">95</td>
+          <td data-label="Matched Cases">100</td>
           <td data-label="Avg Delta">-2.6</td>
-          <td data-label="Wins / Ties / Losses">16 / 12 / 62</td>
+          <td data-label="Wins / Ties / Losses">18 / 14 / 68</td>
           <td data-label="Largest Regressions">speech pace and emphasis cases where style control trails the baseline.</td>
         </tr>
         <tr>
           <td data-label="Compared Model"><code>mlx-community/Qwen3-TTS-12Hz-0.6B-Base-4bit</code></td>
           <td data-label="Baseline"><code>mlx-community/chatterbox-turbo-6bit</code></td>
-          <td data-label="Matched Cases">95</td>
+          <td data-label="Matched Cases">100</td>
           <td data-label="Avg Delta">-6.5</td>
-          <td data-label="Wins / Ties / Losses">10 / 8 / 72</td>
+          <td data-label="Wins / Ties / Losses">11 / 9 / 80</td>
           <td data-label="Largest Regressions">emotion and dense-fact cases with lower naturalness or intelligibility.</td>
         </tr>
       </tbody>
@@ -1409,7 +1445,7 @@
       </div>
       <div class="panel">
         <h3>Synthesis Model</h3>
-        <p><code>mlx-community/Qwen3-TTS-12Hz-0.6B-Base-4bit</code><br>avg 83.7 / n 95 / range 70-93</p>
+        <p><code>mlx-community/Qwen3-TTS-12Hz-0.6B-Base-4bit</code><br>avg 83.7 / n 100 / range 70-93</p>
         <p class="muted">Compare model-level weak spots before changing prompts, voices, wrappers, or model settings.</p>
       </div>
     </section>
