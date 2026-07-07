@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Open Audio Judge Sample: TTS Model Leaderboard + Gemini Judge</title>
+  <title>Open Audio Judge Demo: TTS Model Leaderboard + Gemini Judge</title>
   <style>
     :root {
       --ink: #172026;
@@ -38,6 +38,60 @@
     }
     main {
       padding: 24px 24px 44px;
+    }
+    .control-bar {
+      position: sticky;
+      top: 0;
+      z-index: 5;
+      box-shadow: 0 8px 20px rgb(23 32 38 / 8%);
+      margin-bottom: 18px;
+    }
+    .control-grid {
+      display: grid;
+      gap: 10px;
+      grid-template-columns: minmax(180px, 2fr) repeat(4, minmax(130px, 1fr)) auto;
+    }
+    .view-tabs {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-bottom: 12px;
+    }
+    button,
+    input,
+    select {
+      color: var(--ink);
+      font: inherit;
+    }
+    button,
+    input,
+    select {
+      border: 1px solid var(--line);
+      border-radius: 6px;
+      background: var(--panel);
+      min-height: 38px;
+      padding: 8px 10px;
+    }
+    button {
+      cursor: pointer;
+      font-weight: 650;
+    }
+    button.active {
+      background: var(--accent);
+      border-color: var(--accent);
+      color: #ffffff;
+    }
+    input,
+    select {
+      width: 100%;
+    }
+    .filter-status {
+      color: var(--muted);
+      font-size: 13px;
+      margin: 10px 0 0;
+    }
+    [hidden] {
+      display: none !important;
     }
     h1 {
       margin: 0 0 8px;
@@ -150,6 +204,14 @@
     .sample-card p {
       margin-bottom: 8px;
     }
+    .sample-empty {
+      color: var(--muted);
+      display: none;
+      padding: 14px 16px;
+    }
+    .sample-group.empty .sample-empty {
+      display: block;
+    }
     .scorebar {
       background: #e8edf2;
       border-radius: 999px;
@@ -203,6 +265,12 @@
       main {
         padding: 18px 12px 34px;
       }
+      .control-bar {
+        position: static;
+      }
+      .control-grid {
+        grid-template-columns: 1fr;
+      }
       table,
       thead,
       tbody,
@@ -238,6 +306,52 @@
   </header>
 
   <main>
+    <section class="panel control-bar" aria-label="Demo controls">
+      <div class="view-tabs" aria-label="Report views">
+        <button type="button" class="active" data-view="all">All</button>
+        <button type="button" data-view="overview">Overview</button>
+        <button type="button" data-view="eval">Eval Set</button>
+        <button type="button" data-view="leaderboard">Leaderboard</button>
+        <button type="button" data-view="diagnostics">Diagnostics</button>
+        <button type="button" data-view="samples">Samples</button>
+      </div>
+      <div class="control-grid">
+        <input id="report-search" type="search" placeholder="Search cases, models, categories, reasons" aria-label="Search report">
+        <select id="model-filter" aria-label="Filter by model">
+          <option value="">All models</option>
+          <option value="chatterbox">Chatterbox</option>
+          <option value="kokoro">Kokoro</option>
+          <option value="qwen3">Qwen3-TTS</option>
+        </select>
+        <select id="category-filter" aria-label="Filter by category">
+          <option value="">All categories</option>
+          <option value="paralinguistics">Paralinguistics</option>
+          <option value="instruction_following">Instruction following</option>
+          <option value="information_tuning">Information tuning</option>
+          <option value="storytelling_dialogue">Storytelling dialogue</option>
+          <option value="speech_steerability">Speech steerability</option>
+          <option value="robustness_intelligibility">Robustness intelligibility</option>
+          <option value="speaker_voice_consistency">Speaker voice consistency</option>
+          <option value="multilingual_code_switching">Multilingual code switching</option>
+          <option value="long_form_discourse">Long-form discourse</option>
+        </select>
+        <select id="label-filter" aria-label="Filter by label">
+          <option value="">All labels</option>
+          <option value="accurate">Accurate</option>
+          <option value="review">Review</option>
+          <option value="inaccurate">Inaccurate</option>
+        </select>
+        <select id="sort-samples" aria-label="Sort sample rows">
+          <option value="score-asc">Lowest score first</option>
+          <option value="score-desc">Highest score first</option>
+          <option value="case-asc">Case ID</option>
+          <option value="model-asc">Model</option>
+        </select>
+        <button type="button" id="reset-controls">Reset</button>
+      </div>
+      <p id="filter-status" class="filter-status">Showing all demo content.</p>
+    </section>
+
     <section class="panel">
       <h2>What This Demonstrates</h2>
       <p>
@@ -353,7 +467,7 @@
       before Gemini judges the generated audio.
     </p>
     <section class="sample-groups" aria-label="Eval set samples">
-      <details class="sample-group" open>
+      <details class="sample-group" data-category="paralinguistics" open>
         <summary><span>Paralinguistics</span><strong>5 cases</strong></summary>
         <div class="sample-list">
           <article class="sample-card">
@@ -388,7 +502,7 @@
           </article>
         </div>
       </details>
-      <details class="sample-group">
+      <details class="sample-group" data-category="instruction_following">
         <summary><span>Instruction Following</span><strong>5 cases</strong></summary>
         <div class="sample-list">
           <article class="sample-card">
@@ -423,7 +537,7 @@
           </article>
         </div>
       </details>
-      <details class="sample-group">
+      <details class="sample-group" data-category="information_tuning">
         <summary><span>Information Tuning</span><strong>5 cases</strong></summary>
         <div class="sample-list">
           <article class="sample-card">
@@ -458,7 +572,7 @@
           </article>
         </div>
       </details>
-      <details class="sample-group">
+      <details class="sample-group" data-category="storytelling_dialogue">
         <summary><span>Storytelling Dialogue</span><strong>5 cases</strong></summary>
         <div class="sample-list">
           <article class="sample-card">
@@ -493,7 +607,7 @@
           </article>
         </div>
       </details>
-      <details class="sample-group">
+      <details class="sample-group" data-category="speech_steerability">
         <summary><span>Speech Steerability</span><strong>5 cases</strong></summary>
         <div class="sample-list">
           <article class="sample-card">
@@ -528,7 +642,7 @@
           </article>
         </div>
       </details>
-      <details class="sample-group">
+      <details class="sample-group" data-category="robustness_intelligibility">
         <summary><span>Robustness Intelligibility</span><strong>5 cases</strong></summary>
         <div class="sample-list">
           <article class="sample-card">
@@ -563,7 +677,7 @@
           </article>
         </div>
       </details>
-      <details class="sample-group">
+      <details class="sample-group" data-category="speaker_voice_consistency">
         <summary><span>Speaker Voice Consistency</span><strong>5 cases</strong></summary>
         <div class="sample-list">
           <article class="sample-card">
@@ -598,7 +712,7 @@
           </article>
         </div>
       </details>
-      <details class="sample-group">
+      <details class="sample-group" data-category="multilingual_code_switching">
         <summary><span>Multilingual Code Switching</span><strong>5 cases</strong></summary>
         <div class="sample-list">
           <article class="sample-card">
@@ -633,7 +747,7 @@
           </article>
         </div>
       </details>
-      <details class="sample-group">
+      <details class="sample-group" data-category="long_form_discourse">
         <summary><span>Long Form Discourse</span><strong>5 cases</strong></summary>
         <div class="sample-list">
           <article class="sample-card">
@@ -919,7 +1033,7 @@
       representative rows across models, categories, slices, and score bands from the 135 generated
       samples.
     </p>
-    <table>
+    <table id="sample-breakdown-table">
       <thead>
         <tr>
           <th>Case</th>
@@ -931,7 +1045,7 @@
         </tr>
       </thead>
       <tbody>
-        <tr>
+        <tr data-case="tts-storytelling-bedtime-001-chatterbox" data-model="chatterbox" data-category="storytelling_dialogue" data-label="accurate" data-score="95">
           <td data-label="Case"><code>tts-storytelling-bedtime-001-chatterbox</code></td>
           <td data-label="Model"><code>mlx-community/chatterbox-turbo-6bit</code></td>
           <td data-label="Category / Slice"><code>storytelling_dialogue</code><br><span class="muted">narrative_gentle</span></td>
@@ -941,7 +1055,7 @@
             Highly natural, fluent, and faithful bedtime narration with gentle pacing.
           </td>
         </tr>
-        <tr>
+        <tr data-case="tts-instruction-following-spelled-token-001-chatterbox" data-model="chatterbox" data-category="instruction_following" data-label="accurate" data-score="94">
           <td data-label="Case"><code>tts-instruction-following-spelled-token-001-chatterbox</code></td>
           <td data-label="Model"><code>mlx-community/chatterbox-turbo-6bit</code></td>
           <td data-label="Category / Slice"><code>instruction_following</code><br><span class="muted">spelled_tokens</span></td>
@@ -951,7 +1065,7 @@
             The support code remains intelligible and the letters are kept separate.
           </td>
         </tr>
-        <tr>
+        <tr data-case="tts-long-form-discourse-endurance-001-chatterbox" data-model="chatterbox" data-category="long_form_discourse" data-label="accurate" data-score="88">
           <td data-label="Case"><code>tts-long-form-discourse-endurance-001-chatterbox</code></td>
           <td data-label="Model"><code>mlx-community/chatterbox-turbo-6bit</code></td>
           <td data-label="Category / Slice"><code>long_form_discourse</code><br><span class="muted">endurance_long_sentence</span></td>
@@ -961,7 +1075,7 @@
             Stable long-sentence delivery with only minor end-of-clause compression.
           </td>
         </tr>
-        <tr>
+        <tr data-case="tts-robustness-intelligibility-rare-words-001-kokoro" data-model="kokoro" data-category="robustness_intelligibility" data-label="review" data-score="85">
           <td data-label="Case"><code>tts-robustness-intelligibility-rare-words-001-kokoro</code></td>
           <td data-label="Model"><code>mlx-community/Kokoro-82M-4bit</code></td>
           <td data-label="Category / Slice"><code>robustness_intelligibility</code><br><span class="muted">rare_words</span></td>
@@ -971,7 +1085,7 @@
             Mostly clear rare-word delivery, with one pronunciation that should be inspected.
           </td>
         </tr>
-        <tr>
+        <tr data-case="tts-speech-steerability-slow-001-kokoro" data-model="kokoro" data-category="speech_steerability" data-label="review" data-score="79">
           <td data-label="Case"><code>tts-speech-steerability-slow-001-kokoro</code></td>
           <td data-label="Model"><code>mlx-community/Kokoro-82M-4bit</code></td>
           <td data-label="Category / Slice"><code>speech_steerability</code><br><span class="muted">slow_pace</span></td>
@@ -981,7 +1095,7 @@
             Text is intelligible, but the requested slower beginner-friendly pace is inconsistent.
           </td>
         </tr>
-        <tr>
+        <tr data-case="tts-speaker-voice-consistency-longer-001-qwen3-tts" data-model="qwen3" data-category="speaker_voice_consistency" data-label="review" data-score="80">
           <td data-label="Case"><code>tts-speaker-voice-consistency-longer-001-qwen3-tts</code></td>
           <td data-label="Model"><code>mlx-community/Qwen3-TTS-12Hz-0.6B-Base-4bit</code></td>
           <td data-label="Category / Slice"><code>speaker_voice_consistency</code><br><span class="muted">timbre_stability</span></td>
@@ -991,7 +1105,7 @@
             The voice remains understandable, but timbre stability weakens across the longer update.
           </td>
         </tr>
-        <tr>
+        <tr data-case="tts-multilingual-code-switching-bilingual-direction-001-qwen3-tts" data-model="qwen3" data-category="multilingual_code_switching" data-label="review" data-score="78">
           <td data-label="Case"><code>tts-multilingual-code-switching-bilingual-direction-001-qwen3-tts</code></td>
           <td data-label="Model"><code>mlx-community/Qwen3-TTS-12Hz-0.6B-Base-4bit</code></td>
           <td data-label="Category / Slice"><code>multilingual_code_switching</code><br><span class="muted">bilingual_announcement</span></td>
@@ -1001,7 +1115,7 @@
             English announcement is clear, but the Spanish phrase is less natural and needs pronunciation review.
           </td>
         </tr>
-        <tr>
+        <tr data-case="tts-information-tuning-dates-times-001-qwen3-tts" data-model="qwen3" data-category="information_tuning" data-label="inaccurate" data-score="72">
           <td data-label="Case"><code>tts-information-tuning-dates-times-001-qwen3-tts</code></td>
           <td data-label="Model"><code>mlx-community/Qwen3-TTS-12Hz-0.6B-Base-4bit</code></td>
           <td data-label="Category / Slice"><code>information_tuning</code><br><span class="muted">dates_times</span></td>
@@ -1011,7 +1125,7 @@
             The date and time remain partly intelligible, but dense timing details are not easy to catch.
           </td>
         </tr>
-        <tr>
+        <tr data-case="tts-paralinguistics-urgency-001-qwen3-tts" data-model="qwen3" data-category="paralinguistics" data-label="inaccurate" data-score="70">
           <td data-label="Case"><code>tts-paralinguistics-urgency-001-qwen3-tts</code></td>
           <td data-label="Model"><code>mlx-community/Qwen3-TTS-12Hz-0.6B-Base-4bit</code></td>
           <td data-label="Category / Slice"><code>paralinguistics</code><br><span class="muted">emotion_urgency</span></td>
@@ -1069,5 +1183,160 @@
       explicitly safe to publish.
     </p>
   </main>
+  <script>
+    const sectionViews = {
+      all: null,
+      overview: new Set([
+        "What This Demonstrates",
+        "How To Run It",
+        "Expected Output Files",
+        "Sample Report Preview",
+      ]),
+      eval: new Set(["Eval Set Samples"]),
+      leaderboard: new Set([
+        "Model Leaderboard",
+        "Category Leaderboard",
+        "Baseline Model Deltas",
+      ]),
+      diagnostics: new Set([
+        "Top Diagnostics",
+        "Weakest Segments",
+        "Model-Category Action Matrix",
+      ]),
+      samples: new Set([
+        "Sample-By-Sample Breakdown",
+        "Representative Result JSON",
+        "How To Read The Report",
+      ]),
+    };
+
+    const controls = {
+      search: document.querySelector("#report-search"),
+      model: document.querySelector("#model-filter"),
+      category: document.querySelector("#category-filter"),
+      label: document.querySelector("#label-filter"),
+      sort: document.querySelector("#sort-samples"),
+      reset: document.querySelector("#reset-controls"),
+      status: document.querySelector("#filter-status"),
+      viewButtons: Array.from(document.querySelectorAll("[data-view]")),
+    };
+    const mainChildren = Array.from(document.querySelectorAll("main > :not(.control-bar)"));
+    const evalGroups = Array.from(document.querySelectorAll(".sample-group"));
+    const sampleRows = Array.from(document.querySelectorAll("#sample-breakdown-table tbody tr"));
+    const sampleBody = document.querySelector("#sample-breakdown-table tbody");
+    let activeView = "all";
+
+    function textOf(node) {
+      return node.textContent.trim().toLowerCase();
+    }
+
+    function sectionTitleFor(node, previousTitle) {
+      if (node.matches(".panel") && node.querySelector("h2")) {
+        return node.querySelector("h2").textContent.trim();
+      }
+      if (node.matches("h2")) {
+        return node.textContent.trim();
+      }
+      return previousTitle;
+    }
+
+    function applyView() {
+      const allowed = sectionViews[activeView];
+      let currentTitle = "";
+      mainChildren.forEach((node) => {
+        currentTitle = sectionTitleFor(node, currentTitle);
+        node.hidden = allowed ? !allowed.has(currentTitle) : false;
+      });
+      controls.viewButtons.forEach((button) => {
+        button.classList.toggle("active", button.dataset.view === activeView);
+      });
+    }
+
+    function matchesQuery(node, query) {
+      return !query || textOf(node).includes(query);
+    }
+
+    function sortRows() {
+      const mode = controls.sort.value;
+      const sorted = [...sampleRows].sort((a, b) => {
+        if (mode === "score-desc") {
+          return Number(b.dataset.score) - Number(a.dataset.score);
+        }
+        if (mode === "case-asc") {
+          return a.dataset.case.localeCompare(b.dataset.case);
+        }
+        if (mode === "model-asc") {
+          return a.dataset.model.localeCompare(b.dataset.model) || Number(a.dataset.score) - Number(b.dataset.score);
+        }
+        return Number(a.dataset.score) - Number(b.dataset.score);
+      });
+      sorted.forEach((row) => sampleBody.appendChild(row));
+    }
+
+    function applyFilters() {
+      const query = controls.search.value.trim().toLowerCase();
+      const model = controls.model.value;
+      const category = controls.category.value;
+      const label = controls.label.value;
+      let visibleRows = 0;
+      let visibleCards = 0;
+
+      evalGroups.forEach((group) => {
+        const categoryMatch = !category || group.dataset.category === category;
+        let groupCards = 0;
+        group.querySelectorAll(".sample-card").forEach((card) => {
+          const visible = categoryMatch && matchesQuery(card, query);
+          card.hidden = !visible;
+          if (visible) {
+            groupCards += 1;
+          }
+        });
+        group.hidden = groupCards === 0;
+        group.classList.toggle("empty", groupCards === 0);
+        if (query || category) {
+          group.open = groupCards > 0;
+        }
+        visibleCards += groupCards;
+      });
+
+      sampleRows.forEach((row) => {
+        const visible = matchesQuery(row, query)
+          && (!model || row.dataset.model === model)
+          && (!category || row.dataset.category === category)
+          && (!label || row.dataset.label === label);
+        row.hidden = !visible;
+        if (visible) {
+          visibleRows += 1;
+        }
+      });
+      sortRows();
+      controls.status.textContent = `Showing ${visibleRows} sample rows and ${visibleCards} eval-set cases.`;
+    }
+
+    function resetControls() {
+      controls.search.value = "";
+      controls.model.value = "";
+      controls.category.value = "";
+      controls.label.value = "";
+      controls.sort.value = "score-asc";
+      activeView = "all";
+      applyView();
+      applyFilters();
+    }
+
+    controls.viewButtons.forEach((button) => {
+      button.addEventListener("click", () => {
+        activeView = button.dataset.view;
+        applyView();
+      });
+    });
+    [controls.search, controls.model, controls.category, controls.label, controls.sort].forEach((control) => {
+      control.addEventListener("input", applyFilters);
+      control.addEventListener("change", applyFilters);
+    });
+    controls.reset.addEventListener("click", resetControls);
+    applyView();
+    applyFilters();
+  </script>
 </body>
 </html>
