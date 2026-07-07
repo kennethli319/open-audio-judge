@@ -85,10 +85,13 @@ runs can map private prompts into the same categories without copying private ro
 - `disfluency_repair_control`: false starts, bounded filled pauses, intentional repetition,
   restart cues, and cautious hesitation where spontaneous-speech cues must remain controlled and
   text-faithful.
+- `lexical_stress_disambiguation`: part-of-speech stress shifts such as record/record,
+  permit/permit, project/project, object/object, and conduct/conduct where pronunciation should
+  follow sentence meaning without awkward overpronunciation.
 
 ## Manifest Contract
 
-The public comparison manifest is intentionally balanced at 140 cases for now: 28 categories with 5
+The public comparison manifest is intentionally balanced at 145 cases for now: 29 categories with 5
 cases each. Expansion should add complete five-case category batches before deepening existing
 categories.
 
