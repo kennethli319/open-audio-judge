@@ -362,6 +362,7 @@
           <option value="referential_cohesion">Referential cohesion</option>
           <option value="measurement_unit_disambiguation">Measurement unit disambiguation</option>
           <option value="contextual_abbreviation_expansion">Contextual abbreviation expansion</option>
+          <option value="noise_resilience_delivery">Noise resilience delivery</option>
         </select>
         <select id="label-filter" aria-label="Filter by label">
           <option value="">All labels</option>
@@ -406,7 +407,7 @@
   --cases examples/tts_multiturn_cases.jsonl \
   --judge-provider gemini \
   --judge-samples 3 \
-  --limit 185 \
+  --limit 190 \
   --out runs/leaderboard/chatterbox</code></pre>
 
     <pre><code>oaj autojudge-local-tts \
@@ -415,7 +416,7 @@
   --cases examples/tts_multiturn_cases.jsonl \
   --judge-provider gemini \
   --judge-samples 3 \
-  --limit 185 \
+  --limit 190 \
   --out runs/leaderboard/kokoro</code></pre>
 
     <pre><code>oaj autojudge-local-tts \
@@ -424,7 +425,7 @@
   --cases examples/tts_multiturn_cases.jsonl \
   --judge-provider gemini \
   --judge-samples 3 \
-  --limit 185 \
+  --limit 190 \
   --out runs/leaderboard/qwen3-tts</code></pre>
 
     <p>
@@ -436,7 +437,7 @@
   --cases examples/tts_multiturn_cases.jsonl \
   --judge-provider gemini \
   --judge-samples 3 \
-  --limit 185 \
+  --limit 190 \
   --out runs/leaderboard/chatterbox</code></pre>
 
     <p>
@@ -481,16 +482,16 @@
     <h2>Sample Report Preview</h2>
     <section class="grid" aria-label="Sample report metrics">
       <div class="metric"><span>Models</span><strong>3</strong></div>
-      <div class="metric"><span>Shared Eval Cases</span><strong>185</strong></div>
+      <div class="metric"><span>Shared Eval Cases</span><strong>190</strong></div>
       <div class="metric"><span>Judge Samples</span><strong>3x</strong></div>
       <div class="metric"><span>Top Avg</span><strong>91.2</strong></div>
       <div class="metric"><span>Lowest Avg</span><strong>84.7</strong></div>
-      <div class="metric"><span>Total Judgments</span><strong>1665</strong></div>
+      <div class="metric"><span>Total Judgments</span><strong>1710</strong></div>
     </section>
 
     <h2>Eval Set Samples</h2>
     <p>
-      The public demo eval set contains 185 synthetic, public-safe cases grouped into research-backed
+      The public demo eval set contains 190 synthetic, public-safe cases grouped into research-backed
       TTS dimensions. Each category below contributes five shared cases that every model synthesizes
       before Gemini judges the generated audio.
     </p>
@@ -1787,6 +1788,41 @@
             <p><strong>Slice:</strong> <code>corporate_suffix_weekday_context</code></p>
             <p><strong>Prompt:</strong> Read this vendor note so corporate suffixes and the weekday abbreviation sound intentional.</p>
             <p><strong>Target:</strong> Acme Inc. and River Co. need the revised tax form by Fri. afternoon.</p>
+          </article>
+        </div>
+      </details>
+      <details class="sample-group" data-category="noise_resilience_delivery">
+        <summary><span>Noise Resilience Delivery</span><strong>5 cases</strong></summary>
+        <div class="sample-list">
+          <article class="sample-card">
+            <h3><code>tts-noise-resilience-delivery-commute-alert-001</code></h3>
+            <p><strong>Slice:</strong> <code>public_transit_noise_alert</code></p>
+            <p><strong>Prompt:</strong> Read this transit alert as if it may be heard over street noise, with the stop name and platform change clear.</p>
+            <p><strong>Target:</strong> For downtown trains, use platform two at Cedar Station until the signal repair is complete.</p>
+          </article>
+          <article class="sample-card">
+            <h3><code>tts-noise-resilience-delivery-kitchen-timer-001</code></h3>
+            <p><strong>Slice:</strong> <code>appliance_noise_timer_instruction</code></p>
+            <p><strong>Prompt:</strong> Read this kitchen timer notification so it stays intelligible over appliance noise without sounding alarmed.</p>
+            <p><strong>Target:</strong> Your pasta timer has one minute left, then drain the pot and turn the burner off.</p>
+          </article>
+          <article class="sample-card">
+            <h3><code>tts-noise-resilience-delivery-warehouse-pick-001</code></h3>
+            <p><strong>Slice:</strong> <code>headset_pick_code_clarity</code></p>
+            <p><strong>Prompt:</strong> Read this warehouse pick instruction for a headset user in a loud aisle.</p>
+            <p><strong>Target:</strong> Pick bin B fourteen, scan label K nine, and place two blue cartons on pallet six.</p>
+          </article>
+          <article class="sample-card">
+            <h3><code>tts-noise-resilience-delivery-crowded-checkin-001</code></h3>
+            <p><strong>Slice:</strong> <code>crowded_lobby_name_desk</code></p>
+            <p><strong>Prompt:</strong> Read this check-in instruction for a crowded lobby, with the name and desk number easy to hear.</p>
+            <p><strong>Target:</strong> Maya Chen, please bring your photo ID to desk five after the next family is called.</p>
+          </article>
+          <article class="sample-card">
+            <h3><code>tts-noise-resilience-delivery-emergency-hallway-001</code></h3>
+            <p><strong>Slice:</strong> <code>crowd_noise_safety_direction</code></p>
+            <p><strong>Prompt:</strong> Read this hallway safety message so it cuts through crowd noise while remaining composed.</p>
+            <p><strong>Target:</strong> Move to the right side of the hallway, keep walking, and leave the center lane clear for responders.</p>
           </article>
         </div>
       </details>

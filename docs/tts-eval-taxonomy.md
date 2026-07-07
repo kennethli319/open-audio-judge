@@ -110,10 +110,13 @@ runs can map private prompts into the same categories without copying private ro
 - `contextual_abbreviation_expansion`: context-dependent abbreviations such as St., No., month
   labels, business shorthand, corporate suffixes, and weekday labels where the model must expand or
   preserve the right spoken form from surrounding meaning rather than punctuation alone.
+- `noise_resilience_delivery`: projected but composed delivery for transit alerts, household
+  timers, warehouse headset instructions, crowded lobby announcements, and hallway safety messages
+  where key entities and conditions must remain intelligible in noisy real-world settings.
 
 ## Manifest Contract
 
-The public comparison manifest is intentionally balanced at 185 cases for now: 37 categories with 5
+The public comparison manifest is intentionally balanced at 190 cases for now: 38 categories with 5
 cases each. Expansion should add complete five-case category batches before deepening existing
 categories.
 
