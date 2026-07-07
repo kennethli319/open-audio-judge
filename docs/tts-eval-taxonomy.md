@@ -130,10 +130,12 @@ runs can map private prompts into the same categories without copying private ro
 - `cross_lingual_name_pronunciation`: person names, place names, menu items, product names, and
   organization names from non-English contexts that should stay intelligible and respectful inside
   English utterances without caricature.
+- `speech_mode_stability`: rhymes, countdowns, slogans, repeated phrases, and stage-like cues that
+  should remain spoken rather than drifting into chant, song, loops, or exaggerated performance.
 
 ## Manifest Contract
 
-The public comparison manifest is intentionally balanced at 220 cases for now: 44 categories with 5
+The public comparison manifest is intentionally balanced at 225 cases for now: 45 categories with 5
 cases each. Expansion should add complete five-case category batches before deepening existing
 categories.
 

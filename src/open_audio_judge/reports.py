@@ -766,6 +766,94 @@ TTS_CATEGORY_GUIDANCE = {
             "text-faithful emphasis on short function words",
         ],
     ),
+    "referential_cohesion": (
+        "former/latter references, pronoun antecedents, this/that contrasts, and same/different conditions",
+        [
+            "discourse reference tracking",
+            "phrase grouping for antecedents",
+            "contrastive prosody",
+        ],
+    ),
+    "measurement_unit_disambiguation": (
+        "abbreviated and confusable measurement units in clinical, engineering, logistics, and device specs",
+        [
+            "unit normalization",
+            "abbreviation expansion policy",
+            "domain-specific pronunciation",
+        ],
+    ),
+    "contextual_abbreviation_expansion": (
+        "context-dependent abbreviations such as St., No., dates, business shorthand, and corporate suffixes",
+        [
+            "context-aware text normalization",
+            "abbreviation disambiguation",
+            "entity and date parsing",
+        ],
+    ),
+    "noise_resilience_delivery": (
+        "projected but composed delivery for transit, household, warehouse, lobby, and hallway messages",
+        [
+            "intelligibility-focused style control",
+            "key-entity emphasis",
+            "artifact and clipping suppression",
+        ],
+    ),
+    "audience_register_adaptation": (
+        "child-friendly, patient, executive, engineering, and public-radio delivery without losing exact details",
+        [
+            "audience-conditioned style control",
+            "register-preserving text faithfulness",
+            "reported-speech boundary handling",
+        ],
+    ),
+    "uncertainty_calibration_delivery": (
+        "probabilities, caveats, confidence scores, escalation handoffs, and estimate ranges",
+        [
+            "calibrated prosody",
+            "hedge and confidence emphasis",
+            "range and probability normalization",
+        ],
+    ),
+    "real_time_streaming_delivery": (
+        "first-token openings, chunk boundaries, barge-in repair, concise alerts, and progressive guidance",
+        [
+            "low-latency opening stability",
+            "streaming chunk prosody",
+            "interruption-aware repair cadence",
+        ],
+    ),
+    "numeric_identifier_delivery": (
+        "support tickets, verification codes, device serials, record locators, and lab sample IDs",
+        [
+            "identifier chunking",
+            "letter-digit contrast",
+            "exact transcription support",
+        ],
+    ),
+    "sentence_boundary_inference": (
+        "punctuation-light updates, compact lists, terse agendas, alert cascades, and unpolished messages",
+        [
+            "punctuation-light phrase detection",
+            "list and action grouping",
+            "prosodic boundary inference",
+        ],
+    ),
+    "cross_lingual_name_pronunciation": (
+        "non-English person, place, menu, product, and organization names inside English utterances",
+        [
+            "cross-lingual name phonemization",
+            "accent calibration",
+            "entity-preserving intelligibility",
+        ],
+    ),
+    "speech_mode_stability": (
+        "rhymes, countdowns, slogans, repeated phrases, and stage-like cues that should remain spoken",
+        [
+            "speech-versus-song mode control",
+            "loop and chant suppression",
+            "rhythmic text faithfulness",
+        ],
+    ),
 }
 
 
