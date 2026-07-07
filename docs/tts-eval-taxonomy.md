@@ -148,10 +148,13 @@ runs can map private prompts into the same categories without copying private ro
 - `citation_reference_delivery`: academic citations, regulatory sections, table footnotes, DOI
   identifiers, and internal clause references where source labels, years, numbers, letters, and
   cross-reference hierarchy must remain intelligible without hallucinated wording.
+- `digital_locator_delivery`: email aliases, URLs with query strings, file paths, meeting links,
+  passcodes, social handles, and chat channels where punctuation, separators, and identifier
+  boundaries must be grouped clearly enough for first-listen transcription.
 
 ## Manifest Contract
 
-The public comparison manifest is intentionally balanced at 250 cases for now: 50 categories with 5
+The public comparison manifest is intentionally balanced at 255 cases for now: 51 categories with 5
 cases each. Expansion should add complete five-case category batches before deepening existing
 categories.
 

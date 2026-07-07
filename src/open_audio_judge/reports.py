@@ -942,6 +942,14 @@ TTS_CATEGORY_GUIDANCE = {
             "source-reference phrase grouping",
         ],
     ),
+    "digital_locator_delivery": (
+        "email aliases, URLs, file paths, meeting links, passcodes, handles, and chat channels",
+        [
+            "digital-locator text normalization",
+            "punctuation and separator verbalization",
+            "identifier boundary chunking",
+        ],
+    ),
 }
 
 

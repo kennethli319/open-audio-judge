@@ -375,6 +375,7 @@
           <option value="repair_sensitive_delivery">Repair sensitive delivery</option>
           <option value="pause_breath_control">Pause breath control</option>
           <option value="citation_reference_delivery">Citation reference delivery</option>
+          <option value="digital_locator_delivery">Digital locator delivery</option>
         </select>
         <select id="label-filter" aria-label="Filter by label">
           <option value="">All labels</option>
@@ -419,7 +420,7 @@
   --cases examples/tts_multiturn_cases.jsonl \
   --judge-provider gemini \
   --judge-samples 3 \
-  --limit 250 \
+  --limit 255 \
   --out runs/leaderboard/chatterbox</code></pre>
 
     <pre><code>oaj autojudge-local-tts \
@@ -428,7 +429,7 @@
   --cases examples/tts_multiturn_cases.jsonl \
   --judge-provider gemini \
   --judge-samples 3 \
-  --limit 250 \
+  --limit 255 \
   --out runs/leaderboard/kokoro</code></pre>
 
     <pre><code>oaj autojudge-local-tts \
@@ -437,7 +438,7 @@
   --cases examples/tts_multiturn_cases.jsonl \
   --judge-provider gemini \
   --judge-samples 3 \
-  --limit 250 \
+  --limit 255 \
   --out runs/leaderboard/qwen3-tts</code></pre>
 
     <p>
@@ -449,7 +450,7 @@
   --cases examples/tts_multiturn_cases.jsonl \
   --judge-provider gemini \
   --judge-samples 3 \
-  --limit 250 \
+  --limit 255 \
   --out runs/leaderboard/chatterbox</code></pre>
 
     <p>
@@ -494,16 +495,16 @@
     <h2>Sample Report Preview</h2>
     <section class="grid" aria-label="Sample report metrics">
       <div class="metric"><span>Models</span><strong>3</strong></div>
-      <div class="metric"><span>Shared Eval Cases</span><strong>250</strong></div>
+      <div class="metric"><span>Shared Eval Cases</span><strong>255</strong></div>
       <div class="metric"><span>Judge Samples</span><strong>3x</strong></div>
       <div class="metric"><span>Top Avg</span><strong>91.2</strong></div>
       <div class="metric"><span>Lowest Avg</span><strong>84.7</strong></div>
-      <div class="metric"><span>Total Judgments</span><strong>2250</strong></div>
+      <div class="metric"><span>Total Judgments</span><strong>2295</strong></div>
     </section>
 
     <h2>Eval Set Samples</h2>
     <p>
-      The public demo eval set contains 250 synthetic, public-safe cases grouped into research-backed
+      The public demo eval set contains 255 synthetic, public-safe cases grouped into research-backed
       TTS dimensions. Each category below contributes five shared cases that every model synthesizes
       before Gemini judges the generated audio.
     </p>
@@ -2255,6 +2256,41 @@
             <p><strong>Slice:</strong> <code>internal_clause_step_note_reference</code></p>
             <p><strong>Prompt:</strong> Read this internal cross-reference so the clause, step, and note labels do not collapse together.</p>
             <p><strong>Target:</strong> For the exception, read clause 4.2, step 3, note alpha, before closing the checklist.</p>
+          </article>
+        </div>
+      </details>
+      <details class="sample-group" data-category="digital_locator_delivery">
+        <summary><span>Digital Locator Delivery</span><strong>5 cases</strong></summary>
+        <div class="sample-list">
+          <article class="sample-card">
+            <h3><code>tts-digital-locator-delivery-email-alias-001</code></h3>
+            <p><strong>Slice:</strong> <code>email_alias_plus_tag_ticket_reference</code></p>
+            <p><strong>Prompt:</strong> Read this digital contact instruction so the alias, plus tag, domain, and ticket number can be transcribed on first listen.</p>
+            <p><strong>Target:</strong> Email ops plus nightshift at status dot example dot org, and include ticket A C M E dash 4072.</p>
+          </article>
+          <article class="sample-card">
+            <h3><code>tts-digital-locator-delivery-url-query-001</code></h3>
+            <p><strong>Slice:</strong> <code>url_path_query_parameter_grouping</code></p>
+            <p><strong>Prompt:</strong> Read this URL handoff with the path and query parameter clearly grouped, not blurred into one long string.</p>
+            <p><strong>Target:</strong> Open docs dot example slash setup slash audio question mark tab equals latency.</p>
+          </article>
+          <article class="sample-card">
+            <h3><code>tts-digital-locator-delivery-file-path-001</code></h3>
+            <p><strong>Slice:</strong> <code>file_path_separator_and_extension_delivery</code></p>
+            <p><strong>Prompt:</strong> Read this file path as a locator, keeping underscores, slashes, and the filename boundary audible.</p>
+            <p><strong>Target:</strong> Save the report under shared slash audits slash July underscore seven slash final dot csv.</p>
+          </article>
+          <article class="sample-card">
+            <h3><code>tts-digital-locator-delivery-meeting-code-001</code></h3>
+            <p><strong>Slice:</strong> <code>meeting_link_and_passcode_boundary</code></p>
+            <p><strong>Prompt:</strong> Read this meeting join instruction so the short link and passcode do not sound like one combined identifier.</p>
+            <p><strong>Target:</strong> Join meet dot example slash room seven B, then enter passcode 91 dash K L dash 6.</p>
+          </article>
+          <article class="sample-card">
+            <h3><code>tts-digital-locator-delivery-handle-channel-001</code></h3>
+            <p><strong>Slice:</strong> <code>handle_channel_symbolic_locator</code></p>
+            <p><strong>Prompt:</strong> Read this social and channel locator with at-sign, hash, and underscore cues clear enough for dictation.</p>
+            <p><strong>Target:</strong> Message at design underscore ops in hash release dash room before posting the preview.</p>
           </article>
         </div>
       </details>
