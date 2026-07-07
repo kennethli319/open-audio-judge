@@ -134,7 +134,7 @@ def test_tts_multiturn_examples_cover_requested_categories() -> None:
         category = record["metadata"]["eval_category"]
         categories[category] = categories.get(category, 0) + 1
 
-    assert len(records) == 400
+    assert len(records) == 405
     assert categories == {
         "paralinguistics": 5,
         "instruction_following": 5,
@@ -216,6 +216,7 @@ def test_tts_multiturn_examples_cover_requested_categories() -> None:
         "email_thread_context_delivery": 5,
         "table_matrix_reading": 5,
         "calendar_schedule_delivery": 5,
+        "instruction_conflict_resolution_delivery": 5,
     }
     assert all(record["turns"] for record in records)
     assert all(record["reference_text"] for record in records)

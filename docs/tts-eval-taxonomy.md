@@ -236,10 +236,13 @@ runs can map private prompts into the same categories without copying private ro
 - `calendar_schedule_delivery`: recurring meeting rules, tentative holds, time-zone conversions,
   RSVP deadlines, optional/required attendees, cancellations, and reschedules where spoken grouping
   must preserve calendar state and action semantics.
+- `instruction_conflict_resolution_delivery`: latest corrections, default-versus-override
+  instructions, superseded policies, conflicting location cues, and final formatting requirements
+  where prosody must make the active instruction win without losing the rejected alternative.
 
 ## Manifest Contract
 
-The public comparison manifest is intentionally balanced at 400 cases for now: 80 categories with 5
+The public comparison manifest is intentionally balanced at 405 cases for now: 81 categories with 5
 cases each. Expansion should add complete five-case category batches before deepening existing
 categories.
 

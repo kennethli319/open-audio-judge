@@ -1182,6 +1182,14 @@ TTS_CATEGORY_GUIDANCE = {
             "optional, confirmed, canceled, and rescheduled event distinction",
         ],
     ),
+    "instruction_conflict_resolution_delivery": (
+        "latest corrections, default-versus-override instructions, superseded policies, conflicting cues, and final formatting requirements",
+        [
+            "correction and override prosody",
+            "active-versus-rejected instruction attachment",
+            "default, exception, and superseded-rule distinction",
+        ],
+    ),
 }
 
 

@@ -405,6 +405,7 @@
           <option value="email_thread_context_delivery">Email thread context delivery</option>
           <option value="table_matrix_reading">Table matrix reading</option>
           <option value="calendar_schedule_delivery">Calendar schedule delivery</option>
+          <option value="instruction_conflict_resolution_delivery">Instruction conflict resolution delivery</option>
         </select>
         <select id="label-filter" aria-label="Filter by label">
           <option value="">All labels</option>
@@ -449,7 +450,7 @@
   --cases examples/tts_multiturn_cases.jsonl \
   --judge-provider gemini \
   --judge-samples 3 \
-  --limit 400 \
+  --limit 405 \
   --out runs/leaderboard/chatterbox</code></pre>
 
     <pre><code>oaj autojudge-local-tts \
@@ -458,7 +459,7 @@
   --cases examples/tts_multiturn_cases.jsonl \
   --judge-provider gemini \
   --judge-samples 3 \
-  --limit 400 \
+  --limit 405 \
   --out runs/leaderboard/kokoro</code></pre>
 
     <pre><code>oaj autojudge-local-tts \
@@ -467,7 +468,7 @@
   --cases examples/tts_multiturn_cases.jsonl \
   --judge-provider gemini \
   --judge-samples 3 \
-  --limit 400 \
+  --limit 405 \
   --out runs/leaderboard/qwen3-tts</code></pre>
 
     <p>
@@ -479,7 +480,7 @@
   --cases examples/tts_multiturn_cases.jsonl \
   --judge-provider gemini \
   --judge-samples 3 \
-  --limit 400 \
+  --limit 405 \
   --out runs/leaderboard/chatterbox</code></pre>
 
     <p>
@@ -3335,6 +3336,41 @@
             <p><strong>Slice:</strong> <code>cancel_monday_845_reschedule_wednesday_120</code></p>
             <p><strong>Prompt:</strong> Read this calendar change so the canceled event and replacement slot are unmistakable.</p>
             <p><strong>Target:</strong> Cancel Monday's 8:45 check-in and reschedule it for Wednesday at 1:20 after the lab tour.</p>
+          </article>
+        </div>
+      </details>
+      <details class="sample-group" data-category="instruction_conflict_resolution_delivery">
+        <summary><span>Instruction Conflict Resolution Delivery</span><strong>5 cases</strong></summary>
+        <div class="sample-list">
+          <article class="sample-card">
+            <h3><code>tts-instruction-conflict-resolution-delivery-latest-correction-001</code></h3>
+            <p><strong>Slice:</strong> <code>earlier_18_units_correction_ship_8_hold_10</code></p>
+            <p><strong>Prompt:</strong> Read this update so the latest correction overrides the earlier number.</p>
+            <p><strong>Target:</strong> Earlier I said ship 18 units; correction: ship 8 units and hold the remaining 10 for audit.</p>
+          </article>
+          <article class="sample-card">
+            <h3><code>tts-instruction-conflict-resolution-delivery-ignore-default-001</code></h3>
+            <p><strong>Slice:</strong> <code>standard_blue_label_except_batch_7_orange</code></p>
+            <p><strong>Prompt:</strong> Read this workflow note so the custom override is not replaced by the normal default.</p>
+            <p><strong>Target:</strong> Use the standard blue label for all crates except Batch 7, which needs the orange quarantine label.</p>
+          </article>
+          <article class="sample-card">
+            <h3><code>tts-instruction-conflict-resolution-delivery-current-policy-001</code></h3>
+            <p><strong>Slice:</strong> <code>old_guest_checkout_after_6_current_staff_approval_after_5</code></p>
+            <p><strong>Prompt:</strong> Read this policy change so the outdated rule is clearly superseded.</p>
+            <p><strong>Target:</strong> The old rule allowed guest checkout after 6 PM; the current rule requires staff approval after 5 PM.</p>
+          </article>
+          <article class="sample-card">
+            <h3><code>tts-instruction-conflict-resolution-delivery-conflicting-room-001</code></h3>
+            <p><strong>Slice:</strong> <code>ignore_room_2a_sign_intake_moved_room_4c</code></p>
+            <p><strong>Prompt:</strong> Read this room assignment so the canceled room is not treated as active.</p>
+            <p><strong>Target:</strong> Ignore the lobby sign for Room 2A; today's intake moved to Room 4C beside the pharmacy desk.</p>
+          </article>
+          <article class="sample-card">
+            <h3><code>tts-instruction-conflict-resolution-delivery-format-override-001</code></h3>
+            <p><strong>Slice:</strong> <code>do_not_bullet_list_plain_paragraph_deadline_first</code></p>
+            <p><strong>Prompt:</strong> Read this formatting instruction so the final override wins over the earlier template.</p>
+            <p><strong>Target:</strong> Do not send the brief as a bullet list; send one plain paragraph with the deadline in the first sentence.</p>
           </article>
         </div>
       </details>
