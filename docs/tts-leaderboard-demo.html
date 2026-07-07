@@ -914,31 +914,111 @@
     </table>
 
     <h2>Sample-By-Sample Breakdown</h2>
+    <p>
+      The real combined report contains one row per synthesized model/case pair. This preview shows
+      representative rows across models, categories, slices, and score bands from the 135 generated
+      samples.
+    </p>
     <table>
       <thead>
         <tr>
           <th>Case</th>
+          <th>Model</th>
+          <th>Category / Slice</th>
           <th>Score</th>
           <th>Label</th>
           <th>Reason</th>
-          <th>Provenance</th>
         </tr>
       </thead>
       <tbody>
         <tr>
-          <td data-label="Case"><code>tts-storytelling-bedtime-001-local-tts</code></td>
-          <td data-label="Score">95<br><span class="muted">judge samples: 94, 96, 95; avg 95.00</span></td>
+          <td data-label="Case"><code>tts-storytelling-bedtime-001-chatterbox</code></td>
+          <td data-label="Model"><code>mlx-community/chatterbox-turbo-6bit</code></td>
+          <td data-label="Category / Slice"><code>storytelling_dialogue</code><br><span class="muted">narrative_gentle</span></td>
+          <td data-label="Score">95<br><span class="muted">judge samples: 94, 96, 95</span></td>
           <td data-label="Label" class="good">accurate</td>
           <td data-label="Reason">
-            The speech is highly natural, fluent, intelligible, and faithful to the target text.
+            Highly natural, fluent, and faithful bedtime narration with gentle pacing.
           </td>
-          <td data-label="Provenance">
-            model: <code>mlx-community/chatterbox-turbo-6bit</code><br>
-            rank context: <code>leaderboard rank 1</code><br>
-            category: <code>storytelling</code><br>
-            voice: <code>af_heart</code><br>
-            sample kind: <code>local_synthetic_tts</code><br>
-            duration: <code>3.1s</code>
+        </tr>
+        <tr>
+          <td data-label="Case"><code>tts-instruction-following-spelled-token-001-chatterbox</code></td>
+          <td data-label="Model"><code>mlx-community/chatterbox-turbo-6bit</code></td>
+          <td data-label="Category / Slice"><code>instruction_following</code><br><span class="muted">spelled_tokens</span></td>
+          <td data-label="Score">94<br><span class="muted">judge samples: 95, 93, 94</span></td>
+          <td data-label="Label" class="good">accurate</td>
+          <td data-label="Reason">
+            The support code remains intelligible and the letters are kept separate.
+          </td>
+        </tr>
+        <tr>
+          <td data-label="Case"><code>tts-long-form-discourse-endurance-001-chatterbox</code></td>
+          <td data-label="Model"><code>mlx-community/chatterbox-turbo-6bit</code></td>
+          <td data-label="Category / Slice"><code>long_form_discourse</code><br><span class="muted">endurance_long_sentence</span></td>
+          <td data-label="Score">88<br><span class="muted">judge samples: 89, 87, 88</span></td>
+          <td data-label="Label" class="good">accurate</td>
+          <td data-label="Reason">
+            Stable long-sentence delivery with only minor end-of-clause compression.
+          </td>
+        </tr>
+        <tr>
+          <td data-label="Case"><code>tts-robustness-intelligibility-rare-words-001-kokoro</code></td>
+          <td data-label="Model"><code>mlx-community/Kokoro-82M-4bit</code></td>
+          <td data-label="Category / Slice"><code>robustness_intelligibility</code><br><span class="muted">rare_words</span></td>
+          <td data-label="Score">85<br><span class="muted">judge samples: 84, 86, 85</span></td>
+          <td data-label="Label" class="warn">review</td>
+          <td data-label="Reason">
+            Mostly clear rare-word delivery, with one pronunciation that should be inspected.
+          </td>
+        </tr>
+        <tr>
+          <td data-label="Case"><code>tts-speech-steerability-slow-001-kokoro</code></td>
+          <td data-label="Model"><code>mlx-community/Kokoro-82M-4bit</code></td>
+          <td data-label="Category / Slice"><code>speech_steerability</code><br><span class="muted">slow_pace</span></td>
+          <td data-label="Score">79<br><span class="muted">judge samples: 78, 80, 79</span></td>
+          <td data-label="Label" class="warn">review</td>
+          <td data-label="Reason">
+            Text is intelligible, but the requested slower beginner-friendly pace is inconsistent.
+          </td>
+        </tr>
+        <tr>
+          <td data-label="Case"><code>tts-speaker-voice-consistency-longer-001-qwen3-tts</code></td>
+          <td data-label="Model"><code>mlx-community/Qwen3-TTS-12Hz-0.6B-Base-4bit</code></td>
+          <td data-label="Category / Slice"><code>speaker_voice_consistency</code><br><span class="muted">timbre_stability</span></td>
+          <td data-label="Score">80<br><span class="muted">judge samples: 81, 79, 80</span></td>
+          <td data-label="Label" class="warn">review</td>
+          <td data-label="Reason">
+            The voice remains understandable, but timbre stability weakens across the longer update.
+          </td>
+        </tr>
+        <tr>
+          <td data-label="Case"><code>tts-multilingual-code-switching-bilingual-direction-001-qwen3-tts</code></td>
+          <td data-label="Model"><code>mlx-community/Qwen3-TTS-12Hz-0.6B-Base-4bit</code></td>
+          <td data-label="Category / Slice"><code>multilingual_code_switching</code><br><span class="muted">bilingual_announcement</span></td>
+          <td data-label="Score">78<br><span class="muted">judge samples: 77, 79, 78</span></td>
+          <td data-label="Label" class="warn">review</td>
+          <td data-label="Reason">
+            English announcement is clear, but the Spanish phrase is less natural and needs pronunciation review.
+          </td>
+        </tr>
+        <tr>
+          <td data-label="Case"><code>tts-information-tuning-dates-times-001-qwen3-tts</code></td>
+          <td data-label="Model"><code>mlx-community/Qwen3-TTS-12Hz-0.6B-Base-4bit</code></td>
+          <td data-label="Category / Slice"><code>information_tuning</code><br><span class="muted">dates_times</span></td>
+          <td data-label="Score">72<br><span class="muted">judge samples: 70, 73, 73</span></td>
+          <td data-label="Label" class="bad">inaccurate</td>
+          <td data-label="Reason">
+            The date and time remain partly intelligible, but dense timing details are not easy to catch.
+          </td>
+        </tr>
+        <tr>
+          <td data-label="Case"><code>tts-paralinguistics-urgency-001-qwen3-tts</code></td>
+          <td data-label="Model"><code>mlx-community/Qwen3-TTS-12Hz-0.6B-Base-4bit</code></td>
+          <td data-label="Category / Slice"><code>paralinguistics</code><br><span class="muted">emotion_urgency</span></td>
+          <td data-label="Score">70<br><span class="muted">judge samples: 69, 70, 71</span></td>
+          <td data-label="Label" class="bad">inaccurate</td>
+          <td data-label="Reason">
+            The prompt asks for urgent but composed delivery, but the output sounds flat and under-signals urgency.
           </td>
         </tr>
       </tbody>
