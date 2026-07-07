@@ -210,10 +210,13 @@ runs can map private prompts into the same categories without copying private ro
 - `discourse_marker_intonation`: tag questions, correction markers, topic-return markers,
   politeness softeners, and contrastive discourse markers where prosody must preserve pragmatic
   intent and attach the marker to the right clause.
+- `deictic_reference_delivery`: this/that, here/there, now/then, previous/next, and
+  screen-relative references where spoken anchoring must preserve which visible, temporal, or
+  sequential referent receives each action.
 
 ## Manifest Contract
 
-The public comparison manifest is intentionally balanced at 355 cases for now: 71 categories with 5
+The public comparison manifest is intentionally balanced at 360 cases for now: 72 categories with 5
 cases each. Expansion should add complete five-case category batches before deepening existing
 categories.
 

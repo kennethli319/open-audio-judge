@@ -439,7 +439,7 @@
   --cases examples/tts_multiturn_cases.jsonl \
   --judge-provider gemini \
   --judge-samples 3 \
-  --limit 355 \
+  --limit 360 \
   --out runs/leaderboard/chatterbox</code></pre>
 
     <pre><code>oaj autojudge-local-tts \
@@ -448,7 +448,7 @@
   --cases examples/tts_multiturn_cases.jsonl \
   --judge-provider gemini \
   --judge-samples 3 \
-  --limit 355 \
+  --limit 360 \
   --out runs/leaderboard/kokoro</code></pre>
 
     <pre><code>oaj autojudge-local-tts \
@@ -457,7 +457,7 @@
   --cases examples/tts_multiturn_cases.jsonl \
   --judge-provider gemini \
   --judge-samples 3 \
-  --limit 355 \
+  --limit 360 \
   --out runs/leaderboard/qwen3-tts</code></pre>
 
     <p>
@@ -469,7 +469,7 @@
   --cases examples/tts_multiturn_cases.jsonl \
   --judge-provider gemini \
   --judge-samples 3 \
-  --limit 355 \
+  --limit 360 \
   --out runs/leaderboard/chatterbox</code></pre>
 
     <p>
@@ -514,16 +514,16 @@
     <h2>Sample Report Preview</h2>
     <section class="grid" aria-label="Sample report metrics">
       <div class="metric"><span>Models</span><strong>3</strong></div>
-      <div class="metric"><span>Shared Eval Cases</span><strong>355</strong></div>
+      <div class="metric"><span>Shared Eval Cases</span><strong>360</strong></div>
       <div class="metric"><span>Judge Samples</span><strong>3x</strong></div>
       <div class="metric"><span>Top Avg</span><strong>91.2</strong></div>
       <div class="metric"><span>Lowest Avg</span><strong>84.7</strong></div>
-      <div class="metric"><span>Total Judgments</span><strong>3195</strong></div>
+      <div class="metric"><span>Total Judgments</span><strong>3240</strong></div>
     </section>
 
     <h2>Eval Set Samples</h2>
     <p>
-      The public demo eval set contains 355 synthetic, public-safe cases grouped into research-backed
+      The public demo eval set contains 360 synthetic, public-safe cases grouped into research-backed
       TTS dimensions. Each category below contributes five shared cases that every model synthesizes
       before Gemini judges the generated audio.
     </p>
@@ -3010,6 +3010,41 @@
             <p><strong>Slice:</strong> <code>well_contrast_exception_signature_date</code></p>
             <p><strong>Prompt:</strong> Read this support reply so well signals a careful contrast before the exception.</p>
             <p><strong>Target:</strong> Well, the form is complete, except the signature line still needs today's date.</p>
+          </article>
+        </div>
+      </details>
+      <details class="sample-group" data-category="deictic_reference_delivery">
+        <summary><span>Deictic Reference Delivery</span><strong>5 cases</strong></summary>
+        <div class="sample-list">
+          <article class="sample-card">
+            <h3><code>tts-deictic-reference-delivery-here-there-map-001</code></h3>
+            <p><strong>Slice:</strong> <code>here_gate_b_there_checkpoint_c_badge_scan</code></p>
+            <p><strong>Prompt:</strong> Read this map instruction so here and there stay attached to the right checkpoints.</p>
+            <p><strong>Target:</strong> Start here at gate B, then move there to checkpoint C after the badge scan.</p>
+          </article>
+          <article class="sample-card">
+            <h3><code>tts-deictic-reference-delivery-this-that-inventory-001</code></h3>
+            <p><strong>Slice:</strong> <code>this_return_that_repair_box_contrast</code></p>
+            <p><strong>Prompt:</strong> Read this inventory note so this and that do not sound interchangeable.</p>
+            <p><strong>Target:</strong> Label this box for return, and label that box for repair, before loading the cart.</p>
+          </article>
+          <article class="sample-card">
+            <h3><code>tts-deictic-reference-delivery-now-then-procedure-001</code></h3>
+            <p><strong>Slice:</strong> <code>now_close_valve_then_reopen_drain_green_light</code></p>
+            <p><strong>Prompt:</strong> Read this procedure so now and then mark the immediate and later steps clearly.</p>
+            <p><strong>Target:</strong> Now close the intake valve; then reopen the drain line when the pressure light turns green.</p>
+          </article>
+          <article class="sample-card">
+            <h3><code>tts-deictic-reference-delivery-left-right-screen-001</code></h3>
+            <p><strong>Slice:</strong> <code>this_panel_open_right_panel_close_after_export</code></p>
+            <p><strong>Prompt:</strong> Read this screen-share instruction so this panel and the panel on the right are not confused.</p>
+            <p><strong>Target:</strong> Keep this panel open, but close the panel on the right after the export finishes.</p>
+          </article>
+          <article class="sample-card">
+            <h3><code>tts-deictic-reference-delivery-previous-next-forms-001</code></h3>
+            <p><strong>Slice:</strong> <code>previous_form_signature_next_form_date_only</code></p>
+            <p><strong>Prompt:</strong> Read this form review note so previous and next refer to different records.</p>
+            <p><strong>Target:</strong> The previous form needs a signature; the next form only needs the date field checked.</p>
           </article>
         </div>
       </details>

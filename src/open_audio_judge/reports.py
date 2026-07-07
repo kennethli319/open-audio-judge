@@ -1110,6 +1110,14 @@ TTS_CATEGORY_GUIDANCE = {
             "marker-to-clause attachment and question contour",
         ],
     ),
+    "deictic_reference_delivery": (
+        "this/that, here/there, now/then, previous/next, and screen-relative anchors that point to listener context",
+        [
+            "deictic reference anchoring",
+            "demonstrative and temporal contrast prosody",
+            "referent-to-action phrase grouping",
+        ],
+    ),
 }
 
 
