@@ -349,6 +349,8 @@
           <option value="temporal_rhythm_control">Temporal rhythm control</option>
           <option value="safety_privacy_delivery">Safety privacy delivery</option>
           <option value="semantic_contrast_focus">Semantic contrast focus</option>
+          <option value="dialogue_turn_management">Dialogue turn management</option>
+          <option value="compositional_style_control">Compositional style control</option>
         </select>
         <select id="label-filter" aria-label="Filter by label">
           <option value="">All labels</option>
@@ -393,7 +395,7 @@
   --cases examples/tts_multiturn_cases.jsonl \
   --judge-provider gemini \
   --judge-samples 3 \
-  --limit 125 \
+  --limit 130 \
   --out runs/leaderboard/chatterbox</code></pre>
 
     <pre><code>oaj autojudge-local-tts \
@@ -402,7 +404,7 @@
   --cases examples/tts_multiturn_cases.jsonl \
   --judge-provider gemini \
   --judge-samples 3 \
-  --limit 125 \
+  --limit 130 \
   --out runs/leaderboard/kokoro</code></pre>
 
     <pre><code>oaj autojudge-local-tts \
@@ -411,7 +413,7 @@
   --cases examples/tts_multiturn_cases.jsonl \
   --judge-provider gemini \
   --judge-samples 3 \
-  --limit 125 \
+  --limit 130 \
   --out runs/leaderboard/qwen3-tts</code></pre>
 
     <p>
@@ -423,7 +425,7 @@
   --cases examples/tts_multiturn_cases.jsonl \
   --judge-provider gemini \
   --judge-samples 3 \
-  --limit 125 \
+  --limit 130 \
   --out runs/leaderboard/chatterbox</code></pre>
 
     <p>
@@ -468,16 +470,16 @@
     <h2>Sample Report Preview</h2>
     <section class="grid" aria-label="Sample report metrics">
       <div class="metric"><span>Models</span><strong>3</strong></div>
-      <div class="metric"><span>Shared Eval Cases</span><strong>125</strong></div>
+      <div class="metric"><span>Shared Eval Cases</span><strong>130</strong></div>
       <div class="metric"><span>Judge Samples</span><strong>3x</strong></div>
       <div class="metric"><span>Top Avg</span><strong>91.2</strong></div>
       <div class="metric"><span>Lowest Avg</span><strong>84.7</strong></div>
-      <div class="metric"><span>Total Judgments</span><strong>1125</strong></div>
+      <div class="metric"><span>Total Judgments</span><strong>1170</strong></div>
     </section>
 
     <h2>Eval Set Samples</h2>
     <p>
-      The public demo eval set contains 125 synthetic, public-safe cases grouped into research-backed
+      The public demo eval set contains 130 synthetic, public-safe cases grouped into research-backed
       TTS dimensions. Each category below contributes five shared cases that every model synthesizes
       before Gemini judges the generated audio.
     </p>
@@ -1357,6 +1359,41 @@
           </article>
         </div>
       </details>
+      <details class="sample-group" data-category="compositional_style_control">
+        <summary><span>Compositional Style Control</span><strong>5 cases</strong></summary>
+        <div class="sample-list">
+          <article class="sample-card">
+            <h3><code>tts-compositional-style-control-quiet-urgent-clinic-001</code></h3>
+            <p><strong>Slice:</strong> <code>quiet_urgent_clinic_instruction</code></p>
+            <p><strong>Prompt:</strong> Read this quietly because it is in a clinic waiting room, but keep the instruction urgent and easy to act on.</p>
+            <p><strong>Target:</strong> Please step to desk two now, and bring the blue allergy card with your photo ID.</p>
+          </article>
+          <article class="sample-card">
+            <h3><code>tts-compositional-style-control-friendly-formal-billing-001</code></h3>
+            <p><strong>Slice:</strong> <code>friendly_formal_billing_notice</code></p>
+            <p><strong>Prompt:</strong> Read this as friendly and formal at the same time, with the date and amount clear.</p>
+            <p><strong>Target:</strong> Your renewal estimate is 42 dollars per month, and the review period ends on August 14.</p>
+          </article>
+          <article class="sample-card">
+            <h3><code>tts-compositional-style-control-upbeat-slow-onboarding-001</code></h3>
+            <p><strong>Slice:</strong> <code>upbeat_slow_onboarding_steps</code></p>
+            <p><strong>Prompt:</strong> Read this onboarding tip with upbeat energy, but slow enough for a first-time user to follow.</p>
+            <p><strong>Target:</strong> Tap Create Project, choose the starter template, then name the folder before you invite your team.</p>
+          </article>
+          <article class="sample-card">
+            <h3><code>tts-compositional-style-control-serious-reassuring-outage-001</code></h3>
+            <p><strong>Slice:</strong> <code>serious_reassuring_outage_update</code></p>
+            <p><strong>Prompt:</strong> Read this outage update with serious authority and reassurance, without sounding cheerful.</p>
+            <p><strong>Target:</strong> The payment service is paused while engineers verify recovery, and queued charges will not run twice.</p>
+          </article>
+          <article class="sample-card">
+            <h3><code>tts-compositional-style-control-conversational-precise-navigation-001</code></h3>
+            <p><strong>Slice:</strong> <code>conversational_precise_navigation</code></p>
+            <p><strong>Prompt:</strong> Read this navigation cue conversationally, but with precise timing and lane details.</p>
+            <p><strong>Target:</strong> In 900 feet, use the right two lanes to take exit 18B toward Lake Avenue.</p>
+          </article>
+        </div>
+      </details>
     </section>
 
     <h2>Model Leaderboard</h2>
@@ -1376,7 +1413,7 @@
           <td data-label="Rank">1</td>
           <td data-label="Model"><code>mlx-community/chatterbox-turbo-6bit</code></td>
           <td data-label="Avg">91.2</td>
-          <td data-label="Accurate">86 / 125</td>
+          <td data-label="Accurate">89 / 130</td>
           <td data-label="Weakest Category"><code>information_tuning</code> avg 84.5</td>
           <td data-label="Likely Fix Focus">number clarity, pauses around dense facts</td>
         </tr>
@@ -1384,7 +1421,7 @@
           <td data-label="Rank">2</td>
           <td data-label="Model"><code>mlx-community/Kokoro-82M-4bit</code></td>
           <td data-label="Avg">88.6</td>
-          <td data-label="Accurate">79 / 125</td>
+          <td data-label="Accurate">82 / 130</td>
           <td data-label="Weakest Category"><code>speech_steerability</code> avg 80.8</td>
           <td data-label="Likely Fix Focus">style control, emphasis, pacing</td>
         </tr>
@@ -1392,7 +1429,7 @@
           <td data-label="Rank">3</td>
           <td data-label="Model"><code>mlx-community/Qwen3-TTS-12Hz-0.6B-Base-4bit</code></td>
           <td data-label="Avg">84.7</td>
-          <td data-label="Accurate">59 / 125</td>
+          <td data-label="Accurate">61 / 130</td>
           <td data-label="Weakest Category"><code>paralinguistics</code> avg 77.0</td>
           <td data-label="Likely Fix Focus">emotion rendering, natural prosody</td>
         </tr>
@@ -1434,13 +1471,17 @@
         <p><code>voice_conversion_similarity</code><br>avg 84.0 / n 5 / 74-92</p>
         <p><code>accent_dialect_handling</code><br>avg 83.4 / n 5 / 73-91</p>
         <p><code>artifact_suppression</code><br>avg 83.0 / n 5 / 72-91</p>
+        <p><code>temporal_rhythm_control</code><br>avg 84.4 / n 5 / 75-92</p>
         <p><code>safety_privacy_delivery</code><br>avg 84.5 / n 5 / 74-92</p>
+        <p><code>semantic_contrast_focus</code><br>avg 85.0 / n 5 / 76-93</p>
+        <p><code>dialogue_turn_management</code><br>avg 86.2 / n 5 / 78-94</p>
+        <p><code>compositional_style_control</code><br>avg 83.8 / n 5 / 74-92</p>
       </div>
       <div class="panel">
         <h3>Scores By Model</h3>
-        <p><code>mlx-community/chatterbox-turbo-6bit</code><br>avg 90.1 / n 125 / 78-97</p>
-        <p><code>mlx-community/Kokoro-82M-4bit</code><br>avg 87.2 / n 125 / 73-95</p>
-        <p><code>mlx-community/Qwen3-TTS-12Hz-0.6B-Base-4bit</code><br>avg 83.6 / n 125 / 70-93</p>
+        <p><code>mlx-community/chatterbox-turbo-6bit</code><br>avg 90.1 / n 130 / 78-97</p>
+        <p><code>mlx-community/Kokoro-82M-4bit</code><br>avg 87.2 / n 130 / 73-95</p>
+        <p><code>mlx-community/Qwen3-TTS-12Hz-0.6B-Base-4bit</code><br>avg 83.6 / n 130 / 70-93</p>
       </div>
       <div class="panel">
         <h3>Scores By Voice</h3>
@@ -1576,6 +1617,27 @@
           <td data-label="Qwen3-TTS">80.5</td>
           <td data-label="What To Inspect">consent wording, credential warnings, redactions, negation, irreversible-action clarity</td>
         </tr>
+        <tr>
+          <td data-label="Category"><code>semantic_contrast_focus</code></td>
+          <td data-label="Chatterbox">89.0</td>
+          <td data-label="Kokoro">85.5</td>
+          <td data-label="Qwen3-TTS">80.5</td>
+          <td data-label="What To Inspect">negation scope, exception boundaries, corrections, balanced choices, thresholds</td>
+        </tr>
+        <tr>
+          <td data-label="Category"><code>dialogue_turn_management</code></td>
+          <td data-label="Chatterbox">90.0</td>
+          <td data-label="Kokoro">86.0</td>
+          <td data-label="Qwen3-TTS">82.5</td>
+          <td data-label="What To Inspect">acknowledgments, clarification questions, repair restarts, handoffs, closure</td>
+        </tr>
+        <tr>
+          <td data-label="Category"><code>compositional_style_control</code></td>
+          <td data-label="Chatterbox">88.5</td>
+          <td data-label="Kokoro">84.5</td>
+          <td data-label="Qwen3-TTS">78.5</td>
+          <td data-label="What To Inspect">quiet urgency, friendly formality, upbeat slow coaching, serious reassurance</td>
+        </tr>
       </tbody>
     </table>
 
@@ -1600,17 +1662,17 @@
         <tr>
           <td data-label="Compared Model"><code>mlx-community/Kokoro-82M-4bit</code></td>
           <td data-label="Baseline"><code>mlx-community/chatterbox-turbo-6bit</code></td>
-          <td data-label="Matched Cases">125</td>
+          <td data-label="Matched Cases">130</td>
           <td data-label="Avg Delta">-2.6</td>
-          <td data-label="Wins / Ties / Losses">21 / 15 / 89</td>
+          <td data-label="Wins / Ties / Losses">22 / 16 / 92</td>
           <td data-label="Largest Regressions">speech pace and emphasis cases where style control trails the baseline.</td>
         </tr>
         <tr>
           <td data-label="Compared Model"><code>mlx-community/Qwen3-TTS-12Hz-0.6B-Base-4bit</code></td>
           <td data-label="Baseline"><code>mlx-community/chatterbox-turbo-6bit</code></td>
-          <td data-label="Matched Cases">125</td>
+          <td data-label="Matched Cases">130</td>
           <td data-label="Avg Delta">-6.5</td>
-          <td data-label="Wins / Ties / Losses">13 / 11 / 101</td>
+          <td data-label="Wins / Ties / Losses">14 / 12 / 104</td>
           <td data-label="Largest Regressions">emotion and dense-fact cases with lower naturalness or intelligibility.</td>
         </tr>
       </tbody>
@@ -1634,7 +1696,7 @@
       </div>
       <div class="panel">
         <h3>Synthesis Model</h3>
-        <p><code>mlx-community/Qwen3-TTS-12Hz-0.6B-Base-4bit</code><br>avg 83.6 / n 125 / range 70-93</p>
+        <p><code>mlx-community/Qwen3-TTS-12Hz-0.6B-Base-4bit</code><br>avg 83.6 / n 130 / range 70-93</p>
         <p class="muted">Compare model-level weak spots before changing prompts, voices, wrappers, or model settings.</p>
       </div>
     </section>

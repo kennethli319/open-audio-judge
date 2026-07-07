@@ -726,6 +726,30 @@ TTS_CATEGORY_GUIDANCE = {
             "conditional and negation emphasis",
         ],
     ),
+    "semantic_contrast_focus": (
+        "negation scope, exception boundaries, corrections, balanced alternatives, and threshold rules",
+        [
+            "contrastive emphasis control",
+            "semantic phrase boundary detection",
+            "conditional and negation prosody",
+        ],
+    ),
+    "dialogue_turn_management": (
+        "acknowledgments, clarification questions, repair restarts, handoffs, and task closure",
+        [
+            "dialogue-act prosody",
+            "turn-boundary pacing",
+            "question and handoff intonation",
+        ],
+    ),
+    "compositional_style_control": (
+        "simultaneous style constraints such as quiet urgency, friendly formality, and precise conversation",
+        [
+            "multi-control style conditioning",
+            "style conflict calibration",
+            "instruction and intelligibility preservation",
+        ],
+    ),
 }
 
 

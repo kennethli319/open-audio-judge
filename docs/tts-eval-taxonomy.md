@@ -77,10 +77,13 @@ runs can map private prompts into the same categories without copying private ro
 - `dialogue_turn_management`: spoken-assistant acknowledgments, clarification questions, repair
   restarts, service handoffs, and task-closing next actions where turn boundaries must stay natural
   and exact.
+- `compositional_style_control`: simultaneous style constraints such as quiet urgency, friendly
+  formality, upbeat slow coaching, serious reassurance, and conversational precision where one
+  control should not erase another.
 
 ## Manifest Contract
 
-The public comparison manifest is intentionally balanced at 125 cases for now: 25 categories with 5
+The public comparison manifest is intentionally balanced at 130 cases for now: 26 categories with 5
 cases each. Expansion should add complete five-case category batches before deepening existing
 categories.
 
