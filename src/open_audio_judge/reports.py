@@ -265,7 +265,7 @@ def render_html_report(results: list[EvaluationResult]) -> str:
     }}
     .case-tools {{
       display: grid;
-      grid-template-columns: minmax(220px, 1fr) repeat(3, minmax(140px, 180px));
+      grid-template-columns: minmax(220px, 1fr) repeat(5, minmax(130px, 180px));
       gap: 10px;
       margin: 0 0 12px;
       align-items: end;
@@ -407,6 +407,8 @@ def render_html_report(results: list[EvaluationResult]) -> str:
       const label = document.querySelector("#case-label-filter");
       const status = document.querySelector("#case-status-filter");
       const model = document.querySelector("#case-model-filter");
+      const category = document.querySelector("#case-category-filter");
+      const slice = document.querySelector("#case-slice-filter");
       const count = document.querySelector("#case-visible-count");
       const state = {{ sortKey: "", sortDir: "desc" }};
 
@@ -415,13 +417,17 @@ def render_html_report(results: list[EvaluationResult]) -> str:
         const labelValue = label?.value || "";
         const statusValue = status?.value || "";
         const modelValue = model?.value || "";
+        const categoryValue = category?.value || "";
+        const sliceValue = slice?.value || "";
         let visible = 0;
         rows.forEach((row) => {{
           const matches =
             (!query || row.dataset.search.includes(query)) &&
             (!labelValue || row.dataset.label === labelValue) &&
             (!statusValue || row.dataset.status === statusValue) &&
-            (!modelValue || row.dataset.model === modelValue);
+            (!modelValue || row.dataset.model === modelValue) &&
+            (!categoryValue || row.dataset.category === categoryValue) &&
+            (!sliceValue || row.dataset.slice === sliceValue);
           row.classList.toggle("is-hidden", !matches);
           if (matches) visible += 1;
         }});
@@ -443,7 +449,7 @@ def render_html_report(results: list[EvaluationResult]) -> str:
         applyFilters();
       }}
 
-      [search, label, status, model].forEach((control) => {{
+      [search, label, status, model, category, slice].forEach((control) => {{
         control?.addEventListener("input", applyFilters);
         control?.addEventListener("change", applyFilters);
       }});
@@ -540,7 +546,9 @@ def _render_row(result: EvaluationResult) -> str:
     score_detail = _render_judge_sample_scores(result)
     search_text = _result_search_text(result)
     model = _metadata_group_value(result, "synthesis_model") or ""
-    return f"""<tr data-case="{html.escape(result.case_id)}" data-score="{score}" data-label="{html.escape(label)}" data-status="{html.escape(result.status)}" data-model="{html.escape(model)}" data-search="{html.escape(search_text)}">
+    category = _metadata_group_value(result, "evaluation_category") or ""
+    tts_slice = _metadata_group_value(result, "tts_slice") or ""
+    return f"""<tr data-case="{html.escape(result.case_id)}" data-score="{score}" data-label="{html.escape(label)}" data-status="{html.escape(result.status)}" data-model="{html.escape(model)}" data-category="{html.escape(category)}" data-slice="{html.escape(tts_slice)}" data-search="{html.escape(search_text)}">
   <td data-label="Case">{html.escape(result.case_id)}</td>
   <td data-label="Provenance">{_render_provenance(result)}</td>
   <td data-label="Score" class="scorebar"><strong>{score}</strong>
@@ -562,8 +570,30 @@ def _render_case_table_controls(results: list[EvaluationResult]) -> str:
             if (value := _metadata_group_value(result, "synthesis_model")) is not None
         }
     )
+    categories = sorted(
+        {
+            value
+            for result in results
+            if (value := _metadata_group_value(result, "evaluation_category")) is not None
+        }
+    )
+    slices = sorted(
+        {
+            value
+            for result in results
+            if (value := _metadata_group_value(result, "tts_slice")) is not None
+        }
+    )
     model_options = "".join(
         f'<option value="{html.escape(model)}">{html.escape(model)}</option>' for model in models
+    )
+    category_options = "".join(
+        f'<option value="{html.escape(category)}">{html.escape(category.replace("_", " "))}</option>'
+        for category in categories
+    )
+    slice_options = "".join(
+        f'<option value="{html.escape(tts_slice)}">{html.escape(tts_slice.replace("_", " "))}</option>'
+        for tts_slice in slices
     )
     return f"""<section class="case-tools" aria-label="Case result filters">
       <label>Search
@@ -589,6 +619,18 @@ def _render_case_table_controls(results: list[EvaluationResult]) -> str:
         <select id="case-model-filter">
           <option value="">All models</option>
           {model_options}
+        </select>
+      </label>
+      <label>Category
+        <select id="case-category-filter">
+          <option value="">All categories</option>
+          {category_options}
+        </select>
+      </label>
+      <label>TTS Slice
+        <select id="case-slice-filter">
+          <option value="">All slices</option>
+          {slice_options}
         </select>
       </label>
       <div class="muted" id="case-visible-count">{len(results)} / {len(results)} shown</div>

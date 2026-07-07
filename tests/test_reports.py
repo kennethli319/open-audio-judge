@@ -227,6 +227,8 @@ def test_write_html_report_aggregates_tts_candidate_metadata(tmp_path: Path) -> 
     assert 'id="case-label-filter"' in html
     assert 'id="case-status-filter"' in html
     assert 'id="case-model-filter"' in html
+    assert 'id="case-category-filter"' in html
+    assert 'id="case-slice-filter"' in html
     assert 'id="case-visible-count"' in html
     assert 'data-sort="score"' in html
     assert 'data-sort="case"' in html
@@ -234,6 +236,10 @@ def test_write_html_report_aggregates_tts_candidate_metadata(tmp_path: Path) -> 
     assert 'data-label="inaccurate"' in html
     assert 'data-status="provider_error"' in html
     assert 'data-model="mlx-community/Kokoro-82M-4bit"' in html
+    assert 'data-category="information_tuning"' in html
+    assert 'data-slice="dates_times"' in html
+    assert "All categories" in html
+    assert "All slices" in html
     assert "The number and date were hard to understand." in html
 
 
