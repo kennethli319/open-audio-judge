@@ -177,6 +177,45 @@ def test_write_html_report_aggregates_tts_candidate_metadata(tmp_path: Path) -> 
     assert "dates times / prosody issue" in html
 
 
+def test_write_html_report_shows_sample_provenance_per_row(tmp_path: Path) -> None:
+    result = EvaluationResult(
+        case_id="tts-date-local-tts",
+        task="tts_naturalness",
+        judge_id="tts_naturalness",
+        judge_version="0.1.0",
+        provider="gemini",
+        overall_score=72,
+        reason="Mostly natural with a slight pause.",
+        error_categories=["prosody_issue"],
+        label="needs_review",
+        metadata={
+            "tts_slice": "dates_times",
+            "synthesis_model": "mlx-community/chatterbox-turbo-6bit",
+            "synthesis_voice": "af_heart",
+            "synthesis_lang_code": "en",
+            "sample_kind": "local_synthetic_tts",
+            "source_case_id": "tts-evalset-row-001",
+            "reference_text_sha256": "abc123",
+            "audio_duration_seconds": 1.234,
+            "audio_bytes": 4096,
+        },
+    )
+
+    output = write_html_report([result], tmp_path / "report.html")
+    html = output.read_text(encoding="utf-8")
+
+    assert "<th>Provenance</th>" in html
+    assert 'data-label="Provenance"' in html
+    assert "dates times" in html
+    assert "mlx-community/chatterbox-turbo-6bit" in html
+    assert "af heart" in html
+    assert "local synthetic tts" in html
+    assert "tts-evalset-row-001" in html
+    assert "abc123" in html
+    assert "1.23s" in html
+    assert "4096" in html
+
+
 def test_write_html_report_highlights_priority_semantic_cases(tmp_path: Path) -> None:
     results = [
         EvaluationResult(

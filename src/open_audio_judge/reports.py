@@ -267,6 +267,7 @@ def render_html_report(results: list[EvaluationResult]) -> str:
       <thead>
         <tr>
           <th>Case</th>
+          <th>Provenance</th>
           <th>Score</th>
           <th>Label</th>
           <th>Reason</th>
@@ -305,6 +306,7 @@ def _render_row(result: EvaluationResult) -> str:
     label = result.label
     return f"""<tr>
   <td data-label="Case">{html.escape(result.case_id)}</td>
+  <td data-label="Provenance">{_render_provenance(result)}</td>
   <td data-label="Score" class="scorebar"><strong>{score}</strong>
     <div class="bar"><div class="{label}-fill" style="width:{score}%"></div></div>
   </td>
@@ -580,6 +582,47 @@ def _render_diagnostics(result: EvaluationResult) -> str:
     if result.researcher_notes:
         parts.append(_render_list("Researcher notes", result.researcher_notes))
     return "".join(parts) if parts else '<span class="muted">None</span>'
+
+
+def _render_provenance(result: EvaluationResult) -> str:
+    fields = [
+        ("Slice", "tts_slice"),
+        ("Model", "synthesis_model"),
+        ("Voice", "synthesis_voice"),
+        ("Language", "language"),
+        ("Lang code", "synthesis_lang_code"),
+        ("Sample", "sample_kind"),
+        ("Source case", "source_case_id"),
+        ("Text SHA-256", "reference_text_sha256"),
+        ("Duration", "audio_duration_seconds"),
+        ("Bytes", "audio_bytes"),
+    ]
+    items: list[str] = []
+    for label, field in fields:
+        value = result.metadata.get(field)
+        if not _has_display_value(value):
+            continue
+        items.append(
+            f"<li><span>{html.escape(label)}</span> "
+            f"<strong>{html.escape(_format_provenance_value(value, field))}</strong></li>"
+        )
+    if not items:
+        return '<span class="muted">None</span>'
+    return f'<ul class="counts provenance">{"".join(items)}</ul>'
+
+
+def _has_display_value(value: object) -> bool:
+    if isinstance(value, str):
+        return bool(value.strip())
+    return isinstance(value, (int, float))
+
+
+def _format_provenance_value(value: object, field: str) -> str:
+    if field == "audio_duration_seconds" and isinstance(value, (int, float)):
+        return f"{value:.2f}s"
+    if field == "audio_bytes" and isinstance(value, (int, float)):
+        return str(int(value))
+    return str(value).replace("_", " ")
 
 
 def _render_list(title: str, items: list[str]) -> str:
