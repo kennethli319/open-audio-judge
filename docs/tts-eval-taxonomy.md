@@ -141,10 +141,14 @@ runs can map private prompts into the same categories without copying private ro
 - `repair_sensitive_delivery`: corrections, cancellations, replacements, reversed directions, and
   status repairs where the model must make the rejected value and active value unmistakable without
   adding words or flattening the repair cue.
+- `pause_breath_control`: explicit short and long pauses, clean breath-group boundaries,
+  condition-preserving phrasing, guided breathing phases, parenthetical asides, and long-update
+  breath placement where prosody should aid intelligibility without adding words or breaking
+  meaning-critical spans.
 
 ## Manifest Contract
 
-The public comparison manifest is intentionally balanced at 240 cases for now: 48 categories with 5
+The public comparison manifest is intentionally balanced at 245 cases for now: 49 categories with 5
 cases each. Expansion should add complete five-case category batches before deepening existing
 categories.
 

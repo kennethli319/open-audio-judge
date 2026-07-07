@@ -416,7 +416,7 @@
   --cases examples/tts_multiturn_cases.jsonl \
   --judge-provider gemini \
   --judge-samples 3 \
-  --limit 240 \
+  --limit 245 \
   --out runs/leaderboard/chatterbox</code></pre>
 
     <pre><code>oaj autojudge-local-tts \
@@ -425,7 +425,7 @@
   --cases examples/tts_multiturn_cases.jsonl \
   --judge-provider gemini \
   --judge-samples 3 \
-  --limit 240 \
+  --limit 245 \
   --out runs/leaderboard/kokoro</code></pre>
 
     <pre><code>oaj autojudge-local-tts \
@@ -434,7 +434,7 @@
   --cases examples/tts_multiturn_cases.jsonl \
   --judge-provider gemini \
   --judge-samples 3 \
-  --limit 240 \
+  --limit 245 \
   --out runs/leaderboard/qwen3-tts</code></pre>
 
     <p>
@@ -446,7 +446,7 @@
   --cases examples/tts_multiturn_cases.jsonl \
   --judge-provider gemini \
   --judge-samples 3 \
-  --limit 240 \
+  --limit 245 \
   --out runs/leaderboard/chatterbox</code></pre>
 
     <p>
@@ -491,16 +491,16 @@
     <h2>Sample Report Preview</h2>
     <section class="grid" aria-label="Sample report metrics">
       <div class="metric"><span>Models</span><strong>3</strong></div>
-      <div class="metric"><span>Shared Eval Cases</span><strong>240</strong></div>
+      <div class="metric"><span>Shared Eval Cases</span><strong>245</strong></div>
       <div class="metric"><span>Judge Samples</span><strong>3x</strong></div>
       <div class="metric"><span>Top Avg</span><strong>91.2</strong></div>
       <div class="metric"><span>Lowest Avg</span><strong>84.7</strong></div>
-      <div class="metric"><span>Total Judgments</span><strong>2160</strong></div>
+      <div class="metric"><span>Total Judgments</span><strong>2205</strong></div>
     </section>
 
     <h2>Eval Set Samples</h2>
     <p>
-      The public demo eval set contains 240 synthetic, public-safe cases grouped into research-backed
+      The public demo eval set contains 245 synthetic, public-safe cases grouped into research-backed
       TTS dimensions. Each category below contributes five shared cases that every model synthesizes
       before Gemini judges the generated audio.
     </p>
@@ -2182,6 +2182,41 @@
             <p><strong>Slice:</strong> <code>status_label_negation_then_replacement</code></p>
             <p><strong>Prompt:</strong> Read this status correction so the first label is rejected and the replacement label is easy to log.</p>
             <p><strong>Target:</strong> The account is not closed; mark it pending review until the signed form arrives.</p>
+          </article>
+        </div>
+      </details>
+      <details class="sample-group" data-category="pause_breath_control">
+        <summary><span>Pause Breath Control</span><strong>5 cases</strong></summary>
+        <div class="sample-list">
+          <article class="sample-card">
+            <h3><code>tts-pause-breath-control-brief-long-pause-001</code></h3>
+            <p><strong>Slice:</strong> <code>brief_then_long_pause_training_cue</code></p>
+            <p><strong>Prompt:</strong> Read this training cue with a brief pause after ready and a longer pause after set, without adding extra words.</p>
+            <p><strong>Target:</strong> Ready, set, begin the scan when the green light turns on.</p>
+          </article>
+          <article class="sample-card">
+            <h3><code>tts-pause-breath-control-no-midphrase-breath-001</code></h3>
+            <p><strong>Slice:</strong> <code>avoid_midphrase_breath_lab_condition</code></p>
+            <p><strong>Prompt:</strong> Read this lab instruction in one smooth breath group through the condition, with no awkward pause inside the vial phrase.</p>
+            <p><strong>Target:</strong> Keep the sterile cap sealed until the vial reaches room temperature, then label it for storage.</p>
+          </article>
+          <article class="sample-card">
+            <h3><code>tts-pause-breath-control-meditation-counts-001</code></h3>
+            <p><strong>Slice:</strong> <code>breathing_exercise_phase_spacing</code></p>
+            <p><strong>Prompt:</strong> Read this breathing exercise with calm spacing between phases, but do not sound sleepy or drop the counts.</p>
+            <p><strong>Target:</strong> Inhale for four counts, hold for two, then exhale slowly through the next four counts.</p>
+          </article>
+          <article class="sample-card">
+            <h3><code>tts-pause-breath-control-parenthetical-boundary-001</code></h3>
+            <p><strong>Slice:</strong> <code>parenthetical_breath_group_boundaries</code></p>
+            <p><strong>Prompt:</strong> Read this maintenance note with the parenthetical phrase set off by clean breath-group boundaries.</p>
+            <p><strong>Target:</strong> The north pump, which is the backup unit, should stay offline until noon.</p>
+          </article>
+          <article class="sample-card">
+            <h3><code>tts-pause-breath-control-long-form-breathing-001</code></h3>
+            <p><strong>Slice:</strong> <code>long_update_natural_breath_boundaries</code></p>
+            <p><strong>Prompt:</strong> Read this long customer update with natural breaths only at clause boundaries, not in the middle of names or dates.</p>
+            <p><strong>Target:</strong> After the July service window, Morgan will review the access logs, confirm the badge list, and send one final summary.</p>
           </article>
         </div>
       </details>
