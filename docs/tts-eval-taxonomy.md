@@ -183,10 +183,13 @@ runs can map private prompts into the same categories without copying private ro
 - `syntactic_attachment_delivery`: subordinate clauses, modifier attachment, coordination scope,
   reduced-relative descriptors, and appositive names where prosodic grouping must preserve which
   phrase attaches to which actor, object, or condition.
+- `quantifier_scope_delivery`: all/except, not every, at least/at most, every/except, exactly one,
+  and neither constructions where prosody must preserve set membership, exclusions, lower and upper
+  bounds, and exact cardinality.
 
 ## Manifest Contract
 
-The public comparison manifest is intentionally balanced at 310 cases for now: 62 categories with 5
+The public comparison manifest is intentionally balanced at 315 cases for now: 63 categories with 5
 cases each. Expansion should add complete five-case category batches before deepening existing
 categories.
 

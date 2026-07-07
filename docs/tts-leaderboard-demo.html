@@ -387,6 +387,7 @@
           <option value="ordinal_ranking_delivery">Ordinal ranking delivery</option>
           <option value="temporal_relation_delivery">Temporal relation delivery</option>
           <option value="syntactic_attachment_delivery">Syntactic attachment delivery</option>
+          <option value="quantifier_scope_delivery">Quantifier scope delivery</option>
         </select>
         <select id="label-filter" aria-label="Filter by label">
           <option value="">All labels</option>
@@ -431,7 +432,7 @@
   --cases examples/tts_multiturn_cases.jsonl \
   --judge-provider gemini \
   --judge-samples 3 \
-  --limit 310 \
+  --limit 315 \
   --out runs/leaderboard/chatterbox</code></pre>
 
     <pre><code>oaj autojudge-local-tts \
@@ -440,7 +441,7 @@
   --cases examples/tts_multiturn_cases.jsonl \
   --judge-provider gemini \
   --judge-samples 3 \
-  --limit 310 \
+  --limit 315 \
   --out runs/leaderboard/kokoro</code></pre>
 
     <pre><code>oaj autojudge-local-tts \
@@ -449,7 +450,7 @@
   --cases examples/tts_multiturn_cases.jsonl \
   --judge-provider gemini \
   --judge-samples 3 \
-  --limit 310 \
+  --limit 315 \
   --out runs/leaderboard/qwen3-tts</code></pre>
 
     <p>
@@ -461,7 +462,7 @@
   --cases examples/tts_multiturn_cases.jsonl \
   --judge-provider gemini \
   --judge-samples 3 \
-  --limit 310 \
+  --limit 315 \
   --out runs/leaderboard/chatterbox</code></pre>
 
     <p>
@@ -506,7 +507,7 @@
     <h2>Sample Report Preview</h2>
     <section class="grid" aria-label="Sample report metrics">
       <div class="metric"><span>Models</span><strong>3</strong></div>
-      <div class="metric"><span>Shared Eval Cases</span><strong>310</strong></div>
+      <div class="metric"><span>Shared Eval Cases</span><strong>315</strong></div>
       <div class="metric"><span>Judge Samples</span><strong>3x</strong></div>
       <div class="metric"><span>Top Avg</span><strong>91.2</strong></div>
       <div class="metric"><span>Lowest Avg</span><strong>84.7</strong></div>
@@ -515,7 +516,7 @@
 
     <h2>Eval Set Samples</h2>
     <p>
-      The public demo eval set contains 310 synthetic, public-safe cases grouped into research-backed
+      The public demo eval set contains 315 synthetic, public-safe cases grouped into research-backed
       TTS dimensions. Each category below contributes five shared cases that every model synthesizes
       before Gemini judges the generated audio.
     </p>
@@ -2687,6 +2688,41 @@
             <p><strong>Slice:</strong> <code>appositive_manager_name_after_audit</code></p>
             <p><strong>Prompt:</strong> Read this scheduling note so Alex is clearly the manager, not a second person to call.</p>
             <p><strong>Target:</strong> Call Priya's manager, Alex, after the audit ends.</p>
+          </article>
+        </div>
+      </details>
+      <details class="sample-group" data-category="quantifier_scope_delivery">
+        <summary><span>Quantifier Scope Delivery</span><strong>5 cases</strong></summary>
+        <div class="sample-list">
+          <article class="sample-card">
+            <h3><code>tts-quantifier-scope-delivery-backup-exception-001</code></h3>
+            <p><strong>Slice:</strong> <code>backup_all_except_billing_export</code></p>
+            <p><strong>Prompt:</strong> Read this backup status so the universal statement and exception are both clear.</p>
+            <p><strong>Target:</strong> All backup jobs except the billing export finished before midnight.</p>
+          </article>
+          <article class="sample-card">
+            <h3><code>tts-quantifier-scope-delivery-inventory-negative-001</code></h3>
+            <p><strong>Slice:</strong> <code>inventory_not_every_scanner_batteries_instead</code></p>
+            <p><strong>Prompt:</strong> Read this inventory note so not every is not confused with none.</p>
+            <p><strong>Target:</strong> Not every scanner needs replacement; the dock batteries need replacement instead.</p>
+          </article>
+          <article class="sample-card">
+            <h3><code>tts-quantifier-scope-delivery-reviewer-limits-001</code></h3>
+            <p><strong>Slice:</strong> <code>reviewer_at_least_interview_at_most</code></p>
+            <p><strong>Prompt:</strong> Read this scheduling constraint so lower and upper bounds cannot be swapped.</p>
+            <p><strong>Target:</strong> Assign at least three reviewers, but schedule at most two live interviews today.</p>
+          </article>
+          <article class="sample-card">
+            <h3><code>tts-quantifier-scope-delivery-clinical-exclusion-001</code></h3>
+            <p><strong>Slice:</strong> <code>clinical_every_discharged_except_cardiology</code></p>
+            <p><strong>Prompt:</strong> Read this clinical handoff so the exclusion applies only to one patient group.</p>
+            <p><strong>Target:</strong> Give every discharged patient a follow-up call, except those already seen by cardiology.</p>
+          </article>
+          <article class="sample-card">
+            <h3><code>tts-quantifier-scope-delivery-device-cardinality-001</code></h3>
+            <p><strong>Slice:</strong> <code>device_exactly_one_neither_old_dock</code></p>
+            <p><strong>Prompt:</strong> Read this device note so exact cardinality and total exclusion stay separate.</p>
+            <p><strong>Target:</strong> Exactly one adapter supports fast charging, and neither adapter works with the old dock.</p>
           </article>
         </div>
       </details>

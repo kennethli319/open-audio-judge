@@ -1038,6 +1038,14 @@ TTS_CATEGORY_GUIDANCE = {
             "actor, object, and condition grouping",
         ],
     ),
+    "quantifier_scope_delivery": (
+        "all/except, not every, at least/at most, every/except, exactly one, and neither constructions",
+        [
+            "quantifier and exclusion phrase grouping",
+            "set-membership and cardinality text faithfulness",
+            "lower-bound, upper-bound, and negative-scope prosody",
+        ],
+    ),
 }
 
 
