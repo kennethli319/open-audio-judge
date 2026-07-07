@@ -378,7 +378,7 @@
   --cases examples/tts_multiturn_cases.jsonl \
   --judge-provider gemini \
   --judge-samples 3 \
-  --limit 55 \
+  --limit 60 \
   --out runs/leaderboard/chatterbox</code></pre>
 
     <pre><code>oaj autojudge-local-tts \
@@ -387,7 +387,7 @@
   --cases examples/tts_multiturn_cases.jsonl \
   --judge-provider gemini \
   --judge-samples 3 \
-  --limit 55 \
+  --limit 60 \
   --out runs/leaderboard/kokoro</code></pre>
 
     <pre><code>oaj autojudge-local-tts \
@@ -396,7 +396,7 @@
   --cases examples/tts_multiturn_cases.jsonl \
   --judge-provider gemini \
   --judge-samples 3 \
-  --limit 55 \
+  --limit 60 \
   --out runs/leaderboard/qwen3-tts</code></pre>
 
     <p>
@@ -408,7 +408,7 @@
   --cases examples/tts_multiturn_cases.jsonl \
   --judge-provider gemini \
   --judge-samples 3 \
-  --limit 55 \
+  --limit 60 \
   --out runs/leaderboard/chatterbox</code></pre>
 
     <p>
@@ -453,16 +453,16 @@
     <h2>Sample Report Preview</h2>
     <section class="grid" aria-label="Sample report metrics">
       <div class="metric"><span>Models</span><strong>3</strong></div>
-      <div class="metric"><span>Shared Eval Cases</span><strong>55</strong></div>
+      <div class="metric"><span>Shared Eval Cases</span><strong>60</strong></div>
       <div class="metric"><span>Judge Samples</span><strong>3x</strong></div>
       <div class="metric"><span>Top Avg</span><strong>91.2</strong></div>
       <div class="metric"><span>Lowest Avg</span><strong>84.7</strong></div>
-      <div class="metric"><span>Total Judgments</span><strong>495</strong></div>
+      <div class="metric"><span>Total Judgments</span><strong>540</strong></div>
     </section>
 
     <h2>Eval Set Samples</h2>
     <p>
-      The public demo eval set contains 55 synthetic, public-safe cases grouped into research-backed
+      The public demo eval set contains 60 synthetic, public-safe cases grouped into research-backed
       TTS dimensions. Each category below contributes five shared cases that every model synthesizes
       before Gemini judges the generated audio.
     </p>
@@ -852,6 +852,41 @@
           </article>
         </div>
       </details>
+      <details class="sample-group" data-category="spontaneous_conversation">
+        <summary><span>Spontaneous Conversation</span><strong>5 cases</strong></summary>
+        <div class="sample-list">
+          <article class="sample-card">
+            <h3><code>tts-spontaneous-conversation-hesitation-001</code></h3>
+            <p><strong>Slice:</strong> <code>spoken_hesitation</code></p>
+            <p><strong>Prompt:</strong> Read this like a natural support conversation with mild hesitation, but do not add any extra filler words.</p>
+            <p><strong>Target:</strong> I, uh, I think we should restart the router first, then check whether the status light comes back.</p>
+          </article>
+          <article class="sample-card">
+            <h3><code>tts-spontaneous-conversation-repair-001</code></h3>
+            <p><strong>Slice:</strong> <code>self_correction_repair</code></p>
+            <p><strong>Prompt:</strong> Read this as a quick self-correction in conversation, with the correction easy to notice.</p>
+            <p><strong>Target:</strong> The pickup is at gate fourteen, sorry, gate forty, near the blue kiosk.</p>
+          </article>
+          <article class="sample-card">
+            <h3><code>tts-spontaneous-conversation-backchannel-001</code></h3>
+            <p><strong>Slice:</strong> <code>backchannel_acknowledgment</code></p>
+            <p><strong>Prompt:</strong> Read this as a helpful agent acknowledging the caller before giving the action.</p>
+            <p><strong>Target:</strong> Mm-hmm, I see the issue now; you were charged twice, and I can reverse the duplicate today.</p>
+          </article>
+          <article class="sample-card">
+            <h3><code>tts-spontaneous-conversation-pause-001</code></h3>
+            <p><strong>Slice:</strong> <code>thinking_pause_resume</code></p>
+            <p><strong>Prompt:</strong> Read this with a natural thinking pause at the three dots, then continue cleanly.</p>
+            <p><strong>Target:</strong> Let me check the schedule... okay, the earliest opening is Wednesday afternoon.</p>
+          </article>
+          <article class="sample-card">
+            <h3><code>tts-spontaneous-conversation-restart-001</code></h3>
+            <p><strong>Slice:</strong> <code>conversational_restart</code></p>
+            <p><strong>Prompt:</strong> Read this as a conversational restart that is firm but not alarming.</p>
+            <p><strong>Target:</strong> Wait, no, keep the charger plugged in until the update finishes.</p>
+          </article>
+        </div>
+      </details>
     </section>
 
     <h2>Model Leaderboard</h2>
@@ -871,7 +906,7 @@
           <td data-label="Rank">1</td>
           <td data-label="Model"><code>mlx-community/chatterbox-turbo-6bit</code></td>
           <td data-label="Avg">91.2</td>
-          <td data-label="Accurate">49 / 55</td>
+          <td data-label="Accurate">53 / 60</td>
           <td data-label="Weakest Category"><code>information_tuning</code> avg 84.5</td>
           <td data-label="Likely Fix Focus">number clarity, pauses around dense facts</td>
         </tr>
@@ -879,7 +914,7 @@
           <td data-label="Rank">2</td>
           <td data-label="Model"><code>mlx-community/Kokoro-82M-4bit</code></td>
           <td data-label="Avg">88.6</td>
-          <td data-label="Accurate">44 / 55</td>
+          <td data-label="Accurate">48 / 60</td>
           <td data-label="Weakest Category"><code>speech_steerability</code> avg 80.8</td>
           <td data-label="Likely Fix Focus">style control, emphasis, pacing</td>
         </tr>
@@ -887,7 +922,7 @@
           <td data-label="Rank">3</td>
           <td data-label="Model"><code>mlx-community/Qwen3-TTS-12Hz-0.6B-Base-4bit</code></td>
           <td data-label="Avg">84.7</td>
-          <td data-label="Accurate">34 / 55</td>
+          <td data-label="Accurate">37 / 60</td>
           <td data-label="Weakest Category"><code>paralinguistics</code> avg 77.0</td>
           <td data-label="Likely Fix Focus">emotion rendering, natural prosody</td>
         </tr>
@@ -917,12 +952,15 @@
         <p><code>speaker_voice_consistency</code><br>avg 87.2 / n 5 / 79-94</p>
         <p><code>multilingual_code_switching</code><br>avg 84.0 / n 5 / 73-91</p>
         <p><code>long_form_discourse</code><br>avg 86.8 / n 5 / 78-93</p>
+        <p><code>text_normalization</code><br>avg 85.2 / n 5 / 76-92</p>
+        <p><code>acoustic_contexts</code><br>avg 87.4 / n 5 / 79-94</p>
+        <p><code>spontaneous_conversation</code><br>avg 83.8 / n 5 / 75-91</p>
       </div>
       <div class="panel">
         <h3>Scores By Model</h3>
-        <p><code>mlx-community/chatterbox-turbo-6bit</code><br>avg 90.5 / n 55 / 78-97</p>
-        <p><code>mlx-community/Kokoro-82M-4bit</code><br>avg 87.8 / n 55 / 74-95</p>
-        <p><code>mlx-community/Qwen3-TTS-12Hz-0.6B-Base-4bit</code><br>avg 84.1 / n 55 / 70-93</p>
+        <p><code>mlx-community/chatterbox-turbo-6bit</code><br>avg 90.5 / n 60 / 78-97</p>
+        <p><code>mlx-community/Kokoro-82M-4bit</code><br>avg 87.8 / n 60 / 74-95</p>
+        <p><code>mlx-community/Qwen3-TTS-12Hz-0.6B-Base-4bit</code><br>avg 84.1 / n 60 / 70-93</p>
       </div>
       <div class="panel">
         <h3>Scores By Voice</h3>
@@ -1009,6 +1047,27 @@
           <td data-label="Qwen3-TTS">81.0</td>
           <td data-label="What To Inspect">paragraph flow, list structure, topic transitions, stable endings</td>
         </tr>
+        <tr>
+          <td data-label="Category"><code>text_normalization</code></td>
+          <td data-label="Chatterbox">88.0</td>
+          <td data-label="Kokoro">84.5</td>
+          <td data-label="Qwen3-TTS">79.0</td>
+          <td data-label="What To Inspect">currency, URLs, versions, symbols, addresses, abbreviations</td>
+        </tr>
+        <tr>
+          <td data-label="Category"><code>acoustic_contexts</code></td>
+          <td data-label="Chatterbox">89.0</td>
+          <td data-label="Kokoro">86.5</td>
+          <td data-label="Qwen3-TTS">82.0</td>
+          <td data-label="What To Inspect">phone, public-address, quiet, navigation, and dispatch delivery</td>
+        </tr>
+        <tr>
+          <td data-label="Category"><code>spontaneous_conversation</code></td>
+          <td data-label="Chatterbox">87.5</td>
+          <td data-label="Kokoro">83.5</td>
+          <td data-label="Qwen3-TTS">75.0</td>
+          <td data-label="What To Inspect">hesitations, repairs, backchannels, pauses, restarts</td>
+        </tr>
       </tbody>
     </table>
 
@@ -1033,17 +1092,17 @@
         <tr>
           <td data-label="Compared Model"><code>mlx-community/Kokoro-82M-4bit</code></td>
           <td data-label="Baseline"><code>mlx-community/chatterbox-turbo-6bit</code></td>
-          <td data-label="Matched Cases">55</td>
+          <td data-label="Matched Cases">60</td>
           <td data-label="Avg Delta">-2.6</td>
-          <td data-label="Wins / Ties / Losses">5 / 4 / 21</td>
+          <td data-label="Wins / Ties / Losses">10 / 8 / 42</td>
           <td data-label="Largest Regressions">speech pace and emphasis cases where style control trails the baseline.</td>
         </tr>
         <tr>
           <td data-label="Compared Model"><code>mlx-community/Qwen3-TTS-12Hz-0.6B-Base-4bit</code></td>
           <td data-label="Baseline"><code>mlx-community/chatterbox-turbo-6bit</code></td>
-          <td data-label="Matched Cases">55</td>
+          <td data-label="Matched Cases">60</td>
           <td data-label="Avg Delta">-6.5</td>
-          <td data-label="Wins / Ties / Losses">3 / 2 / 25</td>
+          <td data-label="Wins / Ties / Losses">6 / 4 / 50</td>
           <td data-label="Largest Regressions">emotion and dense-fact cases with lower naturalness or intelligibility.</td>
         </tr>
       </tbody>
@@ -1067,7 +1126,7 @@
       </div>
       <div class="panel">
         <h3>Synthesis Model</h3>
-        <p><code>mlx-community/Qwen3-TTS-12Hz-0.6B-Base-4bit</code><br>avg 84.1 / n 55 / range 70-93</p>
+        <p><code>mlx-community/Qwen3-TTS-12Hz-0.6B-Base-4bit</code><br>avg 84.1 / n 60 / range 70-93</p>
         <p class="muted">Compare model-level weak spots before changing prompts, voices, wrappers, or model settings.</p>
       </div>
     </section>

@@ -47,10 +47,12 @@ runs can map private prompts into the same categories without copying private ro
   addresses, and abbreviations that must be spoken unambiguously.
 - `acoustic_contexts`: phone-like support, public address projection, quiet near-field reminders,
   mobile navigation, and clean dispatch styles where delivery context can hurt intelligibility.
+- `spontaneous_conversation`: hesitation, self-correction, backchannels, thinking pauses, and
+  conversational restarts that should sound natural without hallucinated filler or dropped words.
 
 ## Manifest Contract
 
-The public comparison manifest is intentionally balanced at 55 cases for now: 11 categories with 5
+The public comparison manifest is intentionally balanced at 60 cases for now: 12 categories with 5
 cases each. Expansion should add complete five-case category batches before deepening existing
 categories.
 

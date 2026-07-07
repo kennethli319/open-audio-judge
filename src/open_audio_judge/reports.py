@@ -630,6 +630,14 @@ TTS_CATEGORY_GUIDANCE = {
             "artifact and clipping control",
         ],
     ),
+    "spontaneous_conversation": (
+        "hesitation, self-correction, backchannels, thinking pauses, and restarts",
+        [
+            "spontaneous prosody modeling",
+            "disfluency and pause control",
+            "text-faithful conversational timing",
+        ],
+    ),
 }
 
 
