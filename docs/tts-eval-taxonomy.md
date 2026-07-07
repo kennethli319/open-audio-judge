@@ -113,10 +113,13 @@ runs can map private prompts into the same categories without copying private ro
 - `noise_resilience_delivery`: projected but composed delivery for transit alerts, household
   timers, warehouse headset instructions, crowded lobby announcements, and hallway safety messages
   where key entities and conditions must remain intelligible in noisy real-world settings.
+- `audience_register_adaptation`: child-friendly safety, patient plain-language, executive
+  briefings, engineering handoffs, and public-radio narration where style must adapt to the
+  listener without losing exact conditions, entities, or reported-speech boundaries.
 
 ## Manifest Contract
 
-The public comparison manifest is intentionally balanced at 190 cases for now: 38 categories with 5
+The public comparison manifest is intentionally balanced at 195 cases for now: 39 categories with 5
 cases each. Expansion should add complete five-case category batches before deepening existing
 categories.
 
