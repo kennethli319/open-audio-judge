@@ -638,6 +638,22 @@ TTS_CATEGORY_GUIDANCE = {
             "text-faithful conversational timing",
         ],
     ),
+    "affective_transitions": (
+        "within-utterance shifts between empathy, concern, relief, warning, surprise, and guidance",
+        [
+            "emotion transition conditioning",
+            "clause-level prosody control",
+            "style strength calibration",
+        ],
+    ),
+    "punctuation_prosody": (
+        "quote boundaries, list grouping, asides, question contours, and ellipsis pauses",
+        [
+            "punctuation-to-prosody mapping",
+            "phrase boundary detection",
+            "pause and intonation control",
+        ],
+    ),
 }
 
 

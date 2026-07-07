@@ -49,10 +49,14 @@ runs can map private prompts into the same categories without copying private ro
   mobile navigation, and clean dispatch styles where delivery context can hurt intelligibility.
 - `spontaneous_conversation`: hesitation, self-correction, backchannels, thinking pauses, and
   conversational restarts that should sound natural without hallucinated filler or dropped words.
+- `affective_transitions`: within-utterance shifts such as concern to relief, apology to confidence,
+  friendly guidance to warning, surprise to neutral delivery, and empathy to practical instruction.
+- `punctuation_prosody`: quote boundaries, colon/semicolon grouping, aside phrasing, question-answer
+  contours, and ellipsis pauses that should guide prosody without changing the text.
 
 ## Manifest Contract
 
-The public comparison manifest is intentionally balanced at 60 cases for now: 12 categories with 5
+The public comparison manifest is intentionally balanced at 70 cases for now: 14 categories with 5
 cases each. Expansion should add complete five-case category batches before deepening existing
 categories.
 
