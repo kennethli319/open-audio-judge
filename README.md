@@ -22,7 +22,9 @@ Recent work supports a few design choices:
 - Audio-aware judges can align with humans on some speech qualities, but the evidence is task-specific, so prompts should name the exact criterion being judged ([Chiang et al., 2025](https://arxiv.org/html/2506.05984v1)).
 - Speech-quality judge research is moving toward structured, explanation-rich outputs, not scalar-only MOS predictions ([SpeechLLM-as-Judges, 2025](https://arxiv.org/html/2510.14664v1)).
 
-See [docs/research.md](docs/research.md) and [docs/plan.md](docs/plan.md) for the full research notes and project plan.
+See [docs/research.md](docs/research.md), [docs/tts-eval-taxonomy.md](docs/tts-eval-taxonomy.md),
+and [docs/plan.md](docs/plan.md) for the full research notes, TTS category taxonomy, and project
+plan.
 
 ## Quick Start
 
@@ -234,7 +236,7 @@ oaj autojudge-local-tts \
   --cases examples/tts_multiturn_cases.jsonl \
   --judge-provider gemini \
   --judge-samples 3 \
-  --limit 30 \
+  --limit 45 \
   --out runs/chatterbox-tts-autojudge
 ```
 

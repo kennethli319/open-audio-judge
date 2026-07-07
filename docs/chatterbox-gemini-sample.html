@@ -226,7 +226,7 @@
   --cases examples/tts_multiturn_cases.jsonl \
   --judge-provider gemini \
   --judge-samples 3 \
-  --limit 30 \
+  --limit 45 \
   --out runs/leaderboard/chatterbox</code></pre>
 
     <pre><code>oaj autojudge-local-tts \
@@ -235,7 +235,7 @@
   --cases examples/tts_multiturn_cases.jsonl \
   --judge-provider gemini \
   --judge-samples 3 \
-  --limit 30 \
+  --limit 45 \
   --out runs/leaderboard/kokoro</code></pre>
 
     <pre><code>oaj autojudge-local-tts \
@@ -244,7 +244,7 @@
   --cases examples/tts_multiturn_cases.jsonl \
   --judge-provider gemini \
   --judge-samples 3 \
-  --limit 30 \
+  --limit 45 \
   --out runs/leaderboard/qwen3-tts</code></pre>
 
     <p>
@@ -256,7 +256,7 @@
   --cases examples/tts_multiturn_cases.jsonl \
   --judge-provider gemini \
   --judge-samples 3 \
-  --limit 30 \
+  --limit 45 \
   --out runs/leaderboard/chatterbox</code></pre>
 
     <p>
@@ -300,11 +300,11 @@
     <h2>Sample Report Preview</h2>
     <section class="grid" aria-label="Sample report metrics">
       <div class="metric"><span>Models</span><strong>3</strong></div>
-      <div class="metric"><span>Shared Eval Cases</span><strong>30</strong></div>
+      <div class="metric"><span>Shared Eval Cases</span><strong>45</strong></div>
       <div class="metric"><span>Judge Samples</span><strong>3x</strong></div>
       <div class="metric"><span>Top Avg</span><strong>91.2</strong></div>
       <div class="metric"><span>Lowest Avg</span><strong>84.7</strong></div>
-      <div class="metric"><span>Total Judgments</span><strong>270</strong></div>
+      <div class="metric"><span>Total Judgments</span><strong>405</strong></div>
     </section>
 
     <h2>Model Leaderboard</h2>
@@ -324,7 +324,7 @@
           <td data-label="Rank">1</td>
           <td data-label="Model"><code>mlx-community/chatterbox-turbo-6bit</code></td>
           <td data-label="Avg">91.2</td>
-          <td data-label="Accurate">27 / 30</td>
+          <td data-label="Accurate">40 / 45</td>
           <td data-label="Weakest Category"><code>information_tuning</code> avg 84.5</td>
           <td data-label="Likely Fix Focus">number clarity, pauses around dense facts</td>
         </tr>
@@ -332,7 +332,7 @@
           <td data-label="Rank">2</td>
           <td data-label="Model"><code>mlx-community/Kokoro-82M-4bit</code></td>
           <td data-label="Avg">88.6</td>
-          <td data-label="Accurate">24 / 30</td>
+          <td data-label="Accurate">36 / 45</td>
           <td data-label="Weakest Category"><code>speech_steerability</code> avg 80.8</td>
           <td data-label="Likely Fix Focus">style control, emphasis, pacing</td>
         </tr>
@@ -340,7 +340,7 @@
           <td data-label="Rank">3</td>
           <td data-label="Model"><code>mlx-community/Qwen3-TTS-12Hz-0.6B-Base-4bit</code></td>
           <td data-label="Avg">84.7</td>
-          <td data-label="Accurate">18 / 30</td>
+          <td data-label="Accurate">28 / 45</td>
           <td data-label="Weakest Category"><code>paralinguistics</code> avg 77.0</td>
           <td data-label="Likely Fix Focus">emotion rendering, natural prosody</td>
         </tr>
@@ -363,12 +363,15 @@
         <p><code>storytelling_dialogue</code><br>avg 91.5 / n 5 / 88-95</p>
         <p><code>speech_steerability</code><br>avg 91.5 / n 5 / 89-94</p>
         <p><code>robustness_intelligibility</code><br>avg 85.8 / n 5 / 74-92</p>
+        <p><code>speaker_voice_consistency</code><br>avg 87.2 / n 5 / 79-94</p>
+        <p><code>multilingual_code_switching</code><br>avg 84.0 / n 5 / 73-91</p>
+        <p><code>long_form_discourse</code><br>avg 86.8 / n 5 / 78-93</p>
       </div>
       <div class="panel">
         <h3>Scores By Model</h3>
-        <p><code>mlx-community/chatterbox-turbo-6bit</code><br>avg 91.2 / n 30 / 79-97</p>
-        <p><code>mlx-community/Kokoro-82M-4bit</code><br>avg 88.6 / n 30 / 76-95</p>
-        <p><code>mlx-community/Qwen3-TTS-12Hz-0.6B-Base-4bit</code><br>avg 84.7 / n 30 / 72-93</p>
+        <p><code>mlx-community/chatterbox-turbo-6bit</code><br>avg 90.5 / n 45 / 78-97</p>
+        <p><code>mlx-community/Kokoro-82M-4bit</code><br>avg 87.8 / n 45 / 74-95</p>
+        <p><code>mlx-community/Qwen3-TTS-12Hz-0.6B-Base-4bit</code><br>avg 84.1 / n 45 / 70-93</p>
       </div>
       <div class="panel">
         <h3>Scores By Voice</h3>
@@ -434,6 +437,27 @@
           <td data-label="Qwen3-TTS">82.5</td>
           <td data-label="What To Inspect">rare words, acronyms, code-like strings, long text, multilingual snippets</td>
         </tr>
+        <tr>
+          <td data-label="Category"><code>speaker_voice_consistency</code></td>
+          <td data-label="Chatterbox">87.2</td>
+          <td data-label="Kokoro">86.5</td>
+          <td data-label="Qwen3-TTS">80.0</td>
+          <td data-label="What To Inspect">persona stability, timbre drift, role cues, cross-sentence consistency</td>
+        </tr>
+        <tr>
+          <td data-label="Category"><code>multilingual_code_switching</code></td>
+          <td data-label="Chatterbox">84.0</td>
+          <td data-label="Kokoro">82.8</td>
+          <td data-label="Qwen3-TTS">78.5</td>
+          <td data-label="What To Inspect">short bilingual phrases, names, loan words, respectful accent handling</td>
+        </tr>
+        <tr>
+          <td data-label="Category"><code>long_form_discourse</code></td>
+          <td data-label="Chatterbox">86.8</td>
+          <td data-label="Kokoro">85.0</td>
+          <td data-label="Qwen3-TTS">81.0</td>
+          <td data-label="What To Inspect">paragraph flow, list structure, topic transitions, stable endings</td>
+        </tr>
       </tbody>
     </table>
 
@@ -453,7 +477,7 @@
         <tr>
           <td data-label="Compared Model"><code>mlx-community/Kokoro-82M-4bit</code></td>
           <td data-label="Baseline"><code>mlx-community/chatterbox-turbo-6bit</code></td>
-          <td data-label="Matched Cases">30</td>
+          <td data-label="Matched Cases">45</td>
           <td data-label="Avg Delta">-2.6</td>
           <td data-label="Wins / Ties / Losses">5 / 4 / 21</td>
           <td data-label="Largest Regressions">speech pace and emphasis cases where style control trails the baseline.</td>
@@ -461,7 +485,7 @@
         <tr>
           <td data-label="Compared Model"><code>mlx-community/Qwen3-TTS-12Hz-0.6B-Base-4bit</code></td>
           <td data-label="Baseline"><code>mlx-community/chatterbox-turbo-6bit</code></td>
-          <td data-label="Matched Cases">30</td>
+          <td data-label="Matched Cases">45</td>
           <td data-label="Avg Delta">-6.5</td>
           <td data-label="Wins / Ties / Losses">3 / 2 / 25</td>
           <td data-label="Largest Regressions">emotion and dense-fact cases with lower naturalness or intelligibility.</td>
@@ -485,7 +509,7 @@
       </div>
       <div class="panel">
         <h3>Synthesis Model</h3>
-        <p><code>mlx-community/Qwen3-TTS-12Hz-0.6B-Base-4bit</code><br>avg 84.7 / n 30 / range 72-93</p>
+        <p><code>mlx-community/Qwen3-TTS-12Hz-0.6B-Base-4bit</code><br>avg 84.1 / n 45 / range 70-93</p>
         <p class="muted">Compare model-level weak spots before changing prompts, voices, wrappers, or model settings.</p>
       </div>
     </section>

@@ -58,7 +58,7 @@ def test_tts_multiturn_examples_cover_requested_categories() -> None:
         category = record["metadata"]["eval_category"]
         categories[category] = categories.get(category, 0) + 1
 
-    assert len(records) == 30
+    assert len(records) == 45
     assert categories == {
         "paralinguistics": 5,
         "instruction_following": 5,
@@ -66,6 +66,9 @@ def test_tts_multiturn_examples_cover_requested_categories() -> None:
         "storytelling_dialogue": 5,
         "speech_steerability": 5,
         "robustness_intelligibility": 5,
+        "speaker_voice_consistency": 5,
+        "multilingual_code_switching": 5,
+        "long_form_discourse": 5,
     }
     assert all(record["turns"] for record in records)
     assert all(record["reference_text"] for record in records)
@@ -80,3 +83,4 @@ def test_readme_links_chatterbox_gemini_sample_page() -> None:
 
     assert "docs/chatterbox-gemini-sample.html" in readme
     assert "TTS model leaderboard judged by Gemini" in readme
+    assert "docs/tts-eval-taxonomy.md" in readme
