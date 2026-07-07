@@ -221,10 +221,16 @@ runs can map private prompts into the same categories without copying private ro
 - `modal_negation_scope_delivery`: may-not, do-not-have-to, likely-won't, cannot-until, and
   optional-versus-mandatory constructions where prosody must preserve permission, probability,
   prohibition, and obligation scope.
+- `compound_proper_noun_delivery`: compound product names, team names, place names, protocol names,
+  and program names where multi-word named entities must stay grouped and distinct from surrounding
+  common words or requirements.
+- `range_interval_delivery`: inclusive ranges, exclusive thresholds, alphanumeric spans, time
+  windows, and version intervals where endpoints, exceptions, and units must remain attached to the
+  correct range semantics.
 
 ## Manifest Contract
 
-The public comparison manifest is intentionally balanced at 375 cases for now: 75 categories with 5
+The public comparison manifest is intentionally balanced at 385 cases for now: 77 categories with 5
 cases each. Expansion should add complete five-case category batches before deepening existing
 categories.
 

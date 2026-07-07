@@ -1142,6 +1142,22 @@ TTS_CATEGORY_GUIDANCE = {
             "exception and condition attachment",
         ],
     ),
+    "compound_proper_noun_delivery": (
+        "compound product, team, place, protocol, and program names that must stay grouped",
+        [
+            "named-entity phrase grouping",
+            "compound-name pronunciation",
+            "proper-noun versus common-word disambiguation",
+        ],
+    ),
+    "range_interval_delivery": (
+        "inclusive ranges, exclusive thresholds, alphanumeric spans, time windows, and version intervals",
+        [
+            "range and endpoint text normalization",
+            "exception and unit attachment",
+            "numeric and alphanumeric chunking",
+        ],
+    ),
 }
 
 
