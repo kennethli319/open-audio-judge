@@ -396,7 +396,7 @@
   --cases examples/tts_multiturn_cases.jsonl \
   --judge-provider gemini \
   --judge-samples 3 \
-  --limit 135 \
+  --limit 140 \
   --out runs/leaderboard/chatterbox</code></pre>
 
     <pre><code>oaj autojudge-local-tts \
@@ -405,7 +405,7 @@
   --cases examples/tts_multiturn_cases.jsonl \
   --judge-provider gemini \
   --judge-samples 3 \
-  --limit 135 \
+  --limit 140 \
   --out runs/leaderboard/kokoro</code></pre>
 
     <pre><code>oaj autojudge-local-tts \
@@ -414,7 +414,7 @@
   --cases examples/tts_multiturn_cases.jsonl \
   --judge-provider gemini \
   --judge-samples 3 \
-  --limit 135 \
+  --limit 140 \
   --out runs/leaderboard/qwen3-tts</code></pre>
 
     <p>
@@ -426,7 +426,7 @@
   --cases examples/tts_multiturn_cases.jsonl \
   --judge-provider gemini \
   --judge-samples 3 \
-  --limit 135 \
+  --limit 140 \
   --out runs/leaderboard/chatterbox</code></pre>
 
     <p>
@@ -471,16 +471,16 @@
     <h2>Sample Report Preview</h2>
     <section class="grid" aria-label="Sample report metrics">
       <div class="metric"><span>Models</span><strong>3</strong></div>
-      <div class="metric"><span>Shared Eval Cases</span><strong>135</strong></div>
+      <div class="metric"><span>Shared Eval Cases</span><strong>140</strong></div>
       <div class="metric"><span>Judge Samples</span><strong>3x</strong></div>
       <div class="metric"><span>Top Avg</span><strong>91.2</strong></div>
       <div class="metric"><span>Lowest Avg</span><strong>84.7</strong></div>
-      <div class="metric"><span>Total Judgments</span><strong>1215</strong></div>
+      <div class="metric"><span>Total Judgments</span><strong>1260</strong></div>
     </section>
 
     <h2>Eval Set Samples</h2>
     <p>
-      The public demo eval set contains 135 synthetic, public-safe cases grouped into research-backed
+      The public demo eval set contains 140 synthetic, public-safe cases grouped into research-backed
       TTS dimensions. Each category below contributes five shared cases that every model synthesizes
       before Gemini judges the generated audio.
     </p>
@@ -1430,6 +1430,41 @@
           </article>
         </div>
       </details>
+      <details class="sample-group" data-category="disfluency_repair_control">
+        <summary><span>Disfluency Repair Control</span><strong>5 cases</strong></summary>
+        <div class="sample-list">
+          <article class="sample-card">
+            <h3><code>tts-disfluency-repair-control-false-start-001</code></h3>
+            <p><strong>Slice:</strong> <code>false_start_time_repair</code></p>
+            <p><strong>Prompt:</strong> Read this false start naturally, preserving the correction and both pickup times exactly.</p>
+            <p><strong>Target:</strong> I, I mean, the pickup window opens at 7:30, not 7:15.</p>
+          </article>
+          <article class="sample-card">
+            <h3><code>tts-disfluency-repair-control-filled-pause-001</code></h3>
+            <p><strong>Slice:</strong> <code>bounded_filled_pause_lookup</code></p>
+            <p><strong>Prompt:</strong> Read this lookup response with one mild filled pause, but keep the answer crisp.</p>
+            <p><strong>Target:</strong> Let me check, um, yes, the charger is in bin C 12.</p>
+          </article>
+          <article class="sample-card">
+            <h3><code>tts-disfluency-repair-control-repeat-confirmation-001</code></h3>
+            <p><strong>Slice:</strong> <code>intentional_code_repetition</code></p>
+            <p><strong>Prompt:</strong> Read this access-code confirmation with intentional repetition for accuracy, not excitement.</p>
+            <p><strong>Target:</strong> The door code is 4 8 4 8, repeat, 4 8 4 8.</p>
+          </article>
+          <article class="sample-card">
+            <h3><code>tts-disfluency-repair-control-restart-001</code></h3>
+            <p><strong>Slice:</strong> <code>restart_after_wrong_path</code></p>
+            <p><strong>Prompt:</strong> Read this restart after a mistaken path, making the new instruction sequence easy to follow.</p>
+            <p><strong>Target:</strong> Actually, start over: choose Settings, then Audio, then Calibrate Microphone.</p>
+          </article>
+          <article class="sample-card">
+            <h3><code>tts-disfluency-repair-control-hesitation-001</code></h3>
+            <p><strong>Slice:</strong> <code>cautious_hesitation_safety_advice</code></p>
+            <p><strong>Prompt:</strong> Read this cautious recommendation with a small hesitation, not a dramatic pause.</p>
+            <p><strong>Target:</strong> The safest option is, well, to wait until the pressure gauge returns to zero.</p>
+          </article>
+        </div>
+      </details>
     </section>
 
     <h2>Model Leaderboard</h2>
@@ -1449,7 +1484,7 @@
           <td data-label="Rank">1</td>
           <td data-label="Model"><code>mlx-community/chatterbox-turbo-6bit</code></td>
           <td data-label="Avg">91.2</td>
-          <td data-label="Accurate">92 / 135</td>
+          <td data-label="Accurate">92 / 140</td>
           <td data-label="Weakest Category"><code>information_tuning</code> avg 84.5</td>
           <td data-label="Likely Fix Focus">number clarity, pauses around dense facts</td>
         </tr>
@@ -1457,7 +1492,7 @@
           <td data-label="Rank">2</td>
           <td data-label="Model"><code>mlx-community/Kokoro-82M-4bit</code></td>
           <td data-label="Avg">88.6</td>
-          <td data-label="Accurate">85 / 135</td>
+          <td data-label="Accurate">85 / 140</td>
           <td data-label="Weakest Category"><code>speech_steerability</code> avg 80.8</td>
           <td data-label="Likely Fix Focus">style control, emphasis, pacing</td>
         </tr>
@@ -1465,7 +1500,7 @@
           <td data-label="Rank">3</td>
           <td data-label="Model"><code>mlx-community/Qwen3-TTS-12Hz-0.6B-Base-4bit</code></td>
           <td data-label="Avg">84.7</td>
-          <td data-label="Accurate">63 / 135</td>
+          <td data-label="Accurate">63 / 140</td>
           <td data-label="Weakest Category"><code>paralinguistics</code> avg 77.0</td>
           <td data-label="Likely Fix Focus">emotion rendering, natural prosody</td>
         </tr>
@@ -1516,9 +1551,9 @@
       </div>
       <div class="panel">
         <h3>Scores By Model</h3>
-        <p><code>mlx-community/chatterbox-turbo-6bit</code><br>avg 90.1 / n 135 / 78-97</p>
-        <p><code>mlx-community/Kokoro-82M-4bit</code><br>avg 87.2 / n 135 / 73-95</p>
-        <p><code>mlx-community/Qwen3-TTS-12Hz-0.6B-Base-4bit</code><br>avg 83.6 / n 135 / 70-93</p>
+        <p><code>mlx-community/chatterbox-turbo-6bit</code><br>avg 90.1 / n 140 / 78-97</p>
+        <p><code>mlx-community/Kokoro-82M-4bit</code><br>avg 87.2 / n 140 / 73-95</p>
+        <p><code>mlx-community/Qwen3-TTS-12Hz-0.6B-Base-4bit</code><br>avg 83.6 / n 140 / 70-93</p>
       </div>
       <div class="panel">
         <h3>Scores By Voice</h3>
@@ -1699,7 +1734,7 @@
         <tr>
           <td data-label="Compared Model"><code>mlx-community/Kokoro-82M-4bit</code></td>
           <td data-label="Baseline"><code>mlx-community/chatterbox-turbo-6bit</code></td>
-          <td data-label="Matched Cases">135</td>
+          <td data-label="Matched Cases">140</td>
           <td data-label="Avg Delta">-2.6</td>
           <td data-label="Wins / Ties / Losses">22 / 16 / 92</td>
           <td data-label="Largest Regressions">speech pace and emphasis cases where style control trails the baseline.</td>
@@ -1707,7 +1742,7 @@
         <tr>
           <td data-label="Compared Model"><code>mlx-community/Qwen3-TTS-12Hz-0.6B-Base-4bit</code></td>
           <td data-label="Baseline"><code>mlx-community/chatterbox-turbo-6bit</code></td>
-          <td data-label="Matched Cases">135</td>
+          <td data-label="Matched Cases">140</td>
           <td data-label="Avg Delta">-6.5</td>
           <td data-label="Wins / Ties / Losses">14 / 12 / 104</td>
           <td data-label="Largest Regressions">emotion and dense-fact cases with lower naturalness or intelligibility.</td>
@@ -1733,7 +1768,7 @@
       </div>
       <div class="panel">
         <h3>Synthesis Model</h3>
-        <p><code>mlx-community/Qwen3-TTS-12Hz-0.6B-Base-4bit</code><br>avg 83.6 / n 135 / range 70-93</p>
+        <p><code>mlx-community/Qwen3-TTS-12Hz-0.6B-Base-4bit</code><br>avg 83.6 / n 140 / range 70-93</p>
         <p class="muted">Compare model-level weak spots before changing prompts, voices, wrappers, or model settings.</p>
       </div>
     </section>
@@ -1776,7 +1811,7 @@
     <h2>Sample-By-Sample Breakdown</h2>
     <p>
       The real combined report contains one row per synthesized model/case pair. This preview shows
-      representative rows across models, categories, slices, and score bands from the 405 generated
+      representative rows across models, categories, slices, and score bands from the 420 generated
       samples.
     </p>
     <table id="sample-breakdown-table">

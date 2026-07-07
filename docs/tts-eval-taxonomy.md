@@ -82,10 +82,13 @@ runs can map private prompts into the same categories without copying private ro
   control should not erase another.
 - `named_entity_pronunciation`: person names, place names, product names, acronyms, and program
   names where TTS should preserve intelligibility without over-spelling or caricature.
+- `disfluency_repair_control`: false starts, bounded filled pauses, intentional repetition,
+  restart cues, and cautious hesitation where spontaneous-speech cues must remain controlled and
+  text-faithful.
 
 ## Manifest Contract
 
-The public comparison manifest is intentionally balanced at 135 cases for now: 27 categories with 5
+The public comparison manifest is intentionally balanced at 140 cases for now: 28 categories with 5
 cases each. Expansion should add complete five-case category batches before deepening existing
 categories.
 
