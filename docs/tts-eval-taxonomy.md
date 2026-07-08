@@ -248,10 +248,13 @@ runs can map private prompts into the same categories without copying private ro
 - `policy_clause_delivery`: effective dates, obligation defaults, remedy windows, section
   citations, renewal clauses, and exception boundaries where speech must preserve the legal or
   policy force of each clause without flattening qualifiers.
+- `status_code_delivery`: HTTP/API statuses, device fault codes, payment decline codes, build
+  pipeline labels, and lab QC status strings where compact codes, labels, and required actions
+  must remain attached and exactly intelligible.
 
 ## Manifest Contract
 
-The public comparison manifest is intentionally balanced at 420 cases for now: 84 categories with 5
+The public comparison manifest is intentionally balanced at 425 cases for now: 85 categories with 5
 cases each. Expansion should add complete five-case category batches before deepening existing
 categories.
 

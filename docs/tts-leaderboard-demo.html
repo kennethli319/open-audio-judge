@@ -409,6 +409,7 @@
           <option value="tool_result_state_delivery">Tool result state delivery</option>
           <option value="authorization_access_delivery">Authorization access delivery</option>
           <option value="policy_clause_delivery">Policy clause delivery</option>
+          <option value="status_code_delivery">Status code delivery</option>
         </select>
         <select id="label-filter" aria-label="Filter by label">
           <option value="">All labels</option>
@@ -453,7 +454,7 @@
   --cases examples/tts_multiturn_cases.jsonl \
   --judge-provider gemini \
   --judge-samples 3 \
-  --limit 420 \
+  --limit 425 \
   --out runs/leaderboard/chatterbox</code></pre>
 
     <pre><code>oaj autojudge-local-tts \
@@ -462,7 +463,7 @@
   --cases examples/tts_multiturn_cases.jsonl \
   --judge-provider gemini \
   --judge-samples 3 \
-  --limit 420 \
+  --limit 425 \
   --out runs/leaderboard/kokoro</code></pre>
 
     <pre><code>oaj autojudge-local-tts \
@@ -471,7 +472,7 @@
   --cases examples/tts_multiturn_cases.jsonl \
   --judge-provider gemini \
   --judge-samples 3 \
-  --limit 420 \
+  --limit 425 \
   --out runs/leaderboard/qwen3-tts</code></pre>
 
     <p>
@@ -483,7 +484,7 @@
   --cases examples/tts_multiturn_cases.jsonl \
   --judge-provider gemini \
   --judge-samples 3 \
-  --limit 420 \
+  --limit 425 \
   --out runs/leaderboard/chatterbox</code></pre>
 
     <p>
@@ -528,7 +529,7 @@
     <h2>Sample Report Preview</h2>
     <section class="grid" aria-label="Sample report metrics">
       <div class="metric"><span>Models</span><strong>3</strong></div>
-      <div class="metric"><span>Shared Eval Cases</span><strong>420</strong></div>
+      <div class="metric"><span>Shared Eval Cases</span><strong>425</strong></div>
       <div class="metric"><span>Judge Samples</span><strong>3x</strong></div>
       <div class="metric"><span>Top Avg</span><strong>91.2</strong></div>
       <div class="metric"><span>Lowest Avg</span><strong>84.7</strong></div>
@@ -537,7 +538,7 @@
 
     <h2>Eval Set Samples</h2>
     <p>
-      The public demo eval set contains 420 synthetic, public-safe cases grouped into research-backed
+      The public demo eval set contains 425 synthetic, public-safe cases grouped into research-backed
       TTS dimensions. Each category below contributes five shared cases that every model synthesizes
       before Gemini judges the generated audio.
     </p>
@@ -3479,6 +3480,41 @@
             <p><strong>Slice:</strong> <code>quarterly_auto_renewal_unless_written_cancellation_10_business_days_before</code></p>
             <p><strong>Prompt:</strong> Read this renewal clause so renewal and cancellation timing are not confused.</p>
             <p><strong>Target:</strong> The subscription renews automatically each quarter unless written cancellation arrives 10 business days before renewal.</p>
+          </article>
+        </div>
+      </details>
+      <details class="sample-group" data-category="status_code_delivery">
+        <summary><span>Status Code Delivery</span><strong>5 cases</strong></summary>
+        <div class="sample-list">
+          <article class="sample-card">
+            <h3><code>tts-status-code-delivery-http-429-001</code></h3>
+            <p><strong>Slice:</strong> <code>http_429_retry_after_60_seconds_not_locked</code></p>
+            <p><strong>Prompt:</strong> Read this API error so the status code, retry window, and account state are clearly separate.</p>
+            <p><strong>Target:</strong> HTTP 429 means too many requests; wait 60 seconds before retrying, and do not mark the account as locked.</p>
+          </article>
+          <article class="sample-card">
+            <h3><code>tts-status-code-delivery-device-fault-001</code></h3>
+            <p><strong>Slice:</strong> <code>fault_code_p07_pressure_low_standby_b_ticket_1842</code></p>
+            <p><strong>Prompt:</strong> Read this device fault message so the code letters, digits, and required action are easy to transcribe.</p>
+            <p><strong>Target:</strong> Fault code P zero seven means pump pressure low; switch to standby unit B and log inspection ticket 1842.</p>
+          </article>
+          <article class="sample-card">
+            <h3><code>tts-status-code-delivery-payment-decline-001</code></h3>
+            <p><strong>Slice:</strong> <code>decline_code_05_no_capture_two_retries_left</code></p>
+            <p><strong>Prompt:</strong> Read this payment terminal result so the decline code is not confused with the dollar amount or retry count.</p>
+            <p><strong>Target:</strong> Payment declined with code 05, do not honor; no charge was captured, and the customer has two retry attempts left.</p>
+          </article>
+          <article class="sample-card">
+            <h3><code>tts-status-code-delivery-build-status-001</code></h3>
+            <p><strong>Slice:</strong> <code>build_318_compile_green_tests_yellow_deploy_red</code></p>
+            <p><strong>Prompt:</strong> Read this build pipeline status so each stage label stays attached to its result.</p>
+            <p><strong>Target:</strong> Build 318 is green for compile, yellow for tests, and red for deploy; hold release until deploy returns green.</p>
+          </article>
+          <article class="sample-card">
+            <h3><code>tts-status-code-delivery-lab-qc-001</code></h3>
+            <p><strong>Slice:</strong> <code>sample_a17_qc_failed_code_qf_08_retest_control</code></p>
+            <p><strong>Prompt:</strong> Read this lab status so the sample ID, QC code, and retest action do not blur together.</p>
+            <p><strong>Target:</strong> Sample A17 is status QC failed, code Q F dash 08; retest the control before reporting patient results.</p>
           </article>
         </div>
       </details>

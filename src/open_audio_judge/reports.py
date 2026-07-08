@@ -1214,6 +1214,14 @@ TTS_CATEGORY_GUIDANCE = {
             "citation, actor, obligation, and prohibited-action attachment",
         ],
     ),
+    "status_code_delivery": (
+        "HTTP/API statuses, device fault codes, payment decline codes, build labels, and lab QC status strings",
+        [
+            "status-code and label-value phrase grouping",
+            "alphanumeric code and retry/count normalization",
+            "state, required action, and safety caveat attachment",
+        ],
+    ),
 }
 
 
