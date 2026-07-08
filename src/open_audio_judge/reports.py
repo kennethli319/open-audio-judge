@@ -1222,6 +1222,14 @@ TTS_CATEGORY_GUIDANCE = {
             "state, required action, and safety caveat attachment",
         ],
     ),
+    "menu_option_navigation_delivery": (
+        "IVR menus, kiosk choices, settings toggles, accessibility menu options, and voice-menu paths",
+        [
+            "option label, number, and action attachment",
+            "selected, unchanged, on, and off state distinction",
+            "menu exception and final-action prosody",
+        ],
+    ),
 }
 
 

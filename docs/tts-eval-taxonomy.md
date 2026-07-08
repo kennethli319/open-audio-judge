@@ -251,10 +251,13 @@ runs can map private prompts into the same categories without copying private ro
 - `status_code_delivery`: HTTP/API statuses, device fault codes, payment decline codes, build
   pipeline labels, and lab QC status strings where compact codes, labels, and required actions
   must remain attached and exactly intelligible.
+- `menu_option_navigation_delivery`: IVR menus, kiosk choices, settings toggles, accessibility menu
+  options, and voice-menu paths where option labels, numbers, selected states, and exceptions must
+  stay attached without visual context.
 
 ## Manifest Contract
 
-The public comparison manifest is intentionally balanced at 425 cases for now: 85 categories with 5
+The public comparison manifest is intentionally balanced at 430 cases for now: 86 categories with 5
 cases each. Expansion should add complete five-case category batches before deepening existing
 categories.
 

@@ -410,6 +410,7 @@
           <option value="authorization_access_delivery">Authorization access delivery</option>
           <option value="policy_clause_delivery">Policy clause delivery</option>
           <option value="status_code_delivery">Status code delivery</option>
+          <option value="menu_option_navigation_delivery">Menu option navigation delivery</option>
         </select>
         <select id="label-filter" aria-label="Filter by label">
           <option value="">All labels</option>
@@ -454,7 +455,7 @@
   --cases examples/tts_multiturn_cases.jsonl \
   --judge-provider gemini \
   --judge-samples 3 \
-  --limit 425 \
+  --limit 430 \
   --out runs/leaderboard/chatterbox</code></pre>
 
     <pre><code>oaj autojudge-local-tts \
@@ -463,7 +464,7 @@
   --cases examples/tts_multiturn_cases.jsonl \
   --judge-provider gemini \
   --judge-samples 3 \
-  --limit 425 \
+  --limit 430 \
   --out runs/leaderboard/kokoro</code></pre>
 
     <pre><code>oaj autojudge-local-tts \
@@ -472,7 +473,7 @@
   --cases examples/tts_multiturn_cases.jsonl \
   --judge-provider gemini \
   --judge-samples 3 \
-  --limit 425 \
+  --limit 430 \
   --out runs/leaderboard/qwen3-tts</code></pre>
 
     <p>
@@ -484,7 +485,7 @@
   --cases examples/tts_multiturn_cases.jsonl \
   --judge-provider gemini \
   --judge-samples 3 \
-  --limit 425 \
+  --limit 430 \
   --out runs/leaderboard/chatterbox</code></pre>
 
     <p>
@@ -529,16 +530,16 @@
     <h2>Sample Report Preview</h2>
     <section class="grid" aria-label="Sample report metrics">
       <div class="metric"><span>Models</span><strong>3</strong></div>
-      <div class="metric"><span>Shared Eval Cases</span><strong>425</strong></div>
+      <div class="metric"><span>Shared Eval Cases</span><strong>430</strong></div>
       <div class="metric"><span>Judge Samples</span><strong>3x</strong></div>
       <div class="metric"><span>Top Avg</span><strong>91.2</strong></div>
       <div class="metric"><span>Lowest Avg</span><strong>84.7</strong></div>
-      <div class="metric"><span>Total Judgments</span><strong>3735</strong></div>
+      <div class="metric"><span>Total Judgments</span><strong>3870</strong></div>
     </section>
 
     <h2>Eval Set Samples</h2>
     <p>
-      The public demo eval set contains 425 synthetic, public-safe cases grouped into research-backed
+      The public demo eval set contains 430 synthetic, public-safe cases grouped into research-backed
       TTS dimensions. Each category below contributes five shared cases that every model synthesizes
       before Gemini judges the generated audio.
     </p>
@@ -3515,6 +3516,41 @@
             <p><strong>Slice:</strong> <code>sample_a17_qc_failed_code_qf_08_retest_control</code></p>
             <p><strong>Prompt:</strong> Read this lab status so the sample ID, QC code, and retest action do not blur together.</p>
             <p><strong>Target:</strong> Sample A17 is status QC failed, code Q F dash 08; retest the control before reporting patient results.</p>
+          </article>
+        </div>
+      </details>
+      <details class="sample-group" data-category="menu_option_navigation_delivery">
+        <summary><span>Menu Option Navigation Delivery</span><strong>5 cases</strong></summary>
+        <div class="sample-list">
+          <article class="sample-card">
+            <h3><code>tts-menu-option-navigation-delivery-ivr-001</code></h3>
+            <p><strong>Slice:</strong> <code>ivr_option_number_destination_mapping</code></p>
+            <p><strong>Prompt:</strong> Read this phone menu so each option number stays attached to the right destination.</p>
+            <p><strong>Target:</strong> For billing, press 2; for technical support, press 3; to repeat these options, press 9.</p>
+          </article>
+          <article class="sample-card">
+            <h3><code>tts-menu-option-navigation-delivery-kiosk-001</code></h3>
+            <p><strong>Slice:</strong> <code>kiosk_selected_option_unchanged_option</code></p>
+            <p><strong>Prompt:</strong> Read this kiosk order update so selected and unchanged menu items do not blur together.</p>
+            <p><strong>Target:</strong> Select option B, turkey sandwich with no cheese; leave option C unchanged for the bottled water.</p>
+          </article>
+          <article class="sample-card">
+            <h3><code>tts-menu-option-navigation-delivery-settings-001</code></h3>
+            <p><strong>Slice:</strong> <code>settings_toggle_off_on_unchanged_states</code></p>
+            <p><strong>Prompt:</strong> Read this settings menu instruction so off, on, and unchanged states remain distinct.</p>
+            <p><strong>Target:</strong> Turn Location History off, keep Bluetooth on, and leave Background Refresh unchanged.</p>
+          </article>
+          <article class="sample-card">
+            <h3><code>tts-menu-option-navigation-delivery-media-001</code></h3>
+            <p><strong>Slice:</strong> <code>media_accessibility_options_save_action</code></p>
+            <p><strong>Prompt:</strong> Read this media menu choice so accessibility options and the final action are clear.</p>
+            <p><strong>Target:</strong> Set Audio Description to on, set Captions to off, then choose Save Changes.</p>
+          </article>
+          <article class="sample-card">
+            <h3><code>tts-menu-option-navigation-delivery-refill-001</code></h3>
+            <p><strong>Slice:</strong> <code>voice_menu_refill_versus_pharmacist_path</code></p>
+            <p><strong>Prompt:</strong> Read this pharmacy voice menu so the refill path and pharmacist path are not confused.</p>
+            <p><strong>Target:</strong> Say refill for the prescription ending in 2481, or say pharmacist only for a dosage question.</p>
           </article>
         </div>
       </details>
