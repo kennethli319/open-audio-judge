@@ -1230,6 +1230,14 @@ TTS_CATEGORY_GUIDANCE = {
             "menu exception and final-action prosody",
         ],
     ),
+    "locale_format_disambiguation": (
+        "locale-specific dates, decimal separators, postal codes, phone numbers, and time notation",
+        [
+            "locale-aware text normalization",
+            "date, time, decimal, and phone-number disambiguation",
+            "region and document-context phrase grouping",
+        ],
+    ),
 }
 
 

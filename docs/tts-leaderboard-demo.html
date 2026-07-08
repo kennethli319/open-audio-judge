@@ -411,6 +411,7 @@
           <option value="policy_clause_delivery">Policy clause delivery</option>
           <option value="status_code_delivery">Status code delivery</option>
           <option value="menu_option_navigation_delivery">Menu option navigation delivery</option>
+          <option value="locale_format_disambiguation">Locale format disambiguation</option>
         </select>
         <select id="label-filter" aria-label="Filter by label">
           <option value="">All labels</option>
@@ -455,7 +456,7 @@
   --cases examples/tts_multiturn_cases.jsonl \
   --judge-provider gemini \
   --judge-samples 3 \
-  --limit 430 \
+  --limit 435 \
   --out runs/leaderboard/chatterbox</code></pre>
 
     <pre><code>oaj autojudge-local-tts \
@@ -464,7 +465,7 @@
   --cases examples/tts_multiturn_cases.jsonl \
   --judge-provider gemini \
   --judge-samples 3 \
-  --limit 430 \
+  --limit 435 \
   --out runs/leaderboard/kokoro</code></pre>
 
     <pre><code>oaj autojudge-local-tts \
@@ -473,7 +474,7 @@
   --cases examples/tts_multiturn_cases.jsonl \
   --judge-provider gemini \
   --judge-samples 3 \
-  --limit 430 \
+  --limit 435 \
   --out runs/leaderboard/qwen3-tts</code></pre>
 
     <p>
@@ -485,7 +486,7 @@
   --cases examples/tts_multiturn_cases.jsonl \
   --judge-provider gemini \
   --judge-samples 3 \
-  --limit 430 \
+  --limit 435 \
   --out runs/leaderboard/chatterbox</code></pre>
 
     <p>
@@ -530,16 +531,16 @@
     <h2>Sample Report Preview</h2>
     <section class="grid" aria-label="Sample report metrics">
       <div class="metric"><span>Models</span><strong>3</strong></div>
-      <div class="metric"><span>Shared Eval Cases</span><strong>430</strong></div>
+      <div class="metric"><span>Shared Eval Cases</span><strong>435</strong></div>
       <div class="metric"><span>Judge Samples</span><strong>3x</strong></div>
       <div class="metric"><span>Top Avg</span><strong>91.2</strong></div>
       <div class="metric"><span>Lowest Avg</span><strong>84.7</strong></div>
-      <div class="metric"><span>Total Judgments</span><strong>3870</strong></div>
+      <div class="metric"><span>Total Judgments</span><strong>3915</strong></div>
     </section>
 
     <h2>Eval Set Samples</h2>
     <p>
-      The public demo eval set contains 430 synthetic, public-safe cases grouped into research-backed
+      The public demo eval set contains 435 synthetic, public-safe cases grouped into research-backed
       TTS dimensions. Each category below contributes five shared cases that every model synthesizes
       before Gemini judges the generated audio.
     </p>
@@ -3551,6 +3552,41 @@
             <p><strong>Slice:</strong> <code>voice_menu_refill_versus_pharmacist_path</code></p>
             <p><strong>Prompt:</strong> Read this pharmacy voice menu so the refill path and pharmacist path are not confused.</p>
             <p><strong>Target:</strong> Say refill for the prescription ending in 2481, or say pharmacist only for a dosage question.</p>
+          </article>
+        </div>
+      </details>
+      <details class="sample-group" data-category="locale_format_disambiguation">
+        <summary><span>Locale Format Disambiguation</span><strong>5 cases</strong></summary>
+        <div class="sample-list">
+          <article class="sample-card">
+            <h3><code>tts-locale-format-disambiguation-us-date-001</code></h3>
+            <p><strong>Slice:</strong> <code>us_slash_date_march_4_not_april_3</code></p>
+            <p><strong>Prompt:</strong> Read this invoice note so the U.S. date format is not interpreted as a day-month date.</p>
+            <p><strong>Target:</strong> For the U.S. invoice, 03/04/2026 means March 4, 2026, not April 3.</p>
+          </article>
+          <article class="sample-card">
+            <h3><code>tts-locale-format-disambiguation-eu-decimal-001</code></h3>
+            <p><strong>Slice:</strong> <code>german_decimal_comma_price_1234_50_euros</code></p>
+            <p><strong>Prompt:</strong> Read this price-list note so the European decimal comma and thousands separator are unmistakable.</p>
+            <p><strong>Target:</strong> In the German price list, 1.234,50 euros means one thousand two hundred thirty-four euros and fifty cents.</p>
+          </article>
+          <article class="sample-card">
+            <h3><code>tts-locale-format-disambiguation-canadian-postal-001</code></h3>
+            <p><strong>Slice:</strong> <code>canadian_postal_code_k1a_0b1_letter_digit_chunks</code></p>
+            <p><strong>Prompt:</strong> Read this shipping address so the Canadian postal code is spelled as letters and digits, not normalized as a word.</p>
+            <p><strong>Target:</strong> Ship to Ottawa postal code K one A zero B one; do not read it as a pronounceable name.</p>
+          </article>
+          <article class="sample-card">
+            <h3><code>tts-locale-format-disambiguation-uk-phone-001</code></h3>
+            <p><strong>Slice:</strong> <code>uk_phone_plus_44_20_7946_0958_grouping</code></p>
+            <p><strong>Prompt:</strong> Read this contact detail so the U.K. country code, city code, and subscriber number remain grouped.</p>
+            <p><strong>Target:</strong> Call the U.K. office at plus 44, 20, 7946, 0958; keep the plus sign as the country code.</p>
+          </article>
+          <article class="sample-card">
+            <h3><code>tts-locale-format-disambiguation-24h-time-001</code></h3>
+            <p><strong>Slice:</strong> <code>paris_14h30_matches_new_york_230_pm</code></p>
+            <p><strong>Prompt:</strong> Read this schedule note so 24-hour notation and 12-hour notation refer to the same meeting time.</p>
+            <p><strong>Target:</strong> The Paris schedule says 14 h 30, which matches 2:30 PM on the New York copy.</p>
           </article>
         </div>
       </details>
