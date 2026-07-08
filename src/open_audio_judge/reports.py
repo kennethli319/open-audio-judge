@@ -1238,6 +1238,14 @@ TTS_CATEGORY_GUIDANCE = {
             "region and document-context phrase grouping",
         ],
     ),
+    "accessibility_cue_delivery": (
+        "screen-reader image descriptions, control states, form errors, chart summaries, and live-region updates",
+        [
+            "accessibility label, state, and action attachment",
+            "chart, form, and live-region structure preservation",
+            "screen-reader cue prosody without visual context",
+        ],
+    ),
 }
 
 

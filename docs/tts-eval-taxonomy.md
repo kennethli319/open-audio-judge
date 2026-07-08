@@ -257,10 +257,13 @@ runs can map private prompts into the same categories without copying private ro
 - `locale_format_disambiguation`: locale-specific dates, decimal separators, postal codes, phone
   numbers, and time notation where identical characters can require different spoken normalization
   depending on region or document context.
+- `accessibility_cue_delivery`: screen-reader image descriptions, control states, form errors,
+  chart summaries, and live-region updates where spoken cues must preserve labels, values, states,
+  and remaining actions without visual context.
 
 ## Manifest Contract
 
-The public comparison manifest is intentionally balanced at 435 cases for now: 87 categories with 5
+The public comparison manifest is intentionally balanced at 440 cases for now: 88 categories with 5
 cases each. Expansion should add complete five-case category batches before deepening existing
 categories.
 

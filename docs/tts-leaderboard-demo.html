@@ -412,6 +412,7 @@
           <option value="status_code_delivery">Status code delivery</option>
           <option value="menu_option_navigation_delivery">Menu option navigation delivery</option>
           <option value="locale_format_disambiguation">Locale format disambiguation</option>
+          <option value="accessibility_cue_delivery">Accessibility cue delivery</option>
         </select>
         <select id="label-filter" aria-label="Filter by label">
           <option value="">All labels</option>
@@ -456,7 +457,7 @@
   --cases examples/tts_multiturn_cases.jsonl \
   --judge-provider gemini \
   --judge-samples 3 \
-  --limit 435 \
+  --limit 440 \
   --out runs/leaderboard/chatterbox</code></pre>
 
     <pre><code>oaj autojudge-local-tts \
@@ -465,7 +466,7 @@
   --cases examples/tts_multiturn_cases.jsonl \
   --judge-provider gemini \
   --judge-samples 3 \
-  --limit 435 \
+  --limit 440 \
   --out runs/leaderboard/kokoro</code></pre>
 
     <pre><code>oaj autojudge-local-tts \
@@ -474,7 +475,7 @@
   --cases examples/tts_multiturn_cases.jsonl \
   --judge-provider gemini \
   --judge-samples 3 \
-  --limit 435 \
+  --limit 440 \
   --out runs/leaderboard/qwen3-tts</code></pre>
 
     <p>
@@ -486,7 +487,7 @@
   --cases examples/tts_multiturn_cases.jsonl \
   --judge-provider gemini \
   --judge-samples 3 \
-  --limit 435 \
+  --limit 440 \
   --out runs/leaderboard/chatterbox</code></pre>
 
     <p>
@@ -531,16 +532,16 @@
     <h2>Sample Report Preview</h2>
     <section class="grid" aria-label="Sample report metrics">
       <div class="metric"><span>Models</span><strong>3</strong></div>
-      <div class="metric"><span>Shared Eval Cases</span><strong>435</strong></div>
+      <div class="metric"><span>Shared Eval Cases</span><strong>440</strong></div>
       <div class="metric"><span>Judge Samples</span><strong>3x</strong></div>
       <div class="metric"><span>Top Avg</span><strong>91.2</strong></div>
       <div class="metric"><span>Lowest Avg</span><strong>84.7</strong></div>
-      <div class="metric"><span>Total Judgments</span><strong>3915</strong></div>
+      <div class="metric"><span>Total Judgments</span><strong>3960</strong></div>
     </section>
 
     <h2>Eval Set Samples</h2>
     <p>
-      The public demo eval set contains 435 synthetic, public-safe cases grouped into research-backed
+      The public demo eval set contains 440 synthetic, public-safe cases grouped into research-backed
       TTS dimensions. Each category below contributes five shared cases that every model synthesizes
       before Gemini judges the generated audio.
     </p>
@@ -3587,6 +3588,41 @@
             <p><strong>Slice:</strong> <code>paris_14h30_matches_new_york_230_pm</code></p>
             <p><strong>Prompt:</strong> Read this schedule note so 24-hour notation and 12-hour notation refer to the same meeting time.</p>
             <p><strong>Target:</strong> The Paris schedule says 14 h 30, which matches 2:30 PM on the New York copy.</p>
+          </article>
+        </div>
+      </details>
+      <details class="sample-group" data-category="accessibility_cue_delivery">
+        <summary><span>Accessibility Cue Delivery</span><strong>5 cases</strong></summary>
+        <div class="sample-list">
+          <article class="sample-card">
+            <h3><code>tts-accessibility-cue-delivery-alt-text-001</code></h3>
+            <p><strong>Slice:</strong> <code>image_alt_text_ramp_open_button_covered</code></p>
+            <p><strong>Prompt:</strong> Read this image description so the label and warning remain distinct for a screen-reader user.</p>
+            <p><strong>Target:</strong> Image: front entrance ramp is open, but the automatic door button is covered for maintenance.</p>
+          </article>
+          <article class="sample-card">
+            <h3><code>tts-accessibility-cue-delivery-button-state-001</code></h3>
+            <p><strong>Slice:</strong> <code>button_label_currently_on_action_turn_off</code></p>
+            <p><strong>Prompt:</strong> Read this control announcement so the button label and toggle state are not confused.</p>
+            <p><strong>Target:</strong> Mute microphone button, currently on; double tap to turn microphone off.</p>
+          </article>
+          <article class="sample-card">
+            <h3><code>tts-accessibility-cue-delivery-form-error-001</code></h3>
+            <p><strong>Slice:</strong> <code>form_error_phone_requires_10_digits_current_7</code></p>
+            <p><strong>Prompt:</strong> Read this form error so the field name, required format, and current invalid value remain attached.</p>
+            <p><strong>Target:</strong> Error on phone number: enter 10 digits; current value has only seven digits.</p>
+          </article>
+          <article class="sample-card">
+            <h3><code>tts-accessibility-cue-delivery-chart-summary-001</code></h3>
+            <p><strong>Slice:</strong> <code>chart_summary_weekday_peak_wednesday_billing_friday</code></p>
+            <p><strong>Prompt:</strong> Read this chart summary so the axes, peak, and exception are clear without seeing the chart.</p>
+            <p><strong>Target:</strong> Chart: support tickets by weekday peak on Wednesday at 82, except billing tickets peak on Friday.</p>
+          </article>
+          <article class="sample-card">
+            <h3><code>tts-accessibility-cue-delivery-live-region-001</code></h3>
+            <p><strong>Slice:</strong> <code>live_region_upload_three_of_five_wait_before_closing</code></p>
+            <p><strong>Prompt:</strong> Read this live-region update so the completed count and remaining action are easy to catch.</p>
+            <p><strong>Target:</strong> Upload status: three of five files complete; continue waiting before closing this window.</p>
           </article>
         </div>
       </details>
