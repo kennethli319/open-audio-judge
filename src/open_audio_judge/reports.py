@@ -1206,6 +1206,14 @@ TTS_CATEGORY_GUIDANCE = {
             "actor, resource, and blocked-action attachment",
         ],
     ),
+    "policy_clause_delivery": (
+        "effective dates, obligation defaults, remedy windows, section citations, renewal clauses, and exception boundaries",
+        [
+            "policy and contract clause prosody",
+            "default, exception, threshold, and remedy-window distinction",
+            "citation, actor, obligation, and prohibited-action attachment",
+        ],
+    ),
 }
 
 

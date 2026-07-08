@@ -245,10 +245,13 @@ runs can map private prompts into the same categories without copying private ro
 - `authorization_access_delivery`: role scopes, expiring access, step-up approval, delegated
   permissions, and revoked-versus-retained access where speech must preserve who can do what, when
   the permission changes, and which actions remain blocked.
+- `policy_clause_delivery`: effective dates, obligation defaults, remedy windows, section
+  citations, renewal clauses, and exception boundaries where speech must preserve the legal or
+  policy force of each clause without flattening qualifiers.
 
 ## Manifest Contract
 
-The public comparison manifest is intentionally balanced at 415 cases for now: 83 categories with 5
+The public comparison manifest is intentionally balanced at 420 cases for now: 84 categories with 5
 cases each. Expansion should add complete five-case category batches before deepening existing
 categories.
 

@@ -408,6 +408,7 @@
           <option value="instruction_conflict_resolution_delivery">Instruction conflict resolution delivery</option>
           <option value="tool_result_state_delivery">Tool result state delivery</option>
           <option value="authorization_access_delivery">Authorization access delivery</option>
+          <option value="policy_clause_delivery">Policy clause delivery</option>
         </select>
         <select id="label-filter" aria-label="Filter by label">
           <option value="">All labels</option>
@@ -452,7 +453,7 @@
   --cases examples/tts_multiturn_cases.jsonl \
   --judge-provider gemini \
   --judge-samples 3 \
-  --limit 415 \
+  --limit 420 \
   --out runs/leaderboard/chatterbox</code></pre>
 
     <pre><code>oaj autojudge-local-tts \
@@ -461,7 +462,7 @@
   --cases examples/tts_multiturn_cases.jsonl \
   --judge-provider gemini \
   --judge-samples 3 \
-  --limit 415 \
+  --limit 420 \
   --out runs/leaderboard/kokoro</code></pre>
 
     <pre><code>oaj autojudge-local-tts \
@@ -470,7 +471,7 @@
   --cases examples/tts_multiturn_cases.jsonl \
   --judge-provider gemini \
   --judge-samples 3 \
-  --limit 415 \
+  --limit 420 \
   --out runs/leaderboard/qwen3-tts</code></pre>
 
     <p>
@@ -482,7 +483,7 @@
   --cases examples/tts_multiturn_cases.jsonl \
   --judge-provider gemini \
   --judge-samples 3 \
-  --limit 415 \
+  --limit 420 \
   --out runs/leaderboard/chatterbox</code></pre>
 
     <p>
@@ -527,7 +528,7 @@
     <h2>Sample Report Preview</h2>
     <section class="grid" aria-label="Sample report metrics">
       <div class="metric"><span>Models</span><strong>3</strong></div>
-      <div class="metric"><span>Shared Eval Cases</span><strong>415</strong></div>
+      <div class="metric"><span>Shared Eval Cases</span><strong>420</strong></div>
       <div class="metric"><span>Judge Samples</span><strong>3x</strong></div>
       <div class="metric"><span>Top Avg</span><strong>91.2</strong></div>
       <div class="metric"><span>Lowest Avg</span><strong>84.7</strong></div>
@@ -536,7 +537,7 @@
 
     <h2>Eval Set Samples</h2>
     <p>
-      The public demo eval set contains 415 synthetic, public-safe cases grouped into research-backed
+      The public demo eval set contains 420 synthetic, public-safe cases grouped into research-backed
       TTS dimensions. Each category below contributes five shared cases that every model synthesizes
       before Gemini judges the generated audio.
     </p>
@@ -3443,6 +3444,41 @@
             <p><strong>Slice:</strong> <code>remove_admin_group_keep_read_only_incident_archive</code></p>
             <p><strong>Prompt:</strong> Read this account update so the revoked access and remaining access are not blended.</p>
             <p><strong>Target:</strong> Remove Leo from the admin group, but keep his read-only access to the incident archive.</p>
+          </article>
+        </div>
+      </details>
+      <details class="sample-group" data-category="policy_clause_delivery">
+        <summary><span>Policy Clause Delivery</span><strong>5 cases</strong></summary>
+        <div class="sample-list">
+          <article class="sample-card">
+            <h3><code>tts-policy-clause-delivery-effective-date-001</code></h3>
+            <p><strong>Slice:</strong> <code>travel_policy_effective_august_1_except_approved_before_july_15</code></p>
+            <p><strong>Prompt:</strong> Read this policy clause so the effective date and exception are unmistakable.</p>
+            <p><strong>Target:</strong> The new travel policy applies on August 1, except for trips approved before July 15.</p>
+          </article>
+          <article class="sample-card">
+            <h3><code>tts-policy-clause-delivery-obligation-exception-001</code></h3>
+            <p><strong>Slice:</strong> <code>vendors_must_invoice_within_30_days_unless_shorter_po_deadline</code></p>
+            <p><strong>Prompt:</strong> Read this contract sentence so the obligation and exception do not blur together.</p>
+            <p><strong>Target:</strong> Vendors must submit invoices within 30 days unless the purchase order states a shorter deadline.</p>
+          </article>
+          <article class="sample-card">
+            <h3><code>tts-policy-clause-delivery-remedy-window-001</code></h3>
+            <p><strong>Slice:</strong> <code>service_interruption_over_four_hours_credit_within_seven_days</code></p>
+            <p><strong>Prompt:</strong> Read this service clause so the notice window and remedy remain attached.</p>
+            <p><strong>Target:</strong> If service is interrupted for more than four hours, the customer may request a credit within seven days.</p>
+          </article>
+          <article class="sample-card">
+            <h3><code>tts-policy-clause-delivery-citation-scope-001</code></h3>
+            <p><strong>Slice:</strong> <code>section_4_2_contractors_view_records_not_export_personal_data</code></p>
+            <p><strong>Prompt:</strong> Read this compliance note so the section citation and scope limit are clear.</p>
+            <p><strong>Target:</strong> Under Section 4.2, contractors may view safety records, but they may not export personal data.</p>
+          </article>
+          <article class="sample-card">
+            <h3><code>tts-policy-clause-delivery-renewal-termination-001</code></h3>
+            <p><strong>Slice:</strong> <code>quarterly_auto_renewal_unless_written_cancellation_10_business_days_before</code></p>
+            <p><strong>Prompt:</strong> Read this renewal clause so renewal and cancellation timing are not confused.</p>
+            <p><strong>Target:</strong> The subscription renews automatically each quarter unless written cancellation arrives 10 business days before renewal.</p>
           </article>
         </div>
       </details>
