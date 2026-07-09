@@ -4,6 +4,7 @@ import json
 import os
 import sys
 from pathlib import Path
+from types import SimpleNamespace
 
 import pytest
 
@@ -669,6 +670,72 @@ def test_write_summary_artifact_records_models_and_categories(tmp_path: Path) ->
     assert summary["models"][0]["labels"] == {"accurate": 2}
     assert summary["categories"][0]["category"] == "transcription_accuracy_wer"
     assert summary["categories"][1]["category"] == "numeric_unit_integrity"
+
+
+def test_source_result_paths_for_update_uses_manifest_for_default_results(tmp_path: Path) -> None:
+    module = load_script_module()
+    manifest = tmp_path / "run-manifest.json"
+    manifest.write_text(
+        json.dumps(
+            {
+                "result_paths": [
+                    "runs/asr-leaderboard/model-a/judge-report/results.jsonl",
+                ],
+            }
+        )
+        + "\n",
+        encoding="utf-8",
+    )
+
+    paths = module._source_result_paths_for_update(
+        SimpleNamespace(
+            source_results=[],
+            results=module.DEFAULT_RESULTS,
+            run_manifest=manifest,
+        )
+    )
+
+    assert paths == [
+        module.ROOT / "runs/asr-leaderboard/model-a/judge-report/results.jsonl",
+    ]
+
+
+def test_source_result_paths_for_update_keeps_custom_results_explicit(tmp_path: Path) -> None:
+    module = load_script_module()
+    manifest = tmp_path / "run-manifest.json"
+    manifest.write_text(
+        json.dumps({"result_paths": ["runs/asr-leaderboard/model-a/judge-report/results.jsonl"]})
+        + "\n",
+        encoding="utf-8",
+    )
+    custom_results = tmp_path / "combined" / "results.jsonl"
+
+    assert (
+        module._source_result_paths_for_update(
+            SimpleNamespace(
+                source_results=[],
+                results=custom_results,
+                run_manifest=manifest,
+            )
+        )
+        == []
+    )
+
+
+def test_source_result_paths_for_update_accepts_explicit_run_directories(tmp_path: Path) -> None:
+    module = load_script_module()
+    run_dir = tmp_path / "model-a"
+    run_dir.mkdir()
+
+    paths = module._source_result_paths_for_update(
+        SimpleNamespace(
+            source_results=[run_dir],
+            results=tmp_path / "combined" / "results.jsonl",
+            run_manifest=tmp_path / "missing-manifest.json",
+        )
+    )
+
+    assert paths == [run_dir / "judge-report" / "results.jsonl"]
 
 
 def test_generated_artifacts_include_new_observed_category_columns(tmp_path: Path) -> None:

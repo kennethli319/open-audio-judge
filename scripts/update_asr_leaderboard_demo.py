@@ -103,6 +103,25 @@ def main() -> None:
     parser.add_argument("--results", type=Path, default=DEFAULT_RESULTS)
     parser.add_argument("--page", type=Path, default=DEFAULT_PAGE)
     parser.add_argument(
+        "--source-results",
+        action="append",
+        type=Path,
+        default=[],
+        help=(
+            "Source model results.jsonl file or run directory behind the combined results. "
+            "Repeat to keep generated report links and refresh commands complete."
+        ),
+    )
+    parser.add_argument(
+        "--run-manifest",
+        type=Path,
+        default=DEFAULT_RUN_MANIFEST,
+        help=(
+            "Committed ASR run manifest used to infer source result files when refreshing "
+            "the default combined result bundle."
+        ),
+    )
+    parser.add_argument(
         "--summary-out",
         type=Path,
         default=DEFAULT_SUMMARY,
@@ -152,11 +171,13 @@ def main() -> None:
     )
     args = parser.parse_args()
 
+    source_result_paths = _source_result_paths_for_update(args)
     results = load_results_jsonl(args.results)
     generated = render_generated_sections(
         results,
         results_path=args.results,
         expected_cases_per_model=args.expected_cases_per_model,
+        source_result_paths=source_result_paths,
     )
     replace_generated_block(args.page, generated)
     write_summary_artifact(
@@ -164,28 +185,32 @@ def main() -> None:
         args.summary_out,
         results_path=args.results,
         expected_cases_per_model=args.expected_cases_per_model,
+        source_result_paths=source_result_paths,
     )
     write_refresh_report(
         results,
         args.refresh_report_out,
         results_path=args.results,
         expected_cases_per_model=args.expected_cases_per_model,
+        source_result_paths=source_result_paths,
     )
     write_report_index(
         results,
         args.report_index_out,
         results_path=args.results,
         expected_cases_per_model=args.expected_cases_per_model,
+        source_result_paths=source_result_paths,
     )
     write_report_links_artifact(
         results,
         args.report_links_out,
         results_path=args.results,
         expected_cases_per_model=args.expected_cases_per_model,
+        source_result_paths=source_result_paths,
     )
     write_refresh_commands_script(
         args.refresh_commands_out,
-        source_result_paths=[],
+        source_result_paths=source_result_paths,
     )
     write_live_refresh_script(args.live_refresh_script_out)
     write_next_run_plan_artifact(
@@ -200,6 +225,30 @@ def main() -> None:
     print(f"Report links: {args.report_links_out}")
     print(f"Refresh commands: {args.refresh_commands_out}")
     print(f"Next-refresh plan: {args.next_runs_out}")
+
+
+def _source_result_paths_for_update(args: argparse.Namespace) -> list[Path]:
+    if args.source_results:
+        return [_normalize_source_results_path(path) for path in args.source_results]
+    if args.results.resolve() != DEFAULT_RESULTS.resolve() or not args.run_manifest.exists():
+        return []
+    return _source_result_paths_from_run_manifest(args.run_manifest)
+
+
+def _source_result_paths_from_run_manifest(path: Path) -> list[Path]:
+    data = json.loads(path.read_text(encoding="utf-8"))
+    raw_paths = data.get("result_paths")
+    if not isinstance(raw_paths, list):
+        raise ValueError(f"{path} must contain a result_paths list.")
+    return [_normalize_source_results_path(Path(raw_path)) for raw_path in raw_paths]
+
+
+def _normalize_source_results_path(path: Path) -> Path:
+    if not path.is_absolute():
+        path = ROOT / path
+    if path.is_dir():
+        return path / "judge-report" / "results.jsonl"
+    return path
 
 
 def render_generated_sections(
