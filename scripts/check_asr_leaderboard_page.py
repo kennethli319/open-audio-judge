@@ -205,6 +205,12 @@ def _validate_summary(
         artifact_root=artifact_root,
         path_maps=path_maps,
     )
+    _validate_hosted_manifest_matches_artifact_index(
+        summary,
+        summary_path=summary_path,
+        artifact_root=artifact_root,
+        path_maps=path_maps,
+    )
 
 
 def _validate_referenced_artifacts(
@@ -602,6 +608,69 @@ def _validate_artifact_index(
     ]
     if missing:
         raise ValueError(f"{path} is missing required artifact path(s): {missing}")
+
+
+def _validate_hosted_manifest_matches_artifact_index(
+    summary: dict[str, Any],
+    *,
+    summary_path: Path,
+    artifact_root: Path,
+    path_maps: list[tuple[str, str]],
+) -> None:
+    raw_hosted_path = summary.get("hosted_manifest_path")
+    raw_index_path = summary.get("artifact_index_path")
+    if not isinstance(raw_hosted_path, str) or not raw_hosted_path:
+        raise ValueError(f"{summary_path} has invalid hosted_manifest_path: {raw_hosted_path!r}")
+    if not isinstance(raw_index_path, str) or not raw_index_path:
+        raise ValueError(f"{summary_path} has invalid artifact_index_path: {raw_index_path!r}")
+
+    hosted_path = _resolve_summary_path(raw_hosted_path, artifact_root=artifact_root, path_maps=path_maps)
+    index_path = _resolve_summary_path(raw_index_path, artifact_root=artifact_root, path_maps=path_maps)
+    hosted_manifest = json.loads(hosted_path.read_text(encoding="utf-8"))
+    artifact_index = json.loads(index_path.read_text(encoding="utf-8"))
+
+    index_artifacts = artifact_index.get("artifacts", [])
+    if not isinstance(index_artifacts, list):
+        raise ValueError(f"{index_path} artifacts must be a list.")
+    indexed_by_path = {}
+    for artifact in index_artifacts:
+        if not isinstance(artifact, dict) or not isinstance(artifact.get("path"), str):
+            continue
+        resolved = _resolve_summary_path(
+            artifact["path"],
+            artifact_root=artifact_root,
+            path_maps=path_maps,
+        ).resolve()
+        indexed_by_path[resolved] = artifact
+
+    hosted_artifacts = hosted_manifest.get("artifacts", [])
+    if not isinstance(hosted_artifacts, list):
+        raise ValueError(f"{hosted_path} artifacts must be a list.")
+    for index, artifact in enumerate(hosted_artifacts):
+        if not isinstance(artifact, dict):
+            raise ValueError(f"{hosted_path} artifacts[{index}] must be an object.")
+        source_path = artifact.get("source_path")
+        if not isinstance(source_path, str) or not source_path:
+            raise ValueError(f"{hosted_path} artifacts[{index}] has invalid source_path: {source_path!r}")
+        resolved_source = _resolve_summary_path(
+            source_path,
+            artifact_root=artifact_root,
+            path_maps=path_maps,
+        ).resolve()
+        indexed = indexed_by_path.get(resolved_source)
+        if indexed is None:
+            raise ValueError(
+                f"{hosted_path} artifacts[{index}] source_path is missing from "
+                f"{index_path}: {source_path}"
+            )
+        for key in ("bytes", "sha256"):
+            indexed_value = indexed.get(key)
+            hosted_value = artifact.get(key)
+            if indexed_value is not None and hosted_value != indexed_value:
+                raise ValueError(
+                    f"{hosted_path} artifacts[{index}] {key}={hosted_value!r} "
+                    f"does not match {index_path} {source_path} {key}={indexed_value!r}."
+                )
 
 
 def _required_page_text(summary: dict[str, Any]) -> list[str]:

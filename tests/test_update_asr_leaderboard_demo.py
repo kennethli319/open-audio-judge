@@ -1307,6 +1307,22 @@ def test_check_asr_leaderboard_page_validates_generated_artifacts(tmp_path: Path
     assert validation["model_count"] == 2
     assert validation["output_artifact_count"] == len(summary_data["output_artifacts"])
 
+    unindexed_hosted_source = tmp_path / "unindexed-hosted-source.json"
+    unindexed_hosted_source.write_text("{}\n", encoding="utf-8")
+    hosted_data = json.loads(hosted_manifest.read_text(encoding="utf-8"))
+    hosted_data["artifacts"].append(
+        {
+            "source_path": str(unindexed_hosted_source),
+            "hosted_paths": ["unindexed-hosted-source.json"],
+            "bytes": unindexed_hosted_source.stat().st_size,
+            "sha256": file_sha256(unindexed_hosted_source),
+        }
+    )
+    hosted_data["artifact_count"] = len(hosted_data["artifacts"])
+    hosted_manifest.write_text(json.dumps(hosted_data), encoding="utf-8")
+    with pytest.raises(ValueError, match="source_path is missing from .*artifact-index"):
+        check_module.check_asr_leaderboard_page(page, summary_path=summary)
+
 
 def test_check_asr_leaderboard_page_validates_hosted_artifact_layout(tmp_path: Path) -> None:
     check_module = load_check_module()
