@@ -1509,6 +1509,39 @@ def test_refresh_asr_leaderboard_artifacts_combines_report_and_page(tmp_path: Pa
         combined_results_path=out / "results.jsonl",
     )
 
+    summary_original = summary.read_text(encoding="utf-8")
+    summary.write_text(
+        summary_original.replace(
+            '"refresh_commands_path": "docs/asr-leaderboard-refresh-commands.sh"',
+            '"refresh_commands_path": "docs/stale-asr-refresh-commands.sh"',
+            1,
+        ),
+        encoding="utf-8",
+    )
+    with pytest.raises(ValueError, match="summary.json.*stale"):
+        refresh_module._validate_generated_artifacts_fresh(
+            combined_results,
+            result_paths=[first, second],
+            page=page,
+            summary_out=summary,
+            refresh_report_out=refresh_report,
+            report_index_out=report_index,
+            report_links_out=report_links,
+            refresh_commands_out=refresh_commands,
+            live_refresh_script_out=live_refresh_script,
+            run_manifest=run_manifest,
+            manifest_validation_out=manifest_validation,
+            seed_manifest_validation_out=seed_manifest_validation,
+            next_runs_out=next_runs,
+            hosted_manifest_out=hosted_manifest,
+            artifact_index_out=artifact_index,
+            runtime_status_out=runtime_status,
+            generated=generated,
+            expected_cases_per_model=2,
+            combined_results_path=out / "results.jsonl",
+        )
+    summary.write_text(summary_original, encoding="utf-8")
+
     combined_results_path = out / "results.jsonl"
     combined_results_original = combined_results_path.read_text(encoding="utf-8")
     combined_results_path.write_text(
@@ -1812,17 +1845,12 @@ def test_require_generated_fresh_rejects_stale_page_block(tmp_path: Path) -> Non
         "Open Audio Judge ASR Leaderboard\n" + generated + "\n",
         encoding="utf-8",
     )
-    summary_path.write_text(
-        json.dumps(
-            {
-                "total_results": 2,
-                "model_count": 1,
-                "category_count": 2,
-                "expected_cases_per_model": 2,
-                "source_result_paths": [str(results_path)],
-            }
-        ),
-        encoding="utf-8",
+    update_module.write_summary_artifact(
+        results,
+        summary_path,
+        results_path=tmp_path / "combined" / "results.jsonl",
+        expected_cases_per_model=2,
+        source_result_paths=[results_path],
     )
     update_module.write_refresh_commands_script(
         refresh_commands_path,

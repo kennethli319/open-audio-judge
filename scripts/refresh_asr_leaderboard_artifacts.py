@@ -633,38 +633,18 @@ def _validate_generated_artifacts_fresh(
             "run `.venv/bin/python scripts/refresh_asr_leaderboard_artifacts.py`."
         )
 
-    summary = json.loads(summary_out.read_text(encoding="utf-8"))
-    expected_source_paths = [_repo_relative(path) for path in result_paths]
-    expected = {
-        "total_results": len(combined_results),
-        "model_count": len(
-            {
-                str(result.metadata.get("candidate_model") or "")
-                for result in combined_results
-            }
-        ),
-        "category_count": len(
-            {
-                str(result.metadata.get("eval_category") or "")
-                for result in combined_results
-            }
-        ),
-        "expected_cases_per_model": expected_cases_per_model,
-        "source_result_paths": expected_source_paths,
-    }
-    mismatches = {
-        key: {"expected": value, "actual": summary.get(key)}
-        for key, value in expected.items()
-        if summary.get(key) != value
-    }
-    if mismatches:
-        raise ValueError(
-            f"{_repo_relative(summary_out)} is stale for selected ASR result sources: "
-            + json.dumps(mismatches, sort_keys=True)
-        )
-
     with tempfile.TemporaryDirectory(prefix="asr-leaderboard-fresh-") as raw_tmp_dir:
         tmp_dir = Path(raw_tmp_dir)
+        expected_summary = tmp_dir / summary_out.name
+        write_summary_artifact(
+            combined_results,
+            expected_summary,
+            results_path=combined_results_path,
+            expected_cases_per_model=expected_cases_per_model,
+            source_result_paths=result_paths,
+        )
+        _compare_generated_text_artifact(summary_out, expected_summary)
+
         expected_combined_results = tmp_dir / combined_results_path.name
         write_results_jsonl(combined_results, expected_combined_results)
         _compare_generated_text_artifact(combined_results_path, expected_combined_results)
