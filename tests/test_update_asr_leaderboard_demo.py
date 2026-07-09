@@ -191,6 +191,7 @@ def test_render_generated_sections_summarizes_verified_asr_results(tmp_path: Pat
     assert "report.html" in html
     assert "docs/asr-leaderboard-summary.json" in html
     assert "docs/asr-leaderboard-refresh-report.md" in html
+    assert "docs/asr-leaderboard-refresh-commands.sh" in html
     assert "docs/asr-leaderboard-run-manifest.json" in html
     assert "docs/asr-leaderboard-manifest-validation.json" in html
     assert "docs/asr-seed-manifest-validation.json" in html
@@ -199,6 +200,7 @@ def test_render_generated_sections_summarizes_verified_asr_results(tmp_path: Pat
     assert "ASR_LEADERBOARD_HOSTED_DIR" in html
     assert "--hosted-dir-from-env" in html
     assert "Generated Refresh Workflow" in html
+    assert "Run refresh shell playbook" in html
     assert "Generated Artifacts" in html
     assert "Validate seed manifest" in html
     assert "Discover latest complete runs" in html
@@ -295,6 +297,7 @@ def test_write_summary_artifact_records_models_and_categories(tmp_path: Path) ->
         }
     ]
     assert summary["run_manifest_path"] == "docs/asr-leaderboard-run-manifest.json"
+    assert summary["refresh_commands_path"] == "docs/asr-leaderboard-refresh-commands.sh"
     assert summary["manifest_validation_path"] == "docs/asr-leaderboard-manifest-validation.json"
     assert summary["seed_manifest_validation_path"] == "docs/asr-seed-manifest-validation.json"
     assert summary["next_runs_path"] == "docs/asr-leaderboard-next-runs.json"
@@ -318,6 +321,10 @@ def test_write_summary_artifact_records_models_and_categories(tmp_path: Path) ->
         {
             "path": "docs/asr-leaderboard-refresh-report.md",
             "purpose": "Human-readable coverage, score, source-file, and command report.",
+        },
+        {
+            "path": "docs/asr-leaderboard-refresh-commands.sh",
+            "purpose": "Generated shell playbook for repeatable ASR leaderboard refreshes.",
         },
         {
             "path": "docs/asr-leaderboard-run-manifest.json",
@@ -459,6 +466,9 @@ def test_write_summary_artifact_records_models_and_categories(tmp_path: Path) ->
         ".venv/bin/python",
         "scripts/refresh_asr_leaderboard_artifacts.py",
     ]
+    assert summary["refresh_workflow"]["refresh_commands_path"] == (
+        "docs/asr-leaderboard-refresh-commands.sh"
+    )
     assert summary["refresh_workflow"]["page_validation_command"] == [
         ".venv/bin/python",
         "scripts/check_asr_leaderboard_page.py",
@@ -671,6 +681,7 @@ def test_write_refresh_report_records_coverage_and_commands(tmp_path: Path) -> N
     assert ".venv/bin/python scripts/validate_asr_seed_manifest.py" in text
     assert "Seed manifest validation: `docs/asr-seed-manifest-validation.json`" in text
     assert "Hosted artifact manifest: `docs/asr-leaderboard-hosted-manifest.json`" in text
+    assert "Refresh command playbook: `docs/asr-leaderboard-refresh-commands.sh`" in text
     assert "--summary-out docs/asr-seed-manifest-validation.json" in text
     assert "Load local Gemini secret before model runs" in text
     assert "Run mlx-community/whisper-large-v3-turbo-asr-fp16" in text
@@ -774,6 +785,7 @@ def test_refresh_asr_leaderboard_artifacts_combines_report_and_page(tmp_path: Pa
     page = tmp_path / "demo.html"
     summary = tmp_path / "summary.json"
     refresh_report = tmp_path / "refresh-report.md"
+    refresh_commands = tmp_path / "refresh-commands.sh"
     run_manifest = tmp_path / "run-manifest.json"
     manifest_validation = tmp_path / "manifest-validation.json"
     seed_manifest_validation = tmp_path / "seed-manifest-validation.json"
@@ -832,6 +844,7 @@ def test_refresh_asr_leaderboard_artifacts_combines_report_and_page(tmp_path: Pa
         page=page,
         summary_out=summary,
         refresh_report_out=refresh_report,
+        refresh_commands_out=refresh_commands,
         manifest_validation_out=manifest_validation,
         run_manifest=run_manifest,
         update_run_manifest=True,
@@ -874,6 +887,12 @@ def test_refresh_asr_leaderboard_artifacts_combines_report_and_page(tmp_path: Pa
     assert (hosted_dir / "refresh-report.md").read_text(
         encoding="utf-8"
     ) == refresh_report.read_text(encoding="utf-8")
+    assert (hosted_dir / "refresh-commands.sh").read_text(
+        encoding="utf-8"
+    ) == refresh_commands.read_text(encoding="utf-8")
+    assert "source /Users/wangyauli/.openclaw/secrets/open-audio-judge-gemini.env" in (
+        refresh_commands.read_text(encoding="utf-8")
+    )
     assert (hosted_dir / "asr-leaderboard-run-manifest.json").exists()
     assert (hosted_dir / "manifest-validation.json").read_text(
         encoding="utf-8"
@@ -892,11 +911,12 @@ def test_refresh_asr_leaderboard_artifacts_combines_report_and_page(tmp_path: Pa
     assert {artifact["path"] for artifact in artifact_index_data["artifacts"]} >= {
         str(out / "results.jsonl"),
         str(out / "report.html"),
+        str(refresh_commands),
         str(artifact_index),
         "docs/asr-leaderboard-artifacts.json",
     }
     hosted_manifest_data = json.loads(hosted_manifest.read_text(encoding="utf-8"))
-    assert hosted_manifest_data["artifact_count"] == 10
+    assert hosted_manifest_data["artifact_count"] == 11
     assert {
         "asr-leaderboard/full-35-combined/results.jsonl"
     } in [set(artifact["hosted_paths"]) for artifact in hosted_manifest_data["artifacts"]]
@@ -1223,6 +1243,11 @@ def test_check_asr_leaderboard_page_validates_generated_artifacts(tmp_path: Path
     refresh_module = load_refresh_module()
     refresh_report = tmp_path / "refresh-report.md"
     refresh_report.write_text("# report\n", encoding="utf-8")
+    refresh_commands = tmp_path / "refresh-commands.sh"
+    refresh_commands.write_text("#!/usr/bin/env bash\n", encoding="utf-8")
+    summary_data = json.loads(summary.read_text(encoding="utf-8"))
+    summary_data["refresh_commands_path"] = str(refresh_commands)
+    summary.write_text(json.dumps(summary_data), encoding="utf-8")
     refresh_module.write_artifact_index(
         artifact_index,
         results=results,
@@ -1231,6 +1256,7 @@ def test_check_asr_leaderboard_page_validates_generated_artifacts(tmp_path: Path
         page=page,
         summary_out=summary,
         refresh_report_out=refresh_report,
+        refresh_commands_out=refresh_commands,
         run_manifest=run_manifest,
         manifest_validation_out=manifest_validation,
         seed_manifest_validation_out=seed_manifest_validation,
@@ -1256,6 +1282,7 @@ def test_check_asr_leaderboard_page_validates_hosted_artifact_layout(tmp_path: P
     seed_manifest_validation = hosted / "asr-seed-manifest-validation.json"
     next_runs = hosted / "asr-leaderboard-next-runs.json"
     run_manifest = hosted / "asr-leaderboard-run-manifest.json"
+    refresh_commands = hosted / "asr-leaderboard-refresh-commands.sh"
     hosted_manifest = hosted / "asr-leaderboard-hosted-manifest.json"
     artifact_index = hosted / "asr-leaderboard-artifacts.json"
     results_path = hosted / "asr-leaderboard" / "full-35-combined" / "results.jsonl"
@@ -1327,6 +1354,7 @@ def test_check_asr_leaderboard_page_validates_hosted_artifact_layout(tmp_path: P
         encoding="utf-8",
     )
     seed_manifest_validation.write_text(json.dumps({"status": "complete"}) + "\n", encoding="utf-8")
+    refresh_commands.write_text("#!/usr/bin/env bash\n", encoding="utf-8")
     next_runs.write_text(
         json.dumps(
             {
@@ -1348,6 +1376,7 @@ def test_check_asr_leaderboard_page_validates_hosted_artifact_layout(tmp_path: P
                     ("asr-leaderboard/full-35-combined/results.jsonl", results_path),
                     ("asr-leaderboard/full-35-combined/report.html", report_path),
                     ("asr-leaderboard-run-manifest.json", run_manifest),
+                    ("asr-leaderboard-refresh-commands.sh", refresh_commands),
                 ]
             )
         )
@@ -1369,6 +1398,7 @@ def test_check_asr_leaderboard_page_validates_hosted_artifact_layout(tmp_path: P
                     {"path": "docs/asr-leaderboard-manifest-validation.json", "exists": True},
                     {"path": "docs/asr-seed-manifest-validation.json", "exists": True},
                     {"path": "docs/asr-leaderboard-next-runs.json", "exists": True},
+                    {"path": "docs/asr-leaderboard-refresh-commands.sh", "exists": True},
                     {"path": "docs/asr-leaderboard-hosted-manifest.json", "exists": True},
                     {"path": "docs/asr-leaderboard-artifacts.json", "exists": True},
                 ],
@@ -1383,6 +1413,7 @@ def test_check_asr_leaderboard_page_validates_hosted_artifact_layout(tmp_path: P
                 "results_path": "runs/asr-leaderboard/full-35-combined/results.jsonl",
                 "report_path": "runs/asr-leaderboard/full-35-combined/report.html",
                 "run_manifest_path": "docs/asr-leaderboard-run-manifest.json",
+                "refresh_commands_path": "docs/asr-leaderboard-refresh-commands.sh",
                 "manifest_validation_path": "docs/asr-leaderboard-manifest-validation.json",
                 "seed_manifest_validation_path": "docs/asr-seed-manifest-validation.json",
                 "next_runs_path": "docs/asr-leaderboard-next-runs.json",
@@ -1408,6 +1439,10 @@ def test_check_asr_leaderboard_page_validates_hosted_artifact_layout(tmp_path: P
                     {
                         "path": "docs/asr-leaderboard-run-manifest.json",
                         "purpose": "Committed source result manifest for manifest-based refreshes.",
+                    },
+                    {
+                        "path": "docs/asr-leaderboard-refresh-commands.sh",
+                        "purpose": "Generated shell playbook for repeatable ASR leaderboard refreshes.",
                     },
                         {
                             "path": "docs/asr-leaderboard-next-runs.json",
@@ -1489,6 +1524,8 @@ def test_check_asr_leaderboard_page_validates_hosted_artifact_layout(tmp_path: P
                 "Machine-readable leaderboard summary and reproducible refresh workflow.",
                 "docs/asr-leaderboard-run-manifest.json",
                 "Committed source result manifest for manifest-based refreshes.",
+                "docs/asr-leaderboard-refresh-commands.sh",
+                "Generated shell playbook for repeatable ASR leaderboard refreshes.",
                 "docs/asr-leaderboard-next-runs.json",
                 "Machine-readable next-refresh plan for missing ASR model/category cells.",
                 "docs/asr-leaderboard-artifacts.json",
@@ -1583,6 +1620,7 @@ def test_check_asr_leaderboard_page_rejects_incomplete_validation_artifact(
     run_manifest = tmp_path / "run-manifest.json"
     manifest_validation = tmp_path / "manifest-validation.json"
     seed_manifest_validation = tmp_path / "seed-manifest-validation.json"
+    refresh_commands = tmp_path / "refresh-commands.sh"
     records = [
         result_record(
             case_id="asr-a-model-a",
@@ -1674,8 +1712,10 @@ def test_check_asr_leaderboard_page_rejects_incomplete_validation_artifact(
         json.dumps({"status": "complete"}) + "\n",
         encoding="utf-8",
     )
+    refresh_commands.write_text("#!/usr/bin/env bash\n", encoding="utf-8")
     summary_data = json.loads(summary.read_text(encoding="utf-8"))
     summary_data["run_manifest_path"] = str(run_manifest)
+    summary_data["refresh_commands_path"] = str(refresh_commands)
     summary_data["manifest_validation_path"] = str(manifest_validation)
     summary_data["seed_manifest_validation_path"] = str(seed_manifest_validation)
     summary.write_text(json.dumps(summary_data), encoding="utf-8")
@@ -1748,6 +1788,7 @@ def test_check_asr_leaderboard_page_rejects_missing_output_artifact(tmp_path: Pa
     run_manifest = tmp_path / "run-manifest.json"
     manifest_validation = tmp_path / "manifest-validation.json"
     seed_manifest_validation = tmp_path / "seed-manifest-validation.json"
+    refresh_commands = tmp_path / "refresh-commands.sh"
     records = [
         result_record(
             case_id="asr-a-model-a",
@@ -1822,8 +1863,10 @@ def test_check_asr_leaderboard_page_rejects_missing_output_artifact(tmp_path: Pa
         json.dumps({"status": "complete"}) + "\n",
         encoding="utf-8",
     )
+    refresh_commands.write_text("#!/usr/bin/env bash\n", encoding="utf-8")
     summary_data = json.loads(summary.read_text(encoding="utf-8"))
     summary_data["run_manifest_path"] = str(run_manifest)
+    summary_data["refresh_commands_path"] = str(refresh_commands)
     summary_data["manifest_validation_path"] = str(manifest_validation)
     summary_data["seed_manifest_validation_path"] = str(seed_manifest_validation)
     summary_data["output_artifacts"].append(

@@ -214,6 +214,10 @@
       "purpose": "Human-readable coverage, score, source-file, and command report."
     },
     {
+      "path": "docs/asr-leaderboard-refresh-commands.sh",
+      "purpose": "Generated shell playbook for repeatable ASR leaderboard refreshes."
+    },
+    {
       "path": "docs/asr-leaderboard-run-manifest.json",
       "purpose": "Committed source result manifest for manifest-based refreshes."
     },
@@ -238,6 +242,7 @@
       "purpose": "Single machine-readable index for the ASR leaderboard artifact bundle."
     }
   ],
+  "refresh_commands_path": "docs/asr-leaderboard-refresh-commands.sh",
   "refresh_runtime_status": {
     "all_loaded_results_ok": true,
     "gemini_judge": "verified_from_loaded_results",
@@ -408,6 +413,7 @@
       ".venv/bin/python",
       "scripts/check_asr_leaderboard_page.py"
     ],
+    "refresh_commands_path": "docs/asr-leaderboard-refresh-commands.sh",
     "secret_handling": "Load the Gemini API key from the local secret file only at runtime; do not commit or print secrets.",
     "seed_manifest_validation_command": [
       ".venv/bin/python",

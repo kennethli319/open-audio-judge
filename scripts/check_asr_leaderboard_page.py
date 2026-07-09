@@ -133,6 +133,7 @@ def _validate_summary(
         "models",
         "categories",
         "refresh_workflow",
+        "refresh_commands_path",
         "hosted_manifest_path",
         "artifact_index_path",
     )
@@ -221,6 +222,7 @@ def _validate_referenced_artifacts(
         "manifest_validation_path",
         "seed_manifest_validation_path",
         "next_runs_path",
+        "refresh_commands_path",
         "hosted_manifest_path",
         "artifact_index_path",
     )
@@ -588,6 +590,7 @@ def _validate_artifact_index(
         summary["manifest_validation_path"],
         summary["seed_manifest_validation_path"],
         summary["next_runs_path"],
+        summary["refresh_commands_path"],
         summary["hosted_manifest_path"],
         summary["artifact_index_path"],
     ]

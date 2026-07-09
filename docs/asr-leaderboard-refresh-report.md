@@ -8,6 +8,7 @@ This generated report summarizes the verified ASR leaderboard artifact set.
 - Combined report: `runs/asr-leaderboard/full-35-combined/report.html`
 - Summary JSON: `docs/asr-leaderboard-summary.json`
 - Run manifest: `docs/asr-leaderboard-run-manifest.json`
+- Refresh command playbook: `docs/asr-leaderboard-refresh-commands.sh`
 - Manifest validation: `docs/asr-leaderboard-manifest-validation.json`
 - Seed manifest validation: `docs/asr-seed-manifest-validation.json`
 - Next-refresh plan: `docs/asr-leaderboard-next-runs.json`
@@ -104,6 +105,7 @@ This generated report summarizes the verified ASR leaderboard artifact set.
 | `runs/asr-leaderboard/full-35-combined/report.html` | Local combined HTML report with per-case judge details. |
 | `docs/asr-leaderboard-summary.json` | Machine-readable leaderboard summary and reproducible refresh workflow. |
 | `docs/asr-leaderboard-refresh-report.md` | Human-readable coverage, score, source-file, and command report. |
+| `docs/asr-leaderboard-refresh-commands.sh` | Generated shell playbook for repeatable ASR leaderboard refreshes. |
 | `docs/asr-leaderboard-run-manifest.json` | Committed source result manifest for manifest-based refreshes. |
 | `docs/asr-leaderboard-manifest-validation.json` | Coverage validation for the model/category result matrix. |
 | `docs/asr-seed-manifest-validation.json` | Seed-manifest validation proving public-safe ASR cases keep exact category coverage. |
@@ -113,6 +115,7 @@ This generated report summarizes the verified ASR leaderboard artifact set.
 
 ## Refresh Commands
 
+- Generated shell playbook: `docs/asr-leaderboard-refresh-commands.sh`
 - Seed manifest validation: `.venv/bin/python scripts/validate_asr_seed_manifest.py --summary-out docs/asr-seed-manifest-validation.json`
 - Audio materialization: `.venv/bin/python scripts/synthesize_tts_cases.py --cases examples/asr_research_cases.jsonl --out runs/asr-research-audio --discard-text-sidecars --summary-out runs/asr-research-audio/summary.json`
 - Load local Gemini secret before model runs: `source /Users/wangyauli/.openclaw/secrets/open-audio-judge-gemini.env`

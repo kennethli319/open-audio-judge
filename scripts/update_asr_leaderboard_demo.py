@@ -17,6 +17,7 @@ DEFAULT_RESULTS = ROOT / "runs" / "asr-leaderboard" / "full-35-combined" / "resu
 DEFAULT_PAGE = ROOT / "docs" / "asr-leaderboard-demo.html"
 DEFAULT_SUMMARY = ROOT / "docs" / "asr-leaderboard-summary.json"
 DEFAULT_REFRESH_REPORT = ROOT / "docs" / "asr-leaderboard-refresh-report.md"
+DEFAULT_REFRESH_COMMANDS = ROOT / "docs" / "asr-leaderboard-refresh-commands.sh"
 DEFAULT_RUN_MANIFEST = ROOT / "docs" / "asr-leaderboard-run-manifest.json"
 DEFAULT_MANIFEST_VALIDATION = ROOT / "docs" / "asr-leaderboard-manifest-validation.json"
 DEFAULT_SEED_MANIFEST_VALIDATION = ROOT / "docs" / "asr-seed-manifest-validation.json"
@@ -102,6 +103,12 @@ def main() -> None:
         help="Write a human-readable ASR leaderboard refresh report.",
     )
     parser.add_argument(
+        "--refresh-commands-out",
+        type=Path,
+        default=DEFAULT_REFRESH_COMMANDS,
+        help="Write a shell playbook with the generated ASR leaderboard refresh commands.",
+    )
+    parser.add_argument(
         "--next-runs-out",
         type=Path,
         default=DEFAULT_NEXT_RUNS,
@@ -134,6 +141,10 @@ def main() -> None:
         results_path=args.results,
         expected_cases_per_model=args.expected_cases_per_model,
     )
+    write_refresh_commands_script(
+        args.refresh_commands_out,
+        source_result_paths=[],
+    )
     write_next_run_plan_artifact(
         results,
         args.next_runs_out,
@@ -142,6 +153,7 @@ def main() -> None:
     print(f"Updated {args.page} from {args.results} ({len(results)} results)")
     print(f"Summary: {args.summary_out}")
     print(f"Refresh report: {args.refresh_report_out}")
+    print(f"Refresh commands: {args.refresh_commands_out}")
     print(f"Next-refresh plan: {args.next_runs_out}")
 
 
@@ -165,6 +177,7 @@ def render_generated_sections(
     report_label = html.escape(_repo_relative(results_path.with_name("report.html")))
     summary_label = html.escape(_repo_relative(DEFAULT_SUMMARY))
     refresh_report_label = html.escape(_repo_relative(DEFAULT_REFRESH_REPORT))
+    refresh_commands_label = html.escape(_repo_relative(DEFAULT_REFRESH_COMMANDS))
     manifest_label = html.escape(_repo_relative(DEFAULT_RUN_MANIFEST))
     validation_label = html.escape(_repo_relative(DEFAULT_MANIFEST_VALIDATION))
     seed_validation_label = html.escape(_repo_relative(DEFAULT_SEED_MANIFEST_VALIDATION))
@@ -178,6 +191,7 @@ def render_generated_sections(
         ("Run one MLX ASR model", workflow["model_run_template"]),
         ("Discover latest complete runs", workflow["discover_refresh_command"]),
         ("Refresh committed artifacts", workflow["manifest_refresh_command"]),
+        ("Run refresh shell playbook", ["bash", workflow["refresh_commands_path"]]),
         ("Check generated page", workflow["page_validation_command"]),
         ("Sync hosted artifacts", workflow["hosted_artifact_command"]),
     ]
@@ -221,7 +235,8 @@ def render_generated_sections(
                 "after rerunning the verified ASR model jobs. The combined local report is "
                 f"<code>{report_label}</code> and the committed summary artifact is "
                 f"<code>{summary_label}</code>. The generated refresh report is "
-                f"<code>{refresh_report_label}</code>. The committed run manifest is "
+                f"<code>{refresh_report_label}</code>, and the generated shell playbook is "
+                f"<code>{refresh_commands_label}</code>. The committed run manifest is "
                 f"<code>{manifest_label}</code>, with coverage validation in "
                 f"<code>{validation_label}</code> and seed-manifest validation in "
                 f"<code>{seed_validation_label}</code>. The next-refresh plan is "
@@ -325,6 +340,7 @@ def write_summary_artifact(
                     for summary in source_file_summaries
                 ],
                 "run_manifest_path": _repo_relative(DEFAULT_RUN_MANIFEST),
+                "refresh_commands_path": _repo_relative(DEFAULT_REFRESH_COMMANDS),
                 "manifest_validation_path": _repo_relative(DEFAULT_MANIFEST_VALIDATION),
                 "seed_manifest_validation_path": _repo_relative(DEFAULT_SEED_MANIFEST_VALIDATION),
                 "next_runs_path": _repo_relative(DEFAULT_NEXT_RUNS),
@@ -405,6 +421,7 @@ def write_refresh_report(
                 f"- Combined report: `{_repo_relative(results_path.with_name('report.html'))}`",
                 f"- Summary JSON: `{_repo_relative(DEFAULT_SUMMARY)}`",
                 f"- Run manifest: `{_repo_relative(DEFAULT_RUN_MANIFEST)}`",
+                f"- Refresh command playbook: `{_repo_relative(DEFAULT_REFRESH_COMMANDS)}`",
                 f"- Manifest validation: `{_repo_relative(DEFAULT_MANIFEST_VALIDATION)}`",
                 f"- Seed manifest validation: `{_repo_relative(DEFAULT_SEED_MANIFEST_VALIDATION)}`",
                 f"- Next-refresh plan: `{_repo_relative(DEFAULT_NEXT_RUNS)}`",
@@ -474,6 +491,7 @@ def write_refresh_report(
                 "",
                 "## Refresh Commands",
                 "",
+                f"- Generated shell playbook: `{_repo_relative(DEFAULT_REFRESH_COMMANDS)}`",
                 f"- Seed manifest validation: `{_shell_join(workflow['seed_manifest_validation_command'])}`",
                 f"- Audio materialization: `{_shell_join(workflow['audio_materialization_command'])}`",
                 f"- Load local Gemini secret before model runs: `{_shell_join(workflow['local_secret_env_command'])}`",
@@ -521,6 +539,50 @@ def write_next_run_plan_artifact(
         json.dumps(next_runs, indent=2, sort_keys=True) + "\n",
         encoding="utf-8",
     )
+
+
+def write_refresh_commands_script(
+    output_path: Path,
+    *,
+    source_result_paths: list[Path] | None = None,
+) -> None:
+    workflow = _refresh_workflow(source_result_paths or [])
+    lines = [
+        "#!/usr/bin/env bash",
+        "set -euo pipefail",
+        "",
+        "# Generated ASR leaderboard refresh playbook.",
+        "# By default this refreshes committed artifacts from verified result files.",
+        "# Live model runs require the local Gemini secret and are listed below as opt-in commands.",
+        "",
+        _shell_join(workflow["seed_manifest_validation_command"]),
+        _shell_join(workflow["combine_refresh_command"]),
+        _shell_join(workflow["page_validation_command"]),
+        "",
+        "# Optional hosted sync; set ASR_LEADERBOARD_HOSTED_DIR to the Pages checkout path first.",
+        "# " + _shell_join(workflow["hosted_artifact_command"]),
+        "",
+        "# Optional when seed cases change: materialize local audio under ignored runs/.",
+        "# " + _shell_join(workflow["audio_materialization_command"]),
+        "",
+        "# Optional live refresh: load the Gemini key only in your local shell before judge calls.",
+        "# " + _shell_join(workflow["local_secret_env_command"]),
+        "",
+        "# Optional live refresh: run primary MLX ASR model jobs when the local runtime is ready.",
+        *(
+            "# " + _shell_join(command["command"])
+            for command in workflow["model_run_commands"]
+        ),
+        "",
+        "# If a primary model is blocked, record the unsupported state before trying fallbacks.",
+        "# Fallback models: " + ", ".join(workflow["fallback_model_ids"]),
+        "",
+        "# Alternative: discover the newest complete primary-model runs.",
+        "# " + _shell_join(workflow["discover_refresh_command"]),
+        "",
+    ]
+    output_path.parent.mkdir(parents=True, exist_ok=True)
+    output_path.write_text("\n".join(lines), encoding="utf-8")
 
 
 def _refresh_workflow(source_result_paths: list[Path]) -> dict[str, object]:
@@ -584,6 +646,7 @@ def _refresh_workflow(source_result_paths: list[Path]) -> dict[str, object]:
             ".venv/bin/python",
             "scripts/refresh_asr_leaderboard_artifacts.py",
         ],
+        "refresh_commands_path": _repo_relative(DEFAULT_REFRESH_COMMANDS),
         "page_validation_command": [
             ".venv/bin/python",
             "scripts/check_asr_leaderboard_page.py",
@@ -657,6 +720,10 @@ def build_output_artifact_index(*, results_path: Path) -> list[dict[str, str]]:
         {
             "path": _repo_relative(DEFAULT_REFRESH_REPORT),
             "purpose": "Human-readable coverage, score, source-file, and command report.",
+        },
+        {
+            "path": _repo_relative(DEFAULT_REFRESH_COMMANDS),
+            "purpose": "Generated shell playbook for repeatable ASR leaderboard refreshes.",
         },
         {
             "path": _repo_relative(DEFAULT_RUN_MANIFEST),
