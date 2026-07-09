@@ -135,6 +135,7 @@ def test_render_generated_sections_summarizes_verified_asr_results(tmp_path: Pat
     assert "Check generated page" in html
     assert "scripts/check_asr_leaderboard_page.py" in html
     assert "Run one MLX ASR model" in html
+    assert ".venv/bin/oaj autojudge-mlx-asr" in html
     assert "--model &lt;mlx-community/model-id&gt;" in html
     assert "Generated Model Refresh Commands" in html
     assert "mlx-community/whisper-large-v3-turbo-asr-fp16" in html
@@ -271,7 +272,7 @@ def test_write_summary_artifact_records_models_and_categories(tmp_path: Path) ->
         "runs/asr-research-audio/summary.json",
     ]
     assert summary["refresh_workflow"]["model_run_template"] == [
-        "oaj",
+        ".venv/bin/oaj",
         "autojudge-mlx-asr",
         "--python-bin",
         ".venv/bin/python",
@@ -291,7 +292,7 @@ def test_write_summary_artifact_records_models_and_categories(tmp_path: Path) ->
             "model": "mlx-community/whisper-large-v3-turbo-asr-fp16",
             "run_name": "whisper-large-v3-turbo-refresh",
             "command": [
-                "oaj",
+                ".venv/bin/oaj",
                 "autojudge-mlx-asr",
                 "--python-bin",
                 ".venv/bin/python",
@@ -311,7 +312,7 @@ def test_write_summary_artifact_records_models_and_categories(tmp_path: Path) ->
             "model": "mlx-community/Qwen3-ASR-1.7B-8bit",
             "run_name": "qwen3-asr-1.7b-refresh",
             "command": [
-                "oaj",
+                ".venv/bin/oaj",
                 "autojudge-mlx-asr",
                 "--python-bin",
                 ".venv/bin/python",
@@ -331,7 +332,7 @@ def test_write_summary_artifact_records_models_and_categories(tmp_path: Path) ->
             "model": "mlx-community/VibeVoice-ASR-4bit",
             "run_name": "vibevoice-asr-refresh",
             "command": [
-                "oaj",
+                ".venv/bin/oaj",
                 "autojudge-mlx-asr",
                 "--python-bin",
                 ".venv/bin/python",
@@ -374,6 +375,12 @@ def test_write_summary_artifact_records_models_and_categories(tmp_path: Path) ->
         "/Users/wangyauli/.openclaw/secrets/open-audio-judge-gemini.env",
     ]
     assert "secret" in summary["refresh_workflow"]["secret_handling"].lower()
+    assert summary["refresh_workflow"]["fallback_model_ids"] == [
+        "mlx-community/whisper-small.en-asr-4bit",
+        "mlx-community/parakeet-rnnt-0.6b",
+        "mlx-community/GLM-ASR-Nano-2512-4bit",
+    ]
+    assert "do not substitute silently" in summary["refresh_workflow"]["fallback_handling"]
     assert summary["refresh_runtime_status"] == {
         "all_loaded_results_ok": True,
         "gemini_judge": "verified_from_loaded_results",
@@ -567,7 +574,10 @@ def test_write_refresh_report_records_coverage_and_commands(tmp_path: Path) -> N
     assert "--summary-out docs/asr-seed-manifest-validation.json" in text
     assert "Load local Gemini secret before model runs" in text
     assert "Run mlx-community/whisper-large-v3-turbo-asr-fp16" in text
+    assert ".venv/bin/oaj autojudge-mlx-asr" in text
     assert "runs/asr-leaderboard/vibevoice-asr-refresh" in text
+    assert "Fallback models if a primary model is blocked" in text
+    assert "mlx-community/parakeet-rnnt-0.6b" in text
     assert "--results " + str(source_results_path) in text
     assert "--update-run-manifest" in text
     assert "Hosted artifact sync" in text
@@ -892,7 +902,7 @@ def test_check_asr_leaderboard_page_validates_hosted_artifact_layout(tmp_path: P
                         ".venv/bin/python",
                         "scripts/synthesize_tts_cases.py",
                     ],
-                    "model_run_template": ["oaj", "autojudge-mlx-asr"],
+                    "model_run_template": [".venv/bin/oaj", "autojudge-mlx-asr"],
                     "manifest_refresh_command": [
                         ".venv/bin/python",
                         "scripts/refresh_asr_leaderboard_artifacts.py",
@@ -942,7 +952,7 @@ def test_check_asr_leaderboard_page_validates_hosted_artifact_layout(tmp_path: P
                 "numeric_unit_integrity",
                 ".venv/bin/python scripts/validate_asr_seed_manifest.py",
                 ".venv/bin/python scripts/synthesize_tts_cases.py",
-                "oaj autojudge-mlx-asr",
+                ".venv/bin/oaj autojudge-mlx-asr",
                 ".venv/bin/python scripts/refresh_asr_leaderboard_artifacts.py",
                 ".venv/bin/python scripts/check_asr_leaderboard_page.py",
                 ".venv/bin/python scripts/refresh_asr_leaderboard_artifacts.py --hosted-dir /path/to/kennethli319.github.io/open-audio-judge",

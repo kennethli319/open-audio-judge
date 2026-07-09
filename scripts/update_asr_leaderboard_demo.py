@@ -40,6 +40,11 @@ ASR_LEADERBOARD_MODELS = [
     ("mlx-community/Qwen3-ASR-1.7B-8bit", "qwen3-asr-1.7b-refresh"),
     ("mlx-community/VibeVoice-ASR-4bit", "vibevoice-asr-refresh"),
 ]
+ASR_FALLBACK_MODELS = [
+    "mlx-community/whisper-small.en-asr-4bit",
+    "mlx-community/parakeet-rnnt-0.6b",
+    "mlx-community/GLM-ASR-Nano-2512-4bit",
+]
 GEMINI_SECRET_ENV = "/Users/wangyauli/.openclaw/secrets/open-audio-judge-gemini.env"
 
 
@@ -232,6 +237,15 @@ def render_generated_sections(
             ),
             "      </tbody>",
             "    </table>",
+            (
+                "    <p class=\"muted\">If a primary MLX ASR model is unsupported locally, record that "
+                "blocked state in the run notes before trying the documented fallbacks: "
+                + ", ".join(
+                    f"<code>{html.escape(model)}</code>"
+                    for model in workflow["fallback_model_ids"]
+                )
+                + ".</p>"
+            ),
             "",
             "    <h2>Generated Artifacts</h2>",
             "    <table>",
@@ -419,6 +433,9 @@ def write_refresh_report(
                     f"- Run {command['model']}: `{_shell_join(command['command'])}`"
                     for command in workflow["model_run_commands"]
                 ),
+                "- Fallback models if a primary model is blocked: "
+                + ", ".join(f"`{model}`" for model in workflow["fallback_model_ids"]),
+                f"- Fallback handling: {workflow['fallback_handling']}",
                 f"- Combine and refresh committed artifacts: `{_shell_join(workflow['combine_refresh_command'])}`",
                 f"- Manifest-based refresh: `{_shell_join(workflow['manifest_refresh_command'])}`",
                 f"- Page validation: `{_shell_join(workflow['page_validation_command'])}`",
@@ -469,7 +486,7 @@ def _refresh_workflow(source_result_paths: list[Path]) -> dict[str, object]:
             "runs/asr-research-audio/summary.json",
         ],
         "model_run_template": [
-            "oaj",
+            ".venv/bin/oaj",
             "autojudge-mlx-asr",
             "--python-bin",
             ".venv/bin/python",
@@ -485,6 +502,11 @@ def _refresh_workflow(source_result_paths: list[Path]) -> dict[str, object]:
             "runs/asr-leaderboard/<run-name>",
         ],
         "model_run_commands": _model_run_commands(),
+        "fallback_model_ids": ASR_FALLBACK_MODELS,
+        "fallback_handling": (
+            "If a primary MLX ASR model is blocked or unsupported, record the unsupported state "
+            "explicitly before trying the fallback model list; do not substitute silently."
+        ),
         "combine_refresh_command": refresh_command,
         "manifest_refresh_command": [
             ".venv/bin/python",
@@ -519,7 +541,7 @@ def _model_run_commands() -> list[dict[str, object]]:
                 "model": model,
                 "run_name": run_name,
                 "command": [
-                    "oaj",
+                    ".venv/bin/oaj",
                     "autojudge-mlx-asr",
                     "--python-bin",
                     ".venv/bin/python",

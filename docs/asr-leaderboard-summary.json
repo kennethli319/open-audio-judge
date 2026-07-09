@@ -268,6 +268,12 @@
       "runs/asr-leaderboard/vibevoice-asr-noise-smoke/judge-report/results.jsonl",
       "--update-run-manifest"
     ],
+    "fallback_handling": "If a primary MLX ASR model is blocked or unsupported, record the unsupported state explicitly before trying the fallback model list; do not substitute silently.",
+    "fallback_model_ids": [
+      "mlx-community/whisper-small.en-asr-4bit",
+      "mlx-community/parakeet-rnnt-0.6b",
+      "mlx-community/GLM-ASR-Nano-2512-4bit"
+    ],
     "hosted_artifact_command": [
       ".venv/bin/python",
       "scripts/refresh_asr_leaderboard_artifacts.py",
@@ -285,7 +291,7 @@
     "model_run_commands": [
       {
         "command": [
-          "oaj",
+          ".venv/bin/oaj",
           "autojudge-mlx-asr",
           "--python-bin",
           ".venv/bin/python",
@@ -305,7 +311,7 @@
       },
       {
         "command": [
-          "oaj",
+          ".venv/bin/oaj",
           "autojudge-mlx-asr",
           "--python-bin",
           ".venv/bin/python",
@@ -325,7 +331,7 @@
       },
       {
         "command": [
-          "oaj",
+          ".venv/bin/oaj",
           "autojudge-mlx-asr",
           "--python-bin",
           ".venv/bin/python",
@@ -345,7 +351,7 @@
       }
     ],
     "model_run_template": [
-      "oaj",
+      ".venv/bin/oaj",
       "autojudge-mlx-asr",
       "--python-bin",
       ".venv/bin/python",
