@@ -148,14 +148,15 @@
       </tbody>
     </table>
 
+<!-- ASR_LEADERBOARD_GENERATED_START -->
     <h2>Verified Leaderboard Results</h2>
-    <p class="muted">On 2026-07-08, cron materialized all 35 public-safe ASR audio cases locally, then ran every case through each model with three Gemini judge samples per case. The verified matrix covers <code>transcription_accuracy_wer</code>, <code>numeric_unit_integrity</code>, <code>negation_modality_scope</code>, <code>temporal_scheduling_accuracy</code>, <code>entity_factual_integrity</code>, <code>semantic_paraphrase_preservation</code>, and <code>acoustic_noise_robustness</code>.</p>
+    <p class="muted">Generated from <code>runs/asr-leaderboard/full-35-combined/results.jsonl</code>. The verified matrix covers 105 judged transcripts across 3 MLX ASR models and 7 research categories: <code>acoustic_noise_robustness</code>, <code>entity_factual_integrity</code>, <code>negation_modality_scope</code>, <code>numeric_unit_integrity</code>, <code>semantic_paraphrase_preservation</code>, <code>temporal_scheduling_accuracy</code>, <code>transcription_accuracy_wer</code>.</p>
     <table>
       <thead><tr><th>Model</th><th>Cases</th><th>Gemini Samples</th><th>Average Score</th><th>Labels</th></tr></thead>
       <tbody>
-        <tr><td><code>mlx-community/whisper-large-v3-turbo-asr-fp16</code></td><td>35/35 ok</td><td>105</td><td>93.4</td><td>30 accurate, 3 needs_review, 2 inaccurate</td></tr>
-        <tr><td><code>mlx-community/Qwen3-ASR-1.7B-8bit</code></td><td>35/35 ok</td><td>105</td><td>95.2</td><td>31 accurate, 3 needs_review, 1 inaccurate</td></tr>
         <tr><td><code>mlx-community/VibeVoice-ASR-4bit</code></td><td>35/35 ok</td><td>105</td><td>96.5</td><td>33 accurate, 1 needs_review, 1 inaccurate</td></tr>
+        <tr><td><code>mlx-community/Qwen3-ASR-1.7B-8bit</code></td><td>35/35 ok</td><td>105</td><td>95.2</td><td>31 accurate, 3 needs_review, 1 inaccurate</td></tr>
+        <tr><td><code>mlx-community/whisper-large-v3-turbo-asr-fp16</code></td><td>35/35 ok</td><td>105</td><td>93.4</td><td>30 accurate, 3 needs_review, 2 inaccurate</td></tr>
       </tbody>
     </table>
 
@@ -163,11 +164,13 @@
     <table>
       <thead><tr><th>Model</th><th>WER</th><th>Numeric/Unit</th><th>Negation/Modality</th><th>Temporal</th><th>Entity</th><th>Paraphrase</th><th>Acoustic Noise</th></tr></thead>
       <tbody>
-        <tr><td><code>mlx-community/whisper-large-v3-turbo-asr-fp16</code></td><td>5 cases, 94.8 avg, 4 accurate, 1 needs_review</td><td>5 cases, 92.0 avg, 4 accurate, 1 needs_review</td><td>5 cases, 93.4 avg, 4 accurate, 1 needs_review</td><td>5 cases, 90.6 avg, 4 accurate, 1 inaccurate</td><td>5 cases, 88.6 avg, 4 accurate, 1 inaccurate</td><td>5 cases, 97.6 avg, 5 accurate</td><td>5 cases, 96.6 avg, 5 accurate</td></tr>
-        <tr><td><code>mlx-community/Qwen3-ASR-1.7B-8bit</code></td><td>5 cases, 92.8 avg, 4 accurate, 1 needs_review</td><td>5 cases, 92.0 avg, 4 accurate, 1 needs_review</td><td>5 cases, 100.0 avg, 5 accurate</td><td>5 cases, 100.0 avg, 5 accurate</td><td>5 cases, 89.0 avg, 4 accurate, 1 inaccurate</td><td>5 cases, 100.0 avg, 5 accurate</td><td>5 cases, 92.4 avg, 4 accurate, 1 needs_review</td></tr>
         <tr><td><code>mlx-community/VibeVoice-ASR-4bit</code></td><td>5 cases, 96.2 avg, 5 accurate</td><td>5 cases, 99.2 avg, 5 accurate</td><td>5 cases, 99.6 avg, 5 accurate</td><td>5 cases, 98.8 avg, 5 accurate</td><td>5 cases, 90.2 avg, 4 accurate, 1 inaccurate</td><td>5 cases, 98.4 avg, 5 accurate</td><td>5 cases, 92.8 avg, 4 accurate, 1 needs_review</td></tr>
+        <tr><td><code>mlx-community/Qwen3-ASR-1.7B-8bit</code></td><td>5 cases, 92.8 avg, 4 accurate, 1 needs_review</td><td>5 cases, 92.0 avg, 4 accurate, 1 needs_review</td><td>5 cases, 100.0 avg, 5 accurate</td><td>5 cases, 100.0 avg, 5 accurate</td><td>5 cases, 89.0 avg, 4 accurate, 1 inaccurate</td><td>5 cases, 100.0 avg, 5 accurate</td><td>5 cases, 92.4 avg, 4 accurate, 1 needs_review</td></tr>
+        <tr><td><code>mlx-community/whisper-large-v3-turbo-asr-fp16</code></td><td>5 cases, 94.8 avg, 4 accurate, 1 needs_review</td><td>5 cases, 92.0 avg, 4 accurate, 1 needs_review</td><td>5 cases, 93.4 avg, 4 accurate, 1 needs_review</td><td>5 cases, 90.6 avg, 4 accurate, 1 inaccurate</td><td>5 cases, 88.6 avg, 4 accurate, 1 inaccurate</td><td>5 cases, 97.6 avg, 5 accurate</td><td>5 cases, 96.6 avg, 5 accurate</td></tr>
       </tbody>
     </table>
+    <p class="muted">Total Gemini judge samples: 315. Refresh this block with <code>.venv/bin/python scripts/update_asr_leaderboard_demo.py</code> after rerunning <code>oaj report</code> with verified ASR result files.</p>
+<!-- ASR_LEADERBOARD_GENERATED_END -->
 
     <h2>Eval Categories</h2>
     <div class="grid">
@@ -189,7 +192,7 @@ oaj autojudge-mlx-asr \
   --model mlx-community/whisper-large-v3-turbo-asr-fp16 \
   --judge-provider gemini \
   --judge-samples 3 \
-  --out runs/asr-leaderboard/whisper-large-v3-turbo-full
+  --out runs/asr-leaderboard/whisper-large-v3-turbo-full-gap
 
 oaj autojudge-mlx-asr \
   --python-bin .venv/bin/python \
@@ -197,7 +200,7 @@ oaj autojudge-mlx-asr \
   --model mlx-community/Qwen3-ASR-1.7B-8bit \
   --judge-provider gemini \
   --judge-samples 3 \
-  --out runs/asr-leaderboard/qwen3-asr-1.7b-full
+  --out runs/asr-leaderboard/qwen3-asr-1.7b-full-gap
 
 oaj autojudge-mlx-asr \
   --python-bin .venv/bin/python \
@@ -205,13 +208,15 @@ oaj autojudge-mlx-asr \
   --model mlx-community/VibeVoice-ASR-4bit \
   --judge-provider gemini \
   --judge-samples 3 \
-  --out runs/asr-leaderboard/vibevoice-asr-full
+  --out runs/asr-leaderboard/vibevoice-asr-full-gap
 
 oaj report \
-  --results runs/asr-leaderboard/whisper-large-v3-turbo-full/judge-report/results.jsonl \
-  --results runs/asr-leaderboard/qwen3-asr-1.7b-full/judge-report/results.jsonl \
-  --results runs/asr-leaderboard/vibevoice-asr-full/judge-report/results.jsonl \
-  --out runs/asr-leaderboard/full-35-combined</code></pre>
+  --results runs/asr-leaderboard/whisper-large-v3-turbo-full-gap/judge-report/results.jsonl \
+  --results runs/asr-leaderboard/qwen3-asr-1.7b-full-gap/judge-report/results.jsonl \
+  --results runs/asr-leaderboard/vibevoice-asr-full-gap/judge-report/results.jsonl \
+  --out runs/asr-leaderboard/full-35-combined
+
+.venv/bin/python scripts/update_asr_leaderboard_demo.py</code></pre>
 
     <h2>Expected Output Files</h2>
     <table>
