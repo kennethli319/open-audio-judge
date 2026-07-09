@@ -322,12 +322,6 @@ def main() -> None:
             require_audio_ready=args.require_audio_ready,
             require_hosted_current=args.require_hosted_current,
         )
-        if args.check_summary_out:
-            args.check_summary_out.parent.mkdir(parents=True, exist_ok=True)
-            args.check_summary_out.write_text(
-                json.dumps(check_summary, indent=2, sort_keys=True) + "\n",
-                encoding="utf-8",
-            )
         if args.check_mlx_runtime or args.require_runtime_ready:
             runtime_status = build_runtime_status_artifact_data(
                 results=combined_results_from_paths(result_paths),
@@ -336,8 +330,19 @@ def main() -> None:
                 check_mlx_runtime=True,
             )
             write_runtime_status_data(args.runtime_status_out, runtime_status)
+            enrich_check_summary_with_runtime_status(
+                check_summary,
+                runtime_status=runtime_status,
+                runtime_status_out=args.runtime_status_out,
+            )
             if args.require_runtime_ready:
                 _validate_runtime_ready(runtime_status)
+        if args.check_summary_out:
+            args.check_summary_out.parent.mkdir(parents=True, exist_ok=True)
+            args.check_summary_out.write_text(
+                json.dumps(check_summary, indent=2, sort_keys=True) + "\n",
+                encoding="utf-8",
+            )
         message = (
             "ASR refresh preflight OK: "
             f"{check_summary['total_results']} results, "
@@ -521,6 +526,24 @@ def check_asr_leaderboard_refresh_inputs(
             summary["hosted_current_path_count"] = hosted_current["hosted_path_count"]
     elif require_hosted_current:
         raise ValueError("--require-hosted-current requires --hosted-dir or --hosted-dir-from-env.")
+    return summary
+
+
+def enrich_check_summary_with_runtime_status(
+    summary: dict[str, object],
+    *,
+    runtime_status: dict[str, object],
+    runtime_status_out: Path,
+) -> dict[str, object]:
+    summary["runtime_status_path"] = _repo_relative(runtime_status_out)
+    summary["runtime_status"] = runtime_status
+    try:
+        _validate_runtime_ready(runtime_status)
+    except ValueError as exc:
+        summary["runtime_ready"] = False
+        summary["runtime_ready_issue"] = str(exc)
+    else:
+        summary["runtime_ready"] = True
     return summary
 
 

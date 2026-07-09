@@ -2041,6 +2041,39 @@ def test_validate_runtime_ready_requires_audio_secret_and_mlx_preflight() -> Non
         )
 
 
+def test_enrich_check_summary_with_runtime_status_records_readiness(tmp_path: Path) -> None:
+    refresh_module = load_refresh_module()
+    summary = {"status": "complete"}
+    runtime_status = {
+        "audio_manifest": {"status": "complete"},
+        "gemini_secret": {"status": "present"},
+        "mlx_runtime_preflight": {"status": "ok"},
+    }
+
+    enriched = refresh_module.enrich_check_summary_with_runtime_status(
+        summary,
+        runtime_status=runtime_status,
+        runtime_status_out=tmp_path / "runtime-status.json",
+    )
+
+    assert enriched is summary
+    assert enriched["runtime_status_path"] == str(tmp_path / "runtime-status.json")
+    assert enriched["runtime_status"] == runtime_status
+    assert enriched["runtime_ready"] is True
+
+    blocked = refresh_module.enrich_check_summary_with_runtime_status(
+        {"status": "complete"},
+        runtime_status={
+            **runtime_status,
+            "mlx_runtime_preflight": {"status": "blocked"},
+        },
+        runtime_status_out=Path("docs/asr-leaderboard-runtime-status.json"),
+    )
+    assert blocked["runtime_status_path"] == "docs/asr-leaderboard-runtime-status.json"
+    assert blocked["runtime_ready"] is False
+    assert "mlx_runtime_preflight" in blocked["runtime_ready_issue"]
+
+
 def test_discover_complete_model_result_paths_selects_newest_complete_runs(tmp_path: Path) -> None:
     refresh_module = load_refresh_module()
     runs_root = tmp_path / "runs" / "asr-leaderboard"
