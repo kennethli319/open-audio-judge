@@ -132,6 +132,7 @@ This generated report summarizes the verified ASR leaderboard artifact set.
 - Discover latest complete runs: `.venv/bin/python scripts/refresh_asr_leaderboard_artifacts.py --discover-complete-model-runs --update-run-manifest`
 - Manifest-based refresh: `.venv/bin/python scripts/refresh_asr_leaderboard_artifacts.py`
 - Page validation: `.venv/bin/python scripts/check_asr_leaderboard_page.py`
+- Generated artifact freshness check: `.venv/bin/python scripts/refresh_asr_leaderboard_artifacts.py --check-only --require-generated-fresh`
 - Hosted artifact sync: `.venv/bin/python scripts/refresh_asr_leaderboard_artifacts.py --hosted-dir-from-env`
 - Hosted mirror validation: `.venv/bin/python scripts/refresh_asr_leaderboard_artifacts.py --check-only --hosted-dir-from-env`
 

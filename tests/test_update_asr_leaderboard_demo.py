@@ -243,6 +243,8 @@ def test_render_generated_sections_summarizes_verified_asr_results(tmp_path: Pat
     assert "scripts/validate_asr_seed_manifest.py" in html
     assert "Check generated page" in html
     assert "scripts/check_asr_leaderboard_page.py" in html
+    assert "Verify generated artifacts are fresh" in html
+    assert "--require-generated-fresh" in html
     assert "Check hosted mirror" in html
     assert ".venv/bin/python scripts/refresh_asr_leaderboard_artifacts.py --check-only --hosted-dir-from-env" in html
     assert "Run one MLX ASR model" in html
@@ -522,6 +524,12 @@ def test_write_summary_artifact_records_models_and_categories(tmp_path: Path) ->
         "scripts/refresh_asr_leaderboard_artifacts.py",
         "--check-only",
     ]
+    assert summary["refresh_workflow"]["freshness_check_command"] == [
+        ".venv/bin/python",
+        "scripts/refresh_asr_leaderboard_artifacts.py",
+        "--check-only",
+        "--require-generated-fresh",
+    ]
     assert summary["refresh_workflow"]["manifest_refresh_command"] == [
         ".venv/bin/python",
         "scripts/refresh_asr_leaderboard_artifacts.py",
@@ -758,6 +766,8 @@ def test_write_refresh_report_records_coverage_and_commands(tmp_path: Path) -> N
     assert "mlx-community/parakeet-rnnt-0.6b" in text
     assert "Preflight refresh inputs" in text
     assert "--check-only" in text
+    assert "Generated artifact freshness check" in text
+    assert "--require-generated-fresh" in text
     assert "--results " + str(source_results_path) in text
     assert "--update-run-manifest" in text
     assert "Discover latest complete runs" in text
@@ -979,6 +989,10 @@ def test_refresh_asr_leaderboard_artifacts_combines_report_and_page(tmp_path: Pa
         "PYTHONPATH=src .venv/bin/python -m open_audio_judge.cli check-mlx-asr-runtime"
         in refresh_command_text
     )
+    assert (
+        ".venv/bin/python scripts/refresh_asr_leaderboard_artifacts.py --check-only --require-generated-fresh"
+        in refresh_command_text
+    )
     assert ".venv/bin/python scripts/refresh_asr_leaderboard_artifacts.py --check-only --hosted-dir-from-env" in refresh_command_text
     assert (hosted_dir / "asr-leaderboard-run-manifest.json").exists()
     assert (hosted_dir / "manifest-validation.json").read_text(
@@ -1079,6 +1093,81 @@ def test_check_asr_leaderboard_refresh_inputs_validates_default_artifacts() -> N
         "seed_manifest_status": "complete",
         "page_status": "complete",
     }
+
+
+def test_require_generated_fresh_rejects_stale_page_block(tmp_path: Path) -> None:
+    update_module = load_script_module()
+    refresh_module = load_refresh_module()
+    results_path = tmp_path / "model-a" / "judge-report" / "results.jsonl"
+    summary_path = tmp_path / "summary.json"
+    page = tmp_path / "demo.html"
+    records = [
+        result_record(
+            case_id="asr-a-model-a",
+            model="mlx-community/model-a",
+            category="transcription_accuracy_wer",
+            score=100,
+            label="accurate",
+        ),
+        result_record(
+            case_id="asr-b-model-a",
+            model="mlx-community/model-a",
+            category="numeric_unit_integrity",
+            score=80,
+            label="accurate",
+        ),
+    ]
+    results_path.parent.mkdir(parents=True)
+    results_path.write_text(
+        "".join(json.dumps(record) + "\n" for record in records),
+        encoding="utf-8",
+    )
+    results = update_module.load_results_jsonl(results_path)
+    generated = update_module.render_generated_sections(
+        results,
+        results_path=tmp_path / "combined" / "results.jsonl",
+        expected_cases_per_model=2,
+        source_result_paths=[results_path],
+    )
+    page.write_text(
+        "Open Audio Judge ASR Leaderboard\n" + generated + "\n",
+        encoding="utf-8",
+    )
+    summary_path.write_text(
+        json.dumps(
+            {
+                "total_results": 2,
+                "model_count": 1,
+                "category_count": 2,
+                "expected_cases_per_model": 2,
+                "source_result_paths": [str(results_path)],
+            }
+        ),
+        encoding="utf-8",
+    )
+
+    refresh_module._validate_generated_artifacts_fresh(
+        results,
+        result_paths=[results_path],
+        page=page,
+        summary_out=summary_path,
+        generated=generated,
+        expected_cases_per_model=2,
+    )
+
+    page.write_text(
+        page.read_text(encoding="utf-8").replace("Verified Leaderboard Results", "Stale Results"),
+        encoding="utf-8",
+    )
+    with pytest.raises(ValueError, match="generated ASR leaderboard block is stale"):
+        refresh_module._validate_generated_artifacts_fresh(
+            results,
+            result_paths=[results_path],
+            page=page,
+            summary_out=summary_path,
+            generated=generated,
+            expected_cases_per_model=2,
+        )
 
 
 def test_discover_complete_model_result_paths_selects_newest_complete_runs(tmp_path: Path) -> None:

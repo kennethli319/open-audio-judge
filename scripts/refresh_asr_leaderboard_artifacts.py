@@ -27,7 +27,9 @@ from scripts.update_asr_leaderboard_demo import (  # noqa: E402
     DEFAULT_HOSTED_MANIFEST,
     DEFAULT_RUNTIME_STATUS,
     DEFAULT_NEXT_RUNS,
+    END_MARKER,
     GEMINI_SECRET_ENV,
+    START_MARKER,
     build_next_run_plan,
     build_output_artifact_index,
     build_refresh_runtime_status,
@@ -223,6 +225,14 @@ def main() -> None:
         ),
     )
     parser.add_argument(
+        "--require-generated-fresh",
+        action="store_true",
+        help=(
+            "With --check-only, fail if the committed generated page block or summary "
+            "does not match the selected ASR result sources."
+        ),
+    )
+    parser.add_argument(
         "--expected-cases-per-model",
         type=int,
         default=35,
@@ -254,6 +264,7 @@ def main() -> None:
             seed_cases=args.seed_cases,
             expected_cases_per_model=args.expected_cases_per_model,
             hosted_dir=hosted_dir,
+            require_generated_fresh=args.require_generated_fresh,
         )
         if args.check_mlx_runtime:
             write_runtime_status_artifact(
@@ -314,6 +325,7 @@ def check_asr_leaderboard_refresh_inputs(
     artifact_root: Path = ROOT,
     path_maps: list[tuple[str, str]] | None = None,
     hosted_dir: Path | None = None,
+    require_generated_fresh: bool = False,
 ) -> dict[str, object]:
     result_paths = [_normalize_results_path(path) for path in result_paths]
     _validate_unique_result_paths(result_paths, context="ASR refresh preflight result sources")
@@ -328,7 +340,7 @@ def check_asr_leaderboard_refresh_inputs(
     ]
     if not combined_results:
         raise ValueError("No ASR evaluation results were loaded.")
-    render_generated_sections(
+    generated = render_generated_sections(
         combined_results,
         results_path=DEFAULT_COMBINED_OUT / "results.jsonl",
         expected_cases_per_model=expected_cases_per_model,
@@ -348,6 +360,15 @@ def check_asr_leaderboard_refresh_inputs(
         artifact_root=artifact_root,
         path_maps=path_maps or [],
     )
+    if require_generated_fresh:
+        _validate_generated_artifacts_fresh(
+            combined_results,
+            result_paths=result_paths,
+            page=page,
+            summary_out=summary_out,
+            generated=generated,
+            expected_cases_per_model=expected_cases_per_model,
+        )
     summary: dict[str, object] = {
         "status": "complete",
         "result_file_count": len(result_paths),
@@ -380,6 +401,62 @@ def check_asr_leaderboard_refresh_inputs(
         )
         summary["hosted_page_status"] = hosted_validation["status"]
     return summary
+
+
+def _validate_generated_artifacts_fresh(
+    combined_results: list,
+    *,
+    result_paths: list[Path],
+    page: Path,
+    summary_out: Path,
+    generated: str,
+    expected_cases_per_model: int,
+) -> None:
+    existing_generated = _extract_generated_block(page)
+    if existing_generated != generated:
+        raise ValueError(
+            f"{_repo_relative(page)} generated ASR leaderboard block is stale; "
+            "run `.venv/bin/python scripts/refresh_asr_leaderboard_artifacts.py`."
+        )
+
+    summary = json.loads(summary_out.read_text(encoding="utf-8"))
+    expected_source_paths = [_repo_relative(path) for path in result_paths]
+    expected = {
+        "total_results": len(combined_results),
+        "model_count": len(
+            {
+                str(result.metadata.get("candidate_model") or "")
+                for result in combined_results
+            }
+        ),
+        "category_count": len(
+            {
+                str(result.metadata.get("eval_category") or "")
+                for result in combined_results
+            }
+        ),
+        "expected_cases_per_model": expected_cases_per_model,
+        "source_result_paths": expected_source_paths,
+    }
+    mismatches = {
+        key: {"expected": value, "actual": summary.get(key)}
+        for key, value in expected.items()
+        if summary.get(key) != value
+    }
+    if mismatches:
+        raise ValueError(
+            f"{_repo_relative(summary_out)} is stale for selected ASR result sources: "
+            + json.dumps(mismatches, sort_keys=True)
+        )
+
+
+def _extract_generated_block(page: Path) -> str:
+    html_text = page.read_text(encoding="utf-8")
+    if START_MARKER not in html_text or END_MARKER not in html_text:
+        raise ValueError(f"{page} must contain {START_MARKER} and {END_MARKER}.")
+    before, remainder = html_text.split(START_MARKER, 1)
+    generated_inner, _ = remainder.split(END_MARKER, 1)
+    return START_MARKER + generated_inner + END_MARKER
 
 
 def refresh_asr_leaderboard_artifacts(

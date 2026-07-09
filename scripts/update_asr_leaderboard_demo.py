@@ -197,6 +197,7 @@ def render_generated_sections(
         ("Refresh committed artifacts", workflow["manifest_refresh_command"]),
         ("Run refresh shell playbook", ["bash", workflow["refresh_commands_path"]]),
         ("Check generated page", workflow["page_validation_command"]),
+        ("Verify generated artifacts are fresh", workflow["freshness_check_command"]),
         ("Sync hosted artifacts", workflow["hosted_artifact_command"]),
         ("Check hosted mirror", workflow["hosted_validation_command"]),
     ]
@@ -516,6 +517,7 @@ def write_refresh_report(
                 f"- Discover latest complete runs: `{_shell_join(workflow['discover_refresh_command'])}`",
                 f"- Manifest-based refresh: `{_shell_join(workflow['manifest_refresh_command'])}`",
                 f"- Page validation: `{_shell_join(workflow['page_validation_command'])}`",
+                f"- Generated artifact freshness check: `{_shell_join(workflow['freshness_check_command'])}`",
                 f"- Hosted artifact sync: `{_shell_join(workflow['hosted_artifact_command'])}`",
                 f"- Hosted mirror validation: `{_shell_join(workflow['hosted_validation_command'])}`",
                 "",
@@ -570,6 +572,7 @@ def write_refresh_commands_script(
         _shell_join(workflow["seed_manifest_validation_command"]),
         _shell_join(workflow["combine_refresh_command"]),
         _shell_join(workflow["page_validation_command"]),
+        _shell_join(workflow["freshness_check_command"]),
         "",
         "# Optional hosted sync; export ASR_SYNC_HOSTED=1 and set ASR_LEADERBOARD_HOSTED_DIR first.",
         'if [[ "${ASR_SYNC_HOSTED:-0}" == "1" ]]; then',
@@ -676,6 +679,12 @@ def _refresh_workflow(source_result_paths: list[Path]) -> dict[str, object]:
             ".venv/bin/python",
             "scripts/refresh_asr_leaderboard_artifacts.py",
             "--check-only",
+        ],
+        "freshness_check_command": [
+            ".venv/bin/python",
+            "scripts/refresh_asr_leaderboard_artifacts.py",
+            "--check-only",
+            "--require-generated-fresh",
         ],
         "manifest_refresh_command": [
             ".venv/bin/python",

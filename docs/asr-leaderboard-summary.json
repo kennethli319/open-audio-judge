@@ -321,6 +321,12 @@
       "mlx-community/parakeet-rnnt-0.6b",
       "mlx-community/GLM-ASR-Nano-2512-4bit"
     ],
+    "freshness_check_command": [
+      ".venv/bin/python",
+      "scripts/refresh_asr_leaderboard_artifacts.py",
+      "--check-only",
+      "--require-generated-fresh"
+    ],
     "hosted_artifact_command": [
       ".venv/bin/python",
       "scripts/refresh_asr_leaderboard_artifacts.py",
