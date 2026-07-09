@@ -1260,10 +1260,23 @@ def build_artifact_index_data(
             for result in results
         }
     )
+    result_bundle = {
+        "results_path": _repo_relative(results_path),
+        "exists": results_path.exists(),
+        "bytes": results_path.stat().st_size if results_path.exists() else None,
+        "sha256": _sha256_file(results_path) if results_path.exists() else None,
+        "total_results": len(results),
+        "model_count": len(models),
+        "category_count": len(categories),
+        "expected_cases_per_model": expected_cases_per_model,
+        "models": models,
+        "categories": categories,
+    }
     return {
         "description": "Generated index for the ASR leaderboard demo artifact bundle.",
         "version": 1,
         "status": "complete" if all(record["exists"] for record in records) else "incomplete",
+        "result_bundle": result_bundle,
         "total_results": len(results),
         "model_count": len(models),
         "category_count": len(categories),

@@ -765,6 +765,14 @@ def _validate_artifact_index(
                 f"{path} {field}={index.get(field)!r} does not match "
                 f"{summary_path} {field}={expected!r}."
             )
+    _validate_artifact_index_result_bundle(
+        index,
+        summary=summary,
+        index_path=path,
+        summary_path=summary_path,
+        artifact_root=artifact_root,
+        path_maps=path_maps,
+    )
 
     artifacts = index.get("artifacts")
     if not isinstance(artifacts, list) or not artifacts:
@@ -829,6 +837,66 @@ def _validate_artifact_index(
     ]
     if missing:
         raise ValueError(f"{path} is missing required artifact path(s): {missing}")
+
+
+def _validate_artifact_index_result_bundle(
+    index: dict[str, Any],
+    *,
+    summary: dict[str, Any],
+    index_path: Path,
+    summary_path: Path,
+    artifact_root: Path,
+    path_maps: list[tuple[str, str]],
+) -> None:
+    bundle = index.get("result_bundle")
+    if not isinstance(bundle, dict):
+        raise ValueError(f"{index_path} must include result_bundle.")
+
+    expected_fields = {
+        "results_path": summary["results_path"],
+        "total_results": summary["total_results"],
+        "model_count": summary["model_count"],
+        "category_count": summary["category_count"],
+        "expected_cases_per_model": summary["expected_cases_per_model"],
+    }
+    for field, expected in expected_fields.items():
+        if bundle.get(field) != expected:
+            raise ValueError(
+                f"{index_path} result_bundle.{field}={bundle.get(field)!r} "
+                f"does not match {summary_path} {field}={expected!r}."
+            )
+
+    expected_models = sorted(
+        str(model["model"])
+        for model in summary.get("models", [])
+        if isinstance(model, dict) and model.get("model")
+    )
+    expected_categories = sorted(
+        str(category["category"])
+        for category in summary.get("categories", [])
+        if isinstance(category, dict) and category.get("category")
+    )
+    if bundle.get("models") != expected_models:
+        raise ValueError(f"{index_path} result_bundle.models does not match {summary_path}.")
+    if bundle.get("categories") != expected_categories:
+        raise ValueError(f"{index_path} result_bundle.categories does not match {summary_path}.")
+
+    raw_results_path = bundle.get("results_path")
+    if not isinstance(raw_results_path, str) or not raw_results_path:
+        raise ValueError(f"{index_path} result_bundle.results_path is invalid.")
+    results_path = _resolve_summary_path(
+        raw_results_path,
+        artifact_root=artifact_root,
+        path_maps=path_maps,
+    )
+    if not results_path.exists():
+        raise ValueError(f"{index_path} result_bundle references missing results file.")
+    if bundle.get("exists") is not True:
+        raise ValueError(f"{index_path} result_bundle.exists must be true.")
+    if bundle.get("bytes") != results_path.stat().st_size:
+        raise ValueError(f"{index_path} result_bundle bytes are stale.")
+    if bundle.get("sha256") != _sha256_file(results_path):
+        raise ValueError(f"{index_path} result_bundle sha256 is stale.")
 
 
 def _validate_hosted_manifest_matches_artifact_index(

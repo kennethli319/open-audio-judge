@@ -110,6 +110,30 @@
   "description": "Generated index for the ASR leaderboard demo artifact bundle.",
   "expected_cases_per_model": 35,
   "model_count": 3,
+  "result_bundle": {
+    "bytes": 404226,
+    "categories": [
+      "acoustic_noise_robustness",
+      "entity_factual_integrity",
+      "negation_modality_scope",
+      "numeric_unit_integrity",
+      "semantic_paraphrase_preservation",
+      "temporal_scheduling_accuracy",
+      "transcription_accuracy_wer"
+    ],
+    "category_count": 7,
+    "exists": true,
+    "expected_cases_per_model": 35,
+    "model_count": 3,
+    "models": [
+      "mlx-community/Qwen3-ASR-1.7B-8bit",
+      "mlx-community/VibeVoice-ASR-4bit",
+      "mlx-community/whisper-large-v3-turbo-asr-fp16"
+    ],
+    "results_path": "runs/asr-leaderboard/full-35-combined/results.jsonl",
+    "sha256": "381ea5a536fed20456887b2bb171b64618f51ba5b22cb0b23a625189cfa61976",
+    "total_results": 105
+  },
   "status": "complete",
   "total_results": 105,
   "version": 1

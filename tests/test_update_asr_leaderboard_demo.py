@@ -1071,6 +1071,18 @@ def test_refresh_asr_leaderboard_artifacts_combines_report_and_page(tmp_path: Pa
     artifact_index_data = json.loads(artifact_index.read_text(encoding="utf-8"))
     assert artifact_index_data["status"] == "complete"
     assert artifact_index_data["total_results"] == 4
+    assert artifact_index_data["result_bundle"] == {
+        "results_path": str(out / "results.jsonl"),
+        "exists": True,
+        "bytes": (out / "results.jsonl").stat().st_size,
+        "sha256": file_sha256(out / "results.jsonl"),
+        "total_results": 4,
+        "model_count": 2,
+        "category_count": 2,
+        "expected_cases_per_model": 2,
+        "models": ["mlx-community/model-a", "mlx-community/model-b"],
+        "categories": ["numeric_unit_integrity", "transcription_accuracy_wer"],
+    }
     assert {artifact["path"] for artifact in artifact_index_data["artifacts"]} >= {
         str(out / "results.jsonl"),
         str(out / "report.html"),
@@ -2411,6 +2423,21 @@ def test_check_asr_leaderboard_page_validates_hosted_artifact_layout(tmp_path: P
                 "model_count": 2,
                 "category_count": 2,
                 "expected_cases_per_model": 2,
+                "result_bundle": {
+                    "results_path": "runs/asr-leaderboard/full-35-combined/results.jsonl",
+                    "exists": True,
+                    "bytes": results_path.stat().st_size,
+                    "sha256": file_sha256(results_path),
+                    "total_results": 4,
+                    "model_count": 2,
+                    "category_count": 2,
+                    "expected_cases_per_model": 2,
+                    "models": ["mlx-community/model-a", "mlx-community/model-b"],
+                    "categories": [
+                        "numeric_unit_integrity",
+                        "transcription_accuracy_wer",
+                    ],
+                },
                 "artifacts": [
                     artifact_index_record(
                         "runs/asr-leaderboard/full-35-combined/results.jsonl",
