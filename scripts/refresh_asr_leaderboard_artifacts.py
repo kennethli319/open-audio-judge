@@ -60,6 +60,9 @@ from scripts.validate_asr_seed_manifest import (  # noqa: E402
 
 
 DEFAULT_COMBINED_OUT = ROOT / "runs" / "asr-leaderboard" / "full-35-combined"
+DEFAULT_SOURCE_SELECTION_SUMMARY = (
+    ROOT / "runs" / "asr-leaderboard" / "source-selection-summary.json"
+)
 DEFAULT_RUN_MANIFEST = ROOT / "docs" / "asr-leaderboard-run-manifest.json"
 DEFAULT_MANIFEST_VALIDATION = ROOT / "docs" / "asr-leaderboard-manifest-validation.json"
 DEFAULT_HOSTED_DIR_ENV = "ASR_LEADERBOARD_HOSTED_DIR"
@@ -256,6 +259,15 @@ def main() -> None:
         help="With --check-only, write the preflight validation summary as JSON.",
     )
     parser.add_argument(
+        "--source-selection-summary-out",
+        type=Path,
+        default=DEFAULT_SOURCE_SELECTION_SUMMARY,
+        help=(
+            "Write a machine-readable summary of the selected ASR source result files. "
+            "Use '-' to skip writing this diagnostic artifact."
+        ),
+    )
+    parser.add_argument(
         "--require-generated-fresh",
         action="store_true",
         help=(
@@ -337,6 +349,15 @@ def main() -> None:
             )
             if args.require_runtime_ready:
                 _validate_runtime_ready(runtime_status)
+        write_optional_source_selection_summary(
+            args.source_selection_summary_out,
+            result_paths=result_paths,
+            runs_root=args.runs_root,
+            run_manifest=args.run_manifest,
+            expected_cases_per_model=args.expected_cases_per_model,
+            discovery_requested=args.discover_complete_model_runs,
+            check_only=True,
+        )
         if args.check_summary_out:
             args.check_summary_out.parent.mkdir(parents=True, exist_ok=True)
             args.check_summary_out.write_text(
@@ -368,6 +389,15 @@ def main() -> None:
         hosted_dir=hosted_dir,
         check_mlx_runtime=args.check_mlx_runtime,
         expected_cases_per_model=args.expected_cases_per_model,
+    )
+    write_optional_source_selection_summary(
+        args.source_selection_summary_out,
+        result_paths=result_paths,
+        runs_root=args.runs_root,
+        run_manifest=args.run_manifest,
+        expected_cases_per_model=args.expected_cases_per_model,
+        discovery_requested=args.discover_complete_model_runs,
+        check_only=False,
     )
 
 
@@ -1782,6 +1812,178 @@ def _discover_or_default_result_paths(
             file=sys.stderr,
         )
         return fallback_paths
+
+
+def write_optional_source_selection_summary(
+    output_path: Path | None,
+    *,
+    result_paths: list[Path],
+    runs_root: Path,
+    run_manifest: Path,
+    expected_cases_per_model: int,
+    discovery_requested: bool,
+    check_only: bool,
+) -> None:
+    if output_path is None or str(output_path) == "-":
+        return
+    output_path.parent.mkdir(parents=True, exist_ok=True)
+    output_path.write_text(
+        json.dumps(
+            build_source_selection_summary(
+                result_paths,
+                runs_root=runs_root,
+                run_manifest=run_manifest,
+                expected_cases_per_model=expected_cases_per_model,
+                discovery_requested=discovery_requested,
+                check_only=check_only,
+            ),
+            indent=2,
+            sort_keys=True,
+        )
+        + "\n",
+        encoding="utf-8",
+    )
+
+
+def build_source_selection_summary(
+    result_paths: list[Path],
+    *,
+    runs_root: Path,
+    run_manifest: Path,
+    expected_cases_per_model: int,
+    discovery_requested: bool,
+    check_only: bool,
+) -> dict[str, object]:
+    normalized_paths = [_normalize_results_path(path) for path in result_paths]
+    selected_path_set = {path.resolve() for path in normalized_paths}
+    strategy = "explicit_results"
+    discovery_status: dict[str, object] = {
+        "requested": discovery_requested,
+        "runs_root": _repo_relative(runs_root),
+    }
+    if discovery_requested:
+        try:
+            discovered_paths = discover_complete_model_result_paths(
+                runs_root,
+                expected_cases_per_model=expected_cases_per_model,
+            )
+        except Exception as exc:
+            strategy = "fallback_manifest_or_segmented"
+            discovery_status["status"] = "incomplete"
+            discovery_status["issue"] = str(exc)
+            discovery_status["selected_discovered_paths"] = []
+        else:
+            discovered_path_set = {path.resolve() for path in discovered_paths}
+            strategy = (
+                "discovered_complete_model_runs"
+                if discovered_path_set == selected_path_set
+                else "fallback_manifest_or_segmented"
+            )
+            discovery_status["status"] = "complete"
+            discovery_status["selected_discovered_paths"] = [
+                _repo_relative(path) for path in discovered_paths
+            ]
+
+    manifest_status = _source_selection_manifest_status(
+        run_manifest,
+        selected_path_set=selected_path_set,
+    )
+    if (
+        not discovery_requested
+        and manifest_status["status"] == "complete"
+        and manifest_status["selected_paths_match"] is True
+    ):
+        strategy = "run_manifest"
+    source_files = [_source_selection_file_summary(path) for path in normalized_paths]
+    models = sorted(
+        {
+            model
+            for source in source_files
+            for model in source["models"]
+            if isinstance(model, str) and model
+        }
+    )
+    categories = sorted(
+        {
+            category
+            for source in source_files
+            for category in source["categories"]
+            if isinstance(category, str) and category
+        }
+    )
+    return {
+        "status": "complete",
+        "check_only": check_only,
+        "selection_strategy": strategy,
+        "expected_cases_per_model": expected_cases_per_model,
+        "result_file_count": len(normalized_paths),
+        "total_results": sum(int(source["result_count"]) for source in source_files),
+        "model_count": len(models),
+        "category_count": len(categories),
+        "models": models,
+        "categories": categories,
+        "source_result_paths": [_repo_relative(path) for path in normalized_paths],
+        "source_result_files": source_files,
+        "discovery": discovery_status,
+        "run_manifest": manifest_status,
+    }
+
+
+def _source_selection_file_summary(path: Path) -> dict[str, object]:
+    results = load_results_jsonl(path)
+    models = sorted(
+        {
+            str(result.metadata.get("candidate_model") or "")
+            for result in results
+            if str(result.metadata.get("candidate_model") or "")
+        }
+    )
+    categories = sorted(
+        {
+            str(result.metadata.get("eval_category") or "")
+            for result in results
+            if str(result.metadata.get("eval_category") or "")
+        }
+    )
+    return {
+        "path": _repo_relative(path),
+        "exists": path.exists(),
+        "bytes": path.stat().st_size if path.exists() else None,
+        "sha256": _sha256_file(path) if path.exists() else None,
+        "result_count": len(results),
+        "ok_count": sum(1 for result in results if result.status == "ok"),
+        "models": models,
+        "categories": categories,
+    }
+
+
+def _source_selection_manifest_status(
+    run_manifest: Path,
+    *,
+    selected_path_set: set[Path],
+) -> dict[str, object]:
+    if not run_manifest.exists():
+        return {
+            "path": _repo_relative(run_manifest),
+            "status": "missing",
+            "selected_paths_match": False,
+        }
+    try:
+        manifest_paths = _result_paths_from_run_manifest(run_manifest)
+    except Exception as exc:
+        return {
+            "path": _repo_relative(run_manifest),
+            "status": "invalid",
+            "selected_paths_match": False,
+            "issue": str(exc),
+        }
+    manifest_path_set = {path.resolve() for path in manifest_paths}
+    return {
+        "path": _repo_relative(run_manifest),
+        "status": "complete",
+        "selected_paths_match": manifest_path_set == selected_path_set,
+        "result_paths": [_repo_relative(path) for path in manifest_paths],
+    }
 
 
 def _complete_result_file_model(

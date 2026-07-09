@@ -2284,6 +2284,138 @@ def test_discover_or_default_result_paths_falls_back_to_run_manifest(
     assert "using the committed run manifest/segmented sources instead" in capsys.readouterr().err
 
 
+def test_build_source_selection_summary_records_discovery_choice(tmp_path: Path) -> None:
+    refresh_module = load_refresh_module()
+    model_a_id = refresh_module.ASR_LEADERBOARD_MODELS[0][0]
+    model_b_id = refresh_module.ASR_LEADERBOARD_MODELS[1][0]
+    model_c_id = refresh_module.ASR_LEADERBOARD_MODELS[2][0]
+    runs_root = tmp_path / "runs" / "asr-leaderboard"
+    model_a = runs_root / "model-a-complete" / "judge-report" / "results.jsonl"
+    model_b = runs_root / "model-b-complete" / "judge-report" / "results.jsonl"
+    model_c = runs_root / "model-c-complete" / "judge-report" / "results.jsonl"
+    manifest = tmp_path / "run-manifest.json"
+    records_a = [
+        result_record(
+            case_id="asr-a-model-a",
+            model=model_a_id,
+            category="transcription_accuracy_wer",
+            score=100,
+            label="accurate",
+        ),
+        result_record(
+            case_id="asr-b-model-a",
+            model=model_a_id,
+            category="numeric_unit_integrity",
+            score=80,
+            label="accurate",
+        ),
+    ]
+    records_b = [
+        result_record(
+            case_id="asr-a-model-b",
+            model=model_b_id,
+            category="transcription_accuracy_wer",
+            score=60,
+            label="needs_review",
+        ),
+        result_record(
+            case_id="asr-b-model-b",
+            model=model_b_id,
+            category="numeric_unit_integrity",
+            score=40,
+            label="inaccurate",
+        ),
+    ]
+    records_c = [
+        result_record(
+            case_id="asr-a-model-c",
+            model=model_c_id,
+            category="transcription_accuracy_wer",
+            score=95,
+            label="accurate",
+        ),
+        result_record(
+            case_id="asr-b-model-c",
+            model=model_c_id,
+            category="numeric_unit_integrity",
+            score=75,
+            label="needs_review",
+        ),
+    ]
+    for path, records in ((model_a, records_a), (model_b, records_b), (model_c, records_c)):
+        path.parent.mkdir(parents=True)
+        path.write_text("".join(json.dumps(record) + "\n" for record in records), encoding="utf-8")
+    manifest.write_text(
+        json.dumps(
+            run_manifest_record(
+                [
+                    (str(model_a), records_a),
+                    (str(model_b), records_b),
+                    (str(model_c), records_c),
+                ],
+                expected_cases_per_model=2,
+            )
+        ),
+        encoding="utf-8",
+    )
+
+    summary = refresh_module.build_source_selection_summary(
+        [model_a, model_b, model_c],
+        runs_root=runs_root,
+        run_manifest=manifest,
+        expected_cases_per_model=2,
+        discovery_requested=True,
+        check_only=True,
+    )
+
+    assert summary["status"] == "complete"
+    assert summary["check_only"] is True
+    assert summary["selection_strategy"] == "discovered_complete_model_runs"
+    assert summary["result_file_count"] == 3
+    assert summary["total_results"] == 6
+    assert summary["model_count"] == 3
+    assert summary["category_count"] == 2
+    assert summary["discovery"]["status"] == "complete"
+    assert summary["run_manifest"]["selected_paths_match"] is True
+    assert summary["source_result_files"][0]["sha256"] == file_sha256(model_a)
+
+
+def test_build_source_selection_summary_records_discovery_fallback(tmp_path: Path) -> None:
+    refresh_module = load_refresh_module()
+    runs_root = tmp_path / "runs" / "asr-leaderboard"
+    selected = runs_root / "model-a-segmented" / "judge-report" / "results.jsonl"
+    manifest = tmp_path / "missing-manifest.json"
+    records = [
+        result_record(
+            case_id="asr-a-model-a",
+            model="mlx-community/model-a",
+            category="transcription_accuracy_wer",
+            score=100,
+            label="accurate",
+        )
+    ]
+    selected.parent.mkdir(parents=True)
+    selected.write_text("".join(json.dumps(record) + "\n" for record in records), encoding="utf-8")
+
+    summary = refresh_module.build_source_selection_summary(
+        [selected],
+        runs_root=runs_root,
+        run_manifest=manifest,
+        expected_cases_per_model=2,
+        discovery_requested=True,
+        check_only=False,
+    )
+
+    assert summary["selection_strategy"] == "fallback_manifest_or_segmented"
+    assert summary["discovery"]["status"] == "incomplete"
+    assert "No complete ASR result file found" in summary["discovery"]["issue"]
+    assert summary["run_manifest"] == {
+        "path": str(manifest),
+        "status": "missing",
+        "selected_paths_match": False,
+    }
+
+
 def test_manifest_validation_detects_source_result_digest_drift(tmp_path: Path) -> None:
     refresh_module = load_refresh_module()
     result_path = tmp_path / "model-a" / "judge-report" / "results.jsonl"
