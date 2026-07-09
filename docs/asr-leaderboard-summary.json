@@ -346,6 +346,17 @@
       "--check-only",
       "--require-generated-fresh"
     ],
+    "full_preflight_command": [
+      ".venv/bin/python",
+      "scripts/refresh_asr_leaderboard_artifacts.py",
+      "--check-only",
+      "--require-generated-fresh",
+      "--require-audio-ready",
+      "--check-mlx-runtime",
+      "--require-runtime-ready",
+      "--check-summary-out",
+      "runs/asr-leaderboard/preflight-summary.json"
+    ],
     "hosted_artifact_command": [
       ".venv/bin/python",
       "scripts/refresh_asr_leaderboard_artifacts.py",

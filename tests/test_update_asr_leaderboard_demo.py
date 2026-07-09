@@ -249,6 +249,7 @@ def test_render_generated_sections_summarizes_verified_asr_results(tmp_path: Pat
     assert "--check-mlx-runtime" in html
     assert "Require runtime readiness" in html
     assert "--require-runtime-ready" in html
+    assert "Full refresh readiness check" in html
     assert "Run refresh shell playbook" in html
     assert "Run live model refresh script" in html
     assert "Generated Artifacts" in html
@@ -586,6 +587,17 @@ def test_write_summary_artifact_records_models_and_categories(tmp_path: Path) ->
         "--check-only",
         "--require-runtime-ready",
     ]
+    assert summary["refresh_workflow"]["full_preflight_command"] == [
+        ".venv/bin/python",
+        "scripts/refresh_asr_leaderboard_artifacts.py",
+        "--check-only",
+        "--require-generated-fresh",
+        "--require-audio-ready",
+        "--check-mlx-runtime",
+        "--require-runtime-ready",
+        "--check-summary-out",
+        "runs/asr-leaderboard/preflight-summary.json",
+    ]
     assert summary["refresh_workflow"]["freshness_check_command"] == [
         ".venv/bin/python",
         "scripts/refresh_asr_leaderboard_artifacts.py",
@@ -912,6 +924,7 @@ def test_write_refresh_report_records_coverage_and_commands(tmp_path: Path) -> N
     assert "--check-mlx-runtime" in text
     assert "Require live runtime readiness" in text
     assert "--require-runtime-ready" in text
+    assert "Full refresh readiness check" in text
     assert "Generated artifact freshness check" in text
     assert "--require-generated-fresh" in text
     assert "--results " + str(source_results_path) in text

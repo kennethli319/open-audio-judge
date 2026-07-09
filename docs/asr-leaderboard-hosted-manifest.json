@@ -2,27 +2,27 @@
   "artifact_count": 33,
   "artifacts": [
     {
-      "bytes": 29683,
+      "bytes": 29990,
       "hosted_paths": [
         "asr-leaderboard-demo.html"
       ],
-      "sha256": "adb28312b4edfa50f24c4fe54edee02a5c87fe20ec526305aa15757627725dd3",
+      "sha256": "11736162f06a6aa0607a767d90ff705d9175d899d1b9d39cfe3165a96c2c4cc4",
       "source_path": "docs/asr-leaderboard-demo.html"
     },
     {
-      "bytes": 32617,
+      "bytes": 32967,
       "hosted_paths": [
         "asr-leaderboard-summary.json"
       ],
-      "sha256": "bf374d8d8794c7ca9543f46f1366682b07ceeea791c6b304ea95da4c92d36d33",
+      "sha256": "eb1c2e5e3881b9b2e067e338c012b305465be2b98e57e69ce6c6a67a4e1d63ba",
       "source_path": "docs/asr-leaderboard-summary.json"
     },
     {
-      "bytes": 17569,
+      "bytes": 17834,
       "hosted_paths": [
         "asr-leaderboard-refresh-report.md"
       ],
-      "sha256": "1a4a96ed28777afd6cab1d0f8f678c8181e3a26a1ca0ea200444e1e9c113a60f",
+      "sha256": "247d7314750e8da135a27c6e72149f7d2ea908ad7cf11e4df2339d1c82ab58d1",
       "source_path": "docs/asr-leaderboard-refresh-report.md"
     },
     {
@@ -42,11 +42,11 @@
       "source_path": "docs/asr-leaderboard-report-links.json"
     },
     {
-      "bytes": 5118,
+      "bytes": 5349,
       "hosted_paths": [
         "asr-leaderboard-refresh-commands.sh"
       ],
-      "sha256": "4e7e49de0f7acf50ac4b3654fa7a4486370b21279c7a31a822e9b42caeb95381",
+      "sha256": "5df65301315609b3744b79e1be76dcfd69f0c39a8e8e2da91a2f3541f10e9b10",
       "source_path": "docs/asr-leaderboard-refresh-commands.sh"
     },
     {
@@ -94,7 +94,7 @@
       "hosted_paths": [
         "asr-leaderboard-artifacts.json"
       ],
-      "sha256": "a0f641f398b95bd4914fd8d01289caaa99c22225a86b04afa1dd13c32a4bb155",
+      "sha256": "524ecc0d8a43e4de4f0c66a0a995b76e2398e9de7dffb42fccd441af04718b77",
       "source_path": "docs/asr-leaderboard-artifacts.json"
     },
     {
