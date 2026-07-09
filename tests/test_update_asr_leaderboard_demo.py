@@ -156,6 +156,7 @@ def test_write_summary_artifact_records_models_and_categories(tmp_path: Path) ->
         summary_path,
         results_path=results_path,
         expected_cases_per_model=2,
+        source_result_paths=[tmp_path / "model-a" / "judge-report" / "results.jsonl"],
     )
 
     summary = json.loads(summary_path.read_text(encoding="utf-8"))
@@ -163,6 +164,9 @@ def test_write_summary_artifact_records_models_and_categories(tmp_path: Path) ->
     assert summary["model_count"] == 2
     assert summary["category_count"] == 2
     assert summary["total_gemini_judge_samples"] == 12
+    assert summary["source_result_paths"] == [
+        str(tmp_path / "model-a" / "judge-report" / "results.jsonl")
+    ]
     assert summary["models"][0]["model"] == "mlx-community/model-a"
     assert summary["models"][0]["average_score"] == 90
     assert summary["models"][0]["labels"] == {"accurate": 2}
@@ -264,3 +268,7 @@ def test_refresh_asr_leaderboard_artifacts_combines_report_and_page(tmp_path: Pa
     written_summary = json.loads(summary.read_text(encoding="utf-8"))
     assert written_summary["total_results"] == 4
     assert written_summary["model_count"] == 2
+    assert written_summary["source_result_paths"] == [
+        str(first),
+        str(second),
+    ]

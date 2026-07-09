@@ -145,6 +145,7 @@ def refresh_asr_leaderboard_artifacts(
         summary_out,
         results_path=combined_results_path,
         expected_cases_per_model=expected_cases_per_model,
+        source_result_paths=result_paths,
     )
 
     print(f"Combined {len(combined_results)} ASR results from {len(result_paths)} files")

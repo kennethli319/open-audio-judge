@@ -148,6 +148,7 @@ def write_summary_artifact(
     *,
     results_path: Path,
     expected_cases_per_model: int,
+    source_result_paths: list[Path] | None = None,
 ) -> None:
     model_summaries = summarize_models(results)
     validate_coverage(results, model_summaries, expected_cases_per_model=expected_cases_per_model)
@@ -158,6 +159,10 @@ def write_summary_artifact(
             {
                 "results_path": _repo_relative(results_path),
                 "report_path": _repo_relative(results_path.with_name("report.html")),
+                "source_result_paths": [
+                    _repo_relative(path)
+                    for path in source_result_paths or []
+                ],
                 "total_results": len(results),
                 "model_count": len(model_summaries),
                 "category_count": len(category_summaries),

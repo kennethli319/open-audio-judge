@@ -106,6 +106,26 @@
   ],
   "report_path": "runs/asr-leaderboard/full-35-combined/report.html",
   "results_path": "runs/asr-leaderboard/full-35-combined/results.jsonl",
+  "source_result_paths": [
+    "runs/asr-leaderboard/whisper-large-v3-turbo-smoke/judge-report/results.jsonl",
+    "runs/asr-leaderboard/whisper-large-v3-turbo-full-gap/judge-report/results.jsonl",
+    "runs/asr-leaderboard/whisper-large-v3-turbo-semantic-smoke/judge-report/results.jsonl",
+    "runs/asr-leaderboard/whisper-large-v3-turbo-entity-smoke/judge-report/results.jsonl",
+    "runs/asr-leaderboard/whisper-large-v3-turbo-paraphrase-smoke/judge-report/results.jsonl",
+    "runs/asr-leaderboard/whisper-large-v3-turbo-noise-smoke/judge-report/results.jsonl",
+    "runs/asr-leaderboard/qwen3-asr-1.7b-smoke/judge-report/results.jsonl",
+    "runs/asr-leaderboard/qwen3-asr-1.7b-full-gap/judge-report/results.jsonl",
+    "runs/asr-leaderboard/qwen3-asr-1.7b-semantic-smoke/judge-report/results.jsonl",
+    "runs/asr-leaderboard/qwen3-asr-1.7b-entity-smoke/judge-report/results.jsonl",
+    "runs/asr-leaderboard/qwen3-asr-1.7b-paraphrase-smoke/judge-report/results.jsonl",
+    "runs/asr-leaderboard/qwen3-asr-1.7b-noise-smoke/judge-report/results.jsonl",
+    "runs/asr-leaderboard/vibevoice-asr-smoke/judge-report/results.jsonl",
+    "runs/asr-leaderboard/vibevoice-asr-full-gap/judge-report/results.jsonl",
+    "runs/asr-leaderboard/vibevoice-asr-semantic-smoke/judge-report/results.jsonl",
+    "runs/asr-leaderboard/vibevoice-asr-entity-smoke/judge-report/results.jsonl",
+    "runs/asr-leaderboard/vibevoice-asr-paraphrase-smoke/judge-report/results.jsonl",
+    "runs/asr-leaderboard/vibevoice-asr-noise-smoke/judge-report/results.jsonl"
+  ],
   "total_gemini_judge_samples": 315,
   "total_results": 105
 }
