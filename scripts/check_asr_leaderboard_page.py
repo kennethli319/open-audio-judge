@@ -227,6 +227,12 @@ def _validate_summary(
         artifact_root=artifact_root,
         path_maps=path_maps,
     )
+    _validate_report_links_artifact(
+        summary,
+        summary_path=summary_path,
+        artifact_root=artifact_root,
+        path_maps=path_maps,
+    )
     _validate_runtime_status_artifact(
         summary,
         summary_path=summary_path,
@@ -909,6 +915,311 @@ def _validate_artifact_index_result_bundle(
         raise ValueError(f"{index_path} result_bundle bytes are stale.")
     if bundle.get("sha256") != _sha256_file(results_path):
         raise ValueError(f"{index_path} result_bundle sha256 is stale.")
+
+
+def _validate_report_links_artifact(
+    summary: dict[str, Any],
+    *,
+    summary_path: Path,
+    artifact_root: Path,
+    path_maps: list[tuple[str, str]],
+) -> None:
+    raw_path = summary.get("report_links_path")
+    if not isinstance(raw_path, str) or not raw_path:
+        raise ValueError(f"{summary_path} has invalid report_links_path: {raw_path!r}")
+    path = _resolve_summary_path(raw_path, artifact_root=artifact_root, path_maps=path_maps)
+    try:
+        report_links = json.loads(path.read_text(encoding="utf-8"))
+    except json.JSONDecodeError as exc:
+        raise ValueError(f"{path} must contain valid JSON: {exc}") from exc
+
+    if not isinstance(report_links, dict):
+        raise ValueError(f"{path} must contain a JSON object.")
+    if report_links.get("version") != 1:
+        raise ValueError(f"{path} version must be 1.")
+    if report_links.get("demo_page") != "docs/asr-leaderboard-demo.html":
+        raise ValueError(f"{path} demo_page must be docs/asr-leaderboard-demo.html.")
+
+    hosted = report_links.get("hosted")
+    if not isinstance(hosted, dict):
+        raise ValueError(f"{path} must include hosted link metadata.")
+    expected_hosted = {
+        "base_path": "open-audio-judge",
+        "base_url": "https://kennethli319.github.io/open-audio-judge",
+        "demo_page_path": "open-audio-judge/asr-leaderboard-demo.html",
+        "demo_page_url": "https://kennethli319.github.io/open-audio-judge/asr-leaderboard-demo.html",
+        "combined_results_path": "open-audio-judge/asr-leaderboard/full-35-combined/results.jsonl",
+        "combined_report_path": "open-audio-judge/asr-leaderboard/full-35-combined/report.html",
+        "combined_report_url": (
+            "https://kennethli319.github.io/open-audio-judge/"
+            "asr-leaderboard/full-35-combined/report.html"
+        ),
+    }
+    for key, expected in expected_hosted.items():
+        if hosted.get(key) != expected:
+            raise ValueError(f"{path} hosted.{key}={hosted.get(key)!r} is stale.")
+
+    combined = report_links.get("combined")
+    if not isinstance(combined, dict):
+        raise ValueError(f"{path} must include combined report metadata.")
+    expected_combined = {
+        "results_path": summary["results_path"],
+        "report_path": summary["report_path"],
+        "result_count": summary["total_results"],
+        "model_count": summary["model_count"],
+        "expected_cases_per_model": summary["expected_cases_per_model"],
+    }
+    for key, expected in expected_combined.items():
+        if combined.get(key) != expected:
+            raise ValueError(
+                f"{path} combined.{key}={combined.get(key)!r} does not match "
+                f"{summary_path}."
+            )
+
+    _validate_report_links_source_reports(
+        report_links,
+        summary=summary,
+        report_links_path=path,
+        summary_path=summary_path,
+        artifact_root=artifact_root,
+        path_maps=path_maps,
+    )
+    _validate_report_links_coverage_matrix(
+        report_links,
+        summary=summary,
+        report_links_path=path,
+        summary_path=summary_path,
+    )
+
+
+def _validate_report_links_source_reports(
+    report_links: dict[str, Any],
+    *,
+    summary: dict[str, Any],
+    report_links_path: Path,
+    summary_path: Path,
+    artifact_root: Path,
+    path_maps: list[tuple[str, str]],
+) -> None:
+    source_reports = report_links.get("source_reports")
+    if not isinstance(source_reports, list):
+        raise ValueError(f"{report_links_path} source_reports must be a list.")
+    summary_source_files = summary.get("source_result_files") or []
+    if len(source_reports) != len(summary_source_files):
+        raise ValueError(
+            f"{report_links_path} source_reports length does not match "
+            f"{summary_path} source_result_files."
+        )
+
+    expected_by_path = {
+        source_file.get("path"): source_file
+        for source_file in summary_source_files
+        if isinstance(source_file, dict)
+    }
+    for index, source_report in enumerate(source_reports):
+        if not isinstance(source_report, dict):
+            raise ValueError(f"{report_links_path} source_reports[{index}] must be an object.")
+        results_path = source_report.get("results_path")
+        if not isinstance(results_path, str) or not results_path:
+            raise ValueError(
+                f"{report_links_path} source_reports[{index}] has invalid results_path."
+            )
+        expected_source = expected_by_path.get(results_path)
+        if not isinstance(expected_source, dict):
+            raise ValueError(
+                f"{report_links_path} source_reports[{index}] results_path is missing "
+                f"from {summary_path}: {results_path}"
+            )
+
+        expected_fields = {
+            "result_bytes": expected_source.get("result_bytes"),
+            "result_sha256": expected_source.get("result_sha256"),
+            "report_path": expected_source.get("report_path"),
+            "report_exists": expected_source.get("report_exists"),
+            "report_bytes": expected_source.get("report_bytes"),
+            "report_sha256": expected_source.get("report_sha256"),
+            "models": expected_source.get("models"),
+            "result_count": expected_source.get("result_count"),
+            "ok_count": expected_source.get("ok_count"),
+            "categories": expected_source.get("categories"),
+        }
+        for key, expected in expected_fields.items():
+            if source_report.get(key) != expected:
+                raise ValueError(
+                    f"{report_links_path} source_reports[{index}].{key} is stale."
+                )
+
+        report_exists = source_report.get("report_exists")
+        hosted_path = source_report.get("hosted_report_path")
+        hosted_url = source_report.get("hosted_report_url")
+        report_path = source_report.get("report_path")
+        if report_exists:
+            if not isinstance(report_path, str) or not report_path:
+                raise ValueError(
+                    f"{report_links_path} source_reports[{index}] has invalid report_path."
+                )
+            resolved_report = _resolve_summary_path(
+                report_path,
+                artifact_root=artifact_root,
+                path_maps=path_maps,
+            )
+            if not resolved_report.exists():
+                raise ValueError(
+                    f"{report_links_path} source_reports[{index}] references missing "
+                    f"source report: {report_path}"
+                )
+            expected_hosted_report_path = _expected_hosted_source_report_path(report_path)
+            if hosted_path != f"open-audio-judge/{expected_hosted_report_path}":
+                raise ValueError(
+                    f"{report_links_path} source_reports[{index}].hosted_report_path is stale."
+                )
+            if hosted_url != (
+                "https://kennethli319.github.io/open-audio-judge/"
+                + expected_hosted_report_path
+            ):
+                raise ValueError(
+                    f"{report_links_path} source_reports[{index}].hosted_report_url is stale."
+                )
+        elif hosted_path is not None or hosted_url is not None:
+            raise ValueError(
+                f"{report_links_path} source_reports[{index}] must not link a missing report."
+            )
+
+
+def _validate_report_links_coverage_matrix(
+    report_links: dict[str, Any],
+    *,
+    summary: dict[str, Any],
+    report_links_path: Path,
+    summary_path: Path,
+) -> None:
+    matrix = report_links.get("source_coverage_matrix")
+    if not isinstance(matrix, list):
+        raise ValueError(f"{report_links_path} source_coverage_matrix must be a list.")
+
+    expected_models = [
+        str(model["model"])
+        for model in summary.get("models", [])
+        if isinstance(model, dict) and model.get("model")
+    ]
+    expected_categories = [
+        str(category["category"])
+        for category in summary.get("category_columns", [])
+        if isinstance(category, dict) and category.get("category")
+    ]
+    matrix_models = [
+        str(row.get("model"))
+        for row in matrix
+        if isinstance(row, dict) and row.get("model")
+    ]
+    if sorted(matrix_models) != sorted(expected_models):
+        raise ValueError(
+            f"{report_links_path} source_coverage_matrix models do not match {summary_path}."
+        )
+
+    expected_matrix = {
+        row.get("model"): row
+        for row in summary.get("model_category_matrix", [])
+        if isinstance(row, dict) and row.get("model")
+    }
+    for row_index, row in enumerate(matrix):
+        if not isinstance(row, dict):
+            raise ValueError(f"{report_links_path} source_coverage_matrix[{row_index}] must be an object.")
+        model = row.get("model")
+        expected_row = expected_matrix.get(model)
+        if not isinstance(model, str) or not isinstance(expected_row, dict):
+            raise ValueError(
+                f"{report_links_path} source_coverage_matrix[{row_index}] has unknown model."
+            )
+        if row.get("total_results") != expected_row.get("total_results"):
+            raise ValueError(
+                f"{report_links_path} source_coverage_matrix[{row_index}].total_results "
+                f"does not match {summary_path}."
+            )
+        cells = row.get("cells")
+        if not isinstance(cells, list):
+            raise ValueError(
+                f"{report_links_path} source_coverage_matrix[{row_index}].cells must be a list."
+            )
+        cell_categories = [
+            str(cell.get("category"))
+            for cell in cells
+            if isinstance(cell, dict) and cell.get("category")
+        ]
+        if cell_categories != expected_categories:
+            raise ValueError(
+                f"{report_links_path} source_coverage_matrix[{row_index}] categories "
+                f"do not match {summary_path}."
+            )
+        expected_counts = expected_row.get("category_counts")
+        if not isinstance(expected_counts, dict):
+            raise ValueError(f"{summary_path} model_category_matrix has invalid category_counts.")
+        for cell_index, cell in enumerate(cells):
+            if not isinstance(cell, dict):
+                raise ValueError(
+                    f"{report_links_path} source_coverage_matrix[{row_index}]."
+                    f"cells[{cell_index}] must be an object."
+                )
+            category = cell.get("category")
+            if cell.get("case_count") != expected_counts.get(category):
+                raise ValueError(
+                    f"{report_links_path} source_coverage_matrix[{row_index}]."
+                    f"cells[{cell_index}].case_count does not match {summary_path}."
+                )
+            source_reports = cell.get("source_reports")
+            if not isinstance(source_reports, list):
+                raise ValueError(
+                    f"{report_links_path} source_coverage_matrix[{row_index}]."
+                    f"cells[{cell_index}].source_reports must be a list."
+                )
+            linked_count = 0
+            for source_report in source_reports:
+                if not isinstance(source_report, dict):
+                    raise ValueError(
+                        f"{report_links_path} source_coverage_matrix source_reports "
+                        f"entries must be objects."
+                    )
+                case_count = source_report.get("case_count")
+                if not isinstance(case_count, int) or case_count < 1:
+                    raise ValueError(
+                        f"{report_links_path} source_coverage_matrix has invalid "
+                        f"source report case_count."
+                    )
+                linked_count += case_count
+                report_path = source_report.get("report_path")
+                hosted_path = source_report.get("hosted_report_path")
+                hosted_url = source_report.get("hosted_report_url")
+                if not isinstance(report_path, str) or not report_path:
+                    raise ValueError(
+                        f"{report_links_path} source_coverage_matrix has invalid report_path."
+                    )
+                expected_hosted_report_path = _expected_hosted_source_report_path(report_path)
+                if hosted_path != f"open-audio-judge/{expected_hosted_report_path}":
+                    raise ValueError(
+                        f"{report_links_path} source_coverage_matrix has stale "
+                        f"hosted_report_path."
+                    )
+                if hosted_url != (
+                    "https://kennethli319.github.io/open-audio-judge/"
+                    + expected_hosted_report_path
+                ):
+                    raise ValueError(
+                        f"{report_links_path} source_coverage_matrix has stale "
+                        f"hosted_report_url."
+                    )
+            if source_reports and linked_count != cell.get("case_count"):
+                raise ValueError(
+                    f"{report_links_path} source_coverage_matrix[{row_index}]."
+                    f"cells[{cell_index}] source report case counts do not sum to case_count."
+                )
+
+
+def _expected_hosted_source_report_path(report_path: str) -> str:
+    prefix = "runs/asr-leaderboard/"
+    if report_path.startswith(prefix):
+        return "asr-leaderboard/" + report_path.removeprefix(prefix)
+    path = Path(report_path)
+    return f"asr-leaderboard/source-reports/{path.parent.parent.name}/report.html"
 
 
 def _validate_hosted_manifest_matches_artifact_index(

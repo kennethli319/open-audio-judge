@@ -2409,6 +2409,21 @@ def test_check_asr_leaderboard_page_validates_generated_artifacts(tmp_path: Path
         "demo_page_path": "open-audio-judge/asr-leaderboard-demo.html",
         "demo_page_url": "https://kennethli319.github.io/open-audio-judge/asr-leaderboard-demo.html",
     }
+    report_links_data["combined"]["result_count"] = 3
+    report_links.write_text(json.dumps(report_links_data), encoding="utf-8")
+    with pytest.raises(ValueError, match="combined.result_count=.*does not match"):
+        check_module._validate_report_links_artifact(
+            json.loads(summary.read_text(encoding="utf-8")),
+            summary_path=summary,
+            artifact_root=Path.cwd(),
+            path_maps=[],
+        )
+    update_module.write_report_links_artifact(
+        results,
+        report_links,
+        results_path=results_path,
+        expected_cases_per_model=2,
+    )
 
     unindexed_hosted_source = tmp_path / "unindexed-hosted-source.json"
     unindexed_hosted_source.write_text("{}\n", encoding="utf-8")
@@ -2682,7 +2697,78 @@ def test_check_asr_leaderboard_page_validates_hosted_artifact_layout(tmp_path: P
     seed_manifest_validation.write_text(json.dumps({"status": "complete"}) + "\n", encoding="utf-8")
     update_module.write_refresh_commands_script(refresh_commands)
     report_index.write_text("# report index\n", encoding="utf-8")
-    report_links.write_text("{}\n", encoding="utf-8")
+    report_links.write_text(
+        json.dumps(
+            {
+                "description": "Hosted fixture ASR report links.",
+                "version": 1,
+                "demo_page": "docs/asr-leaderboard-demo.html",
+                "hosted": {
+                    "base_path": "open-audio-judge",
+                    "base_url": "https://kennethli319.github.io/open-audio-judge",
+                    "demo_page_path": "open-audio-judge/asr-leaderboard-demo.html",
+                    "demo_page_url": (
+                        "https://kennethli319.github.io/open-audio-judge/"
+                        "asr-leaderboard-demo.html"
+                    ),
+                    "combined_results_path": (
+                        "open-audio-judge/asr-leaderboard/full-35-combined/results.jsonl"
+                    ),
+                    "combined_report_path": (
+                        "open-audio-judge/asr-leaderboard/full-35-combined/report.html"
+                    ),
+                    "combined_report_url": (
+                        "https://kennethli319.github.io/open-audio-judge/"
+                        "asr-leaderboard/full-35-combined/report.html"
+                    ),
+                },
+                "combined": {
+                    "results_path": "runs/asr-leaderboard/full-35-combined/results.jsonl",
+                    "report_path": "runs/asr-leaderboard/full-35-combined/report.html",
+                    "result_count": 4,
+                    "model_count": 2,
+                    "expected_cases_per_model": 2,
+                },
+                "source_coverage_matrix": [
+                    {
+                        "model": "mlx-community/model-a",
+                        "total_results": 2,
+                        "cells": [
+                            {
+                                "category": "transcription_accuracy_wer",
+                                "case_count": 1,
+                                "source_reports": [],
+                            },
+                            {
+                                "category": "numeric_unit_integrity",
+                                "case_count": 1,
+                                "source_reports": [],
+                            },
+                        ],
+                    },
+                    {
+                        "model": "mlx-community/model-b",
+                        "total_results": 2,
+                        "cells": [
+                            {
+                                "category": "transcription_accuracy_wer",
+                                "case_count": 1,
+                                "source_reports": [],
+                            },
+                            {
+                                "category": "numeric_unit_integrity",
+                                "case_count": 1,
+                                "source_reports": [],
+                            },
+                        ],
+                    },
+                ],
+                "source_reports": [],
+            }
+        )
+        + "\n",
+        encoding="utf-8",
+    )
     next_runs.write_text(
         json.dumps(
             {
@@ -2906,6 +2992,28 @@ def test_check_asr_leaderboard_page_validates_hosted_artifact_layout(tmp_path: P
                 "categories": [
                     {"category": "transcription_accuracy_wer"},
                     {"category": "numeric_unit_integrity"},
+                ],
+                "category_columns": [
+                    {"category": "transcription_accuracy_wer", "label": "WER"},
+                    {"category": "numeric_unit_integrity", "label": "Numeric/Unit"},
+                ],
+                "model_category_matrix": [
+                    {
+                        "model": "mlx-community/model-a",
+                        "total_results": 2,
+                        "category_counts": {
+                            "transcription_accuracy_wer": 1,
+                            "numeric_unit_integrity": 1,
+                        },
+                    },
+                    {
+                        "model": "mlx-community/model-b",
+                        "total_results": 2,
+                        "category_counts": {
+                            "transcription_accuracy_wer": 1,
+                            "numeric_unit_integrity": 1,
+                        },
+                    },
                 ],
             }
         )
