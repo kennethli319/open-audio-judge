@@ -655,6 +655,7 @@ def test_check_asr_leaderboard_page_validates_generated_artifacts(tmp_path: Path
         "".join(json.dumps(record) + "\n" for record in records),
         encoding="utf-8",
     )
+    results_path.with_name("report.html").write_text("<html></html>\n", encoding="utf-8")
     results = update_module.load_results_jsonl(results_path)
     page.write_text(
         "<!doctype html><html lang=\"en\"><body>\n"
@@ -685,6 +686,61 @@ def test_check_asr_leaderboard_page_validates_generated_artifacts(tmp_path: Path
     assert validation["status"] == "complete"
     assert validation["total_results"] == 4
     assert validation["model_count"] == 2
+
+
+def test_check_asr_leaderboard_page_rejects_missing_summary_artifacts(tmp_path: Path) -> None:
+    update_module = load_script_module()
+    check_module = load_check_module()
+    page = tmp_path / "demo.html"
+    summary = tmp_path / "summary.json"
+    results_path = tmp_path / "results.jsonl"
+    records = [
+        result_record(
+            case_id="asr-a-model-a",
+            model="mlx-community/model-a",
+            category="transcription_accuracy_wer",
+            score=100,
+            label="accurate",
+        ),
+        result_record(
+            case_id="asr-b-model-a",
+            model="mlx-community/model-a",
+            category="numeric_unit_integrity",
+            score=80,
+            label="accurate",
+        ),
+    ]
+    results_path.write_text(
+        "".join(json.dumps(record) + "\n" for record in records),
+        encoding="utf-8",
+    )
+    results = update_module.load_results_jsonl(results_path)
+    page.write_text(
+        "<!doctype html><html lang=\"en\"><body>\n"
+        "<h1>Open Audio Judge ASR Leaderboard</h1>\n"
+        f"{update_module.START_MARKER}\n"
+        "old generated content\n"
+        f"{update_module.END_MARKER}\n"
+        "</body></html>\n",
+        encoding="utf-8",
+    )
+    update_module.replace_generated_block(
+        page,
+        update_module.render_generated_sections(
+            results,
+            results_path=results_path,
+            expected_cases_per_model=2,
+        ),
+    )
+    update_module.write_summary_artifact(
+        results,
+        summary,
+        results_path=results_path,
+        expected_cases_per_model=2,
+    )
+
+    with pytest.raises(ValueError, match="references missing ASR artifact"):
+        check_module.check_asr_leaderboard_page(page, summary_path=summary)
 
 
 def test_refresh_asr_leaderboard_artifacts_reads_run_manifest(tmp_path: Path) -> None:

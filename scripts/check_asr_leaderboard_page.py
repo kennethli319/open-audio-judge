@@ -75,6 +75,8 @@ def _validate_summary(summary: Any, *, summary_path: Path) -> None:
         raise ValueError(f"{summary_path} must contain a JSON object.")
 
     required_keys = (
+        "results_path",
+        "report_path",
         "total_results",
         "model_count",
         "category_count",
@@ -93,6 +95,34 @@ def _validate_summary(summary: Any, *, summary_path: Path) -> None:
         raise ValueError("ASR leaderboard summary model_count does not match models.")
     if summary["category_count"] != len(summary["categories"]):
         raise ValueError("ASR leaderboard summary category_count does not match categories.")
+
+    _validate_referenced_artifacts(summary, summary_path=summary_path)
+
+
+def _validate_referenced_artifacts(summary: dict[str, Any], *, summary_path: Path) -> None:
+    artifact_keys = ("results_path", "report_path")
+    missing = []
+    for key in artifact_keys:
+        raw_path = summary.get(key)
+        if not isinstance(raw_path, str) or not raw_path:
+            raise ValueError(f"{summary_path} has invalid {key}: {raw_path!r}")
+        path = _resolve_summary_path(raw_path)
+        if not path.exists():
+            missing.append((key, raw_path))
+
+    raw_source_paths = summary.get("source_result_paths", [])
+    if not isinstance(raw_source_paths, list):
+        raise ValueError(f"{summary_path} source_result_paths must be a list.")
+    for raw_path in raw_source_paths:
+        if not isinstance(raw_path, str) or not raw_path:
+            raise ValueError(f"{summary_path} has invalid source_result_paths entry: {raw_path!r}")
+        path = _resolve_summary_path(raw_path)
+        if not path.exists():
+            missing.append(("source_result_paths", raw_path))
+
+    if missing:
+        formatted = ", ".join(f"{key}={path}" for key, path in missing)
+        raise ValueError(f"{summary_path} references missing ASR artifact(s): {formatted}")
 
 
 def _required_page_text(summary: dict[str, Any]) -> list[str]:
@@ -142,6 +172,13 @@ def _repo_relative(path: Path) -> str:
         return path.resolve().relative_to(ROOT).as_posix()
     except ValueError:
         return path.as_posix()
+
+
+def _resolve_summary_path(raw_path: str) -> Path:
+    path = Path(raw_path)
+    if path.is_absolute():
+        return path
+    return ROOT / path
 
 
 def _rendered_command_text(command: list[object]) -> str:
