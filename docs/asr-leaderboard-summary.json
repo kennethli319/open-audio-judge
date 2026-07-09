@@ -315,9 +315,9 @@
     "hosted_artifact_command": [
       ".venv/bin/python",
       "scripts/refresh_asr_leaderboard_artifacts.py",
-      "--hosted-dir",
-      "/path/to/kennethli319.github.io/open-audio-judge"
+      "--hosted-dir-from-env"
     ],
+    "hosted_artifact_env_var": "ASR_LEADERBOARD_HOSTED_DIR",
     "local_secret_env_command": [
       "source",
       "/Users/wangyauli/.openclaw/secrets/open-audio-judge-gemini.env"

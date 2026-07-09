@@ -125,7 +125,7 @@ This generated report summarizes the verified ASR leaderboard artifact set.
 - Discover latest complete runs: `.venv/bin/python scripts/refresh_asr_leaderboard_artifacts.py --discover-complete-model-runs --update-run-manifest`
 - Manifest-based refresh: `.venv/bin/python scripts/refresh_asr_leaderboard_artifacts.py`
 - Page validation: `.venv/bin/python scripts/check_asr_leaderboard_page.py`
-- Hosted artifact sync: `.venv/bin/python scripts/refresh_asr_leaderboard_artifacts.py --hosted-dir /path/to/kennethli319.github.io/open-audio-judge`
+- Hosted artifact sync: `.venv/bin/python scripts/refresh_asr_leaderboard_artifacts.py --hosted-dir-from-env`
 
 ## Runtime Status
 

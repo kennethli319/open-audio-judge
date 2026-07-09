@@ -25,6 +25,7 @@ DEFAULT_HOSTED_MANIFEST = ROOT / "docs" / "asr-leaderboard-hosted-manifest.json"
 DEFAULT_ARTIFACT_INDEX = ROOT / "docs" / "asr-leaderboard-artifacts.json"
 DEFAULT_AUDIO_CASES = ROOT / "runs" / "asr-research-audio" / "tts_audio_cases.jsonl"
 DEFAULT_SEED_CASES = ROOT / "examples" / "asr_research_cases.jsonl"
+DEFAULT_HOSTED_DIR_ENV = "ASR_LEADERBOARD_HOSTED_DIR"
 START_MARKER = "<!-- ASR_LEADERBOARD_GENERATED_START -->"
 END_MARKER = "<!-- ASR_LEADERBOARD_GENERATED_END -->"
 
@@ -228,8 +229,8 @@ def render_generated_sections(
                 f"<code>{hosted_manifest_label}</code>. The artifact bundle index is "
                 f"<code>{artifact_index_label}</code>; together they include the source result files, "
                 "complete model/category matrix, missing-cell guidance, hosted copy map, and reproducible refresh workflow. Pass "
-                "<code>--hosted-dir /path/to/kennethli319.github.io/open-audio-judge</code> "
-                "to copy the same verified artifacts into the hosted Pages checkout.</p>"
+                f"<code>{DEFAULT_HOSTED_DIR_ENV}</code> with "
+                "<code>--hosted-dir-from-env</code> to copy the same verified artifacts into the hosted Pages checkout.</p>"
             ),
             "",
             "    <h2>Generated Refresh Workflow</h2>",
@@ -590,9 +591,9 @@ def _refresh_workflow(source_result_paths: list[Path]) -> dict[str, object]:
         "hosted_artifact_command": [
             ".venv/bin/python",
             "scripts/refresh_asr_leaderboard_artifacts.py",
-            "--hosted-dir",
-            "/path/to/kennethli319.github.io/open-audio-judge",
+            "--hosted-dir-from-env",
         ],
+        "hosted_artifact_env_var": DEFAULT_HOSTED_DIR_ENV,
         "local_secret_env_command": [
             "source",
             GEMINI_SECRET_ENV,

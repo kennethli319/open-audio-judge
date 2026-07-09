@@ -3,6 +3,7 @@ from __future__ import annotations
 import argparse
 import hashlib
 import json
+import os
 import shutil
 import sys
 from collections import Counter
@@ -39,6 +40,7 @@ from scripts.validate_asr_seed_manifest import (  # noqa: E402
 DEFAULT_COMBINED_OUT = ROOT / "runs" / "asr-leaderboard" / "full-35-combined"
 DEFAULT_RUN_MANIFEST = ROOT / "docs" / "asr-leaderboard-run-manifest.json"
 DEFAULT_MANIFEST_VALIDATION = ROOT / "docs" / "asr-leaderboard-manifest-validation.json"
+DEFAULT_HOSTED_DIR_ENV = "ASR_LEADERBOARD_HOSTED_DIR"
 FULL_RUN_RESULT_PATHS = [
     ROOT
     / "runs"
@@ -179,12 +181,31 @@ def main() -> None:
         ),
     )
     parser.add_argument(
+        "--hosted-dir-from-env",
+        action="store_true",
+        help=(
+            f"Read the hosted Pages directory from ${DEFAULT_HOSTED_DIR_ENV}. "
+            "Ignored when --hosted-dir is set."
+        ),
+    )
+    parser.add_argument(
+        "--hosted-dir-env",
+        default=DEFAULT_HOSTED_DIR_ENV,
+        help=(
+            "Environment variable used with --hosted-dir-from-env "
+            f"(default: {DEFAULT_HOSTED_DIR_ENV})."
+        ),
+    )
+    parser.add_argument(
         "--expected-cases-per-model",
         type=int,
         default=35,
         help="Fail unless every model has this many ok judged results.",
     )
     args = parser.parse_args()
+    hosted_dir = args.hosted_dir
+    if hosted_dir is None and args.hosted_dir_from_env:
+        hosted_dir = _hosted_dir_from_env(args.hosted_dir_env)
 
     if args.results:
         result_paths = [_normalize_results_path(path) for path in args.results]
@@ -213,9 +234,19 @@ def main() -> None:
         artifact_index_out=args.artifact_index_out,
         run_manifest=args.run_manifest,
         update_run_manifest=args.update_run_manifest,
-        hosted_dir=args.hosted_dir,
+        hosted_dir=hosted_dir,
         expected_cases_per_model=args.expected_cases_per_model,
     )
+
+
+def _hosted_dir_from_env(env_var: str) -> Path:
+    raw_value = os.environ.get(env_var, "").strip()
+    if not raw_value:
+        raise ValueError(
+            f"--hosted-dir-from-env requires ${env_var} to point to the "
+            "kennethli319.github.io/open-audio-judge checkout."
+        )
+    return Path(raw_value).expanduser()
 
 
 def refresh_asr_leaderboard_artifacts(

@@ -196,7 +196,8 @@ def test_render_generated_sections_summarizes_verified_asr_results(tmp_path: Pat
     assert "docs/asr-seed-manifest-validation.json" in html
     assert "reproducible refresh workflow" in html
     assert "docs/asr-leaderboard-hosted-manifest.json" in html
-    assert "--hosted-dir /path/to/kennethli319.github.io/open-audio-judge" in html
+    assert "ASR_LEADERBOARD_HOSTED_DIR" in html
+    assert "--hosted-dir-from-env" in html
     assert "Generated Refresh Workflow" in html
     assert "Generated Artifacts" in html
     assert "Validate seed manifest" in html
@@ -465,9 +466,9 @@ def test_write_summary_artifact_records_models_and_categories(tmp_path: Path) ->
     assert summary["refresh_workflow"]["hosted_artifact_command"] == [
         ".venv/bin/python",
         "scripts/refresh_asr_leaderboard_artifacts.py",
-        "--hosted-dir",
-        "/path/to/kennethli319.github.io/open-audio-judge",
+        "--hosted-dir-from-env",
     ]
+    assert summary["refresh_workflow"]["hosted_artifact_env_var"] == "ASR_LEADERBOARD_HOSTED_DIR"
     assert summary["refresh_workflow"]["local_secret_env_command"] == [
         "source",
         "/Users/wangyauli/.openclaw/secrets/open-audio-judge-gemini.env",
@@ -911,6 +912,29 @@ def test_refresh_asr_leaderboard_artifacts_combines_report_and_page(tmp_path: Pa
     assert (
         hosted_dir / "asr-leaderboard" / "full-35-combined" / "report.html"
     ).read_text(encoding="utf-8") == (out / "report.html").read_text(encoding="utf-8")
+
+
+def test_refresh_asr_leaderboard_artifacts_reads_hosted_dir_from_env(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    refresh_module = load_refresh_module()
+    hosted_dir = tmp_path / "pages" / "open-audio-judge"
+
+    monkeypatch.setenv("ASR_LEADERBOARD_HOSTED_DIR", str(hosted_dir))
+
+    assert refresh_module._hosted_dir_from_env("ASR_LEADERBOARD_HOSTED_DIR") == hosted_dir
+
+
+def test_refresh_asr_leaderboard_artifacts_requires_hosted_dir_env(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    refresh_module = load_refresh_module()
+
+    monkeypatch.delenv("ASR_LEADERBOARD_HOSTED_DIR", raising=False)
+
+    with pytest.raises(ValueError, match="ASR_LEADERBOARD_HOSTED_DIR"):
+        refresh_module._hosted_dir_from_env("ASR_LEADERBOARD_HOSTED_DIR")
 
 
 def test_discover_complete_model_result_paths_selects_newest_complete_runs(tmp_path: Path) -> None:
@@ -1415,9 +1439,9 @@ def test_check_asr_leaderboard_page_validates_hosted_artifact_layout(tmp_path: P
                     "hosted_artifact_command": [
                         ".venv/bin/python",
                         "scripts/refresh_asr_leaderboard_artifacts.py",
-                        "--hosted-dir",
-                        "/path/to/kennethli319.github.io/open-audio-judge",
+                        "--hosted-dir-from-env",
                     ],
+                    "hosted_artifact_env_var": "ASR_LEADERBOARD_HOSTED_DIR",
                 },
                 "total_results": 4,
                 "model_count": 2,
@@ -1456,7 +1480,7 @@ def test_check_asr_leaderboard_page_validates_hosted_artifact_layout(tmp_path: P
                 ".venv/bin/oaj autojudge-mlx-asr",
                 ".venv/bin/python scripts/refresh_asr_leaderboard_artifacts.py",
                 ".venv/bin/python scripts/check_asr_leaderboard_page.py",
-                ".venv/bin/python scripts/refresh_asr_leaderboard_artifacts.py --hosted-dir /path/to/kennethli319.github.io/open-audio-judge",
+                ".venv/bin/python scripts/refresh_asr_leaderboard_artifacts.py --hosted-dir-from-env",
                 "runs/asr-leaderboard/full-35-combined/results.jsonl",
                 "Combined ASR judge results used by the generated page and report.",
                 "runs/asr-leaderboard/full-35-combined/report.html",
