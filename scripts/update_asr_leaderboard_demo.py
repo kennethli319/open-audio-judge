@@ -145,6 +145,7 @@ def render_generated_sections(
         ("Materialize audio", workflow["audio_materialization_command"]),
         ("Run one MLX ASR model", workflow["model_run_template"]),
         ("Refresh committed artifacts", workflow["manifest_refresh_command"]),
+        ("Check generated page", workflow["page_validation_command"]),
         ("Sync hosted artifacts", workflow["hosted_artifact_command"]),
     ]
     output_artifacts = [
@@ -391,6 +392,7 @@ def write_refresh_report(
                 f"- Audio materialization: `{_shell_join(workflow['audio_materialization_command'])}`",
                 f"- Combine and refresh committed artifacts: `{_shell_join(workflow['combine_refresh_command'])}`",
                 f"- Manifest-based refresh: `{_shell_join(workflow['manifest_refresh_command'])}`",
+                f"- Page validation: `{_shell_join(workflow['page_validation_command'])}`",
                 f"- Hosted artifact sync: `{_shell_join(workflow['hosted_artifact_command'])}`",
                 "",
                 "## Runtime Status",
@@ -457,6 +459,10 @@ def _refresh_workflow(source_result_paths: list[Path]) -> dict[str, object]:
         "manifest_refresh_command": [
             ".venv/bin/python",
             "scripts/refresh_asr_leaderboard_artifacts.py",
+        ],
+        "page_validation_command": [
+            ".venv/bin/python",
+            "scripts/check_asr_leaderboard_page.py",
         ],
         "hosted_artifact_command": [
             ".venv/bin/python",

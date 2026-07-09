@@ -8,6 +8,7 @@ import pytest
 
 SCRIPT = Path("scripts/update_asr_leaderboard_demo.py")
 REFRESH_SCRIPT = Path("scripts/refresh_asr_leaderboard_artifacts.py")
+CHECK_SCRIPT = Path("scripts/check_asr_leaderboard_page.py")
 
 
 def load_script_module():
@@ -22,6 +23,16 @@ def load_script_module():
 
 def load_refresh_module():
     spec = importlib.util.spec_from_file_location("refresh_asr_leaderboard_artifacts", REFRESH_SCRIPT)
+    assert spec is not None
+    assert spec.loader is not None
+    module = importlib.util.module_from_spec(spec)
+    sys.modules[spec.name] = module
+    spec.loader.exec_module(module)
+    return module
+
+
+def load_check_module():
+    spec = importlib.util.spec_from_file_location("check_asr_leaderboard_page", CHECK_SCRIPT)
     assert spec is not None
     assert spec.loader is not None
     module = importlib.util.module_from_spec(spec)
@@ -121,6 +132,8 @@ def test_render_generated_sections_summarizes_verified_asr_results(tmp_path: Pat
     assert "Generated Artifacts" in html
     assert "Validate seed manifest" in html
     assert "scripts/validate_asr_seed_manifest.py" in html
+    assert "Check generated page" in html
+    assert "scripts/check_asr_leaderboard_page.py" in html
     assert "Run one MLX ASR model" in html
     assert "--model &lt;mlx-community/model-id&gt;" in html
     assert "Machine-readable leaderboard summary" in html
@@ -249,6 +262,10 @@ def test_write_summary_artifact_records_models_and_categories(tmp_path: Path) ->
     assert summary["refresh_workflow"]["manifest_refresh_command"] == [
         ".venv/bin/python",
         "scripts/refresh_asr_leaderboard_artifacts.py",
+    ]
+    assert summary["refresh_workflow"]["page_validation_command"] == [
+        ".venv/bin/python",
+        "scripts/check_asr_leaderboard_page.py",
     ]
     assert summary["refresh_workflow"]["hosted_artifact_command"] == [
         ".venv/bin/python",
@@ -451,6 +468,8 @@ def test_write_refresh_report_records_coverage_and_commands(tmp_path: Path) -> N
     assert "--results " + str(source_results_path) in text
     assert "--update-run-manifest" in text
     assert "Hosted artifact sync" in text
+    assert "Page validation" in text
+    assert "scripts/check_asr_leaderboard_page.py" in text
     assert "## Runtime Status" in text
     assert "MLX ASR: not_executed_by_refresh" in text
     assert "Gemini judge: verified_from_loaded_results" in text
@@ -594,6 +613,78 @@ def test_refresh_asr_leaderboard_artifacts_combines_report_and_page(tmp_path: Pa
     assert (hosted_dir / "seed-manifest-validation.json").read_text(
         encoding="utf-8"
     ) == seed_manifest_validation.read_text(encoding="utf-8")
+
+
+def test_check_asr_leaderboard_page_validates_generated_artifacts(tmp_path: Path) -> None:
+    update_module = load_script_module()
+    check_module = load_check_module()
+    page = tmp_path / "demo.html"
+    summary = tmp_path / "summary.json"
+    results_path = tmp_path / "results.jsonl"
+    records = [
+        result_record(
+            case_id="asr-a-model-a",
+            model="mlx-community/model-a",
+            category="transcription_accuracy_wer",
+            score=100,
+            label="accurate",
+        ),
+        result_record(
+            case_id="asr-b-model-a",
+            model="mlx-community/model-a",
+            category="numeric_unit_integrity",
+            score=80,
+            label="accurate",
+        ),
+        result_record(
+            case_id="asr-a-model-b",
+            model="mlx-community/model-b",
+            category="transcription_accuracy_wer",
+            score=60,
+            label="needs_review",
+        ),
+        result_record(
+            case_id="asr-b-model-b",
+            model="mlx-community/model-b",
+            category="numeric_unit_integrity",
+            score=40,
+            label="inaccurate",
+        ),
+    ]
+    results_path.write_text(
+        "".join(json.dumps(record) + "\n" for record in records),
+        encoding="utf-8",
+    )
+    results = update_module.load_results_jsonl(results_path)
+    page.write_text(
+        "<!doctype html><html lang=\"en\"><body>\n"
+        "<h1>Open Audio Judge ASR Leaderboard</h1>\n"
+        f"{update_module.START_MARKER}\n"
+        "old generated content\n"
+        f"{update_module.END_MARKER}\n"
+        "</body></html>\n",
+        encoding="utf-8",
+    )
+    update_module.replace_generated_block(
+        page,
+        update_module.render_generated_sections(
+            results,
+            results_path=results_path,
+            expected_cases_per_model=2,
+        ),
+    )
+    update_module.write_summary_artifact(
+        results,
+        summary,
+        results_path=results_path,
+        expected_cases_per_model=2,
+    )
+
+    validation = check_module.check_asr_leaderboard_page(page, summary_path=summary)
+
+    assert validation["status"] == "complete"
+    assert validation["total_results"] == 4
+    assert validation["model_count"] == 2
 
 
 def test_refresh_asr_leaderboard_artifacts_reads_run_manifest(tmp_path: Path) -> None:

@@ -264,6 +264,10 @@
       "--out",
       "runs/asr-leaderboard/<run-name>"
     ],
+    "page_validation_command": [
+      ".venv/bin/python",
+      "scripts/check_asr_leaderboard_page.py"
+    ],
     "secret_handling": "Load the Gemini API key from the local secret file only at runtime; do not commit or print secrets.",
     "seed_manifest_validation_command": [
       ".venv/bin/python",
