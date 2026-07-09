@@ -826,6 +826,43 @@ def _validate_runtime_status_artifact(
         raise ValueError(f"{path} must include audio_manifest status.")
     if audio_manifest.get("status") not in {"complete", "missing", "stale"}:
         raise ValueError(f"{path} has invalid audio_manifest.status.")
+    result_bundle = status.get("result_bundle")
+    if not isinstance(result_bundle, dict):
+        raise ValueError(f"{path} must include result_bundle.")
+    expected_bundle_fields = {
+        "total_results": summary["total_results"],
+        "model_count": summary["model_count"],
+        "category_count": summary["category_count"],
+    }
+    mismatches = {
+        key: {"expected": value, "actual": result_bundle.get(key)}
+        for key, value in expected_bundle_fields.items()
+        if result_bundle.get(key) != value
+    }
+    if mismatches:
+        raise ValueError(
+            f"{path} result_bundle does not match {summary_path}: "
+            + json.dumps(mismatches, sort_keys=True)
+        )
+    source_files = result_bundle.get("source_result_files")
+    if not isinstance(source_files, list):
+        raise ValueError(f"{path} result_bundle.source_result_files must be a list.")
+    for index, source_file in enumerate(source_files):
+        if not isinstance(source_file, dict):
+            raise ValueError(f"{path} result_bundle.source_result_files[{index}] must be an object.")
+        source_path = source_file.get("path")
+        if not isinstance(source_path, str) or not source_path:
+            raise ValueError(f"{path} result_bundle.source_result_files[{index}] has invalid path.")
+        resolved_source = _resolve_summary_path(
+            source_path,
+            artifact_root=artifact_root,
+            path_maps=path_maps,
+        )
+        if resolved_source.exists():
+            if source_file.get("bytes") != resolved_source.stat().st_size:
+                raise ValueError(f"{path} result_bundle source file bytes are stale: {source_path}")
+            if source_file.get("sha256") != _sha256_file(resolved_source):
+                raise ValueError(f"{path} result_bundle source file sha256 is stale: {source_path}")
     if "secret_handling" not in status:
         raise ValueError(f"{path} must document secret_handling.")
 

@@ -1028,7 +1028,31 @@ def test_refresh_asr_leaderboard_artifacts_combines_report_and_page(tmp_path: Pa
     assert (hosted_dir / "asr-leaderboard-next-runs.json").read_text(
         encoding="utf-8"
     ) == next_runs.read_text(encoding="utf-8")
-    assert json.loads(runtime_status.read_text(encoding="utf-8"))["status"] == "complete"
+    runtime_status_data = json.loads(runtime_status.read_text(encoding="utf-8"))
+    assert runtime_status_data["status"] == "complete"
+    assert runtime_status_data["result_bundle"] == {
+        "results_path": str(out / "results.jsonl"),
+        "total_results": 4,
+        "model_count": 2,
+        "category_count": 2,
+        "models": ["mlx-community/model-a", "mlx-community/model-b"],
+        "categories": ["numeric_unit_integrity", "transcription_accuracy_wer"],
+        "source_result_file_count": 2,
+        "source_result_files": [
+            {
+                "path": str(first),
+                "exists": True,
+                "bytes": first.stat().st_size,
+                "sha256": file_sha256(first),
+            },
+            {
+                "path": str(second),
+                "exists": True,
+                "bytes": second.stat().st_size,
+                "sha256": file_sha256(second),
+            },
+        ],
+    }
     assert (hosted_dir / "asr-leaderboard-runtime-status.json").read_text(
         encoding="utf-8"
     ) == runtime_status.read_text(encoding="utf-8")
@@ -1800,6 +1824,44 @@ def test_check_asr_leaderboard_page_rejects_stale_refresh_commands(tmp_path: Pat
         )
 
 
+def test_check_asr_leaderboard_page_rejects_stale_runtime_result_bundle(tmp_path: Path) -> None:
+    check_module = load_check_module()
+    runtime_status = tmp_path / "runtime-status.json"
+    runtime_status.write_text(
+        json.dumps(
+            {
+                "status": "complete",
+                "mlx_runtime_preflight": {"status": "not_checked"},
+                "gemini_secret": {"status": "present"},
+                "audio_manifest": {"status": "complete"},
+                "secret_handling": "Secrets are not written.",
+                "result_bundle": {
+                    "total_results": 3,
+                    "model_count": 2,
+                    "category_count": 2,
+                    "source_result_files": [],
+                },
+            }
+        )
+        + "\n",
+        encoding="utf-8",
+    )
+    summary = {
+        "runtime_status_path": str(runtime_status),
+        "total_results": 4,
+        "model_count": 2,
+        "category_count": 2,
+    }
+
+    with pytest.raises(ValueError, match="result_bundle does not match"):
+        check_module._validate_runtime_status_artifact(
+            summary,
+            summary_path=tmp_path / "summary.json",
+            artifact_root=tmp_path,
+            path_maps=[],
+        )
+
+
 def test_check_asr_leaderboard_page_rejects_stale_source_run_report(tmp_path: Path) -> None:
     check_module = load_check_module()
     source_report = tmp_path / "model-a" / "judge-report" / "report.html"
@@ -1937,14 +1999,40 @@ def test_check_asr_leaderboard_page_validates_hosted_artifact_layout(tmp_path: P
     )
     runtime_status.write_text(
         json.dumps(
-            {
-                "status": "complete",
-                "mlx_runtime_preflight": {"status": "not_checked"},
-                "gemini_secret": {"status": "present"},
-                "audio_manifest": {"status": "complete"},
-                "secret_handling": "test fixture",
-            }
-        )
+                {
+                    "status": "complete",
+                    "mlx_runtime_preflight": {"status": "not_checked"},
+                    "gemini_secret": {"status": "present"},
+                    "audio_manifest": {"status": "complete"},
+                    "result_bundle": {
+                        "results_path": "runs/asr-leaderboard/full-35-combined/results.jsonl",
+                        "total_results": 4,
+                        "model_count": 2,
+                        "category_count": 2,
+                        "models": ["mlx-community/model-a", "mlx-community/model-b"],
+                        "categories": [
+                            "numeric_unit_integrity",
+                            "transcription_accuracy_wer",
+                        ],
+                        "source_result_file_count": 2,
+                        "source_result_files": [
+                            {
+                                "path": "runs/asr-leaderboard/model-a/judge-report/results.jsonl",
+                                "exists": False,
+                                "bytes": None,
+                                "sha256": None,
+                            },
+                            {
+                                "path": "runs/asr-leaderboard/model-b/judge-report/results.jsonl",
+                                "exists": False,
+                                "bytes": None,
+                                "sha256": None,
+                            },
+                        ],
+                    },
+                    "secret_handling": "test fixture",
+                }
+            )
         + "\n",
         encoding="utf-8",
     )

@@ -300,6 +300,7 @@ def main() -> None:
             write_runtime_status_artifact(
                 args.runtime_status_out,
                 results=combined_results_from_paths(result_paths),
+                source_result_paths=result_paths,
                 check_mlx_runtime=True,
             )
         message = (
@@ -672,6 +673,8 @@ def refresh_asr_leaderboard_artifacts(
     write_runtime_status_artifact(
         runtime_status_out,
         results=combined_results,
+        results_path=combined_results_path,
+        source_result_paths=result_paths,
         check_mlx_runtime=check_mlx_runtime,
     )
     write_artifact_index(
@@ -1330,10 +1333,17 @@ def write_runtime_status_artifact(
     output_path: Path,
     *,
     results: list,
+    results_path: Path | None = None,
+    source_result_paths: list[Path] | None = None,
     check_mlx_runtime: bool = False,
 ) -> None:
     status = build_refresh_runtime_status(results)
     status["status"] = "complete"
+    status["result_bundle"] = build_runtime_result_bundle_status(
+        results,
+        results_path=results_path,
+        source_result_paths=source_result_paths or [],
+    )
     status["mlx_runtime_preflight"] = (
         _run_mlx_runtime_preflight()
         if check_mlx_runtime
@@ -1353,6 +1363,47 @@ def write_runtime_status_artifact(
         json.dumps(status, indent=2, sort_keys=True) + "\n",
         encoding="utf-8",
     )
+
+
+def build_runtime_result_bundle_status(
+    results: list,
+    *,
+    results_path: Path | None = None,
+    source_result_paths: list[Path] | None = None,
+) -> dict[str, object]:
+    models = sorted(
+        {
+            str(result.metadata.get("candidate_model") or "")
+            for result in results
+        }
+    )
+    categories = sorted(
+        {
+            str(result.metadata.get("eval_category") or "")
+            for result in results
+        }
+    )
+    source_files = []
+    for path in source_result_paths or []:
+        path = _normalize_results_path(path)
+        source_files.append(
+            {
+                "path": _repo_relative(path),
+                "exists": path.exists(),
+                "bytes": path.stat().st_size if path.exists() else None,
+                "sha256": _sha256_file(path) if path.exists() else None,
+            }
+        )
+    return {
+        "results_path": _repo_relative(results_path) if results_path is not None else None,
+        "total_results": len(results),
+        "model_count": len([model for model in models if model]),
+        "category_count": len([category for category in categories if category]),
+        "models": [model for model in models if model],
+        "categories": [category for category in categories if category],
+        "source_result_file_count": len(source_files),
+        "source_result_files": source_files,
+    }
 
 
 def build_audio_manifest_status(
