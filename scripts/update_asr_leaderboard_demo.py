@@ -16,6 +16,7 @@ ROOT = Path(__file__).resolve().parents[1]
 DEFAULT_RESULTS = ROOT / "runs" / "asr-leaderboard" / "full-35-combined" / "results.jsonl"
 DEFAULT_PAGE = ROOT / "docs" / "asr-leaderboard-demo.html"
 DEFAULT_SUMMARY = ROOT / "docs" / "asr-leaderboard-summary.json"
+DEFAULT_REFRESH_REPORT = ROOT / "docs" / "asr-leaderboard-refresh-report.md"
 DEFAULT_RUN_MANIFEST = ROOT / "docs" / "asr-leaderboard-run-manifest.json"
 DEFAULT_MANIFEST_VALIDATION = ROOT / "docs" / "asr-leaderboard-manifest-validation.json"
 DEFAULT_AUDIO_CASES = ROOT / "runs" / "asr-research-audio" / "tts_audio_cases.jsonl"
@@ -65,6 +66,12 @@ def main() -> None:
         help="Write a machine-readable summary artifact for the hosted ASR demo.",
     )
     parser.add_argument(
+        "--refresh-report-out",
+        type=Path,
+        default=DEFAULT_REFRESH_REPORT,
+        help="Write a human-readable ASR leaderboard refresh report.",
+    )
+    parser.add_argument(
         "--expected-cases-per-model",
         type=int,
         default=35,
@@ -85,8 +92,15 @@ def main() -> None:
         results_path=args.results,
         expected_cases_per_model=args.expected_cases_per_model,
     )
+    write_refresh_report(
+        results,
+        args.refresh_report_out,
+        results_path=args.results,
+        expected_cases_per_model=args.expected_cases_per_model,
+    )
     print(f"Updated {args.page} from {args.results} ({len(results)} results)")
     print(f"Summary: {args.summary_out}")
+    print(f"Refresh report: {args.refresh_report_out}")
 
 
 def render_generated_sections(
@@ -106,6 +120,7 @@ def render_generated_sections(
     results_label = html.escape(_repo_relative(results_path))
     report_label = html.escape(_repo_relative(results_path.with_name("report.html")))
     summary_label = html.escape(_repo_relative(DEFAULT_SUMMARY))
+    refresh_report_label = html.escape(_repo_relative(DEFAULT_REFRESH_REPORT))
     manifest_label = html.escape(_repo_relative(DEFAULT_RUN_MANIFEST))
     validation_label = html.escape(_repo_relative(DEFAULT_MANIFEST_VALIDATION))
 
@@ -141,7 +156,8 @@ def render_generated_sections(
                 '<code>.venv/bin/python scripts/refresh_asr_leaderboard_artifacts.py</code> '
                 "after rerunning the verified ASR model jobs. The combined local report is "
                 f"<code>{report_label}</code> and the committed summary artifact is "
-                f"<code>{summary_label}</code>. The committed run manifest is "
+                f"<code>{summary_label}</code>. The generated refresh report is "
+                f"<code>{refresh_report_label}</code>. The committed run manifest is "
                 f"<code>{manifest_label}</code>, with coverage validation in "
                 f"<code>{validation_label}</code>; together they include the source result files, "
                 "complete model/category matrix, and reproducible refresh workflow. Pass "
@@ -207,6 +223,72 @@ def write_summary_artifact(
             sort_keys=True,
         )
         + "\n",
+        encoding="utf-8",
+    )
+
+
+def write_refresh_report(
+    results: list[EvaluationResult],
+    output_path: Path,
+    *,
+    results_path: Path,
+    expected_cases_per_model: int,
+    source_result_paths: list[Path] | None = None,
+) -> None:
+    model_summaries = summarize_models(results)
+    validate_coverage(results, model_summaries, expected_cases_per_model=expected_cases_per_model)
+    category_summaries = summarize_categories(results)
+    workflow = _refresh_workflow(source_result_paths or [])
+    output_path.parent.mkdir(parents=True, exist_ok=True)
+    output_path.write_text(
+        "\n".join(
+            [
+                "# ASR Leaderboard Refresh Report",
+                "",
+                "This generated report summarizes the verified ASR leaderboard artifact set.",
+                "",
+                "## Coverage",
+                "",
+                f"- Results: `{_repo_relative(results_path)}`",
+                f"- Combined report: `{_repo_relative(results_path.with_name('report.html'))}`",
+                f"- Summary JSON: `{_repo_relative(DEFAULT_SUMMARY)}`",
+                f"- Run manifest: `{_repo_relative(DEFAULT_RUN_MANIFEST)}`",
+                f"- Manifest validation: `{_repo_relative(DEFAULT_MANIFEST_VALIDATION)}`",
+                f"- Total judged transcripts: {len(results)}",
+                f"- Models: {len(model_summaries)}",
+                f"- Categories: {len(category_summaries)}",
+                f"- Expected cases per model: {expected_cases_per_model}",
+                "",
+                "## Model Scores",
+                "",
+                "| Model | Cases | Gemini Samples | Average Score | Labels |",
+                "| --- | ---: | ---: | ---: | --- |",
+                *(_model_markdown_row(summary) for summary in model_summaries),
+                "",
+                "## Category Scores",
+                "",
+                "| Category | Results | Average Score | Labels |",
+                "| --- | ---: | ---: | --- |",
+                *(_category_markdown_row(summary) for summary in category_summaries),
+                "",
+                "## Source Result Files",
+                "",
+                *(
+                    f"- `{_repo_relative(path)}`"
+                    for path in source_result_paths or [results_path]
+                ),
+                "",
+                "## Refresh Commands",
+                "",
+                f"- Audio materialization: `{_shell_join(workflow['audio_materialization_command'])}`",
+                f"- Combine and refresh committed artifacts: `{_shell_join(workflow['combine_refresh_command'])}`",
+                f"- Manifest-based refresh: `{_shell_join(workflow['manifest_refresh_command'])}`",
+                f"- Hosted artifact sync: `{_shell_join(workflow['hosted_artifact_command'])}`",
+                "",
+                "Gemini secrets must be loaded only at runtime from the local secret file.",
+                "",
+            ]
+        ),
         encoding="utf-8",
     )
 
@@ -374,6 +456,33 @@ def _ordered_label_counts(labels: Counter[str]) -> dict[str, int]:
         for label in ("accurate", "needs_review", "inaccurate")
         if labels[label]
     }
+
+
+def _model_markdown_row(summary: ModelSummary) -> str:
+    labels = ", ".join(
+        f"{summary.labels[label]} {label}"
+        for label in ("accurate", "needs_review", "inaccurate")
+        if summary.labels[label]
+    )
+    return (
+        f"| `{summary.model}` | {summary.ok_count}/{summary.result_count} ok | "
+        f"{summary.judge_samples} | {summary.average_score:.1f} | {labels} |"
+    )
+
+
+def _category_markdown_row(summary: CategorySummary) -> str:
+    labels = ", ".join(
+        f"{summary.labels[label]} {label}"
+        for label in ("accurate", "needs_review", "inaccurate")
+        if summary.labels[label]
+    )
+    return f"| `{summary.category}` | {summary.result_count} | {summary.average_score:.1f} | {labels} |"
+
+
+def _shell_join(command: object) -> str:
+    if not isinstance(command, list):
+        raise TypeError(f"Expected command list, got {type(command).__name__}")
+    return " ".join(str(part) for part in command)
 
 
 def _render_category_row(model: str, results: list[EvaluationResult]) -> str:

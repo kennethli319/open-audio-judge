@@ -111,6 +111,7 @@ def test_render_generated_sections_summarizes_verified_asr_results(tmp_path: Pat
     assert "numeric_unit_integrity" in html
     assert "report.html" in html
     assert "docs/asr-leaderboard-summary.json" in html
+    assert "docs/asr-leaderboard-refresh-report.md" in html
     assert "docs/asr-leaderboard-run-manifest.json" in html
     assert "docs/asr-leaderboard-manifest-validation.json" in html
     assert "reproducible refresh workflow" in html
@@ -226,6 +227,64 @@ def test_write_summary_artifact_records_models_and_categories(tmp_path: Path) ->
     assert summary["categories"][1]["category"] == "numeric_unit_integrity"
 
 
+def test_write_refresh_report_records_coverage_and_commands(tmp_path: Path) -> None:
+    module = load_script_module()
+    results_path = tmp_path / "results.jsonl"
+    report_path = tmp_path / "refresh-report.md"
+    records = [
+        result_record(
+            case_id="asr-a-model-a",
+            model="mlx-community/model-a",
+            category="transcription_accuracy_wer",
+            score=100,
+            label="accurate",
+        ),
+        result_record(
+            case_id="asr-b-model-a",
+            model="mlx-community/model-a",
+            category="numeric_unit_integrity",
+            score=80,
+            label="accurate",
+        ),
+        result_record(
+            case_id="asr-a-model-b",
+            model="mlx-community/model-b",
+            category="transcription_accuracy_wer",
+            score=60,
+            label="needs_review",
+        ),
+        result_record(
+            case_id="asr-b-model-b",
+            model="mlx-community/model-b",
+            category="numeric_unit_integrity",
+            score=40,
+            label="inaccurate",
+        ),
+    ]
+    results_path.write_text(
+        "".join(json.dumps(record) + "\n" for record in records),
+        encoding="utf-8",
+    )
+    results = module.load_results_jsonl(results_path)
+
+    module.write_refresh_report(
+        results,
+        report_path,
+        results_path=results_path,
+        expected_cases_per_model=2,
+        source_result_paths=[tmp_path / "model-a" / "judge-report" / "results.jsonl"],
+    )
+
+    text = report_path.read_text(encoding="utf-8")
+    assert "# ASR Leaderboard Refresh Report" in text
+    assert "Total judged transcripts: 4" in text
+    assert "`mlx-community/model-a`" in text
+    assert "`transcription_accuracy_wer`" in text
+    assert ".venv/bin/python scripts/refresh_asr_leaderboard_artifacts.py" in text
+    assert "--results " + str(tmp_path / "model-a" / "judge-report" / "results.jsonl") in text
+    assert "Hosted artifact sync" in text
+
+
 def test_replace_generated_block_only_updates_marked_section(tmp_path: Path) -> None:
     module = load_script_module()
     page = tmp_path / "demo.html"
@@ -257,6 +316,7 @@ def test_refresh_asr_leaderboard_artifacts_combines_report_and_page(tmp_path: Pa
     out = tmp_path / "combined"
     page = tmp_path / "demo.html"
     summary = tmp_path / "summary.json"
+    refresh_report = tmp_path / "refresh-report.md"
     manifest_validation = tmp_path / "manifest-validation.json"
     hosted_dir = tmp_path / "hosted" / "open-audio-judge"
     records_a = [
@@ -309,6 +369,7 @@ def test_refresh_asr_leaderboard_artifacts_combines_report_and_page(tmp_path: Pa
         out=out,
         page=page,
         summary_out=summary,
+        refresh_report_out=refresh_report,
         manifest_validation_out=manifest_validation,
         run_manifest=refresh_module.DEFAULT_RUN_MANIFEST,
         hosted_dir=hosted_dir,
@@ -343,6 +404,9 @@ def test_refresh_asr_leaderboard_artifacts_combines_report_and_page(tmp_path: Pa
     assert (hosted_dir / "summary.json").read_text(encoding="utf-8") == summary.read_text(
         encoding="utf-8"
     )
+    assert (hosted_dir / "refresh-report.md").read_text(
+        encoding="utf-8"
+    ) == refresh_report.read_text(encoding="utf-8")
     assert (hosted_dir / "asr-leaderboard-run-manifest.json").exists()
     assert (hosted_dir / "manifest-validation.json").read_text(
         encoding="utf-8"

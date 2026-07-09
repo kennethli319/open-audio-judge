@@ -13,9 +13,11 @@ from open_audio_judge.reports import write_html_report  # noqa: E402
 from open_audio_judge.runner import load_results_jsonl, write_results_jsonl  # noqa: E402
 from scripts.update_asr_leaderboard_demo import (  # noqa: E402
     DEFAULT_PAGE,
+    DEFAULT_REFRESH_REPORT,
     DEFAULT_SUMMARY,
     render_generated_sections,
     replace_generated_block,
+    write_refresh_report,
     write_summary_artifact,
 )
 
@@ -89,6 +91,7 @@ def main() -> None:
     parser.add_argument("--out", type=Path, default=DEFAULT_COMBINED_OUT)
     parser.add_argument("--page", type=Path, default=DEFAULT_PAGE)
     parser.add_argument("--summary-out", type=Path, default=DEFAULT_SUMMARY)
+    parser.add_argument("--refresh-report-out", type=Path, default=DEFAULT_REFRESH_REPORT)
     parser.add_argument(
         "--manifest-validation-out",
         type=Path,
@@ -133,6 +136,7 @@ def main() -> None:
         out=args.out,
         page=args.page,
         summary_out=args.summary_out,
+        refresh_report_out=args.refresh_report_out,
         manifest_validation_out=args.manifest_validation_out,
         run_manifest=args.run_manifest,
         hosted_dir=args.hosted_dir,
@@ -146,6 +150,7 @@ def refresh_asr_leaderboard_artifacts(
     out: Path,
     page: Path,
     summary_out: Path,
+    refresh_report_out: Path,
     manifest_validation_out: Path,
     run_manifest: Path,
     expected_cases_per_model: int,
@@ -183,6 +188,13 @@ def refresh_asr_leaderboard_artifacts(
         expected_cases_per_model=expected_cases_per_model,
         source_result_paths=result_paths,
     )
+    write_refresh_report(
+        combined_results,
+        refresh_report_out,
+        results_path=combined_results_path,
+        expected_cases_per_model=expected_cases_per_model,
+        source_result_paths=result_paths,
+    )
     write_manifest_validation_artifact(
         combined_results,
         manifest_validation_out,
@@ -195,6 +207,7 @@ def refresh_asr_leaderboard_artifacts(
             hosted_dir,
             page=page,
             summary_out=summary_out,
+            refresh_report_out=refresh_report_out,
             run_manifest=run_manifest,
             manifest_validation_out=manifest_validation_out,
         )
@@ -207,6 +220,7 @@ def refresh_asr_leaderboard_artifacts(
     print(f"Report:  {combined_report_path}")
     print(f"Page:    {page}")
     print(f"Summary: {summary_out}")
+    print(f"Refresh report: {refresh_report_out}")
     print(f"Manifest validation: {manifest_validation_out}")
     for copied_path in copied_hosted_paths:
         print(f"Hosted:  {copied_path}")
@@ -217,12 +231,13 @@ def copy_hosted_asr_artifacts(
     *,
     page: Path = DEFAULT_PAGE,
     summary_out: Path = DEFAULT_SUMMARY,
+    refresh_report_out: Path = DEFAULT_REFRESH_REPORT,
     run_manifest: Path = DEFAULT_RUN_MANIFEST,
     manifest_validation_out: Path = DEFAULT_MANIFEST_VALIDATION,
 ) -> list[Path]:
     hosted_dir.mkdir(parents=True, exist_ok=True)
     copied_paths = []
-    for source in (page, summary_out, run_manifest, manifest_validation_out):
+    for source in (page, summary_out, refresh_report_out, run_manifest, manifest_validation_out):
         if not source.exists():
             raise FileNotFoundError(f"Missing hosted ASR source artifact: {source}")
         destination = hosted_dir / source.name
