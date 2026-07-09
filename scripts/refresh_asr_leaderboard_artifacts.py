@@ -311,6 +311,10 @@ def main() -> None:
         )
         if check_summary.get("hosted_page_status"):
             message += f" Hosted mirror: {check_summary['hosted_page_status']}."
+            message += (
+                f" Hosted artifacts: {check_summary['hosted_artifact_count']} sources, "
+                f"{check_summary['hosted_path_count']} paths."
+            )
         print(message)
         return
     refresh_asr_leaderboard_artifacts(
@@ -452,6 +456,8 @@ def check_asr_leaderboard_refresh_inputs(
             allow_missing_source_results=True,
         )
         summary["hosted_page_status"] = hosted_validation["status"]
+        summary["hosted_artifact_count"] = hosted_validation["hosted_artifact_count"]
+        summary["hosted_path_count"] = hosted_validation["hosted_path_count"]
     return summary
 
 

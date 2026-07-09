@@ -1755,6 +1755,8 @@ def test_check_asr_leaderboard_page_validates_generated_artifacts(tmp_path: Path
     assert validation["total_results"] == 4
     assert validation["model_count"] == 2
     assert validation["output_artifact_count"] == len(summary_data["output_artifacts"])
+    assert validation["hosted_artifact_count"] == 2
+    assert validation["hosted_path_count"] == 2
 
     unindexed_hosted_source = tmp_path / "unindexed-hosted-source.json"
     unindexed_hosted_source.write_text("{}\n", encoding="utf-8")
@@ -2144,6 +2146,8 @@ def test_check_asr_leaderboard_page_validates_hosted_artifact_layout(tmp_path: P
     )
 
     assert validation["status"] == "complete"
+    assert validation["hosted_artifact_count"] == 5
+    assert validation["hosted_path_count"] == 5
 
 
 def test_check_asr_leaderboard_page_rejects_stale_run_manifest(tmp_path: Path) -> None:

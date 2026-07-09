@@ -101,6 +101,11 @@ def check_asr_leaderboard_page(
     if missing:
         raise ValueError(f"{page} is missing required ASR leaderboard text: {missing}")
 
+    hosted_manifest_stats = _hosted_manifest_stats(
+        summary,
+        artifact_root=artifact_root,
+        path_maps=path_maps or [],
+    )
     return {
         "status": "complete",
         "page": _repo_relative(page),
@@ -109,6 +114,7 @@ def check_asr_leaderboard_page(
         "model_count": summary["model_count"],
         "category_count": summary["category_count"],
         "output_artifact_count": len(summary["output_artifacts"]),
+        **hosted_manifest_stats,
     }
 
 
@@ -893,6 +899,39 @@ def _validate_refresh_commands_script(
         raise ValueError(
             f"{path} is missing refresh workflow command(s) from {summary_path}: {missing}"
         )
+
+
+def _hosted_manifest_stats(
+    summary: dict[str, Any],
+    *,
+    artifact_root: Path,
+    path_maps: list[tuple[str, str]],
+) -> dict[str, int]:
+    raw_path = summary.get("hosted_manifest_path")
+    if not isinstance(raw_path, str) or not raw_path:
+        return {"hosted_artifact_count": 0, "hosted_path_count": 0}
+
+    path = _resolve_summary_path(raw_path, artifact_root=artifact_root, path_maps=path_maps)
+    manifest = json.loads(path.read_text(encoding="utf-8"))
+    artifacts = manifest.get("artifacts", []) if isinstance(manifest, dict) else []
+    if not isinstance(artifacts, list):
+        return {"hosted_artifact_count": 0, "hosted_path_count": 0}
+
+    hosted_path_count = 0
+    for artifact in artifacts:
+        if not isinstance(artifact, dict):
+            continue
+        hosted_paths = artifact.get("hosted_paths", [])
+        if isinstance(hosted_paths, list):
+            hosted_path_count += sum(
+                1
+                for hosted_path in hosted_paths
+                if isinstance(hosted_path, str) and hosted_path
+            )
+    return {
+        "hosted_artifact_count": len(artifacts),
+        "hosted_path_count": hosted_path_count,
+    }
 
 
 def _required_page_text(summary: dict[str, Any]) -> list[str]:
