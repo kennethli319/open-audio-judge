@@ -123,6 +123,21 @@ def render_generated_sections(
     refresh_report_label = html.escape(_repo_relative(DEFAULT_REFRESH_REPORT))
     manifest_label = html.escape(_repo_relative(DEFAULT_RUN_MANIFEST))
     validation_label = html.escape(_repo_relative(DEFAULT_MANIFEST_VALIDATION))
+    workflow = _refresh_workflow([])
+    workflow_commands = [
+        ("Materialize audio", workflow["audio_materialization_command"]),
+        ("Run one MLX ASR model", workflow["model_run_template"]),
+        ("Refresh committed artifacts", workflow["manifest_refresh_command"]),
+        ("Sync hosted artifacts", workflow["hosted_artifact_command"]),
+    ]
+    output_artifacts = [
+        (results_label, "Combined ASR judge results used by the generated page and report."),
+        (report_label, "Local combined HTML report with per-case judge details."),
+        (summary_label, "Machine-readable leaderboard summary and reproducible refresh workflow."),
+        (refresh_report_label, "Human-readable coverage, score, source-file, and command report."),
+        (manifest_label, "Committed source result manifest for manifest-based refreshes."),
+        (validation_label, "Coverage validation for the model/category result matrix."),
+    ]
 
     return "\n".join(
         [
@@ -164,6 +179,36 @@ def render_generated_sections(
                 "<code>--hosted-dir /path/to/kennethli319.github.io/open-audio-judge</code> "
                 "to copy the same verified artifacts into the hosted Pages checkout.</p>"
             ),
+            "",
+            "    <h2>Generated Refresh Workflow</h2>",
+            "    <p class=\"muted\">These commands are generated from the same workflow metadata written to "
+            f"<code>{summary_label}</code> and <code>{refresh_report_label}</code>.</p>",
+            "    <table>",
+            "      <thead><tr><th>Step</th><th>Command</th></tr></thead>",
+            "      <tbody>",
+            *(
+                "        <tr>"
+                f"<td>{html.escape(label)}</td>"
+                f"<td><code>{html.escape(_shell_join(command))}</code></td>"
+                "</tr>"
+                for label, command in workflow_commands
+            ),
+            "      </tbody>",
+            "    </table>",
+            "",
+            "    <h2>Generated Artifacts</h2>",
+            "    <table>",
+            "      <thead><tr><th>Path</th><th>Purpose</th></tr></thead>",
+            "      <tbody>",
+            *(
+                "        <tr>"
+                f"<td><code>{path}</code></td>"
+                f"<td>{html.escape(purpose)}</td>"
+                "</tr>"
+                for path, purpose in output_artifacts
+            ),
+            "      </tbody>",
+            "    </table>",
             END_MARKER,
         ]
     )

@@ -116,6 +116,11 @@ def test_render_generated_sections_summarizes_verified_asr_results(tmp_path: Pat
     assert "docs/asr-leaderboard-manifest-validation.json" in html
     assert "reproducible refresh workflow" in html
     assert "--hosted-dir /path/to/kennethli319.github.io/open-audio-judge" in html
+    assert "Generated Refresh Workflow" in html
+    assert "Generated Artifacts" in html
+    assert "Run one MLX ASR model" in html
+    assert "--model &lt;mlx-community/model-id&gt;" in html
+    assert "Machine-readable leaderboard summary" in html
 
 
 def test_write_summary_artifact_records_models_and_categories(tmp_path: Path) -> None:
