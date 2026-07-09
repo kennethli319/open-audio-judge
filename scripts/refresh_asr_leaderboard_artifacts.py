@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import argparse
 import json
+import shutil
 import sys
 from pathlib import Path
 
@@ -97,6 +98,14 @@ def main() -> None:
         ),
     )
     parser.add_argument(
+        "--hosted-dir",
+        type=Path,
+        help=(
+            "Optional kennethli319.github.io/open-audio-judge directory. When set, copy the "
+            "refreshed ASR demo page, summary JSON, and run manifest there."
+        ),
+    )
+    parser.add_argument(
         "--expected-cases-per-model",
         type=int,
         default=35,
@@ -117,6 +126,7 @@ def main() -> None:
         out=args.out,
         page=args.page,
         summary_out=args.summary_out,
+        hosted_dir=args.hosted_dir,
         expected_cases_per_model=args.expected_cases_per_model,
     )
 
@@ -128,6 +138,7 @@ def refresh_asr_leaderboard_artifacts(
     page: Path,
     summary_out: Path,
     expected_cases_per_model: int,
+    hosted_dir: Path | None = None,
 ) -> None:
     result_paths = [_normalize_results_path(path) for path in result_paths]
     for path in result_paths:
@@ -161,12 +172,42 @@ def refresh_asr_leaderboard_artifacts(
         expected_cases_per_model=expected_cases_per_model,
         source_result_paths=result_paths,
     )
+    copied_hosted_paths = (
+        copy_hosted_asr_artifacts(
+            hosted_dir,
+            page=page,
+            summary_out=summary_out,
+            run_manifest=DEFAULT_RUN_MANIFEST,
+        )
+        if hosted_dir
+        else []
+    )
 
     print(f"Combined {len(combined_results)} ASR results from {len(result_paths)} files")
     print(f"Results: {combined_results_path}")
     print(f"Report:  {combined_report_path}")
     print(f"Page:    {page}")
     print(f"Summary: {summary_out}")
+    for copied_path in copied_hosted_paths:
+        print(f"Hosted:  {copied_path}")
+
+
+def copy_hosted_asr_artifacts(
+    hosted_dir: Path,
+    *,
+    page: Path = DEFAULT_PAGE,
+    summary_out: Path = DEFAULT_SUMMARY,
+    run_manifest: Path = DEFAULT_RUN_MANIFEST,
+) -> list[Path]:
+    hosted_dir.mkdir(parents=True, exist_ok=True)
+    copied_paths = []
+    for source in (page, summary_out, run_manifest):
+        if not source.exists():
+            raise FileNotFoundError(f"Missing hosted ASR source artifact: {source}")
+        destination = hosted_dir / source.name
+        shutil.copyfile(source, destination)
+        copied_paths.append(destination)
+    return copied_paths
 
 
 def _normalize_results_path(path: Path) -> Path:

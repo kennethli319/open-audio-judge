@@ -257,6 +257,14 @@ summary, and generated demo-page leaderboard block with:
 .venv/bin/python scripts/refresh_asr_leaderboard_artifacts.py
 ```
 
+To refresh the same committed artifacts and copy them into the hosted Pages
+checkout in one verified step, pass the Pages destination:
+
+```bash
+.venv/bin/python scripts/refresh_asr_leaderboard_artifacts.py \
+  --hosted-dir /path/to/kennethli319.github.io/open-audio-judge
+```
+
 See [docs/asr-leaderboard-demo.html](docs/asr-leaderboard-demo.html) for the
 full command flow.
 

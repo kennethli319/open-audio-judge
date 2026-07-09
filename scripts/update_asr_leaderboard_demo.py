@@ -141,7 +141,9 @@ def render_generated_sections(
                 f"<code>{report_label}</code> and the committed summary artifact is "
                 f"<code>{summary_label}</code>. The committed run manifest is "
                 f"<code>{manifest_label}</code>; together they include the source result files "
-                "and reproducible refresh workflow.</p>"
+                "and reproducible refresh workflow. Pass "
+                "<code>--hosted-dir /path/to/kennethli319.github.io/open-audio-judge</code> "
+                "to copy the same verified artifacts into the hosted Pages checkout.</p>"
             ),
             END_MARKER,
         ]
@@ -245,6 +247,12 @@ def _refresh_workflow(source_result_paths: list[Path]) -> dict[str, object]:
         "manifest_refresh_command": [
             ".venv/bin/python",
             "scripts/refresh_asr_leaderboard_artifacts.py",
+        ],
+        "hosted_artifact_command": [
+            ".venv/bin/python",
+            "scripts/refresh_asr_leaderboard_artifacts.py",
+            "--hosted-dir",
+            "/path/to/kennethli319.github.io/open-audio-judge",
         ],
         "secret_handling": (
             "Load the Gemini API key from the local secret file only at runtime; "

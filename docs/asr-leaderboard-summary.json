@@ -156,6 +156,12 @@
       "--results",
       "runs/asr-leaderboard/vibevoice-asr-noise-smoke/judge-report/results.jsonl"
     ],
+    "hosted_artifact_command": [
+      ".venv/bin/python",
+      "scripts/refresh_asr_leaderboard_artifacts.py",
+      "--hosted-dir",
+      "/path/to/kennethli319.github.io/open-audio-judge"
+    ],
     "manifest_refresh_command": [
       ".venv/bin/python",
       "scripts/refresh_asr_leaderboard_artifacts.py"

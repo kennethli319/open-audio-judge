@@ -111,6 +111,7 @@ def test_render_generated_sections_summarizes_verified_asr_results(tmp_path: Pat
     assert "docs/asr-leaderboard-summary.json" in html
     assert "docs/asr-leaderboard-run-manifest.json" in html
     assert "reproducible refresh workflow" in html
+    assert "--hosted-dir /path/to/kennethli319.github.io/open-audio-judge" in html
 
 
 def test_write_summary_artifact_records_models_and_categories(tmp_path: Path) -> None:
@@ -207,6 +208,12 @@ def test_write_summary_artifact_records_models_and_categories(tmp_path: Path) ->
         ".venv/bin/python",
         "scripts/refresh_asr_leaderboard_artifacts.py",
     ]
+    assert summary["refresh_workflow"]["hosted_artifact_command"] == [
+        ".venv/bin/python",
+        "scripts/refresh_asr_leaderboard_artifacts.py",
+        "--hosted-dir",
+        "/path/to/kennethli319.github.io/open-audio-judge",
+    ]
     assert "secret" in summary["refresh_workflow"]["secret_handling"].lower()
     assert summary["models"][0]["model"] == "mlx-community/model-a"
     assert summary["models"][0]["average_score"] == 90
@@ -246,6 +253,7 @@ def test_refresh_asr_leaderboard_artifacts_combines_report_and_page(tmp_path: Pa
     out = tmp_path / "combined"
     page = tmp_path / "demo.html"
     summary = tmp_path / "summary.json"
+    hosted_dir = tmp_path / "hosted" / "open-audio-judge"
     records_a = [
         result_record(
             case_id="asr-a-model-a",
@@ -296,6 +304,7 @@ def test_refresh_asr_leaderboard_artifacts_combines_report_and_page(tmp_path: Pa
         out=out,
         page=page,
         summary_out=summary,
+        hosted_dir=hosted_dir,
         expected_cases_per_model=2,
     )
 
@@ -313,6 +322,13 @@ def test_refresh_asr_leaderboard_artifacts_combines_report_and_page(tmp_path: Pa
         str(first),
         str(second),
     ]
+    assert (hosted_dir / "demo.html").read_text(encoding="utf-8") == page.read_text(
+        encoding="utf-8"
+    )
+    assert (hosted_dir / "summary.json").read_text(encoding="utf-8") == summary.read_text(
+        encoding="utf-8"
+    )
+    assert (hosted_dir / "asr-leaderboard-run-manifest.json").exists()
 
 
 def test_refresh_asr_leaderboard_artifacts_reads_run_manifest(tmp_path: Path) -> None:
