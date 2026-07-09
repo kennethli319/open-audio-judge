@@ -17,6 +17,24 @@ OPEN_SAMPLE_MANIFESTS = [
 ]
 
 TTS_MULTITURN_MANIFEST = Path("examples/tts_multiturn_cases.jsonl")
+ASR_RESEARCH_MANIFEST = Path("examples/asr_research_cases.jsonl")
+ASR_RESEARCH_CATEGORIES = {
+    "transcription_accuracy_wer",
+    "entity_factual_integrity",
+    "numeric_unit_integrity",
+    "negation_modality_scope",
+    "temporal_scheduling_accuracy",
+    "semantic_paraphrase_preservation",
+}
+ASR_REQUIRED_METADATA = {
+    "language",
+    "eval_category",
+    "asr_slice",
+    "source",
+    "source_basis",
+    "requires_audio_materialization",
+    "expected_error_focus",
+}
 TTS_RESEARCH_CATEGORIES = {
     "paralinguistics",
     "instruction_following",
@@ -173,6 +191,35 @@ def test_tts_multiturn_manifest_has_research_metadata_contract() -> None:
         assert case.reference_text
         assert case.turns[-1].content == case.reference_text
         assert any(term in metadata["source_basis"] for term in TTS_SOURCE_BASIS_TERMS)
+
+
+def test_asr_research_manifest_has_category_metadata_contract() -> None:
+    cases = load_cases(ASR_RESEARCH_MANIFEST)
+
+    assert len(cases) == 30
+    assert len({case.id for case in cases}) == len(cases)
+    assert {case.metadata["eval_category"] for case in cases} == ASR_RESEARCH_CATEGORIES
+
+    for case in cases:
+        metadata = case.metadata
+        missing = sorted(key for key in ASR_REQUIRED_METADATA if not metadata.get(key))
+        assert missing == [], f"{case.id} missing metadata: {missing}"
+        assert metadata["source"] == "research-backed-asr-demo"
+        assert metadata["language"] == "en"
+        assert metadata["requires_audio_materialization"] is True
+        assert case.reference_text
+        assert case.audio_path is None
+        assert case.audio_url is None
+
+
+def test_asr_research_manifest_keeps_five_cases_per_category() -> None:
+    cases = load_cases(ASR_RESEARCH_MANIFEST)
+    counts: dict[str, int] = {}
+    for case in cases:
+        category = str(case.metadata["eval_category"])
+        counts[category] = counts.get(category, 0) + 1
+
+    assert counts == {category: 5 for category in ASR_RESEARCH_CATEGORIES}
 
 
 def test_tts_multiturn_manifest_keeps_five_cases_per_category() -> None:

@@ -2,7 +2,8 @@
 
 Open Audio Judge is a prompt-based evaluation harness for audio LLM judges. The goal is to make ASR, TTS, VAD, diarization, speech translation, and speech-event evaluations comparable even when teams run the judge on private datasets.
 
-**Live demo:** [TTS model leaderboard judged by Gemini](https://kennethli319.github.io/open-audio-judge/tts-leaderboard-demo.html)
+**Live demos:** [TTS model leaderboard judged by Gemini](https://kennethli319.github.io/open-audio-judge/tts-leaderboard-demo.html)
+and [ASR model leaderboard plan judged by Gemini](https://kennethli319.github.io/open-audio-judge/asr-leaderboard-demo.html)
 
 The first MVP focuses on:
 
@@ -23,8 +24,8 @@ Recent work supports a few design choices:
 - Speech-quality judge research is moving toward structured, explanation-rich outputs, not scalar-only MOS predictions ([SpeechLLM-as-Judges, 2025](https://arxiv.org/html/2510.14664v1)).
 
 See [docs/research.md](docs/research.md), [docs/tts-eval-taxonomy.md](docs/tts-eval-taxonomy.md),
-and [docs/plan.md](docs/plan.md) for the full research notes, TTS category taxonomy, and project
-plan.
+[docs/asr-eval-taxonomy.md](docs/asr-eval-taxonomy.md), and [docs/plan.md](docs/plan.md) for
+the full research notes, TTS/ASR category taxonomies, and project plan.
 
 ## Quick Start
 
@@ -221,6 +222,35 @@ The command writes:
 Install `transformers` and any model-specific audio dependencies in the runtime environment before
 using this command with real Hugging Face models. Keep private or generated audio artifacts under
 `runs/` unless they are explicitly safe to publish.
+
+## AutoJudge A Local MLX ASR Model
+
+For the ASR leaderboard workflow, `autojudge-mlx-asr` calls the MLX audio STT CLI,
+writes candidate transcripts, then judges them with Gemini or another Open Audio
+Judge provider.
+
+```bash
+oaj autojudge-mlx-asr \
+  --cases runs/asr-research-audio/asr_audio_cases.jsonl \
+  --model mlx-community/whisper-large-v3-turbo-asr-fp16 \
+  --judge-provider gemini \
+  --judge-samples 3 \
+  --out runs/asr-leaderboard/whisper-large-v3-turbo
+```
+
+The first three scheduled MLX ASR candidates are:
+
+- `mlx-community/whisper-large-v3-turbo-asr-fp16`
+- `mlx-community/Qwen3-ASR-1.7B-8bit`
+- `mlx-community/VibeVoice-ASR-4bit`
+
+The research-guided ASR seed set is `examples/asr_research_cases.jsonl`: 30
+public-safe text/reference cases across WER, entity integrity, numeric/unit
+integrity, negation/modality scope, temporal accuracy, and semantic paraphrase
+preservation. These seeds intentionally require local audio materialization
+before ASR transcription; keep generated audio under ignored `runs/`.
+See [docs/asr-leaderboard-demo.html](docs/asr-leaderboard-demo.html) for the
+full command flow.
 
 ## AutoJudge A Local Chatterbox TTS Model
 

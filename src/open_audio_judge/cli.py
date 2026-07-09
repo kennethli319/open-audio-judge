@@ -27,6 +27,13 @@ from open_audio_judge.local_tts import (
     write_local_tts_failures_jsonl,
     write_local_tts_summary_json,
 )
+from open_audio_judge.mlx_asr import (
+    DEFAULT_MLX_ASR_MODELS,
+    MlxAsrConfig,
+    transcribe_cases_with_mlx_asr,
+    write_mlx_asr_cases_jsonl,
+    write_mlx_asr_summary_json,
+)
 from open_audio_judge.prompting import load_prompt
 from open_audio_judge.providers import build_provider
 from open_audio_judge.reports import BASELINE_SYNTHESIS_MODEL, write_html_report
@@ -114,6 +121,85 @@ def autojudge_hf_asr_command(
     results = evaluate_cases(candidate_cases, prompt, provider, judge_out, judge_samples=judge_samples)
     ok_count = sum(1 for result in results if result.status == "ok")
     console.print(f"[bold]AutoJudged {len(results)} Hugging Face ASR cases[/bold] ({ok_count} ok)")
+    console.print(f"Model:   {model}")
+    console.print(f"Cases:   {candidate_path}")
+    console.print(f"Summary: {summary_path}")
+    console.print(f"Results: {judge_out / 'results.jsonl'}")
+    console.print(f"Report:  {judge_out / 'report.html'}")
+
+
+@app.command("autojudge-mlx-asr")
+def autojudge_mlx_asr_command(
+    cases: Annotated[Path, typer.Option("--cases", "-c", help="Local-audio ASR case file.")],
+    model: Annotated[
+        str,
+        typer.Option("--model", "-m", help="MLX ASR model id."),
+    ] = DEFAULT_MLX_ASR_MODELS[0],
+    judge: Annotated[str, typer.Option("--judge", "-j", help="Judge prompt id or path.")] = "asr_error",
+    judge_provider: Annotated[
+        str,
+        typer.Option("--judge-provider", help="Provider used to judge candidate transcripts."),
+    ] = "gemini",
+    out: Annotated[
+        Path,
+        typer.Option("--out", "-o", help="Output directory for transcripts and judge report."),
+    ] = Path("runs/mlx-asr-autojudge"),
+    python_bin: Annotated[
+        str,
+        typer.Option("--python-bin", help="Python executable that has mlx-audio installed."),
+    ] = "python3",
+    mlx_module: Annotated[
+        str,
+        typer.Option("--mlx-module", help="MLX audio STT module to run with python -m."),
+    ] = "mlx_audio.stt.generate",
+    mlx_extra_arg: Annotated[
+        list[str] | None,
+        typer.Option("--mlx-extra-arg", help="Additional argument passed to the MLX ASR CLI."),
+    ] = None,
+    limit: Annotated[int | None, typer.Option("--limit", help="Maximum cases to evaluate.")] = None,
+    judge_samples: Annotated[
+        int,
+        typer.Option(
+            "--judge-samples",
+            help="Number of independent judge calls to average per case.",
+        ),
+    ] = 3,
+    timeout_seconds: Annotated[
+        float | None,
+        typer.Option("--timeout-seconds", help="Maximum seconds for each MLX ASR transcription."),
+    ] = None,
+) -> None:
+    loaded_cases = load_cases(cases)
+    if limit is not None:
+        loaded_cases = loaded_cases[:limit]
+
+    candidate_cases = transcribe_cases_with_mlx_asr(
+        loaded_cases,
+        config=MlxAsrConfig(
+            model=model,
+            python_bin=python_bin,
+            module=mlx_module,
+            timeout_seconds=timeout_seconds,
+            extra_args=tuple(mlx_extra_arg or ()),
+        ),
+        base_dir=cases.parent,
+    )
+    candidate_path = out / "candidate_cases.jsonl"
+    summary_path = out / "model_summary.json"
+    judge_out = out / "judge-report"
+    write_mlx_asr_cases_jsonl(candidate_cases, candidate_path)
+    write_mlx_asr_summary_json(
+        candidate_cases,
+        summary_path,
+        source_cases=cases,
+        model=model,
+    )
+
+    prompt = load_prompt(judge)
+    provider = build_provider(judge_provider)
+    results = evaluate_cases(candidate_cases, prompt, provider, judge_out, judge_samples=judge_samples)
+    ok_count = sum(1 for result in results if result.status == "ok")
+    console.print(f"[bold]AutoJudged {len(results)} MLX ASR cases[/bold] ({ok_count} ok)")
     console.print(f"Model:   {model}")
     console.print(f"Cases:   {candidate_path}")
     console.print(f"Summary: {summary_path}")

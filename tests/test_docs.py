@@ -126,6 +126,56 @@ def test_tts_leaderboard_demo_page_documents_workflow() -> None:
         assert text in html
 
 
+def test_asr_leaderboard_demo_page_documents_workflow() -> None:
+    page = Path("docs/asr-leaderboard-demo.html")
+    html = page.read_text(encoding="utf-8")
+
+    parser = StrictEnoughHtmlParser()
+    parser.feed(html)
+    parser.close()
+
+    required_text = [
+        "Open Audio Judge ASR Leaderboard",
+        "Three MLX Community ASR models transcribe the same research-guided eval set",
+        "oaj autojudge-mlx-asr",
+        "--judge-provider gemini",
+        "--judge-samples 3",
+        "Expected Output Files",
+        "candidate_cases.jsonl",
+        "model_summary.json",
+        "judge-report/results.jsonl",
+        "judge-report/report.html",
+        "combined/report.html",
+        "transcription_accuracy_wer",
+        "entity_factual_integrity",
+        "numeric_unit_integrity",
+        "negation_modality_scope",
+        "temporal_scheduling_accuracy",
+        "semantic_paraphrase_preservation",
+        "mlx-community/whisper-large-v3-turbo-asr-fp16",
+        "mlx-community/Qwen3-ASR-1.7B-8bit",
+        "mlx-community/VibeVoice-ASR-4bit",
+        "examples/asr_research_cases.jsonl",
+        "docs/asr-eval-taxonomy.md",
+        "Representative Result JSON",
+    ]
+    for text in required_text:
+        assert text in html
+
+
+def test_asr_research_docs_list_categories() -> None:
+    docs = Path("docs/asr-eval-taxonomy.md").read_text(encoding="utf-8")
+    manifest = [
+        json.loads(line)
+        for line in Path("examples/asr_research_cases.jsonl").read_text(encoding="utf-8").splitlines()
+        if line.strip()
+    ]
+    categories = {record["metadata"]["eval_category"] for record in manifest}
+
+    for category in categories:
+        assert category in docs
+
+
 def test_tts_multiturn_examples_cover_requested_categories() -> None:
     records = [
         json.loads(line)
