@@ -29,9 +29,36 @@ def main() -> None:
     )
     parser.add_argument("--page", type=Path, default=DEFAULT_PAGE)
     parser.add_argument("--summary", type=Path, default=DEFAULT_SUMMARY)
+    parser.add_argument(
+        "--artifact-root",
+        type=Path,
+        default=ROOT,
+        help="Root used to resolve relative artifact paths from the summary.",
+    )
+    parser.add_argument(
+        "--path-map",
+        action="append",
+        default=[],
+        metavar="FROM=TO",
+        help=(
+            "Rewrite a summary artifact path prefix before resolving it. "
+            "Repeat for hosted layouts, for example docs/= and runs/asr-leaderboard/=asr-leaderboard/."
+        ),
+    )
+    parser.add_argument(
+        "--allow-missing-source-results",
+        action="store_true",
+        help="Allow source_result_paths to be absent when validating a hosted artifact mirror.",
+    )
     args = parser.parse_args()
 
-    summary = check_asr_leaderboard_page(args.page, summary_path=args.summary)
+    summary = check_asr_leaderboard_page(
+        args.page,
+        summary_path=args.summary,
+        artifact_root=args.artifact_root,
+        path_maps=parse_path_maps(args.path_map),
+        allow_missing_source_results=args.allow_missing_source_results,
+    )
     print(
         "Validated ASR leaderboard page "
         f"{summary['page']} against {summary['summary_path']} "
@@ -40,7 +67,14 @@ def main() -> None:
     )
 
 
-def check_asr_leaderboard_page(page: Path, *, summary_path: Path) -> dict[str, Any]:
+def check_asr_leaderboard_page(
+    page: Path,
+    *,
+    summary_path: Path,
+    artifact_root: Path = ROOT,
+    path_maps: list[tuple[str, str]] | None = None,
+    allow_missing_source_results: bool = False,
+) -> dict[str, Any]:
     if not page.exists():
         raise FileNotFoundError(f"Missing ASR leaderboard page: {page}")
     if not summary_path.exists():
@@ -54,7 +88,13 @@ def check_asr_leaderboard_page(page: Path, *, summary_path: Path) -> dict[str, A
         raise ValueError(f"{page} must contain generated ASR leaderboard markers.")
 
     summary = json.loads(summary_path.read_text(encoding="utf-8"))
-    _validate_summary(summary, summary_path=summary_path)
+    _validate_summary(
+        summary,
+        summary_path=summary_path,
+        artifact_root=artifact_root,
+        path_maps=path_maps or [],
+        allow_missing_source_results=allow_missing_source_results,
+    )
     required_text = _required_page_text(summary)
     missing = [text for text in required_text if text not in html]
     if missing:
@@ -71,7 +111,14 @@ def check_asr_leaderboard_page(page: Path, *, summary_path: Path) -> dict[str, A
     }
 
 
-def _validate_summary(summary: Any, *, summary_path: Path) -> None:
+def _validate_summary(
+    summary: Any,
+    *,
+    summary_path: Path,
+    artifact_root: Path,
+    path_maps: list[tuple[str, str]],
+    allow_missing_source_results: bool,
+) -> None:
     if not isinstance(summary, dict):
         raise ValueError(f"{summary_path} must contain a JSON object.")
 
@@ -97,12 +144,25 @@ def _validate_summary(summary: Any, *, summary_path: Path) -> None:
     if summary["category_count"] != len(summary["categories"]):
         raise ValueError("ASR leaderboard summary category_count does not match categories.")
 
-    _validate_referenced_artifacts(summary, summary_path=summary_path)
-    _validate_output_artifacts(summary, summary_path=summary_path)
+    _validate_referenced_artifacts(
+        summary,
+        summary_path=summary_path,
+        artifact_root=artifact_root,
+        path_maps=path_maps,
+        allow_missing_source_results=allow_missing_source_results,
+    )
+    _validate_output_artifacts(
+        summary,
+        summary_path=summary_path,
+        artifact_root=artifact_root,
+        path_maps=path_maps,
+    )
     _validate_status_artifact(
         summary,
         key="manifest_validation_path",
         summary_path=summary_path,
+        artifact_root=artifact_root,
+        path_maps=path_maps,
         expected_fields={
             "total_results": summary["total_results"],
             "model_count": summary["model_count"],
@@ -114,10 +174,19 @@ def _validate_summary(summary: Any, *, summary_path: Path) -> None:
         summary,
         key="seed_manifest_validation_path",
         summary_path=summary_path,
+        artifact_root=artifact_root,
+        path_maps=path_maps,
     )
 
 
-def _validate_referenced_artifacts(summary: dict[str, Any], *, summary_path: Path) -> None:
+def _validate_referenced_artifacts(
+    summary: dict[str, Any],
+    *,
+    summary_path: Path,
+    artifact_root: Path,
+    path_maps: list[tuple[str, str]],
+    allow_missing_source_results: bool,
+) -> None:
     artifact_keys = (
         "results_path",
         "report_path",
@@ -130,7 +199,7 @@ def _validate_referenced_artifacts(summary: dict[str, Any], *, summary_path: Pat
         raw_path = summary.get(key)
         if not isinstance(raw_path, str) or not raw_path:
             raise ValueError(f"{summary_path} has invalid {key}: {raw_path!r}")
-        path = _resolve_summary_path(raw_path)
+        path = _resolve_summary_path(raw_path, artifact_root=artifact_root, path_maps=path_maps)
         if not path.exists():
             missing.append((key, raw_path))
 
@@ -140,8 +209,8 @@ def _validate_referenced_artifacts(summary: dict[str, Any], *, summary_path: Pat
     for raw_path in raw_source_paths:
         if not isinstance(raw_path, str) or not raw_path:
             raise ValueError(f"{summary_path} has invalid source_result_paths entry: {raw_path!r}")
-        path = _resolve_summary_path(raw_path)
-        if not path.exists():
+        path = _resolve_summary_path(raw_path, artifact_root=artifact_root, path_maps=path_maps)
+        if not path.exists() and not allow_missing_source_results:
             missing.append(("source_result_paths", raw_path))
 
     if missing:
@@ -149,7 +218,13 @@ def _validate_referenced_artifacts(summary: dict[str, Any], *, summary_path: Pat
         raise ValueError(f"{summary_path} references missing ASR artifact(s): {formatted}")
 
 
-def _validate_output_artifacts(summary: dict[str, Any], *, summary_path: Path) -> None:
+def _validate_output_artifacts(
+    summary: dict[str, Any],
+    *,
+    summary_path: Path,
+    artifact_root: Path,
+    path_maps: list[tuple[str, str]],
+) -> None:
     artifacts = summary.get("output_artifacts")
     if not isinstance(artifacts, list) or not artifacts:
         raise ValueError(f"{summary_path} must include a non-empty output_artifacts list.")
@@ -164,7 +239,7 @@ def _validate_output_artifacts(summary: dict[str, Any], *, summary_path: Path) -
             raise ValueError(f"{summary_path} output_artifacts[{index}] has invalid path: {raw_path!r}")
         if not isinstance(purpose, str) or not purpose:
             raise ValueError(f"{summary_path} output_artifacts[{index}] has invalid purpose: {purpose!r}")
-        if not _resolve_summary_path(raw_path).exists():
+        if not _resolve_summary_path(raw_path, artifact_root=artifact_root, path_maps=path_maps).exists():
             missing.append(raw_path)
 
     if missing:
@@ -177,12 +252,14 @@ def _validate_status_artifact(
     *,
     key: str,
     summary_path: Path,
+    artifact_root: Path,
+    path_maps: list[tuple[str, str]],
     expected_fields: dict[str, object] | None = None,
 ) -> None:
     raw_path = summary.get(key)
     if not isinstance(raw_path, str) or not raw_path:
         raise ValueError(f"{summary_path} has invalid {key}: {raw_path!r}")
-    path = _resolve_summary_path(raw_path)
+    path = _resolve_summary_path(raw_path, artifact_root=artifact_root, path_maps=path_maps)
     try:
         artifact = json.loads(path.read_text(encoding="utf-8"))
     except json.JSONDecodeError as exc:
@@ -262,11 +339,36 @@ def _repo_relative(path: Path) -> str:
         return path.as_posix()
 
 
-def _resolve_summary_path(raw_path: str) -> Path:
+def parse_path_maps(raw_maps: list[str]) -> list[tuple[str, str]]:
+    path_maps = []
+    for raw_map in raw_maps:
+        if "=" not in raw_map:
+            raise ValueError(f"Invalid --path-map value: {raw_map!r}; expected FROM=TO.")
+        source, destination = raw_map.split("=", 1)
+        if not source:
+            raise ValueError(f"Invalid --path-map value: {raw_map!r}; FROM must be non-empty.")
+        path_maps.append((source, destination))
+    return path_maps
+
+
+def _resolve_summary_path(
+    raw_path: str,
+    *,
+    artifact_root: Path,
+    path_maps: list[tuple[str, str]],
+) -> Path:
     path = Path(raw_path)
     if path.is_absolute():
         return path
-    return ROOT / path
+    mapped = raw_path
+    for source, destination in path_maps:
+        if mapped == source.rstrip("/"):
+            mapped = destination.rstrip("/")
+            break
+        if mapped.startswith(source):
+            mapped = destination + mapped[len(source):]
+            break
+    return artifact_root / mapped
 
 
 def _rendered_command_text(command: list[object]) -> str:

@@ -658,7 +658,7 @@ def test_refresh_asr_leaderboard_artifacts_combines_report_and_page(tmp_path: Pa
     first.write_text("".join(json.dumps(record) + "\n" for record in records_a), encoding="utf-8")
     second.write_text("".join(json.dumps(record) + "\n" for record in records_b), encoding="utf-8")
     page.write_text(
-        "before\n"
+        "Open Audio Judge ASR Leaderboard\n"
         f"{update_module.START_MARKER}\n"
         "old generated content\n"
         f"{update_module.END_MARKER}\n"
@@ -824,6 +824,155 @@ def test_check_asr_leaderboard_page_validates_generated_artifacts(tmp_path: Path
     assert validation["total_results"] == 4
     assert validation["model_count"] == 2
     assert validation["output_artifact_count"] == len(summary_data["output_artifacts"])
+
+
+def test_check_asr_leaderboard_page_validates_hosted_artifact_layout(tmp_path: Path) -> None:
+    check_module = load_check_module()
+    hosted = tmp_path / "hosted"
+    page = hosted / "asr-leaderboard-demo.html"
+    summary = hosted / "asr-leaderboard-summary.json"
+    manifest_validation = hosted / "asr-leaderboard-manifest-validation.json"
+    seed_manifest_validation = hosted / "asr-seed-manifest-validation.json"
+    run_manifest = hosted / "asr-leaderboard-run-manifest.json"
+    results_path = hosted / "asr-leaderboard" / "full-35-combined" / "results.jsonl"
+    report_path = hosted / "asr-leaderboard" / "full-35-combined" / "report.html"
+
+    results_path.parent.mkdir(parents=True)
+    for path in (results_path, report_path, run_manifest):
+        path.write_text("{}\n", encoding="utf-8")
+    manifest_validation.write_text(
+        json.dumps(
+            {
+                "status": "complete",
+                "total_results": 4,
+                "model_count": 2,
+                "category_count": 2,
+                "expected_cases_per_model": 2,
+            }
+        )
+        + "\n",
+        encoding="utf-8",
+    )
+    seed_manifest_validation.write_text(json.dumps({"status": "complete"}) + "\n", encoding="utf-8")
+    summary.write_text(
+        json.dumps(
+            {
+                "results_path": "runs/asr-leaderboard/full-35-combined/results.jsonl",
+                "report_path": "runs/asr-leaderboard/full-35-combined/report.html",
+                "run_manifest_path": "docs/asr-leaderboard-run-manifest.json",
+                "manifest_validation_path": "docs/asr-leaderboard-manifest-validation.json",
+                "seed_manifest_validation_path": "docs/asr-seed-manifest-validation.json",
+                "source_result_paths": [
+                    "runs/asr-leaderboard/model-a/judge-report/results.jsonl",
+                ],
+                "output_artifacts": [
+                    {
+                        "path": "runs/asr-leaderboard/full-35-combined/results.jsonl",
+                        "purpose": "Combined ASR judge results used by the generated page and report.",
+                    },
+                    {
+                        "path": "runs/asr-leaderboard/full-35-combined/report.html",
+                        "purpose": "Local combined HTML report with per-case judge details.",
+                    },
+                    {
+                        "path": "docs/asr-leaderboard-summary.json",
+                        "purpose": "Machine-readable leaderboard summary and reproducible refresh workflow.",
+                    },
+                    {
+                        "path": "docs/asr-leaderboard-run-manifest.json",
+                        "purpose": "Committed source result manifest for manifest-based refreshes.",
+                    },
+                ],
+                "refresh_workflow": {
+                    "seed_manifest_validation_command": [
+                        ".venv/bin/python",
+                        "scripts/validate_asr_seed_manifest.py",
+                    ],
+                    "audio_materialization_command": [
+                        ".venv/bin/python",
+                        "scripts/synthesize_tts_cases.py",
+                    ],
+                    "model_run_template": ["oaj", "autojudge-mlx-asr"],
+                    "manifest_refresh_command": [
+                        ".venv/bin/python",
+                        "scripts/refresh_asr_leaderboard_artifacts.py",
+                    ],
+                    "page_validation_command": [
+                        ".venv/bin/python",
+                        "scripts/check_asr_leaderboard_page.py",
+                    ],
+                    "hosted_artifact_command": [
+                        ".venv/bin/python",
+                        "scripts/refresh_asr_leaderboard_artifacts.py",
+                        "--hosted-dir",
+                        "/path/to/kennethli319.github.io/open-audio-judge",
+                    ],
+                },
+                "total_results": 4,
+                "model_count": 2,
+                "category_count": 2,
+                "expected_cases_per_model": 2,
+                "models": [
+                    {"model": "mlx-community/model-a"},
+                    {"model": "mlx-community/model-b"},
+                ],
+                "categories": [
+                    {"category": "transcription_accuracy_wer"},
+                    {"category": "numeric_unit_integrity"},
+                ],
+            }
+        )
+        + "\n",
+        encoding="utf-8",
+    )
+    page.write_text(
+        "\n".join(
+            [
+                "<!doctype html><html><body>",
+                "Open Audio Judge ASR Leaderboard",
+                "<!-- ASR_LEADERBOARD_GENERATED_START -->",
+                "Verified Leaderboard Results",
+                "Category Breakdown",
+                "Generated Refresh Workflow",
+                "Generated Artifacts",
+                "4 judged transcripts",
+                "mlx-community/model-a",
+                "mlx-community/model-b",
+                "transcription_accuracy_wer",
+                "numeric_unit_integrity",
+                ".venv/bin/python scripts/validate_asr_seed_manifest.py",
+                ".venv/bin/python scripts/synthesize_tts_cases.py",
+                "oaj autojudge-mlx-asr",
+                ".venv/bin/python scripts/refresh_asr_leaderboard_artifacts.py",
+                ".venv/bin/python scripts/check_asr_leaderboard_page.py",
+                ".venv/bin/python scripts/refresh_asr_leaderboard_artifacts.py --hosted-dir /path/to/kennethli319.github.io/open-audio-judge",
+                "runs/asr-leaderboard/full-35-combined/results.jsonl",
+                "Combined ASR judge results used by the generated page and report.",
+                "runs/asr-leaderboard/full-35-combined/report.html",
+                "Local combined HTML report with per-case judge details.",
+                "docs/asr-leaderboard-summary.json",
+                "Machine-readable leaderboard summary and reproducible refresh workflow.",
+                "docs/asr-leaderboard-run-manifest.json",
+                "Committed source result manifest for manifest-based refreshes.",
+                "<!-- ASR_LEADERBOARD_GENERATED_END -->",
+                "</body></html>",
+            ]
+        ),
+        encoding="utf-8",
+    )
+
+    validation = check_module.check_asr_leaderboard_page(
+        page,
+        summary_path=summary,
+        artifact_root=hosted,
+        path_maps=[
+            ("docs/", ""),
+            ("runs/asr-leaderboard/", "asr-leaderboard/"),
+        ],
+        allow_missing_source_results=True,
+    )
+
+    assert validation["status"] == "complete"
 
 
 def test_check_asr_leaderboard_page_rejects_incomplete_validation_artifact(

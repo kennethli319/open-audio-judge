@@ -12,6 +12,7 @@ sys.path.insert(0, str(ROOT))
 
 from open_audio_judge.reports import write_html_report  # noqa: E402
 from open_audio_judge.runner import load_cases, load_results_jsonl, write_results_jsonl  # noqa: E402
+from scripts.check_asr_leaderboard_page import check_asr_leaderboard_page  # noqa: E402
 from scripts.update_asr_leaderboard_demo import (  # noqa: E402
     DEFAULT_PAGE,
     DEFAULT_REFRESH_REPORT,
@@ -256,6 +257,17 @@ def refresh_asr_leaderboard_artifacts(
         if hosted_dir
         else []
     )
+    if hosted_dir:
+        check_asr_leaderboard_page(
+            hosted_dir / page.name,
+            summary_path=hosted_dir / summary_out.name,
+            artifact_root=hosted_dir,
+            path_maps=[
+                ("docs/", ""),
+                ("runs/asr-leaderboard/", "asr-leaderboard/"),
+            ],
+            allow_missing_source_results=True,
+        )
 
     print(f"Combined {len(combined_results)} ASR results from {len(result_paths)} files")
     print(f"Results: {combined_results_path}")
@@ -345,19 +357,21 @@ def copy_hosted_asr_artifacts(
 ) -> list[Path]:
     hosted_dir.mkdir(parents=True, exist_ok=True)
     copied_paths = []
-    for source in (
-        page,
-        summary_out,
-        refresh_report_out,
-        run_manifest,
-        manifest_validation_out,
-        seed_manifest_validation_out,
-    ):
+    source_destinations = (
+        (page, {page.name, DEFAULT_PAGE.name}),
+        (summary_out, {summary_out.name, DEFAULT_SUMMARY.name}),
+        (refresh_report_out, {refresh_report_out.name, DEFAULT_REFRESH_REPORT.name}),
+        (run_manifest, {run_manifest.name, DEFAULT_RUN_MANIFEST.name}),
+        (manifest_validation_out, {manifest_validation_out.name, DEFAULT_MANIFEST_VALIDATION.name}),
+        (seed_manifest_validation_out, {seed_manifest_validation_out.name, DEFAULT_SEED_MANIFEST_VALIDATION.name}),
+    )
+    for source, destination_names in source_destinations:
         if not source.exists():
             raise FileNotFoundError(f"Missing hosted ASR source artifact: {source}")
-        destination = hosted_dir / source.name
-        shutil.copyfile(source, destination)
-        copied_paths.append(destination)
+        for destination_name in sorted(destination_names):
+            destination = hosted_dir / destination_name
+            shutil.copyfile(source, destination)
+            copied_paths.append(destination)
 
     if combined_results_path or combined_report_path:
         hosted_combined_dir = hosted_dir / "asr-leaderboard" / "full-35-combined"
