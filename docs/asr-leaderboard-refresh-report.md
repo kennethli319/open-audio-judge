@@ -153,6 +153,7 @@ This generated report summarizes the verified ASR leaderboard artifact set.
 - Hosted artifact sync: `.venv/bin/python scripts/refresh_asr_leaderboard_artifacts.py --hosted-dir-from-env`
 - Hosted mirror validation: `.venv/bin/python scripts/refresh_asr_leaderboard_artifacts.py --check-only --hosted-dir-from-env --require-hosted-current`
 - Live model refresh script: `bash docs/asr-leaderboard-live-refresh.sh`
+- Review blocked model log: `tail -n 20 runs/asr-leaderboard/blocked-models.jsonl`
 
 ## Runtime Status
 

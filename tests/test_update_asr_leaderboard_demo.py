@@ -252,6 +252,8 @@ def test_render_generated_sections_summarizes_verified_asr_results(tmp_path: Pat
     assert "Full refresh readiness check" in html
     assert "Run refresh shell playbook" in html
     assert "Run live model refresh script" in html
+    assert "Review blocked model log" in html
+    assert "tail -n 20 runs/asr-leaderboard/blocked-models.jsonl" in html
     assert "Generated Artifacts" in html
     assert "Validate seed manifest" in html
     assert "Discover latest complete runs" in html
@@ -637,6 +639,15 @@ def test_write_summary_artifact_records_models_and_categories(tmp_path: Path) ->
         "--require-hosted-current",
     ]
     assert summary["refresh_workflow"]["hosted_artifact_env_var"] == "ASR_LEADERBOARD_HOSTED_DIR"
+    assert summary["refresh_workflow"]["blocked_model_log_path"] == (
+        "runs/asr-leaderboard/blocked-models.jsonl"
+    )
+    assert summary["refresh_workflow"]["blocked_model_log_command"] == [
+        "tail",
+        "-n",
+        "20",
+        "runs/asr-leaderboard/blocked-models.jsonl",
+    ]
     assert summary["refresh_workflow"]["local_secret_env_command"] == [
         "source",
         "/Users/wangyauli/.openclaw/secrets/open-audio-judge-gemini.env",
@@ -939,6 +950,8 @@ def test_write_refresh_report_records_coverage_and_commands(tmp_path: Path) -> N
     assert "--discover-complete-model-runs" in text
     assert "Hosted artifact sync" in text
     assert "Hosted mirror validation" in text
+    assert "Review blocked model log" in text
+    assert "tail -n 20 runs/asr-leaderboard/blocked-models.jsonl" in text
     assert (
         ".venv/bin/python scripts/refresh_asr_leaderboard_artifacts.py --check-only --hosted-dir-from-env --require-hosted-current"
         in text

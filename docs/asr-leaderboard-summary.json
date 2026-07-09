@@ -291,6 +291,13 @@
       "--check-only",
       "--require-audio-ready"
     ],
+    "blocked_model_log_command": [
+      "tail",
+      "-n",
+      "20",
+      "runs/asr-leaderboard/blocked-models.jsonl"
+    ],
+    "blocked_model_log_path": "runs/asr-leaderboard/blocked-models.jsonl",
     "combine_refresh_command": [
       ".venv/bin/python",
       "scripts/refresh_asr_leaderboard_artifacts.py",

@@ -190,6 +190,7 @@
         <tr><td>Refresh committed artifacts</td><td><code>.venv/bin/python scripts/refresh_asr_leaderboard_artifacts.py</code></td></tr>
         <tr><td>Run refresh shell playbook</td><td><code>bash docs/asr-leaderboard-refresh-commands.sh</code></td></tr>
         <tr><td>Run live model refresh script</td><td><code>bash docs/asr-leaderboard-live-refresh.sh</code></td></tr>
+        <tr><td>Review blocked model log</td><td><code>tail -n 20 runs/asr-leaderboard/blocked-models.jsonl</code></td></tr>
         <tr><td>Check generated page</td><td><code>.venv/bin/python scripts/check_asr_leaderboard_page.py</code></td></tr>
         <tr><td>Verify generated artifacts are fresh</td><td><code>.venv/bin/python scripts/refresh_asr_leaderboard_artifacts.py --check-only --require-generated-fresh</code></td></tr>
         <tr><td>Sync hosted artifacts</td><td><code>.venv/bin/python scripts/refresh_asr_leaderboard_artifacts.py --hosted-dir-from-env</code></td></tr>
