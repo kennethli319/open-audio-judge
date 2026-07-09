@@ -417,7 +417,12 @@ def check_asr_leaderboard_refresh_inputs(
             report_index_out=report_index_out,
             report_links_out=report_links_out,
             refresh_commands_out=refresh_commands_out,
+            run_manifest=DEFAULT_RUN_MANIFEST,
+            manifest_validation_out=DEFAULT_MANIFEST_VALIDATION,
+            seed_cases=seed_cases,
+            seed_manifest_validation_out=DEFAULT_SEED_MANIFEST_VALIDATION,
             next_runs_out=next_runs_out,
+            runtime_status_out=DEFAULT_RUNTIME_STATUS,
             generated=generated,
             expected_cases_per_model=expected_cases_per_model,
         )
@@ -479,7 +484,12 @@ def _validate_generated_artifacts_fresh(
     report_index_out: Path | None = None,
     report_links_out: Path | None = None,
     refresh_commands_out: Path | None = None,
+    run_manifest: Path | None = None,
+    manifest_validation_out: Path | None = None,
+    seed_cases: Path | None = None,
+    seed_manifest_validation_out: Path | None = None,
     next_runs_out: Path | None = None,
+    runtime_status_out: Path | None = None,
     generated: str,
     expected_cases_per_model: int,
 ) -> None:
@@ -567,6 +577,40 @@ def _validate_generated_artifacts_fresh(
                 expected_cases_per_model=expected_cases_per_model,
             )
             _compare_generated_text_artifact(next_runs_out, expected_next_runs)
+        if run_manifest is not None:
+            expected_run_manifest = tmp_dir / run_manifest.name
+            write_run_manifest_artifact(
+                result_paths,
+                expected_run_manifest,
+                expected_cases_per_model=expected_cases_per_model,
+            )
+            _compare_generated_text_artifact(run_manifest, expected_run_manifest)
+        if manifest_validation_out is not None and run_manifest is not None:
+            expected_manifest_validation = tmp_dir / manifest_validation_out.name
+            write_manifest_validation_artifact(
+                combined_results,
+                expected_manifest_validation,
+                result_paths=result_paths,
+                run_manifest=run_manifest,
+                expected_cases_per_model=expected_cases_per_model,
+            )
+            _compare_generated_text_artifact(manifest_validation_out, expected_manifest_validation)
+        if seed_manifest_validation_out is not None and seed_cases is not None:
+            expected_seed_validation = tmp_dir / seed_manifest_validation_out.name
+            write_seed_manifest_validation_artifact(
+                seed_cases,
+                expected_seed_validation,
+            )
+            _compare_generated_text_artifact(seed_manifest_validation_out, expected_seed_validation)
+        if runtime_status_out is not None:
+            expected_runtime_status = tmp_dir / runtime_status_out.name
+            write_runtime_status_artifact(
+                expected_runtime_status,
+                results=combined_results,
+                results_path=DEFAULT_COMBINED_OUT / "results.jsonl",
+                source_result_paths=result_paths,
+            )
+            _compare_runtime_status_artifact(runtime_status_out, expected_runtime_status)
 
 
 def _compare_generated_text_artifact(actual_path: Path, expected_path: Path) -> None:
@@ -574,6 +618,20 @@ def _compare_generated_text_artifact(actual_path: Path, expected_path: Path) -> 
         raise FileNotFoundError(f"Missing generated ASR leaderboard artifact: {actual_path}")
     actual = actual_path.read_text(encoding="utf-8")
     expected = expected_path.read_text(encoding="utf-8")
+    if actual != expected:
+        raise ValueError(
+            f"{_repo_relative(actual_path)} is stale for selected ASR result sources; "
+            "run `.venv/bin/python scripts/refresh_asr_leaderboard_artifacts.py`."
+        )
+
+
+def _compare_runtime_status_artifact(actual_path: Path, expected_path: Path) -> None:
+    if not actual_path.exists():
+        raise FileNotFoundError(f"Missing generated ASR leaderboard artifact: {actual_path}")
+    actual = json.loads(actual_path.read_text(encoding="utf-8"))
+    expected = json.loads(expected_path.read_text(encoding="utf-8"))
+    actual.pop("mlx_runtime_preflight", None)
+    expected.pop("mlx_runtime_preflight", None)
     if actual != expected:
         raise ValueError(
             f"{_repo_relative(actual_path)} is stale for selected ASR result sources; "

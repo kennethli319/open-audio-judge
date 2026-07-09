@@ -1248,6 +1248,7 @@ def test_require_generated_fresh_rejects_stale_page_block(tmp_path: Path) -> Non
     results_path = tmp_path / "model-a" / "judge-report" / "results.jsonl"
     summary_path = tmp_path / "summary.json"
     refresh_commands_path = tmp_path / "refresh-commands.sh"
+    run_manifest = tmp_path / "run-manifest.json"
     page = tmp_path / "demo.html"
     records = [
         result_record(
@@ -1297,6 +1298,11 @@ def test_require_generated_fresh_rejects_stale_page_block(tmp_path: Path) -> Non
         refresh_commands_path,
         source_result_paths=[results_path],
     )
+    refresh_module.write_run_manifest_artifact(
+        [results_path],
+        run_manifest,
+        expected_cases_per_model=2,
+    )
 
     refresh_module._validate_generated_artifacts_fresh(
         results,
@@ -1304,6 +1310,7 @@ def test_require_generated_fresh_rejects_stale_page_block(tmp_path: Path) -> Non
         page=page,
         summary_out=summary_path,
         refresh_commands_out=refresh_commands_path,
+        run_manifest=run_manifest,
         generated=generated,
         expected_cases_per_model=2,
     )
@@ -1330,6 +1337,30 @@ def test_require_generated_fresh_rejects_stale_page_block(tmp_path: Path) -> Non
         refresh_commands_path,
         source_result_paths=[results_path],
     )
+    run_manifest.write_text(
+        run_manifest.read_text(encoding="utf-8").replace(
+            '"expected_cases_per_model": 2',
+            '"expected_cases_per_model": 99',
+        ),
+        encoding="utf-8",
+    )
+    with pytest.raises(ValueError, match="run-manifest.json.*stale"):
+        refresh_module._validate_generated_artifacts_fresh(
+            results,
+            result_paths=[results_path],
+            page=page,
+            summary_out=summary_path,
+            refresh_commands_out=refresh_commands_path,
+            run_manifest=run_manifest,
+            generated=generated,
+            expected_cases_per_model=2,
+        )
+
+    refresh_module.write_run_manifest_artifact(
+        [results_path],
+        run_manifest,
+        expected_cases_per_model=2,
+    )
 
     page.write_text(
         page.read_text(encoding="utf-8").replace("Verified Leaderboard Results", "Stale Results"),
@@ -1344,6 +1375,47 @@ def test_require_generated_fresh_rejects_stale_page_block(tmp_path: Path) -> Non
             generated=generated,
             expected_cases_per_model=2,
         )
+
+
+def test_runtime_status_freshness_allows_live_preflight_output(tmp_path: Path) -> None:
+    refresh_module = load_refresh_module()
+    actual = tmp_path / "runtime-status.json"
+    expected = tmp_path / "expected-runtime-status.json"
+    base_status = {
+        "status": "complete",
+        "gemini_judge": "verified_from_loaded_results",
+        "result_bundle": {"total_results": 2, "source_result_file_count": 1},
+        "mlx_runtime_preflight": {
+            "status": "not_checked",
+            "command": ["check-runtime"],
+        },
+    }
+    expected.write_text(json.dumps(base_status) + "\n", encoding="utf-8")
+    actual.write_text(
+        json.dumps(
+            {
+                **base_status,
+                "mlx_runtime_preflight": {
+                    "status": "ok",
+                    "command": ["check-runtime"],
+                    "stdout": "MLX ASR runtime OK",
+                    "stderr": "",
+                    "returncode": 0,
+                },
+            }
+        )
+        + "\n",
+        encoding="utf-8",
+    )
+
+    refresh_module._compare_runtime_status_artifact(actual, expected)
+
+    actual.write_text(
+        json.dumps({**base_status, "result_bundle": {"total_results": 1}}) + "\n",
+        encoding="utf-8",
+    )
+    with pytest.raises(ValueError, match="runtime-status.json.*stale"):
+        refresh_module._compare_runtime_status_artifact(actual, expected)
 
 
 def test_discover_complete_model_result_paths_selects_newest_complete_runs(tmp_path: Path) -> None:
