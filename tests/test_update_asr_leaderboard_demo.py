@@ -2627,6 +2627,37 @@ def test_check_asr_leaderboard_page_rejects_missing_refresh_preflights(tmp_path:
         )
 
 
+def test_check_asr_leaderboard_page_rejects_stale_refresh_workflow_artifact(
+    tmp_path: Path,
+) -> None:
+    update_module = load_script_module()
+    check_module = load_check_module()
+    refresh_workflow = tmp_path / "refresh-workflow.json"
+    update_module.write_refresh_workflow_artifact(refresh_workflow)
+    artifact = json.loads(refresh_workflow.read_text(encoding="utf-8"))
+    artifact["workflow"]["seed_manifest_validation_command"] = [
+        ".venv/bin/python",
+        "scripts/validate_asr_seed_manifest.py",
+        "--stale-summary-out",
+        "docs/asr-seed-manifest-validation.json",
+    ]
+    refresh_workflow.write_text(json.dumps(artifact), encoding="utf-8")
+    summary = {
+        "refresh_workflow_path": str(refresh_workflow),
+        "refresh_commands_path": "docs/asr-leaderboard-refresh-commands.sh",
+        "live_refresh_script_path": "docs/asr-leaderboard-live-refresh.sh",
+        "refresh_workflow": update_module._refresh_workflow([]),
+    }
+
+    with pytest.raises(ValueError, match="workflow does not match"):
+        check_module._validate_refresh_workflow_artifact(
+            summary,
+            summary_path=tmp_path / "summary.json",
+            artifact_root=tmp_path,
+            path_maps=[],
+        )
+
+
 def test_check_asr_leaderboard_page_rejects_stale_runtime_result_bundle(tmp_path: Path) -> None:
     check_module = load_check_module()
     runtime_status = tmp_path / "runtime-status.json"
@@ -2756,6 +2787,7 @@ def test_check_asr_leaderboard_page_validates_hosted_artifact_layout(tmp_path: P
     next_runs = hosted / "asr-leaderboard-next-runs.json"
     run_manifest = hosted / "asr-leaderboard-run-manifest.json"
     refresh_commands = hosted / "asr-leaderboard-refresh-commands.sh"
+    refresh_workflow = hosted / "asr-leaderboard-refresh-workflow.json"
     report_index = hosted / "asr-leaderboard-report-index.md"
     report_links = hosted / "asr-leaderboard-report-links.json"
     hosted_manifest = hosted / "asr-leaderboard-hosted-manifest.json"
@@ -2831,6 +2863,7 @@ def test_check_asr_leaderboard_page_validates_hosted_artifact_layout(tmp_path: P
     )
     seed_manifest_validation.write_text(json.dumps({"status": "complete"}) + "\n", encoding="utf-8")
     update_module.write_refresh_commands_script(refresh_commands)
+    update_module.write_refresh_workflow_artifact(refresh_workflow)
     report_index.write_text("# report index\n", encoding="utf-8")
     report_links.write_text(
         json.dumps(
@@ -2965,6 +2998,7 @@ def test_check_asr_leaderboard_page_validates_hosted_artifact_layout(tmp_path: P
                     ("asr-leaderboard/full-35-combined/report.html", report_path),
                     ("asr-leaderboard-run-manifest.json", run_manifest),
                     ("asr-leaderboard-refresh-commands.sh", refresh_commands),
+                    ("asr-leaderboard-refresh-workflow.json", refresh_workflow),
                     ("asr-leaderboard-report-index.md", report_index),
                     ("asr-leaderboard-report-links.json", report_links),
                     ("asr-leaderboard-runtime-status.json", runtime_status),
@@ -3027,6 +3061,10 @@ def test_check_asr_leaderboard_page_validates_hosted_artifact_layout(tmp_path: P
                         refresh_commands,
                     ),
                     artifact_index_record(
+                        "docs/asr-leaderboard-refresh-workflow.json",
+                        refresh_workflow,
+                    ),
+                    artifact_index_record(
                         "docs/asr-leaderboard-report-index.md",
                         report_index,
                     ),
@@ -3061,6 +3099,7 @@ def test_check_asr_leaderboard_page_validates_hosted_artifact_layout(tmp_path: P
                 "report_path": "runs/asr-leaderboard/full-35-combined/report.html",
                 "run_manifest_path": "docs/asr-leaderboard-run-manifest.json",
                 "refresh_commands_path": "docs/asr-leaderboard-refresh-commands.sh",
+                "refresh_workflow_path": "docs/asr-leaderboard-refresh-workflow.json",
                 "report_index_path": "docs/asr-leaderboard-report-index.md",
                 "report_links_path": "docs/asr-leaderboard-report-links.json",
                 "manifest_validation_path": "docs/asr-leaderboard-manifest-validation.json",
@@ -3093,6 +3132,10 @@ def test_check_asr_leaderboard_page_validates_hosted_artifact_layout(tmp_path: P
                     {
                         "path": "docs/asr-leaderboard-refresh-commands.sh",
                         "purpose": "Generated shell playbook for repeatable ASR leaderboard refreshes.",
+                    },
+                    {
+                        "path": "docs/asr-leaderboard-refresh-workflow.json",
+                        "purpose": "Machine-readable generated workflow for ASR refresh automation.",
                     },
                     {
                         "path": "docs/asr-leaderboard-report-index.md",
@@ -3187,6 +3230,8 @@ def test_check_asr_leaderboard_page_validates_hosted_artifact_layout(tmp_path: P
                 "Committed source result manifest for manifest-based refreshes.",
                 "docs/asr-leaderboard-refresh-commands.sh",
                 "Generated shell playbook for repeatable ASR leaderboard refreshes.",
+                "docs/asr-leaderboard-refresh-workflow.json",
+                "Machine-readable generated workflow for ASR refresh automation.",
                 "docs/asr-leaderboard-report-index.md",
                 "Human-readable index linking the demo page, combined report, and source run reports.",
                 "docs/asr-leaderboard-report-links.json",
@@ -3216,12 +3261,12 @@ def test_check_asr_leaderboard_page_validates_hosted_artifact_layout(tmp_path: P
     )
 
     assert validation["status"] == "complete"
-    assert validation["hosted_artifact_count"] == 7
-    assert validation["hosted_path_count"] == 7
-    assert validation["hosted_digest_verified_artifact_count"] == 7
-    assert validation["hosted_digest_verified_path_count"] == 7
+    assert validation["hosted_artifact_count"] == 8
+    assert validation["hosted_path_count"] == 8
+    assert validation["hosted_digest_verified_artifact_count"] == 8
+    assert validation["hosted_digest_verified_path_count"] == 8
     assert check_module._format_hosted_validation_fragment(validation) == (
-        ", 7/7 hosted paths digest-verified"
+        ", 8/8 hosted paths digest-verified"
     )
 
 

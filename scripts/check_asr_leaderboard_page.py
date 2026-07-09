@@ -155,6 +155,7 @@ def _validate_summary(
         "models",
         "categories",
         "refresh_workflow",
+        "refresh_workflow_path",
         "refresh_commands_path",
         "report_index_path",
         "report_links_path",
@@ -249,6 +250,12 @@ def _validate_summary(
         artifact_root=artifact_root,
         path_maps=path_maps,
     )
+    _validate_refresh_workflow_artifact(
+        summary,
+        summary_path=summary_path,
+        artifact_root=artifact_root,
+        path_maps=path_maps,
+    )
     _validate_hosted_manifest_matches_artifact_index(
         summary,
         summary_path=summary_path,
@@ -285,6 +292,7 @@ def _validate_referenced_artifacts(
         "seed_manifest_validation_path",
         "next_runs_path",
         "refresh_commands_path",
+        "refresh_workflow_path",
         "report_index_path",
         "report_links_path",
         "hosted_manifest_path",
@@ -1450,6 +1458,61 @@ def _validate_refresh_commands_script(
         raise ValueError(
             f"{path} is missing refresh workflow command(s) from {summary_path}: {missing}"
         )
+
+
+def _validate_refresh_workflow_artifact(
+    summary: dict[str, Any],
+    *,
+    summary_path: Path,
+    artifact_root: Path,
+    path_maps: list[tuple[str, str]],
+) -> None:
+    raw_path = summary.get("refresh_workflow_path")
+    if not isinstance(raw_path, str) or not raw_path:
+        raise ValueError(f"{summary_path} has invalid refresh_workflow_path: {raw_path!r}")
+    path = _resolve_summary_path(raw_path, artifact_root=artifact_root, path_maps=path_maps)
+    try:
+        artifact = json.loads(path.read_text(encoding="utf-8"))
+    except json.JSONDecodeError as exc:
+        raise ValueError(f"{path} must contain valid JSON: {exc}") from exc
+
+    if not isinstance(artifact, dict):
+        raise ValueError(f"{path} must contain a JSON object.")
+    if artifact.get("version") != 1:
+        raise ValueError(f"{path} has unsupported version: {artifact.get('version')!r}")
+
+    workflow = summary.get("refresh_workflow")
+    if not isinstance(workflow, dict):
+        raise ValueError(f"{summary_path} must include a refresh_workflow object.")
+    if artifact.get("workflow") != workflow:
+        raise ValueError(f"{path} workflow does not match {summary_path} refresh_workflow.")
+
+    command_keys = artifact.get("command_keys")
+    expected_command_keys = sorted(
+        key
+        for key, value in workflow.items()
+        if key.endswith("_command")
+        and isinstance(value, list)
+        and all(isinstance(part, str) for part in value)
+    )
+    if command_keys != expected_command_keys:
+        raise ValueError(f"{path} command_keys do not match the embedded refresh_workflow.")
+
+    expected_counts = {
+        "primary_model_count": len(workflow.get("model_run_commands", [])),
+        "fallback_model_count": len(workflow.get("fallback_model_ids", [])),
+    }
+    for key, expected in expected_counts.items():
+        if artifact.get(key) != expected:
+            raise ValueError(f"{path} has invalid {key}: {artifact.get(key)!r}")
+
+    expected_paths = {
+        "refresh_commands_path": workflow.get("refresh_commands_path"),
+        "live_refresh_script_path": workflow.get("live_refresh_script_path"),
+    }
+    for key, expected in expected_paths.items():
+        if expected is not None and artifact.get(key) != expected:
+            raise ValueError(f"{path} {key} does not match {summary_path}.")
 
 
 def _validate_live_refresh_script(
