@@ -9,6 +9,7 @@ This generated report summarizes the verified ASR leaderboard artifact set.
 - Summary JSON: `docs/asr-leaderboard-summary.json`
 - Run manifest: `docs/asr-leaderboard-run-manifest.json`
 - Refresh command playbook: `docs/asr-leaderboard-refresh-commands.sh`
+- Live model refresh script: `docs/asr-leaderboard-live-refresh.sh`
 - Report index: `docs/asr-leaderboard-report-index.md`
 - Report links JSON: `docs/asr-leaderboard-report-links.json`
 - Manifest validation: `docs/asr-leaderboard-manifest-validation.json`
@@ -113,6 +114,7 @@ This generated report summarizes the verified ASR leaderboard artifact set.
 | `docs/asr-leaderboard-report-index.md` | Human-readable index linking the demo page, combined report, and source run reports. |
 | `docs/asr-leaderboard-report-links.json` | Machine-readable map linking the demo page to combined and source ASR reports. |
 | `docs/asr-leaderboard-refresh-commands.sh` | Generated shell playbook for repeatable ASR leaderboard refreshes. |
+| `docs/asr-leaderboard-live-refresh.sh` | Opt-in generated shell script for live MLX ASR/Gemini refreshes. |
 | `docs/asr-leaderboard-run-manifest.json` | Committed source result manifest for manifest-based refreshes. |
 | `docs/asr-leaderboard-manifest-validation.json` | Coverage validation for the model/category result matrix. |
 | `docs/asr-seed-manifest-validation.json` | Seed-manifest validation proving public-safe ASR cases keep exact category coverage. |
@@ -124,6 +126,7 @@ This generated report summarizes the verified ASR leaderboard artifact set.
 ## Refresh Commands
 
 - Generated shell playbook: `docs/asr-leaderboard-refresh-commands.sh`
+- Generated live refresh script: `docs/asr-leaderboard-live-refresh.sh`
 - Seed manifest validation: `.venv/bin/python scripts/validate_asr_seed_manifest.py --summary-out docs/asr-seed-manifest-validation.json`
 - Audio materialization: `.venv/bin/python scripts/synthesize_tts_cases.py --cases examples/asr_research_cases.jsonl --out runs/asr-research-audio --discard-text-sidecars --summary-out runs/asr-research-audio/summary.json`
 - MLX ASR runtime check: `PYTHONPATH=src .venv/bin/python -m open_audio_judge.cli check-mlx-asr-runtime --python-bin .venv/bin/python --model mlx-community/whisper-large-v3-turbo-asr-fp16`
@@ -145,6 +148,7 @@ This generated report summarizes the verified ASR leaderboard artifact set.
 - Generated artifact freshness check: `.venv/bin/python scripts/refresh_asr_leaderboard_artifacts.py --check-only --require-generated-fresh`
 - Hosted artifact sync: `.venv/bin/python scripts/refresh_asr_leaderboard_artifacts.py --hosted-dir-from-env`
 - Hosted mirror validation: `.venv/bin/python scripts/refresh_asr_leaderboard_artifacts.py --check-only --hosted-dir-from-env`
+- Live model refresh script: `bash docs/asr-leaderboard-live-refresh.sh`
 
 ## Runtime Status
 

@@ -21,6 +21,7 @@ DEFAULT_REFRESH_REPORT = ROOT / "docs" / "asr-leaderboard-refresh-report.md"
 DEFAULT_REPORT_INDEX = ROOT / "docs" / "asr-leaderboard-report-index.md"
 DEFAULT_REPORT_LINKS = ROOT / "docs" / "asr-leaderboard-report-links.json"
 DEFAULT_REFRESH_COMMANDS = ROOT / "docs" / "asr-leaderboard-refresh-commands.sh"
+DEFAULT_LIVE_REFRESH_SCRIPT = ROOT / "docs" / "asr-leaderboard-live-refresh.sh"
 DEFAULT_RUN_MANIFEST = ROOT / "docs" / "asr-leaderboard-run-manifest.json"
 DEFAULT_MANIFEST_VALIDATION = ROOT / "docs" / "asr-leaderboard-manifest-validation.json"
 DEFAULT_SEED_MANIFEST_VALIDATION = ROOT / "docs" / "asr-seed-manifest-validation.json"
@@ -120,6 +121,12 @@ def main() -> None:
         help="Write a shell playbook with the generated ASR leaderboard refresh commands.",
     )
     parser.add_argument(
+        "--live-refresh-script-out",
+        type=Path,
+        default=DEFAULT_LIVE_REFRESH_SCRIPT,
+        help="Write an opt-in shell script for live MLX ASR/Gemini model refreshes.",
+    )
+    parser.add_argument(
         "--report-index-out",
         type=Path,
         default=DEFAULT_REPORT_INDEX,
@@ -180,6 +187,7 @@ def main() -> None:
         args.refresh_commands_out,
         source_result_paths=[],
     )
+    write_live_refresh_script(args.live_refresh_script_out)
     write_next_run_plan_artifact(
         results,
         args.next_runs_out,
@@ -217,6 +225,7 @@ def render_generated_sections(
     report_index_label = html.escape(_repo_relative(DEFAULT_REPORT_INDEX))
     report_links_label = html.escape(_repo_relative(DEFAULT_REPORT_LINKS))
     refresh_commands_label = html.escape(_repo_relative(DEFAULT_REFRESH_COMMANDS))
+    live_refresh_script_label = html.escape(_repo_relative(DEFAULT_LIVE_REFRESH_SCRIPT))
     manifest_label = html.escape(_repo_relative(DEFAULT_RUN_MANIFEST))
     validation_label = html.escape(_repo_relative(DEFAULT_MANIFEST_VALIDATION))
     seed_validation_label = html.escape(_repo_relative(DEFAULT_SEED_MANIFEST_VALIDATION))
@@ -238,6 +247,7 @@ def render_generated_sections(
         ("Discover latest complete runs", workflow["discover_refresh_command"]),
         ("Refresh committed artifacts", workflow["manifest_refresh_command"]),
         ("Run refresh shell playbook", ["bash", workflow["refresh_commands_path"]]),
+        ("Run live model refresh script", ["bash", workflow["live_refresh_script_path"]]),
         ("Check generated page", workflow["page_validation_command"]),
         ("Verify generated artifacts are fresh", workflow["freshness_check_command"]),
         ("Sync hosted artifacts", workflow["hosted_artifact_command"]),
@@ -284,7 +294,8 @@ def render_generated_sections(
                 f"<code>{report_label}</code> and the committed summary artifact is "
                 f"<code>{summary_label}</code>. The generated refresh report is "
                 f"<code>{refresh_report_label}</code>, and the generated shell playbook is "
-                f"<code>{refresh_commands_label}</code>. The committed run manifest is "
+                f"<code>{refresh_commands_label}</code>. The opt-in live model refresh script is "
+                f"<code>{live_refresh_script_label}</code>. The committed run manifest is "
                 f"<code>{manifest_label}</code>, with coverage validation in "
                 f"<code>{validation_label}</code> and seed-manifest validation in "
                 f"<code>{seed_validation_label}</code>. The next-refresh plan is "
@@ -393,6 +404,7 @@ def write_summary_artifact(
                 ],
                 "run_manifest_path": _repo_relative(DEFAULT_RUN_MANIFEST),
                 "refresh_commands_path": _repo_relative(DEFAULT_REFRESH_COMMANDS),
+                "live_refresh_script_path": _repo_relative(DEFAULT_LIVE_REFRESH_SCRIPT),
                 "report_index_path": _repo_relative(DEFAULT_REPORT_INDEX),
                 "report_links_path": _repo_relative(DEFAULT_REPORT_LINKS),
                 "manifest_validation_path": _repo_relative(DEFAULT_MANIFEST_VALIDATION),
@@ -477,6 +489,7 @@ def write_refresh_report(
                 f"- Summary JSON: `{_repo_relative(DEFAULT_SUMMARY)}`",
                 f"- Run manifest: `{_repo_relative(DEFAULT_RUN_MANIFEST)}`",
                 f"- Refresh command playbook: `{_repo_relative(DEFAULT_REFRESH_COMMANDS)}`",
+                f"- Live model refresh script: `{_repo_relative(DEFAULT_LIVE_REFRESH_SCRIPT)}`",
                 f"- Report index: `{_repo_relative(DEFAULT_REPORT_INDEX)}`",
                 f"- Report links JSON: `{_repo_relative(DEFAULT_REPORT_LINKS)}`",
                 f"- Manifest validation: `{_repo_relative(DEFAULT_MANIFEST_VALIDATION)}`",
@@ -552,6 +565,7 @@ def write_refresh_report(
                 "## Refresh Commands",
                 "",
                 f"- Generated shell playbook: `{_repo_relative(DEFAULT_REFRESH_COMMANDS)}`",
+                f"- Generated live refresh script: `{_repo_relative(DEFAULT_LIVE_REFRESH_SCRIPT)}`",
                 f"- Seed manifest validation: `{_shell_join(workflow['seed_manifest_validation_command'])}`",
                 f"- Audio materialization: `{_shell_join(workflow['audio_materialization_command'])}`",
                 f"- MLX ASR runtime check: `{_shell_join(workflow['mlx_runtime_check_command'])}`",
@@ -575,6 +589,7 @@ def write_refresh_report(
                 f"- Generated artifact freshness check: `{_shell_join(workflow['freshness_check_command'])}`",
                 f"- Hosted artifact sync: `{_shell_join(workflow['hosted_artifact_command'])}`",
                 f"- Hosted mirror validation: `{_shell_join(workflow['hosted_validation_command'])}`",
+                f"- Live model refresh script: `bash {workflow['live_refresh_script_path']}`",
                 "",
                 "## Runtime Status",
                 "",
@@ -827,6 +842,43 @@ def write_refresh_commands_script(
     output_path.write_text("\n".join(lines), encoding="utf-8")
 
 
+def write_live_refresh_script(output_path: Path) -> None:
+    workflow = _refresh_workflow([])
+    lines = [
+        "#!/usr/bin/env bash",
+        "set -euo pipefail",
+        "",
+        "# Generated opt-in live ASR leaderboard refresh script.",
+        "# Runs local MLX ASR jobs and Gemini judging only after runtime preflights pass.",
+        "# Gemini secrets are sourced at runtime and are never printed by this script.",
+        "",
+        _shell_join(workflow["refresh_check_command"]),
+        _shell_join(workflow["audio_ready_check_command"]),
+        _shell_join(workflow["mlx_runtime_check_command"]),
+        _shell_join(workflow["runtime_ready_check_command"]),
+        "",
+        'if [[ ! -f "' + GEMINI_SECRET_ENV + '" ]]; then',
+        '  echo "Missing Gemini secret file: ' + GEMINI_SECRET_ENV + '" >&2',
+        "  exit 1",
+        "fi",
+        _shell_join(workflow["local_secret_env_command"]),
+        "",
+        "# Primary model refreshes.",
+        *(_shell_join(command["command"]) for command in workflow["model_run_commands"]),
+        "",
+        "# Rebuild committed artifacts from the newest complete primary-model runs.",
+        _shell_join(workflow["discover_refresh_command"]),
+        _shell_join(workflow["page_validation_command"]),
+        _shell_join(workflow["freshness_check_command"]),
+        "",
+        "# If a primary model fails, record the unsupported/blocked state before trying fallbacks.",
+        "# Fallback models: " + ", ".join(workflow["fallback_model_ids"]),
+        "",
+    ]
+    output_path.parent.mkdir(parents=True, exist_ok=True)
+    output_path.write_text("\n".join(lines), encoding="utf-8")
+
+
 def _refresh_workflow(source_result_paths: list[Path]) -> dict[str, object]:
     refresh_command = [
         ".venv/bin/python",
@@ -937,6 +989,7 @@ def _refresh_workflow(source_result_paths: list[Path]) -> dict[str, object]:
             "scripts/refresh_asr_leaderboard_artifacts.py",
         ],
         "refresh_commands_path": _repo_relative(DEFAULT_REFRESH_COMMANDS),
+        "live_refresh_script_path": _repo_relative(DEFAULT_LIVE_REFRESH_SCRIPT),
         "page_validation_command": [
             ".venv/bin/python",
             "scripts/check_asr_leaderboard_page.py",
@@ -1028,6 +1081,10 @@ def build_output_artifact_index(*, results_path: Path) -> list[dict[str, str]]:
         {
             "path": _repo_relative(DEFAULT_REFRESH_COMMANDS),
             "purpose": "Generated shell playbook for repeatable ASR leaderboard refreshes.",
+        },
+        {
+            "path": _repo_relative(DEFAULT_LIVE_REFRESH_SCRIPT),
+            "purpose": "Opt-in generated shell script for live MLX ASR/Gemini refreshes.",
         },
         {
             "path": _repo_relative(DEFAULT_RUN_MANIFEST),

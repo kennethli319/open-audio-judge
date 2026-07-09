@@ -97,6 +97,7 @@
   "category_count": 7,
   "expected_cases_per_model": 35,
   "hosted_manifest_path": "docs/asr-leaderboard-hosted-manifest.json",
+  "live_refresh_script_path": "docs/asr-leaderboard-live-refresh.sh",
   "manifest_validation_path": "docs/asr-leaderboard-manifest-validation.json",
   "model_category_matrix": [
     {
@@ -226,6 +227,10 @@
       "purpose": "Generated shell playbook for repeatable ASR leaderboard refreshes."
     },
     {
+      "path": "docs/asr-leaderboard-live-refresh.sh",
+      "purpose": "Opt-in generated shell script for live MLX ASR/Gemini refreshes."
+    },
+    {
       "path": "docs/asr-leaderboard-run-manifest.json",
       "purpose": "Committed source result manifest for manifest-based refreshes."
     },
@@ -353,6 +358,7 @@
       "--check-only",
       "--hosted-dir-from-env"
     ],
+    "live_refresh_script_path": "docs/asr-leaderboard-live-refresh.sh",
     "local_secret_env_command": [
       "source",
       "/Users/wangyauli/.openclaw/secrets/open-audio-judge-gemini.env"

@@ -245,6 +245,12 @@ def _validate_summary(
         artifact_root=artifact_root,
         path_maps=path_maps,
     )
+    _validate_live_refresh_script(
+        summary,
+        summary_path=summary_path,
+        artifact_root=artifact_root,
+        path_maps=path_maps,
+    )
 
 
 def _validate_referenced_artifacts(
@@ -1122,6 +1128,73 @@ def _validate_refresh_commands_script(
     if missing:
         raise ValueError(
             f"{path} is missing refresh workflow command(s) from {summary_path}: {missing}"
+        )
+
+
+def _validate_live_refresh_script(
+    summary: dict[str, Any],
+    *,
+    summary_path: Path,
+    artifact_root: Path,
+    path_maps: list[tuple[str, str]],
+) -> None:
+    raw_path = summary.get("live_refresh_script_path")
+    if raw_path is None:
+        return
+    if not isinstance(raw_path, str) or not raw_path:
+        raise ValueError(f"{summary_path} has invalid live_refresh_script_path: {raw_path!r}")
+    path = _resolve_summary_path(raw_path, artifact_root=artifact_root, path_maps=path_maps)
+    text = path.read_text(encoding="utf-8")
+    if "set -euo pipefail" not in text:
+        raise ValueError(f"{path} must use strict shell settings.")
+    if "never printed" not in text:
+        raise ValueError(f"{path} must document secret handling.")
+
+    workflow = summary.get("refresh_workflow")
+    if not isinstance(workflow, dict):
+        raise ValueError(f"{summary_path} must include a refresh_workflow object.")
+
+    command_keys = (
+        "refresh_check_command",
+        "audio_ready_check_command",
+        "mlx_runtime_check_command",
+        "runtime_ready_check_command",
+        "local_secret_env_command",
+        "discover_refresh_command",
+        "page_validation_command",
+        "freshness_check_command",
+    )
+    missing = []
+    for key in command_keys:
+        command = workflow.get(key)
+        if isinstance(command, list) and _rendered_command_text(command) not in text:
+            missing.append(key)
+
+    model_commands = workflow.get("model_run_commands", [])
+    if not isinstance(model_commands, list):
+        raise ValueError(f"{summary_path} refresh_workflow.model_run_commands must be a list.")
+    for index, model_command in enumerate(model_commands):
+        if not isinstance(model_command, dict):
+            raise ValueError(
+                f"{summary_path} refresh_workflow.model_run_commands[{index}] must be an object."
+            )
+        command = model_command.get("command")
+        if not isinstance(command, list):
+            raise ValueError(
+                f"{summary_path} refresh_workflow.model_run_commands[{index}].command must be a list."
+            )
+        if _rendered_command_text(command) not in text:
+            missing.append(f"model_run_commands[{index}]")
+
+    fallback_models = workflow.get("fallback_model_ids", [])
+    if isinstance(fallback_models, list):
+        for model in fallback_models:
+            if isinstance(model, str) and model and model not in text:
+                missing.append(f"fallback_model_ids[{model}]")
+
+    if missing:
+        raise ValueError(
+            f"{path} is missing live refresh workflow command(s) from {summary_path}: {missing}"
         )
 
 
