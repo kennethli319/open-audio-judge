@@ -35,6 +35,12 @@ CATEGORY_COLUMNS = [
     ("acoustic_noise_robustness", "Acoustic Noise"),
 ]
 CATEGORY_LABELS = dict(CATEGORY_COLUMNS)
+ASR_LEADERBOARD_MODELS = [
+    ("mlx-community/whisper-large-v3-turbo-asr-fp16", "whisper-large-v3-turbo-refresh"),
+    ("mlx-community/Qwen3-ASR-1.7B-8bit", "qwen3-asr-1.7b-refresh"),
+    ("mlx-community/VibeVoice-ASR-4bit", "vibevoice-asr-refresh"),
+]
+GEMINI_SECRET_ENV = "/Users/wangyauli/.openclaw/secrets/open-audio-judge-gemini.env"
 
 
 @dataclass(frozen=True)
@@ -207,6 +213,22 @@ def render_generated_sections(
                 f"<td><code>{html.escape(_shell_join(command))}</code></td>"
                 "</tr>"
                 for label, command in workflow_commands
+            ),
+            "      </tbody>",
+            "    </table>",
+            "",
+            "    <h2>Generated Model Refresh Commands</h2>",
+            "    <p class=\"muted\">Load the Gemini secret only in the local shell before running live judge calls: "
+            f"<code>{html.escape(_shell_join(workflow['local_secret_env_command']))}</code>.</p>",
+            "    <table>",
+            "      <thead><tr><th>Model</th><th>Run Command</th></tr></thead>",
+            "      <tbody>",
+            *(
+                "        <tr>"
+                f"<td><code>{html.escape(command['model'])}</code></td>"
+                f"<td><code>{html.escape(_shell_join(command['command']))}</code></td>"
+                "</tr>"
+                for command in workflow["model_run_commands"]
             ),
             "      </tbody>",
             "    </table>",
@@ -392,6 +414,11 @@ def write_refresh_report(
                 "",
                 f"- Seed manifest validation: `{_shell_join(workflow['seed_manifest_validation_command'])}`",
                 f"- Audio materialization: `{_shell_join(workflow['audio_materialization_command'])}`",
+                f"- Load local Gemini secret before model runs: `{_shell_join(workflow['local_secret_env_command'])}`",
+                *(
+                    f"- Run {command['model']}: `{_shell_join(command['command'])}`"
+                    for command in workflow["model_run_commands"]
+                ),
                 f"- Combine and refresh committed artifacts: `{_shell_join(workflow['combine_refresh_command'])}`",
                 f"- Manifest-based refresh: `{_shell_join(workflow['manifest_refresh_command'])}`",
                 f"- Page validation: `{_shell_join(workflow['page_validation_command'])}`",
@@ -457,6 +484,7 @@ def _refresh_workflow(source_result_paths: list[Path]) -> dict[str, object]:
             "--out",
             "runs/asr-leaderboard/<run-name>",
         ],
+        "model_run_commands": _model_run_commands(),
         "combine_refresh_command": refresh_command,
         "manifest_refresh_command": [
             ".venv/bin/python",
@@ -472,11 +500,43 @@ def _refresh_workflow(source_result_paths: list[Path]) -> dict[str, object]:
             "--hosted-dir",
             "/path/to/kennethli319.github.io/open-audio-judge",
         ],
+        "local_secret_env_command": [
+            "source",
+            GEMINI_SECRET_ENV,
+        ],
         "secret_handling": (
             "Load the Gemini API key from the local secret file only at runtime; "
             "do not commit or print secrets."
         ),
     }
+
+
+def _model_run_commands() -> list[dict[str, object]]:
+    commands = []
+    for model, run_name in ASR_LEADERBOARD_MODELS:
+        commands.append(
+            {
+                "model": model,
+                "run_name": run_name,
+                "command": [
+                    "oaj",
+                    "autojudge-mlx-asr",
+                    "--python-bin",
+                    ".venv/bin/python",
+                    "--cases",
+                    _repo_relative(DEFAULT_AUDIO_CASES),
+                    "--model",
+                    model,
+                    "--judge-provider",
+                    "gemini",
+                    "--judge-samples",
+                    "3",
+                    "--out",
+                    f"runs/asr-leaderboard/{run_name}",
+                ],
+            }
+        )
+    return commands
 
 
 def build_output_artifact_index(*, results_path: Path) -> list[dict[str, str]]:

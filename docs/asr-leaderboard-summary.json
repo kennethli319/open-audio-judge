@@ -274,9 +274,75 @@
       "--hosted-dir",
       "/path/to/kennethli319.github.io/open-audio-judge"
     ],
+    "local_secret_env_command": [
+      "source",
+      "/Users/wangyauli/.openclaw/secrets/open-audio-judge-gemini.env"
+    ],
     "manifest_refresh_command": [
       ".venv/bin/python",
       "scripts/refresh_asr_leaderboard_artifacts.py"
+    ],
+    "model_run_commands": [
+      {
+        "command": [
+          "oaj",
+          "autojudge-mlx-asr",
+          "--python-bin",
+          ".venv/bin/python",
+          "--cases",
+          "runs/asr-research-audio/tts_audio_cases.jsonl",
+          "--model",
+          "mlx-community/whisper-large-v3-turbo-asr-fp16",
+          "--judge-provider",
+          "gemini",
+          "--judge-samples",
+          "3",
+          "--out",
+          "runs/asr-leaderboard/whisper-large-v3-turbo-refresh"
+        ],
+        "model": "mlx-community/whisper-large-v3-turbo-asr-fp16",
+        "run_name": "whisper-large-v3-turbo-refresh"
+      },
+      {
+        "command": [
+          "oaj",
+          "autojudge-mlx-asr",
+          "--python-bin",
+          ".venv/bin/python",
+          "--cases",
+          "runs/asr-research-audio/tts_audio_cases.jsonl",
+          "--model",
+          "mlx-community/Qwen3-ASR-1.7B-8bit",
+          "--judge-provider",
+          "gemini",
+          "--judge-samples",
+          "3",
+          "--out",
+          "runs/asr-leaderboard/qwen3-asr-1.7b-refresh"
+        ],
+        "model": "mlx-community/Qwen3-ASR-1.7B-8bit",
+        "run_name": "qwen3-asr-1.7b-refresh"
+      },
+      {
+        "command": [
+          "oaj",
+          "autojudge-mlx-asr",
+          "--python-bin",
+          ".venv/bin/python",
+          "--cases",
+          "runs/asr-research-audio/tts_audio_cases.jsonl",
+          "--model",
+          "mlx-community/VibeVoice-ASR-4bit",
+          "--judge-provider",
+          "gemini",
+          "--judge-samples",
+          "3",
+          "--out",
+          "runs/asr-leaderboard/vibevoice-asr-refresh"
+        ],
+        "model": "mlx-community/VibeVoice-ASR-4bit",
+        "run_name": "vibevoice-asr-refresh"
+      }
     ],
     "model_run_template": [
       "oaj",

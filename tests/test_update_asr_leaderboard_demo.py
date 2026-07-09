@@ -136,6 +136,10 @@ def test_render_generated_sections_summarizes_verified_asr_results(tmp_path: Pat
     assert "scripts/check_asr_leaderboard_page.py" in html
     assert "Run one MLX ASR model" in html
     assert "--model &lt;mlx-community/model-id&gt;" in html
+    assert "Generated Model Refresh Commands" in html
+    assert "mlx-community/whisper-large-v3-turbo-asr-fp16" in html
+    assert "qwen3-asr-1.7b-refresh" in html
+    assert "source /Users/wangyauli/.openclaw/secrets/open-audio-judge-gemini.env" in html
     assert "Machine-readable leaderboard summary" in html
 
 
@@ -282,6 +286,68 @@ def test_write_summary_artifact_records_models_and_categories(tmp_path: Path) ->
         "--out",
         "runs/asr-leaderboard/<run-name>",
     ]
+    assert summary["refresh_workflow"]["model_run_commands"] == [
+        {
+            "model": "mlx-community/whisper-large-v3-turbo-asr-fp16",
+            "run_name": "whisper-large-v3-turbo-refresh",
+            "command": [
+                "oaj",
+                "autojudge-mlx-asr",
+                "--python-bin",
+                ".venv/bin/python",
+                "--cases",
+                "runs/asr-research-audio/tts_audio_cases.jsonl",
+                "--model",
+                "mlx-community/whisper-large-v3-turbo-asr-fp16",
+                "--judge-provider",
+                "gemini",
+                "--judge-samples",
+                "3",
+                "--out",
+                "runs/asr-leaderboard/whisper-large-v3-turbo-refresh",
+            ],
+        },
+        {
+            "model": "mlx-community/Qwen3-ASR-1.7B-8bit",
+            "run_name": "qwen3-asr-1.7b-refresh",
+            "command": [
+                "oaj",
+                "autojudge-mlx-asr",
+                "--python-bin",
+                ".venv/bin/python",
+                "--cases",
+                "runs/asr-research-audio/tts_audio_cases.jsonl",
+                "--model",
+                "mlx-community/Qwen3-ASR-1.7B-8bit",
+                "--judge-provider",
+                "gemini",
+                "--judge-samples",
+                "3",
+                "--out",
+                "runs/asr-leaderboard/qwen3-asr-1.7b-refresh",
+            ],
+        },
+        {
+            "model": "mlx-community/VibeVoice-ASR-4bit",
+            "run_name": "vibevoice-asr-refresh",
+            "command": [
+                "oaj",
+                "autojudge-mlx-asr",
+                "--python-bin",
+                ".venv/bin/python",
+                "--cases",
+                "runs/asr-research-audio/tts_audio_cases.jsonl",
+                "--model",
+                "mlx-community/VibeVoice-ASR-4bit",
+                "--judge-provider",
+                "gemini",
+                "--judge-samples",
+                "3",
+                "--out",
+                "runs/asr-leaderboard/vibevoice-asr-refresh",
+            ],
+        },
+    ]
     assert summary["refresh_workflow"]["combine_refresh_command"] == [
         ".venv/bin/python",
         "scripts/refresh_asr_leaderboard_artifacts.py",
@@ -302,6 +368,10 @@ def test_write_summary_artifact_records_models_and_categories(tmp_path: Path) ->
         "scripts/refresh_asr_leaderboard_artifacts.py",
         "--hosted-dir",
         "/path/to/kennethli319.github.io/open-audio-judge",
+    ]
+    assert summary["refresh_workflow"]["local_secret_env_command"] == [
+        "source",
+        "/Users/wangyauli/.openclaw/secrets/open-audio-judge-gemini.env",
     ]
     assert "secret" in summary["refresh_workflow"]["secret_handling"].lower()
     assert summary["refresh_runtime_status"] == {
@@ -495,6 +565,9 @@ def test_write_refresh_report_records_coverage_and_commands(tmp_path: Path) -> N
     assert ".venv/bin/python scripts/validate_asr_seed_manifest.py" in text
     assert "Seed manifest validation: `docs/asr-seed-manifest-validation.json`" in text
     assert "--summary-out docs/asr-seed-manifest-validation.json" in text
+    assert "Load local Gemini secret before model runs" in text
+    assert "Run mlx-community/whisper-large-v3-turbo-asr-fp16" in text
+    assert "runs/asr-leaderboard/vibevoice-asr-refresh" in text
     assert "--results " + str(source_results_path) in text
     assert "--update-run-manifest" in text
     assert "Hosted artifact sync" in text

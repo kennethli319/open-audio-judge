@@ -185,6 +185,17 @@
       </tbody>
     </table>
 
+    <h2>Generated Model Refresh Commands</h2>
+    <p class="muted">Load the Gemini secret only in the local shell before running live judge calls: <code>source /Users/wangyauli/.openclaw/secrets/open-audio-judge-gemini.env</code>.</p>
+    <table>
+      <thead><tr><th>Model</th><th>Run Command</th></tr></thead>
+      <tbody>
+        <tr><td><code>mlx-community/whisper-large-v3-turbo-asr-fp16</code></td><td><code>oaj autojudge-mlx-asr --python-bin .venv/bin/python --cases runs/asr-research-audio/tts_audio_cases.jsonl --model mlx-community/whisper-large-v3-turbo-asr-fp16 --judge-provider gemini --judge-samples 3 --out runs/asr-leaderboard/whisper-large-v3-turbo-refresh</code></td></tr>
+        <tr><td><code>mlx-community/Qwen3-ASR-1.7B-8bit</code></td><td><code>oaj autojudge-mlx-asr --python-bin .venv/bin/python --cases runs/asr-research-audio/tts_audio_cases.jsonl --model mlx-community/Qwen3-ASR-1.7B-8bit --judge-provider gemini --judge-samples 3 --out runs/asr-leaderboard/qwen3-asr-1.7b-refresh</code></td></tr>
+        <tr><td><code>mlx-community/VibeVoice-ASR-4bit</code></td><td><code>oaj autojudge-mlx-asr --python-bin .venv/bin/python --cases runs/asr-research-audio/tts_audio_cases.jsonl --model mlx-community/VibeVoice-ASR-4bit --judge-provider gemini --judge-samples 3 --out runs/asr-leaderboard/vibevoice-asr-refresh</code></td></tr>
+      </tbody>
+    </table>
+
     <h2>Generated Artifacts</h2>
     <table>
       <thead><tr><th>Path</th><th>Purpose</th></tr></thead>
