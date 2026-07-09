@@ -250,6 +250,8 @@ def refresh_asr_leaderboard_artifacts(
             run_manifest=run_manifest,
             manifest_validation_out=manifest_validation_out,
             seed_manifest_validation_out=seed_manifest_validation_out,
+            combined_results_path=combined_results_path,
+            combined_report_path=combined_report_path,
         )
         if hosted_dir
         else []
@@ -338,6 +340,8 @@ def copy_hosted_asr_artifacts(
     run_manifest: Path = DEFAULT_RUN_MANIFEST,
     manifest_validation_out: Path = DEFAULT_MANIFEST_VALIDATION,
     seed_manifest_validation_out: Path = DEFAULT_SEED_MANIFEST_VALIDATION,
+    combined_results_path: Path | None = None,
+    combined_report_path: Path | None = None,
 ) -> list[Path]:
     hosted_dir.mkdir(parents=True, exist_ok=True)
     copied_paths = []
@@ -354,6 +358,18 @@ def copy_hosted_asr_artifacts(
         destination = hosted_dir / source.name
         shutil.copyfile(source, destination)
         copied_paths.append(destination)
+
+    if combined_results_path or combined_report_path:
+        hosted_combined_dir = hosted_dir / "asr-leaderboard" / "full-35-combined"
+        hosted_combined_dir.mkdir(parents=True, exist_ok=True)
+        for source in (combined_results_path, combined_report_path):
+            if source is None:
+                continue
+            if not source.exists():
+                raise FileNotFoundError(f"Missing hosted ASR combined artifact: {source}")
+            destination = hosted_combined_dir / source.name
+            shutil.copyfile(source, destination)
+            copied_paths.append(destination)
     return copied_paths
 
 

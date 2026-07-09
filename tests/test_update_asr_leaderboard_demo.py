@@ -718,6 +718,12 @@ def test_refresh_asr_leaderboard_artifacts_combines_report_and_page(tmp_path: Pa
     assert (hosted_dir / "seed-manifest-validation.json").read_text(
         encoding="utf-8"
     ) == seed_manifest_validation.read_text(encoding="utf-8")
+    assert (
+        hosted_dir / "asr-leaderboard" / "full-35-combined" / "results.jsonl"
+    ).read_text(encoding="utf-8") == (out / "results.jsonl").read_text(encoding="utf-8")
+    assert (
+        hosted_dir / "asr-leaderboard" / "full-35-combined" / "report.html"
+    ).read_text(encoding="utf-8") == (out / "report.html").read_text(encoding="utf-8")
 
 
 def test_check_asr_leaderboard_page_validates_generated_artifacts(tmp_path: Path) -> None:
