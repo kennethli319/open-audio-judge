@@ -1136,6 +1136,68 @@ def test_refresh_asr_leaderboard_artifacts_combines_report_and_page(tmp_path: Pa
         combined_results_path=out / "results.jsonl",
     )
 
+    combined_results_path = out / "results.jsonl"
+    combined_results_original = combined_results_path.read_text(encoding="utf-8")
+    combined_results_path.write_text(
+        combined_results_original.replace(
+            '"overall_score": 100',
+            '"overall_score": 99',
+            1,
+        ),
+        encoding="utf-8",
+    )
+    with pytest.raises(ValueError, match="results.jsonl.*stale"):
+        refresh_module._validate_generated_artifacts_fresh(
+            combined_results,
+            result_paths=[first, second],
+            page=page,
+            summary_out=summary,
+            refresh_report_out=refresh_report,
+            report_index_out=report_index,
+            report_links_out=report_links,
+            refresh_commands_out=refresh_commands,
+            run_manifest=run_manifest,
+            manifest_validation_out=manifest_validation,
+            seed_manifest_validation_out=seed_manifest_validation,
+            next_runs_out=next_runs,
+            hosted_manifest_out=hosted_manifest,
+            artifact_index_out=artifact_index,
+            runtime_status_out=runtime_status,
+            generated=generated,
+            expected_cases_per_model=2,
+            combined_results_path=combined_results_path,
+        )
+    combined_results_path.write_text(combined_results_original, encoding="utf-8")
+
+    combined_report_path = out / "report.html"
+    combined_report_original = combined_report_path.read_text(encoding="utf-8")
+    combined_report_path.write_text(
+        combined_report_original.replace("Open Audio Judge Report", "Stale ASR Report", 1),
+        encoding="utf-8",
+    )
+    with pytest.raises(ValueError, match="report.html.*stale"):
+        refresh_module._validate_generated_artifacts_fresh(
+            combined_results,
+            result_paths=[first, second],
+            page=page,
+            summary_out=summary,
+            refresh_report_out=refresh_report,
+            report_index_out=report_index,
+            report_links_out=report_links,
+            refresh_commands_out=refresh_commands,
+            run_manifest=run_manifest,
+            manifest_validation_out=manifest_validation,
+            seed_manifest_validation_out=seed_manifest_validation,
+            next_runs_out=next_runs,
+            hosted_manifest_out=hosted_manifest,
+            artifact_index_out=artifact_index,
+            runtime_status_out=runtime_status,
+            generated=generated,
+            expected_cases_per_model=2,
+            combined_results_path=combined_results_path,
+        )
+    combined_report_path.write_text(combined_report_original, encoding="utf-8")
+
     hosted_manifest.write_text(
         hosted_manifest.read_text(encoding="utf-8").replace(
             '"artifact_count": 14',
@@ -1365,6 +1427,10 @@ def test_require_generated_fresh_rejects_stale_page_block(tmp_path: Path) -> Non
         run_manifest,
         expected_cases_per_model=2,
     )
+    combined_results_path = tmp_path / "combined" / "results.jsonl"
+    combined_results_path.parent.mkdir(parents=True)
+    refresh_module.write_results_jsonl(results, combined_results_path)
+    refresh_module.write_html_report(results, combined_results_path.with_name("report.html"))
 
     refresh_module._validate_generated_artifacts_fresh(
         results,
@@ -1375,6 +1441,7 @@ def test_require_generated_fresh_rejects_stale_page_block(tmp_path: Path) -> Non
         run_manifest=run_manifest,
         generated=generated,
         expected_cases_per_model=2,
+        combined_results_path=combined_results_path,
     )
 
     refresh_commands_path.write_text(
@@ -1393,6 +1460,7 @@ def test_require_generated_fresh_rejects_stale_page_block(tmp_path: Path) -> Non
             refresh_commands_out=refresh_commands_path,
             generated=generated,
             expected_cases_per_model=2,
+            combined_results_path=combined_results_path,
         )
 
     update_module.write_refresh_commands_script(
@@ -1416,6 +1484,7 @@ def test_require_generated_fresh_rejects_stale_page_block(tmp_path: Path) -> Non
             run_manifest=run_manifest,
             generated=generated,
             expected_cases_per_model=2,
+            combined_results_path=combined_results_path,
         )
 
     refresh_module.write_run_manifest_artifact(

@@ -538,6 +538,17 @@ def _validate_generated_artifacts_fresh(
 
     with tempfile.TemporaryDirectory(prefix="asr-leaderboard-fresh-") as raw_tmp_dir:
         tmp_dir = Path(raw_tmp_dir)
+        expected_combined_results = tmp_dir / combined_results_path.name
+        write_results_jsonl(combined_results, expected_combined_results)
+        _compare_generated_text_artifact(combined_results_path, expected_combined_results)
+
+        expected_combined_report = tmp_dir / combined_results_path.with_name("report.html").name
+        write_html_report(combined_results, expected_combined_report)
+        _compare_generated_text_artifact(
+            combined_results_path.with_name("report.html"),
+            expected_combined_report,
+        )
+
         if refresh_report_out is not None:
             expected_refresh_report = tmp_dir / refresh_report_out.name
             write_refresh_report(
