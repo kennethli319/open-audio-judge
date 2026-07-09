@@ -115,7 +115,7 @@
       <div class="metric"><span>Seed eval cases</span><strong>35</strong></div>
       <div class="metric"><span>Research categories</span><strong>7</strong></div>
       <div class="metric"><span>MLX ASR models</span><strong>3</strong></div>
-      <div class="metric"><span>Verified smoke results</span><strong>9</strong></div>
+      <div class="metric"><span>Verified smoke results</span><strong>24</strong></div>
     </section>
 
     <h2>Demo Run</h2>
@@ -137,13 +137,23 @@
     </table>
 
     <h2>Verified Smoke Results</h2>
-    <p class="muted">On 2026-07-08, cron materialized all 35 public-safe ASR audio cases locally, then ran the first three <code>transcription_accuracy_wer</code> cases through each model with three Gemini judge samples per case. Full-slice leaderboard runs are still pending.</p>
+    <p class="muted">On 2026-07-08, cron materialized all 35 public-safe ASR audio cases locally, then ran two bounded smoke slices through each model with three Gemini judge samples per case: three <code>transcription_accuracy_wer</code> cases plus five semantic-risk cases covering numeric/unit, negation/modality, and temporal scheduling accuracy. Full-slice leaderboard runs are still pending.</p>
     <table>
       <thead><tr><th>Model</th><th>Cases</th><th>Gemini Samples</th><th>Average Score</th><th>Labels</th></tr></thead>
       <tbody>
-        <tr><td><code>mlx-community/whisper-large-v3-turbo-asr-fp16</code></td><td>3/3 ok</td><td>9</td><td>92.0</td><td>2 accurate, 1 needs_review</td></tr>
-        <tr><td><code>mlx-community/Qwen3-ASR-1.7B-8bit</code></td><td>3/3 ok</td><td>9</td><td>88.0</td><td>2 accurate, 1 needs_review</td></tr>
-        <tr><td><code>mlx-community/VibeVoice-ASR-4bit</code></td><td>3/3 ok</td><td>9</td><td>94.3</td><td>3 accurate</td></tr>
+        <tr><td><code>mlx-community/whisper-large-v3-turbo-asr-fp16</code></td><td>8/8 ok</td><td>24</td><td>92.9</td><td>6 accurate, 2 needs_review</td></tr>
+        <tr><td><code>mlx-community/Qwen3-ASR-1.7B-8bit</code></td><td>8/8 ok</td><td>24</td><td>95.5</td><td>7 accurate, 1 needs_review</td></tr>
+        <tr><td><code>mlx-community/VibeVoice-ASR-4bit</code></td><td>8/8 ok</td><td>24</td><td>97.1</td><td>8 accurate</td></tr>
+      </tbody>
+    </table>
+
+    <h2>Smoke Slice Breakdown</h2>
+    <table>
+      <thead><tr><th>Model</th><th>WER Slice</th><th>Semantic-Risk Slice</th></tr></thead>
+      <tbody>
+        <tr><td><code>mlx-community/whisper-large-v3-turbo-asr-fp16</code></td><td>3 cases, 92.0 avg, 2 accurate, 1 needs_review</td><td>5 cases, 93.4 avg, 4 accurate, 1 needs_review</td></tr>
+        <tr><td><code>mlx-community/Qwen3-ASR-1.7B-8bit</code></td><td>3 cases, 88.0 avg, 2 accurate, 1 needs_review</td><td>5 cases, 100.0 avg, 5 accurate</td></tr>
+        <tr><td><code>mlx-community/VibeVoice-ASR-4bit</code></td><td>3 cases, 94.3 avg, 3 accurate</td><td>5 cases, 98.8 avg, 5 accurate</td></tr>
       </tbody>
     </table>
 
