@@ -9,6 +9,7 @@ This generated index maps the hosted ASR demo to the full combined report and so
 - Demo page: `docs/asr-leaderboard-demo.html`
 - Summary JSON: `docs/asr-leaderboard-summary.json`
 - Refresh report: `docs/asr-leaderboard-refresh-report.md`
+- Report links JSON: `docs/asr-leaderboard-report-links.json`
 
 ## Coverage
 

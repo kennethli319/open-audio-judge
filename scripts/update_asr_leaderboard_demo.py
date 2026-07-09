@@ -19,6 +19,7 @@ DEFAULT_PAGE = ROOT / "docs" / "asr-leaderboard-demo.html"
 DEFAULT_SUMMARY = ROOT / "docs" / "asr-leaderboard-summary.json"
 DEFAULT_REFRESH_REPORT = ROOT / "docs" / "asr-leaderboard-refresh-report.md"
 DEFAULT_REPORT_INDEX = ROOT / "docs" / "asr-leaderboard-report-index.md"
+DEFAULT_REPORT_LINKS = ROOT / "docs" / "asr-leaderboard-report-links.json"
 DEFAULT_REFRESH_COMMANDS = ROOT / "docs" / "asr-leaderboard-refresh-commands.sh"
 DEFAULT_RUN_MANIFEST = ROOT / "docs" / "asr-leaderboard-run-manifest.json"
 DEFAULT_MANIFEST_VALIDATION = ROOT / "docs" / "asr-leaderboard-manifest-validation.json"
@@ -121,6 +122,12 @@ def main() -> None:
         help="Write a human-readable index of the combined and source ASR reports.",
     )
     parser.add_argument(
+        "--report-links-out",
+        type=Path,
+        default=DEFAULT_REPORT_LINKS,
+        help="Write a machine-readable map of the combined and source ASR reports.",
+    )
+    parser.add_argument(
         "--next-runs-out",
         type=Path,
         default=DEFAULT_NEXT_RUNS,
@@ -159,6 +166,12 @@ def main() -> None:
         results_path=args.results,
         expected_cases_per_model=args.expected_cases_per_model,
     )
+    write_report_links_artifact(
+        results,
+        args.report_links_out,
+        results_path=args.results,
+        expected_cases_per_model=args.expected_cases_per_model,
+    )
     write_refresh_commands_script(
         args.refresh_commands_out,
         source_result_paths=[],
@@ -172,6 +185,7 @@ def main() -> None:
     print(f"Summary: {args.summary_out}")
     print(f"Refresh report: {args.refresh_report_out}")
     print(f"Report index: {args.report_index_out}")
+    print(f"Report links: {args.report_links_out}")
     print(f"Refresh commands: {args.refresh_commands_out}")
     print(f"Next-refresh plan: {args.next_runs_out}")
 
@@ -197,6 +211,7 @@ def render_generated_sections(
     summary_label = html.escape(_repo_relative(DEFAULT_SUMMARY))
     refresh_report_label = html.escape(_repo_relative(DEFAULT_REFRESH_REPORT))
     report_index_label = html.escape(_repo_relative(DEFAULT_REPORT_INDEX))
+    report_links_label = html.escape(_repo_relative(DEFAULT_REPORT_LINKS))
     refresh_commands_label = html.escape(_repo_relative(DEFAULT_REFRESH_COMMANDS))
     manifest_label = html.escape(_repo_relative(DEFAULT_RUN_MANIFEST))
     validation_label = html.escape(_repo_relative(DEFAULT_MANIFEST_VALIDATION))
@@ -274,7 +289,8 @@ def render_generated_sections(
                 f"<code>{DEFAULT_HOSTED_DIR_ENV}</code> with "
                 "<code>--hosted-dir-from-env</code> to copy the same verified artifacts into the hosted Pages checkout. "
                 f"Use <code>{report_index_label}</code> as the generated map from the demo page to the combined full-35 report "
-                "and per-source run reports.</p>"
+                "and per-source run reports; use "
+                f"<code>{report_links_label}</code> for the same map in machine-readable form.</p>"
             ),
             "",
             "    <h2>Generated Refresh Workflow</h2>",
@@ -371,6 +387,7 @@ def write_summary_artifact(
                 "run_manifest_path": _repo_relative(DEFAULT_RUN_MANIFEST),
                 "refresh_commands_path": _repo_relative(DEFAULT_REFRESH_COMMANDS),
                 "report_index_path": _repo_relative(DEFAULT_REPORT_INDEX),
+                "report_links_path": _repo_relative(DEFAULT_REPORT_LINKS),
                 "manifest_validation_path": _repo_relative(DEFAULT_MANIFEST_VALIDATION),
                 "seed_manifest_validation_path": _repo_relative(DEFAULT_SEED_MANIFEST_VALIDATION),
                 "next_runs_path": _repo_relative(DEFAULT_NEXT_RUNS),
@@ -454,6 +471,7 @@ def write_refresh_report(
                 f"- Run manifest: `{_repo_relative(DEFAULT_RUN_MANIFEST)}`",
                 f"- Refresh command playbook: `{_repo_relative(DEFAULT_REFRESH_COMMANDS)}`",
                 f"- Report index: `{_repo_relative(DEFAULT_REPORT_INDEX)}`",
+                f"- Report links JSON: `{_repo_relative(DEFAULT_REPORT_LINKS)}`",
                 f"- Manifest validation: `{_repo_relative(DEFAULT_MANIFEST_VALIDATION)}`",
                 f"- Seed manifest validation: `{_repo_relative(DEFAULT_SEED_MANIFEST_VALIDATION)}`",
                 f"- Next-refresh plan: `{_repo_relative(DEFAULT_NEXT_RUNS)}`",
@@ -603,6 +621,7 @@ def write_report_index(
         f"- Demo page: `{_repo_relative(DEFAULT_PAGE)}`",
         f"- Summary JSON: `{_repo_relative(DEFAULT_SUMMARY)}`",
         f"- Refresh report: `{_repo_relative(DEFAULT_REFRESH_REPORT)}`",
+        f"- Report links JSON: `{_repo_relative(DEFAULT_REPORT_LINKS)}`",
         "",
         "## Coverage",
         "",
@@ -652,6 +671,55 @@ def write_report_index(
         ]
     )
     output_path.write_text("\n".join(lines), encoding="utf-8")
+
+
+def write_report_links_artifact(
+    results: list[EvaluationResult],
+    output_path: Path,
+    *,
+    results_path: Path,
+    expected_cases_per_model: int,
+    source_result_paths: list[Path] | None = None,
+) -> None:
+    model_summaries = summarize_models(results)
+    validate_coverage(results, model_summaries, expected_cases_per_model=expected_cases_per_model)
+    source_file_summaries = summarize_source_result_files(source_result_paths or [])
+    output_path.parent.mkdir(parents=True, exist_ok=True)
+    output_path.write_text(
+        json.dumps(
+            {
+                "description": "Machine-readable ASR report links for the hosted demo and refresh automation.",
+                "version": 1,
+                "demo_page": _repo_relative(DEFAULT_PAGE),
+                "combined": {
+                    "results_path": _repo_relative(results_path),
+                    "report_path": _repo_relative(results_path.with_name("report.html")),
+                    "result_count": len(results),
+                    "model_count": len(model_summaries),
+                    "expected_cases_per_model": expected_cases_per_model,
+                },
+                "source_reports": [
+                    {
+                        "results_path": _repo_relative(summary.path),
+                        "report_path": _repo_relative(summary.report_path),
+                        "report_exists": summary.report_exists,
+                        "models": list(summary.models),
+                        "result_count": summary.result_count,
+                        "ok_count": summary.ok_count,
+                        "categories": {
+                            category: summary.categories[category]
+                            for category in sorted(summary.categories)
+                        },
+                    }
+                    for summary in source_file_summaries
+                ],
+            },
+            indent=2,
+            sort_keys=True,
+        )
+        + "\n",
+        encoding="utf-8",
+    )
 
 
 def write_refresh_commands_script(
@@ -881,6 +949,10 @@ def build_output_artifact_index(*, results_path: Path) -> list[dict[str, str]]:
         {
             "path": _repo_relative(DEFAULT_REPORT_INDEX),
             "purpose": "Human-readable index linking the demo page, combined report, and source run reports.",
+        },
+        {
+            "path": _repo_relative(DEFAULT_REPORT_LINKS),
+            "purpose": "Machine-readable map linking the demo page to combined and source ASR reports.",
         },
         {
             "path": _repo_relative(DEFAULT_REFRESH_COMMANDS),

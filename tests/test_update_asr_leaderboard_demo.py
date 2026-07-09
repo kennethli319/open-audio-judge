@@ -351,6 +351,7 @@ def test_write_summary_artifact_records_models_and_categories(tmp_path: Path) ->
     assert summary["artifact_index_path"] == "docs/asr-leaderboard-artifacts.json"
     assert summary["runtime_status_path"] == "docs/asr-leaderboard-runtime-status.json"
     assert summary["report_index_path"] == "docs/asr-leaderboard-report-index.md"
+    assert summary["report_links_path"] == "docs/asr-leaderboard-report-links.json"
     assert summary["next_run_plan"]["status"] == "complete"
     assert summary["next_run_plan"]["missing_cell_count"] == 0
     assert summary["output_artifacts"] == [
@@ -373,6 +374,10 @@ def test_write_summary_artifact_records_models_and_categories(tmp_path: Path) ->
         {
             "path": "docs/asr-leaderboard-report-index.md",
             "purpose": "Human-readable index linking the demo page, combined report, and source run reports.",
+        },
+        {
+            "path": "docs/asr-leaderboard-report-links.json",
+            "purpose": "Machine-readable map linking the demo page to combined and source ASR reports.",
         },
         {
             "path": "docs/asr-leaderboard-refresh-commands.sh",
@@ -1074,12 +1079,15 @@ def test_refresh_asr_leaderboard_artifacts_combines_report_and_page(tmp_path: Pa
     assert digest_statuses[str(hosted_manifest)] == "deferred_circular_reference"
     assert digest_statuses[str(out / "results.jsonl")] == "ok"
     hosted_manifest_data = json.loads(hosted_manifest.read_text(encoding="utf-8"))
-    assert hosted_manifest_data["artifact_count"] == 13
+    assert hosted_manifest_data["artifact_count"] == 14
     assert {
         "asr-leaderboard/full-35-combined/results.jsonl"
     } in [set(artifact["hosted_paths"]) for artifact in hosted_manifest_data["artifacts"]]
     assert {
         "asr-leaderboard-report-index.md"
+    } in [set(artifact["hosted_paths"]) for artifact in hosted_manifest_data["artifacts"]]
+    assert {
+        "asr-leaderboard-report-links.json"
     } in [set(artifact["hosted_paths"]) for artifact in hosted_manifest_data["artifacts"]]
     assert (hosted_dir / "asr-leaderboard-hosted-manifest.json").read_text(
         encoding="utf-8"
@@ -1749,6 +1757,13 @@ def test_check_asr_leaderboard_page_validates_generated_artifacts(tmp_path: Path
         results_path=results_path,
         expected_cases_per_model=2,
     )
+    report_links = tmp_path / "asr-leaderboard-report-links.json"
+    update_module.write_report_links_artifact(
+        results,
+        report_links,
+        results_path=results_path,
+        expected_cases_per_model=2,
+    )
     refresh_commands = tmp_path / "refresh-commands.sh"
     update_module.write_refresh_commands_script(refresh_commands)
     summary_data = json.loads(summary.read_text(encoding="utf-8"))
@@ -1763,6 +1778,7 @@ def test_check_asr_leaderboard_page_validates_generated_artifacts(tmp_path: Path
         summary_out=summary,
         refresh_report_out=refresh_report,
         report_index_out=report_index,
+        report_links_out=report_links,
         refresh_commands_out=refresh_commands,
         run_manifest=run_manifest,
         manifest_validation_out=manifest_validation,
@@ -2399,12 +2415,23 @@ def test_check_asr_leaderboard_page_rejects_incomplete_validation_artifact(
         json.dumps({"status": "complete"}) + "\n",
         encoding="utf-8",
     )
+    report_links = tmp_path / "asr-leaderboard-report-links.json"
+    update_module.write_report_links_artifact(
+        results,
+        report_links,
+        results_path=results_path,
+        expected_cases_per_model=2,
+    )
     refresh_commands.write_text("#!/usr/bin/env bash\n", encoding="utf-8")
     summary_data = json.loads(summary.read_text(encoding="utf-8"))
     summary_data["run_manifest_path"] = str(run_manifest)
     summary_data["refresh_commands_path"] = str(refresh_commands)
+    summary_data["report_links_path"] = str(report_links)
     summary_data["manifest_validation_path"] = str(manifest_validation)
     summary_data["seed_manifest_validation_path"] = str(seed_manifest_validation)
+    for artifact in summary_data["output_artifacts"]:
+        if artifact["path"] == "docs/asr-leaderboard-report-links.json":
+            artifact["path"] = str(report_links)
     summary.write_text(json.dumps(summary_data), encoding="utf-8")
 
     with pytest.raises(ValueError, match="status must be complete"):
