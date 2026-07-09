@@ -16,6 +16,8 @@ ROOT = Path(__file__).resolve().parents[1]
 DEFAULT_RESULTS = ROOT / "runs" / "asr-leaderboard" / "full-35-combined" / "results.jsonl"
 DEFAULT_PAGE = ROOT / "docs" / "asr-leaderboard-demo.html"
 DEFAULT_SUMMARY = ROOT / "docs" / "asr-leaderboard-summary.json"
+DEFAULT_AUDIO_CASES = ROOT / "runs" / "asr-research-audio" / "tts_audio_cases.jsonl"
+DEFAULT_SEED_CASES = ROOT / "examples" / "asr_research_cases.jsonl"
 START_MARKER = "<!-- ASR_LEADERBOARD_GENERATED_START -->"
 END_MARKER = "<!-- ASR_LEADERBOARD_GENERATED_END -->"
 
@@ -135,7 +137,8 @@ def render_generated_sections(
                 '<code>.venv/bin/python scripts/refresh_asr_leaderboard_artifacts.py</code> '
                 "after rerunning the verified ASR model jobs. The combined local report is "
                 f"<code>{report_label}</code> and the committed summary artifact is "
-                f"<code>{summary_label}</code>.</p>"
+                f"<code>{summary_label}</code>; that summary includes the source result files "
+                "and reproducible refresh workflow.</p>"
             ),
             END_MARKER,
         ]
@@ -163,6 +166,7 @@ def write_summary_artifact(
                     _repo_relative(path)
                     for path in source_result_paths or []
                 ],
+                "refresh_workflow": _refresh_workflow(source_result_paths or []),
                 "total_results": len(results),
                 "model_count": len(model_summaries),
                 "category_count": len(category_summaries),
@@ -195,6 +199,50 @@ def write_summary_artifact(
         + "\n",
         encoding="utf-8",
     )
+
+
+def _refresh_workflow(source_result_paths: list[Path]) -> dict[str, object]:
+    refresh_command = [
+        ".venv/bin/python",
+        "scripts/refresh_asr_leaderboard_artifacts.py",
+    ]
+    for path in source_result_paths:
+        refresh_command.extend(["--results", _repo_relative(path)])
+
+    return {
+        "audio_materialization_command": [
+            ".venv/bin/python",
+            "scripts/synthesize_tts_cases.py",
+            "--cases",
+            _repo_relative(DEFAULT_SEED_CASES),
+            "--out",
+            "runs/asr-research-audio",
+            "--discard-text-sidecars",
+            "--summary-out",
+            "runs/asr-research-audio/summary.json",
+        ],
+        "model_run_template": [
+            "oaj",
+            "autojudge-mlx-asr",
+            "--python-bin",
+            ".venv/bin/python",
+            "--cases",
+            _repo_relative(DEFAULT_AUDIO_CASES),
+            "--model",
+            "<mlx-community/model-id>",
+            "--judge-provider",
+            "gemini",
+            "--judge-samples",
+            "3",
+            "--out",
+            "runs/asr-leaderboard/<run-name>",
+        ],
+        "combine_refresh_command": refresh_command,
+        "secret_handling": (
+            "Load the Gemini API key from the local secret file only at runtime; "
+            "do not commit or print secrets."
+        ),
+    }
 
 
 def summarize_models(results: list[EvaluationResult]) -> list[ModelSummary]:

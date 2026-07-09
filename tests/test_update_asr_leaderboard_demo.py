@@ -109,6 +109,7 @@ def test_render_generated_sections_summarizes_verified_asr_results(tmp_path: Pat
     assert "numeric_unit_integrity" in html
     assert "report.html" in html
     assert "docs/asr-leaderboard-summary.json" in html
+    assert "reproducible refresh workflow" in html
 
 
 def test_write_summary_artifact_records_models_and_categories(tmp_path: Path) -> None:
@@ -167,6 +168,40 @@ def test_write_summary_artifact_records_models_and_categories(tmp_path: Path) ->
     assert summary["source_result_paths"] == [
         str(tmp_path / "model-a" / "judge-report" / "results.jsonl")
     ]
+    assert summary["refresh_workflow"]["audio_materialization_command"] == [
+        ".venv/bin/python",
+        "scripts/synthesize_tts_cases.py",
+        "--cases",
+        "examples/asr_research_cases.jsonl",
+        "--out",
+        "runs/asr-research-audio",
+        "--discard-text-sidecars",
+        "--summary-out",
+        "runs/asr-research-audio/summary.json",
+    ]
+    assert summary["refresh_workflow"]["model_run_template"] == [
+        "oaj",
+        "autojudge-mlx-asr",
+        "--python-bin",
+        ".venv/bin/python",
+        "--cases",
+        "runs/asr-research-audio/tts_audio_cases.jsonl",
+        "--model",
+        "<mlx-community/model-id>",
+        "--judge-provider",
+        "gemini",
+        "--judge-samples",
+        "3",
+        "--out",
+        "runs/asr-leaderboard/<run-name>",
+    ]
+    assert summary["refresh_workflow"]["combine_refresh_command"] == [
+        ".venv/bin/python",
+        "scripts/refresh_asr_leaderboard_artifacts.py",
+        "--results",
+        str(tmp_path / "model-a" / "judge-report" / "results.jsonl"),
+    ]
+    assert "secret" in summary["refresh_workflow"]["secret_handling"].lower()
     assert summary["models"][0]["model"] == "mlx-community/model-a"
     assert summary["models"][0]["average_score"] == 90
     assert summary["models"][0]["labels"] == {"accurate": 2}
