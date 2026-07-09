@@ -24,7 +24,9 @@ def load_script_module():
 
 
 def load_refresh_module():
-    spec = importlib.util.spec_from_file_location("refresh_asr_leaderboard_artifacts", REFRESH_SCRIPT)
+    spec = importlib.util.spec_from_file_location(
+        "refresh_asr_leaderboard_artifacts", REFRESH_SCRIPT
+    )
     assert spec is not None
     assert spec.loader is not None
     module = importlib.util.module_from_spec(spec)
@@ -78,12 +80,7 @@ def run_manifest_record(
 ) -> dict:
     runs = []
     for results_path, records in path_records:
-        models = sorted(
-            {
-                str(record["metadata"]["candidate_model"])
-                for record in records
-            }
-        )
+        models = sorted({str(record["metadata"]["candidate_model"]) for record in records})
         assert len(models) == 1
         category_counts = {}
         for record in records:
@@ -248,7 +245,10 @@ def test_render_generated_sections_summarizes_verified_asr_results(tmp_path: Pat
     assert "Verify generated artifacts are fresh" in html
     assert "--require-generated-fresh" in html
     assert "Check hosted mirror" in html
-    assert ".venv/bin/python scripts/refresh_asr_leaderboard_artifacts.py --check-only --hosted-dir-from-env" in html
+    assert (
+        ".venv/bin/python scripts/refresh_asr_leaderboard_artifacts.py --check-only --hosted-dir-from-env"
+        in html
+    )
     assert "Run one MLX ASR model" in html
     assert "Check MLX ASR runtime" in html
     assert "PYTHONPATH=src .venv/bin/python -m open_audio_judge.cli check-mlx-asr-runtime" in html
@@ -320,9 +320,7 @@ def test_write_summary_artifact_records_models_and_categories(tmp_path: Path) ->
     assert summary["model_count"] == 2
     assert summary["category_count"] == 2
     assert summary["total_gemini_judge_samples"] == 12
-    assert summary["source_result_paths"] == [
-        str(source_results_path)
-    ]
+    assert summary["source_result_paths"] == [str(source_results_path)]
     assert summary["source_result_files"] == [
         {
             "path": str(source_results_path),
@@ -797,7 +795,10 @@ def test_write_refresh_report_records_coverage_and_commands(tmp_path: Path) -> N
     assert "--discover-complete-model-runs" in text
     assert "Hosted artifact sync" in text
     assert "Hosted mirror validation" in text
-    assert ".venv/bin/python scripts/refresh_asr_leaderboard_artifacts.py --check-only --hosted-dir-from-env" in text
+    assert (
+        ".venv/bin/python scripts/refresh_asr_leaderboard_artifacts.py --check-only --hosted-dir-from-env"
+        in text
+    )
     assert "Page validation" in text
     assert "scripts/check_asr_leaderboard_page.py" in text
     assert "## Runtime Status" in text
@@ -805,7 +806,10 @@ def test_write_refresh_report_records_coverage_and_commands(tmp_path: Path) -> N
     assert "Gemini judge: verified_from_loaded_results" in text
     assert "Live model calls during refresh: none" in text
     assert "## Model Category Matrix" in text
-    assert "| Model | WER | Numeric/Unit | Negation/Modality | Temporal | Entity | Paraphrase | Acoustic Noise |" in text
+    assert (
+        "| Model | WER | Numeric/Unit | Negation/Modality | Temporal | Entity | Paraphrase | Acoustic Noise |"
+        in text
+    )
     assert "| `mlx-community/model-a` | 1 | 1 | 0 | 0 | 0 | 0 | 0 |" in text
     assert "## Source Result File Coverage" in text
     assert (
@@ -813,7 +817,10 @@ def test_write_refresh_report_records_coverage_and_commands(tmp_path: Path) -> N
         "`mlx-community/model-a` | 2/2 ok |"
     ) in text
     assert "## Generated Artifact Index" in text
-    assert f"| `{results_path}` | Combined ASR judge results used by the generated page and report. |" in text
+    assert (
+        f"| `{results_path}` | Combined ASR judge results used by the generated page and report. |"
+        in text
+    )
 
 
 def test_render_generated_sections_includes_source_run_reports(tmp_path: Path) -> None:
@@ -861,22 +868,14 @@ def test_replace_generated_block_only_updates_marked_section(tmp_path: Path) -> 
     module = load_script_module()
     page = tmp_path / "demo.html"
     page.write_text(
-        "before\n"
-        f"{module.START_MARKER}\n"
-        "old generated content\n"
-        f"{module.END_MARKER}\n"
-        "after\n",
+        f"before\n{module.START_MARKER}\nold generated content\n{module.END_MARKER}\nafter\n",
         encoding="utf-8",
     )
 
     module.replace_generated_block(page, f"{module.START_MARKER}\nnew content\n{module.END_MARKER}")
 
     assert page.read_text(encoding="utf-8") == (
-        "before\n"
-        f"{module.START_MARKER}\n"
-        "new content\n"
-        f"{module.END_MARKER}\n"
-        "after\n"
+        f"before\n{module.START_MARKER}\nnew content\n{module.END_MARKER}\nafter\n"
     )
 
 
@@ -1004,10 +1003,13 @@ def test_refresh_asr_leaderboard_artifacts_combines_report_and_page(tmp_path: Pa
     refresh_command_text = refresh_commands.read_text(encoding="utf-8")
     assert "ASR_SYNC_HOSTED=1" in refresh_command_text
     assert (
-        ": \"${ASR_LEADERBOARD_HOSTED_DIR:?Set ASR_LEADERBOARD_HOSTED_DIR "
-        "to the Pages checkout open-audio-judge directory}\""
+        ': "${ASR_LEADERBOARD_HOSTED_DIR:?Set ASR_LEADERBOARD_HOSTED_DIR '
+        'to the Pages checkout open-audio-judge directory}"'
     ) in refresh_command_text
-    assert "source /Users/wangyauli/.openclaw/secrets/open-audio-judge-gemini.env" in refresh_command_text
+    assert (
+        "source /Users/wangyauli/.openclaw/secrets/open-audio-judge-gemini.env"
+        in refresh_command_text
+    )
     assert (
         "PYTHONPATH=src .venv/bin/python -m open_audio_judge.cli check-mlx-asr-runtime"
         in refresh_command_text
@@ -1020,7 +1022,10 @@ def test_refresh_asr_leaderboard_artifacts_combines_report_and_page(tmp_path: Pa
         ".venv/bin/python scripts/refresh_asr_leaderboard_artifacts.py --check-only --require-audio-ready"
         in refresh_command_text
     )
-    assert ".venv/bin/python scripts/refresh_asr_leaderboard_artifacts.py --check-only --hosted-dir-from-env" in refresh_command_text
+    assert (
+        ".venv/bin/python scripts/refresh_asr_leaderboard_artifacts.py --check-only --hosted-dir-from-env"
+        in refresh_command_text
+    )
     assert (hosted_dir / "asr-leaderboard-run-manifest.json").exists()
     assert (hosted_dir / "manifest-validation.json").read_text(
         encoding="utf-8"
@@ -1072,35 +1077,34 @@ def test_refresh_asr_leaderboard_artifacts_combines_report_and_page(tmp_path: Pa
         "docs/asr-leaderboard-artifacts.json",
     }
     digest_statuses = {
-        artifact["path"]: artifact["digest_status"]
-        for artifact in artifact_index_data["artifacts"]
+        artifact["path"]: artifact["digest_status"] for artifact in artifact_index_data["artifacts"]
     }
     assert digest_statuses[str(artifact_index)] == "deferred_circular_reference"
     assert digest_statuses[str(hosted_manifest)] == "deferred_circular_reference"
     assert digest_statuses[str(out / "results.jsonl")] == "ok"
     hosted_manifest_data = json.loads(hosted_manifest.read_text(encoding="utf-8"))
     assert hosted_manifest_data["artifact_count"] == 14
-    assert {
-        "asr-leaderboard/full-35-combined/results.jsonl"
-    } in [set(artifact["hosted_paths"]) for artifact in hosted_manifest_data["artifacts"]]
-    assert {
-        "asr-leaderboard-report-index.md"
-    } in [set(artifact["hosted_paths"]) for artifact in hosted_manifest_data["artifacts"]]
-    assert {
-        "asr-leaderboard-report-links.json"
-    } in [set(artifact["hosted_paths"]) for artifact in hosted_manifest_data["artifacts"]]
+    assert {"asr-leaderboard/full-35-combined/results.jsonl"} in [
+        set(artifact["hosted_paths"]) for artifact in hosted_manifest_data["artifacts"]
+    ]
+    assert {"asr-leaderboard-report-index.md"} in [
+        set(artifact["hosted_paths"]) for artifact in hosted_manifest_data["artifacts"]
+    ]
+    assert {"asr-leaderboard-report-links.json"} in [
+        set(artifact["hosted_paths"]) for artifact in hosted_manifest_data["artifacts"]
+    ]
     assert (hosted_dir / "asr-leaderboard-hosted-manifest.json").read_text(
         encoding="utf-8"
     ) == hosted_manifest.read_text(encoding="utf-8")
     assert (hosted_dir / "asr-leaderboard-artifacts.json").read_text(
         encoding="utf-8"
     ) == artifact_index.read_text(encoding="utf-8")
-    assert (
-        hosted_dir / "asr-leaderboard" / "full-35-combined" / "results.jsonl"
-    ).read_text(encoding="utf-8") == (out / "results.jsonl").read_text(encoding="utf-8")
-    assert (
-        hosted_dir / "asr-leaderboard" / "full-35-combined" / "report.html"
-    ).read_text(encoding="utf-8") == (out / "report.html").read_text(encoding="utf-8")
+    assert (hosted_dir / "asr-leaderboard" / "full-35-combined" / "results.jsonl").read_text(
+        encoding="utf-8"
+    ) == (out / "results.jsonl").read_text(encoding="utf-8")
+    assert (hosted_dir / "asr-leaderboard" / "full-35-combined" / "report.html").read_text(
+        encoding="utf-8"
+    ) == (out / "report.html").read_text(encoding="utf-8")
 
     combined_results = update_module.load_results_jsonl(out / "results.jsonl")
     generated = update_module.render_generated_sections(
@@ -1260,8 +1264,7 @@ def test_check_only_can_write_machine_readable_preflight_summary(
     written = json.loads(summary_out.read_text(encoding="utf-8"))
     assert written["status"] == "complete"
     assert written["source_result_paths"] == [
-        refresh_module._repo_relative(path)
-        for path in result_paths
+        refresh_module._repo_relative(path) for path in result_paths
     ]
     assert written["total_results"] == 105
     assert written["audio_manifest_status"] == "complete"
@@ -1644,7 +1647,9 @@ def test_manifest_validation_detects_source_result_digest_drift(tmp_path: Path) 
         ),
     ]
     result_path.parent.mkdir(parents=True)
-    result_path.write_text("".join(json.dumps(record) + "\n" for record in records), encoding="utf-8")
+    result_path.write_text(
+        "".join(json.dumps(record) + "\n" for record in records), encoding="utf-8"
+    )
     manifest.write_text(
         json.dumps(
             run_manifest_record(
@@ -1678,7 +1683,10 @@ def test_manifest_validation_detects_source_result_digest_drift(tmp_path: Path) 
     assert check["declared_model"] == "mlx-community/model-a"
     assert check["actual_models"] == ["mlx-community/model-a"]
     assert check["model_match"] is True
-    assert check["declared_bytes"] != check["actual_bytes"] or check["declared_sha256"] != check["actual_sha256"]
+    assert (
+        check["declared_bytes"] != check["actual_bytes"]
+        or check["declared_sha256"] != check["actual_sha256"]
+    )
     assert check["actual_bytes"] == result_path.stat().st_size
     assert check["actual_sha256"] == file_sha256(result_path)
     assert check["digest_match"] is False
@@ -1788,7 +1796,7 @@ def test_check_asr_leaderboard_page_validates_generated_artifacts(tmp_path: Path
     results_path.with_name("report.html").write_text("<html></html>\n", encoding="utf-8")
     results = update_module.load_results_jsonl(results_path)
     page.write_text(
-        "<!doctype html><html lang=\"en\"><body>\n"
+        '<!doctype html><html lang="en"><body>\n'
         "<h1>Open Audio Judge ASR Leaderboard</h1>\n"
         f"{update_module.START_MARKER}\n"
         "old generated content\n"
@@ -1810,8 +1818,16 @@ def test_check_asr_leaderboard_page_validates_generated_artifacts(tmp_path: Path
         results_path=results_path,
         expected_cases_per_model=2,
     )
-    model_a_records = [record for record in records if record["metadata"]["candidate_model"] == "mlx-community/model-a"]
-    model_b_records = [record for record in records if record["metadata"]["candidate_model"] == "mlx-community/model-b"]
+    model_a_records = [
+        record
+        for record in records
+        if record["metadata"]["candidate_model"] == "mlx-community/model-a"
+    ]
+    model_b_records = [
+        record
+        for record in records
+        if record["metadata"]["candidate_model"] == "mlx-community/model-b"
+    ]
     run_manifest.write_text(
         json.dumps(
             run_manifest_record(
@@ -1899,6 +1915,8 @@ def test_check_asr_leaderboard_page_validates_generated_artifacts(tmp_path: Path
     update_module.write_refresh_commands_script(refresh_commands)
     summary_data = json.loads(summary.read_text(encoding="utf-8"))
     summary_data["refresh_commands_path"] = str(refresh_commands)
+    summary_data["report_index_path"] = str(report_index)
+    summary_data["report_links_path"] = str(report_links)
     summary.write_text(json.dumps(summary_data), encoding="utf-8")
     refresh_module.write_artifact_index(
         artifact_index,
@@ -1928,6 +1946,16 @@ def test_check_asr_leaderboard_page_validates_generated_artifacts(tmp_path: Path
     assert validation["output_artifact_count"] == len(summary_data["output_artifacts"])
     assert validation["hosted_artifact_count"] == 2
     assert validation["hosted_path_count"] == 2
+
+    report_links.unlink()
+    with pytest.raises(ValueError, match="report_links_path=.*asr-leaderboard-report-links.json"):
+        check_module.check_asr_leaderboard_page(page, summary_path=summary)
+    update_module.write_report_links_artifact(
+        results,
+        report_links,
+        results_path=results_path,
+        expected_cases_per_model=2,
+    )
 
     unindexed_hosted_source = tmp_path / "unindexed-hosted-source.json"
     unindexed_hosted_source.write_text("{}\n", encoding="utf-8")
@@ -2057,6 +2085,8 @@ def test_check_asr_leaderboard_page_validates_hosted_artifact_layout(tmp_path: P
     next_runs = hosted / "asr-leaderboard-next-runs.json"
     run_manifest = hosted / "asr-leaderboard-run-manifest.json"
     refresh_commands = hosted / "asr-leaderboard-refresh-commands.sh"
+    report_index = hosted / "asr-leaderboard-report-index.md"
+    report_links = hosted / "asr-leaderboard-report-links.json"
     hosted_manifest = hosted / "asr-leaderboard-hosted-manifest.json"
     artifact_index = hosted / "asr-leaderboard-artifacts.json"
     runtime_status = hosted / "asr-leaderboard-runtime-status.json"
@@ -2130,6 +2160,8 @@ def test_check_asr_leaderboard_page_validates_hosted_artifact_layout(tmp_path: P
     )
     seed_manifest_validation.write_text(json.dumps({"status": "complete"}) + "\n", encoding="utf-8")
     update_module.write_refresh_commands_script(refresh_commands)
+    report_index.write_text("# report index\n", encoding="utf-8")
+    report_links.write_text("{}\n", encoding="utf-8")
     next_runs.write_text(
         json.dumps(
             {
@@ -2146,40 +2178,40 @@ def test_check_asr_leaderboard_page_validates_hosted_artifact_layout(tmp_path: P
     )
     runtime_status.write_text(
         json.dumps(
-                {
-                    "status": "complete",
-                    "mlx_runtime_preflight": {"status": "not_checked"},
-                    "gemini_secret": {"status": "present"},
-                    "audio_manifest": {"status": "complete"},
-                    "result_bundle": {
-                        "results_path": "runs/asr-leaderboard/full-35-combined/results.jsonl",
-                        "total_results": 4,
-                        "model_count": 2,
-                        "category_count": 2,
-                        "models": ["mlx-community/model-a", "mlx-community/model-b"],
-                        "categories": [
-                            "numeric_unit_integrity",
-                            "transcription_accuracy_wer",
-                        ],
-                        "source_result_file_count": 2,
-                        "source_result_files": [
-                            {
-                                "path": "runs/asr-leaderboard/model-a/judge-report/results.jsonl",
-                                "exists": False,
-                                "bytes": None,
-                                "sha256": None,
-                            },
-                            {
-                                "path": "runs/asr-leaderboard/model-b/judge-report/results.jsonl",
-                                "exists": False,
-                                "bytes": None,
-                                "sha256": None,
-                            },
-                        ],
-                    },
-                    "secret_handling": "test fixture",
-                }
-            )
+            {
+                "status": "complete",
+                "mlx_runtime_preflight": {"status": "not_checked"},
+                "gemini_secret": {"status": "present"},
+                "audio_manifest": {"status": "complete"},
+                "result_bundle": {
+                    "results_path": "runs/asr-leaderboard/full-35-combined/results.jsonl",
+                    "total_results": 4,
+                    "model_count": 2,
+                    "category_count": 2,
+                    "models": ["mlx-community/model-a", "mlx-community/model-b"],
+                    "categories": [
+                        "numeric_unit_integrity",
+                        "transcription_accuracy_wer",
+                    ],
+                    "source_result_file_count": 2,
+                    "source_result_files": [
+                        {
+                            "path": "runs/asr-leaderboard/model-a/judge-report/results.jsonl",
+                            "exists": False,
+                            "bytes": None,
+                            "sha256": None,
+                        },
+                        {
+                            "path": "runs/asr-leaderboard/model-b/judge-report/results.jsonl",
+                            "exists": False,
+                            "bytes": None,
+                            "sha256": None,
+                        },
+                    ],
+                },
+                "secret_handling": "test fixture",
+            }
+        )
         + "\n",
         encoding="utf-8",
     )
@@ -2191,6 +2223,8 @@ def test_check_asr_leaderboard_page_validates_hosted_artifact_layout(tmp_path: P
                     ("asr-leaderboard/full-35-combined/report.html", report_path),
                     ("asr-leaderboard-run-manifest.json", run_manifest),
                     ("asr-leaderboard-refresh-commands.sh", refresh_commands),
+                    ("asr-leaderboard-report-index.md", report_index),
+                    ("asr-leaderboard-report-links.json", report_links),
                     ("asr-leaderboard-runtime-status.json", runtime_status),
                 ]
             )
@@ -2236,6 +2270,14 @@ def test_check_asr_leaderboard_page_validates_hosted_artifact_layout(tmp_path: P
                         refresh_commands,
                     ),
                     artifact_index_record(
+                        "docs/asr-leaderboard-report-index.md",
+                        report_index,
+                    ),
+                    artifact_index_record(
+                        "docs/asr-leaderboard-report-links.json",
+                        report_links,
+                    ),
+                    artifact_index_record(
                         "docs/asr-leaderboard-runtime-status.json",
                         runtime_status,
                     ),
@@ -2262,6 +2304,8 @@ def test_check_asr_leaderboard_page_validates_hosted_artifact_layout(tmp_path: P
                 "report_path": "runs/asr-leaderboard/full-35-combined/report.html",
                 "run_manifest_path": "docs/asr-leaderboard-run-manifest.json",
                 "refresh_commands_path": "docs/asr-leaderboard-refresh-commands.sh",
+                "report_index_path": "docs/asr-leaderboard-report-index.md",
+                "report_links_path": "docs/asr-leaderboard-report-links.json",
                 "manifest_validation_path": "docs/asr-leaderboard-manifest-validation.json",
                 "seed_manifest_validation_path": "docs/asr-seed-manifest-validation.json",
                 "next_runs_path": "docs/asr-leaderboard-next-runs.json",
@@ -2293,19 +2337,27 @@ def test_check_asr_leaderboard_page_validates_hosted_artifact_layout(tmp_path: P
                         "path": "docs/asr-leaderboard-refresh-commands.sh",
                         "purpose": "Generated shell playbook for repeatable ASR leaderboard refreshes.",
                     },
-                        {
-                            "path": "docs/asr-leaderboard-next-runs.json",
-                            "purpose": "Machine-readable next-refresh plan for missing ASR model/category cells.",
-                        },
-                        {
-                            "path": "docs/asr-leaderboard-artifacts.json",
-                            "purpose": "Single machine-readable index for the ASR leaderboard artifact bundle.",
-                        },
-                        {
-                            "path": "docs/asr-leaderboard-runtime-status.json",
-                            "purpose": "Machine-readable MLX ASR and Gemini readiness status for refresh automation.",
-                        },
-                    ],
+                    {
+                        "path": "docs/asr-leaderboard-report-index.md",
+                        "purpose": "Human-readable index linking the demo page, combined report, and source run reports.",
+                    },
+                    {
+                        "path": "docs/asr-leaderboard-report-links.json",
+                        "purpose": "Machine-readable map linking the demo page to combined and source ASR reports.",
+                    },
+                    {
+                        "path": "docs/asr-leaderboard-next-runs.json",
+                        "purpose": "Machine-readable next-refresh plan for missing ASR model/category cells.",
+                    },
+                    {
+                        "path": "docs/asr-leaderboard-artifacts.json",
+                        "purpose": "Single machine-readable index for the ASR leaderboard artifact bundle.",
+                    },
+                    {
+                        "path": "docs/asr-leaderboard-runtime-status.json",
+                        "purpose": "Machine-readable MLX ASR and Gemini readiness status for refresh automation.",
+                    },
+                ],
                 "refresh_workflow": update_module._refresh_workflow([]),
                 "total_results": 4,
                 "model_count": 2,
@@ -2356,6 +2408,10 @@ def test_check_asr_leaderboard_page_validates_hosted_artifact_layout(tmp_path: P
                 "Committed source result manifest for manifest-based refreshes.",
                 "docs/asr-leaderboard-refresh-commands.sh",
                 "Generated shell playbook for repeatable ASR leaderboard refreshes.",
+                "docs/asr-leaderboard-report-index.md",
+                "Human-readable index linking the demo page, combined report, and source run reports.",
+                "docs/asr-leaderboard-report-links.json",
+                "Machine-readable map linking the demo page to combined and source ASR reports.",
                 "docs/asr-leaderboard-next-runs.json",
                 "Machine-readable next-refresh plan for missing ASR model/category cells.",
                 "docs/asr-leaderboard-artifacts.json",
@@ -2381,8 +2437,8 @@ def test_check_asr_leaderboard_page_validates_hosted_artifact_layout(tmp_path: P
     )
 
     assert validation["status"] == "complete"
-    assert validation["hosted_artifact_count"] == 5
-    assert validation["hosted_path_count"] == 5
+    assert validation["hosted_artifact_count"] == 7
+    assert validation["hosted_path_count"] == 7
 
 
 def test_check_asr_leaderboard_page_rejects_stale_run_manifest(tmp_path: Path) -> None:
@@ -2492,7 +2548,7 @@ def test_check_asr_leaderboard_page_rejects_incomplete_validation_artifact(
     results_path.with_name("report.html").write_text("<html></html>\n", encoding="utf-8")
     results = update_module.load_results_jsonl(results_path)
     page.write_text(
-        "<!doctype html><html lang=\"en\"><body>\n"
+        '<!doctype html><html lang="en"><body>\n'
         "<h1>Open Audio Judge ASR Leaderboard</h1>\n"
         f"{update_module.START_MARKER}\n"
         "old generated content\n"
@@ -2514,8 +2570,16 @@ def test_check_asr_leaderboard_page_rejects_incomplete_validation_artifact(
         results_path=results_path,
         expected_cases_per_model=2,
     )
-    model_a_records = [record for record in records if record["metadata"]["candidate_model"] == "mlx-community/model-a"]
-    model_b_records = [record for record in records if record["metadata"]["candidate_model"] == "mlx-community/model-b"]
+    model_a_records = [
+        record
+        for record in records
+        if record["metadata"]["candidate_model"] == "mlx-community/model-a"
+    ]
+    model_b_records = [
+        record
+        for record in records
+        if record["metadata"]["candidate_model"] == "mlx-community/model-b"
+    ]
     run_manifest.write_text(
         json.dumps(
             run_manifest_record(
@@ -2597,7 +2661,7 @@ def test_check_asr_leaderboard_page_rejects_missing_summary_artifacts(tmp_path: 
     )
     results = update_module.load_results_jsonl(results_path)
     page.write_text(
-        "<!doctype html><html lang=\"en\"><body>\n"
+        '<!doctype html><html lang="en"><body>\n'
         "<h1>Open Audio Judge ASR Leaderboard</h1>\n"
         f"{update_module.START_MARKER}\n"
         "old generated content\n"
@@ -2657,7 +2721,7 @@ def test_check_asr_leaderboard_page_rejects_missing_output_artifact(tmp_path: Pa
     results_path.with_name("report.html").write_text("<html></html>\n", encoding="utf-8")
     results = update_module.load_results_jsonl(results_path)
     page.write_text(
-        "<!doctype html><html lang=\"en\"><body>\n"
+        '<!doctype html><html lang="en"><body>\n'
         "<h1>Open Audio Judge ASR Leaderboard</h1>\n"
         f"{update_module.START_MARKER}\n"
         "old generated content\n"
@@ -2752,7 +2816,9 @@ def test_refresh_asr_leaderboard_artifacts_reads_run_manifest(tmp_path: Path) ->
     assert paths == [nested, direct]
 
 
-def test_refresh_asr_leaderboard_artifacts_rejects_duplicate_run_manifest_paths(tmp_path: Path) -> None:
+def test_refresh_asr_leaderboard_artifacts_rejects_duplicate_run_manifest_paths(
+    tmp_path: Path,
+) -> None:
     refresh_module = load_refresh_module()
     results_path = tmp_path / "run-a" / "judge-report" / "results.jsonl"
     manifest = tmp_path / "manifest.json"
@@ -3006,7 +3072,7 @@ def test_validate_coverage_rejects_uneven_model_category_counts(tmp_path: Path) 
                     score=70,
                     label="accurate",
                 ),
-            ]
+            ],
         )
     )
 

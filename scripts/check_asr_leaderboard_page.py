@@ -140,6 +140,8 @@ def _validate_summary(
         "categories",
         "refresh_workflow",
         "refresh_commands_path",
+        "report_index_path",
+        "report_links_path",
         "hosted_manifest_path",
         "artifact_index_path",
         "runtime_status_path",
@@ -255,6 +257,8 @@ def _validate_referenced_artifacts(
         "seed_manifest_validation_path",
         "next_runs_path",
         "refresh_commands_path",
+        "report_index_path",
+        "report_links_path",
         "hosted_manifest_path",
         "artifact_index_path",
         "runtime_status_path",
@@ -429,7 +433,9 @@ def _validate_run_manifest_artifact(
         if not isinstance(category_counts, dict) or not category_counts:
             raise ValueError(f"{path} runs[{index}] must include non-empty category_counts.")
         if not all(isinstance(count, int) and count >= 0 for count in category_counts.values()):
-            raise ValueError(f"{path} runs[{index}] has invalid category_counts: {category_counts!r}")
+            raise ValueError(
+                f"{path} runs[{index}] has invalid category_counts: {category_counts!r}"
+            )
         if sum(category_counts.values()) != result_count:
             raise ValueError(f"{path} runs[{index}] category_counts do not sum to result_count.")
 
@@ -480,15 +486,23 @@ def _validate_output_artifacts(
         raw_path = artifact.get("path")
         purpose = artifact.get("purpose")
         if not isinstance(raw_path, str) or not raw_path:
-            raise ValueError(f"{summary_path} output_artifacts[{index}] has invalid path: {raw_path!r}")
+            raise ValueError(
+                f"{summary_path} output_artifacts[{index}] has invalid path: {raw_path!r}"
+            )
         if not isinstance(purpose, str) or not purpose:
-            raise ValueError(f"{summary_path} output_artifacts[{index}] has invalid purpose: {purpose!r}")
-        if not _resolve_summary_path(raw_path, artifact_root=artifact_root, path_maps=path_maps).exists():
+            raise ValueError(
+                f"{summary_path} output_artifacts[{index}] has invalid purpose: {purpose!r}"
+            )
+        if not _resolve_summary_path(
+            raw_path, artifact_root=artifact_root, path_maps=path_maps
+        ).exists():
             missing.append(raw_path)
 
     if missing:
         formatted = ", ".join(missing)
-        raise ValueError(f"{summary_path} output_artifacts reference missing ASR artifact(s): {formatted}")
+        raise ValueError(
+            f"{summary_path} output_artifacts reference missing ASR artifact(s): {formatted}"
+        )
 
 
 def _validate_status_artifact(
@@ -603,7 +617,9 @@ def _validate_hosted_manifest_artifact(
             or not hosted_paths
             or not all(isinstance(hosted_path, str) and hosted_path for hosted_path in hosted_paths)
         ):
-            raise ValueError(f"{path} artifacts[{index}] has invalid hosted_paths: {hosted_paths!r}")
+            raise ValueError(
+                f"{path} artifacts[{index}] has invalid hosted_paths: {hosted_paths!r}"
+            )
         if not isinstance(expected_bytes, int) or expected_bytes < 0:
             raise ValueError(f"{path} artifacts[{index}] has invalid bytes: {expected_bytes!r}")
         if (
@@ -681,7 +697,9 @@ def _validate_artifact_index(
         raw_artifact_path = artifact.get("path")
         if not isinstance(raw_artifact_path, str) or not raw_artifact_path:
             raise ValueError(f"{path} has invalid artifact path: {raw_artifact_path!r}")
-        resolved = _resolve_summary_path(raw_artifact_path, artifact_root=artifact_root, path_maps=path_maps)
+        resolved = _resolve_summary_path(
+            raw_artifact_path, artifact_root=artifact_root, path_maps=path_maps
+        )
         artifact_paths.add(resolved.resolve())
         if not resolved.exists():
             raise ValueError(f"{path} references missing artifact: {raw_artifact_path}")
@@ -716,6 +734,8 @@ def _validate_artifact_index(
         summary["seed_manifest_validation_path"],
         summary["next_runs_path"],
         summary["refresh_commands_path"],
+        summary["report_index_path"],
+        summary["report_links_path"],
         summary["hosted_manifest_path"],
         summary["artifact_index_path"],
         summary["runtime_status_path"],
@@ -723,7 +743,9 @@ def _validate_artifact_index(
     missing = [
         raw_path
         for raw_path in required_paths
-        if _resolve_summary_path(raw_path, artifact_root=artifact_root, path_maps=path_maps).resolve()
+        if _resolve_summary_path(
+            raw_path, artifact_root=artifact_root, path_maps=path_maps
+        ).resolve()
         not in artifact_paths
     ]
     if missing:
@@ -744,8 +766,12 @@ def _validate_hosted_manifest_matches_artifact_index(
     if not isinstance(raw_index_path, str) or not raw_index_path:
         raise ValueError(f"{summary_path} has invalid artifact_index_path: {raw_index_path!r}")
 
-    hosted_path = _resolve_summary_path(raw_hosted_path, artifact_root=artifact_root, path_maps=path_maps)
-    index_path = _resolve_summary_path(raw_index_path, artifact_root=artifact_root, path_maps=path_maps)
+    hosted_path = _resolve_summary_path(
+        raw_hosted_path, artifact_root=artifact_root, path_maps=path_maps
+    )
+    index_path = _resolve_summary_path(
+        raw_index_path, artifact_root=artifact_root, path_maps=path_maps
+    )
     hosted_manifest = json.loads(hosted_path.read_text(encoding="utf-8"))
     artifact_index = json.loads(index_path.read_text(encoding="utf-8"))
 
@@ -771,7 +797,9 @@ def _validate_hosted_manifest_matches_artifact_index(
             raise ValueError(f"{hosted_path} artifacts[{index}] must be an object.")
         source_path = artifact.get("source_path")
         if not isinstance(source_path, str) or not source_path:
-            raise ValueError(f"{hosted_path} artifacts[{index}] has invalid source_path: {source_path!r}")
+            raise ValueError(
+                f"{hosted_path} artifacts[{index}] has invalid source_path: {source_path!r}"
+            )
         resolved_source = _resolve_summary_path(
             source_path,
             artifact_root=artifact_root,
@@ -849,7 +877,9 @@ def _validate_runtime_status_artifact(
         raise ValueError(f"{path} result_bundle.source_result_files must be a list.")
     for index, source_file in enumerate(source_files):
         if not isinstance(source_file, dict):
-            raise ValueError(f"{path} result_bundle.source_result_files[{index}] must be an object.")
+            raise ValueError(
+                f"{path} result_bundle.source_result_files[{index}] must be an object."
+            )
         source_path = source_file.get("path")
         if not isinstance(source_path, str) or not source_path:
             raise ValueError(f"{path} result_bundle.source_result_files[{index}] has invalid path.")
@@ -961,9 +991,7 @@ def _hosted_manifest_stats(
         hosted_paths = artifact.get("hosted_paths", [])
         if isinstance(hosted_paths, list):
             hosted_path_count += sum(
-                1
-                for hosted_path in hosted_paths
-                if isinstance(hosted_path, str) and hosted_path
+                1 for hosted_path in hosted_paths if isinstance(hosted_path, str) and hosted_path
             )
     return {
         "hosted_artifact_count": len(artifacts),
@@ -1060,7 +1088,7 @@ def _resolve_summary_path(
             mapped = destination.rstrip("/")
             break
         if mapped.startswith(source):
-            mapped = destination + mapped[len(source):]
+            mapped = destination + mapped[len(source) :]
             break
     return artifact_root / mapped
 
