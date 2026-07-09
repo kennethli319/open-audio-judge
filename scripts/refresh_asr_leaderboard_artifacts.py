@@ -228,6 +228,11 @@ def main() -> None:
         ),
     )
     parser.add_argument(
+        "--check-summary-out",
+        type=Path,
+        help="With --check-only, write the preflight validation summary as JSON.",
+    )
+    parser.add_argument(
         "--require-generated-fresh",
         action="store_true",
         help=(
@@ -272,6 +277,12 @@ def main() -> None:
             hosted_dir=hosted_dir,
             require_generated_fresh=args.require_generated_fresh,
         )
+        if args.check_summary_out:
+            args.check_summary_out.parent.mkdir(parents=True, exist_ok=True)
+            args.check_summary_out.write_text(
+                json.dumps(check_summary, indent=2, sort_keys=True) + "\n",
+                encoding="utf-8",
+            )
         if args.check_mlx_runtime:
             write_runtime_status_artifact(
                 args.runtime_status_out,
@@ -399,6 +410,7 @@ def check_asr_leaderboard_refresh_inputs(
         ),
         "seed_manifest_status": seed_validation["status"],
         "page_status": page_validation["status"],
+        "source_result_paths": [_repo_relative(path) for path in result_paths],
     }
     if hosted_dir:
         hosted_validation = check_asr_leaderboard_page(

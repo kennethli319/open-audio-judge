@@ -278,6 +278,7 @@ verified result files, validates the full model/category matrix, validates the
 - `docs/asr-leaderboard-next-runs.json`
 - `docs/asr-leaderboard-hosted-manifest.json`
 - `docs/asr-leaderboard-artifacts.json`
+- `docs/asr-leaderboard-runtime-status.json`
 
 When a new complete run should replace the committed source manifest, discover
 the latest complete run for each primary model and update the manifest in the
@@ -293,10 +294,18 @@ Before committing refreshed ASR artifacts, run the lightweight page and artifact
 checks:
 
 ```bash
+.venv/bin/python scripts/refresh_asr_leaderboard_artifacts.py \
+  --check-only \
+  --require-generated-fresh \
+  --check-summary-out runs/asr-leaderboard/preflight-summary.json
 .venv/bin/python scripts/check_asr_leaderboard_page.py
 .venv/bin/python scripts/validate_asr_seed_manifest.py \
   --summary-out docs/asr-seed-manifest-validation.json
 ```
+
+The optional `--check-summary-out` file records the validated source result
+paths, model/category counts, seed-manifest status, and hosted mirror status
+without rewriting the generated leaderboard artifacts.
 
 To refresh the same committed artifacts and copy them into the hosted Pages
 checkout in one verified step, either pass the Pages destination directly:

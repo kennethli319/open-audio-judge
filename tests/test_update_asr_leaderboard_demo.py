@@ -1095,7 +1095,60 @@ def test_check_asr_leaderboard_refresh_inputs_validates_default_artifacts() -> N
         "category_count": 7,
         "seed_manifest_status": "complete",
         "page_status": "complete",
+        "source_result_paths": [
+            "runs/asr-leaderboard/whisper-large-v3-turbo-smoke/judge-report/results.jsonl",
+            "runs/asr-leaderboard/whisper-large-v3-turbo-full-gap/judge-report/results.jsonl",
+            "runs/asr-leaderboard/whisper-large-v3-turbo-semantic-smoke/judge-report/results.jsonl",
+            "runs/asr-leaderboard/whisper-large-v3-turbo-entity-smoke/judge-report/results.jsonl",
+            "runs/asr-leaderboard/whisper-large-v3-turbo-paraphrase-smoke/judge-report/results.jsonl",
+            "runs/asr-leaderboard/whisper-large-v3-turbo-noise-smoke/judge-report/results.jsonl",
+            "runs/asr-leaderboard/qwen3-asr-1.7b-smoke/judge-report/results.jsonl",
+            "runs/asr-leaderboard/qwen3-asr-1.7b-full-gap/judge-report/results.jsonl",
+            "runs/asr-leaderboard/qwen3-asr-1.7b-semantic-smoke/judge-report/results.jsonl",
+            "runs/asr-leaderboard/qwen3-asr-1.7b-entity-smoke/judge-report/results.jsonl",
+            "runs/asr-leaderboard/qwen3-asr-1.7b-paraphrase-smoke/judge-report/results.jsonl",
+            "runs/asr-leaderboard/qwen3-asr-1.7b-noise-smoke/judge-report/results.jsonl",
+            "runs/asr-leaderboard/vibevoice-asr-smoke/judge-report/results.jsonl",
+            "runs/asr-leaderboard/vibevoice-asr-full-gap/judge-report/results.jsonl",
+            "runs/asr-leaderboard/vibevoice-asr-semantic-smoke/judge-report/results.jsonl",
+            "runs/asr-leaderboard/vibevoice-asr-entity-smoke/judge-report/results.jsonl",
+            "runs/asr-leaderboard/vibevoice-asr-paraphrase-smoke/judge-report/results.jsonl",
+            "runs/asr-leaderboard/vibevoice-asr-noise-smoke/judge-report/results.jsonl",
+        ],
     }
+
+
+def test_check_only_can_write_machine_readable_preflight_summary(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    refresh_module = load_refresh_module()
+    result_paths = refresh_module._default_result_paths(
+        35,
+        run_manifest=refresh_module.DEFAULT_RUN_MANIFEST,
+    )
+    summary_out = tmp_path / "preflight-summary.json"
+
+    monkeypatch.setattr(
+        sys,
+        "argv",
+        [
+            "refresh_asr_leaderboard_artifacts.py",
+            "--check-only",
+            "--require-generated-fresh",
+            "--check-summary-out",
+            str(summary_out),
+        ],
+    )
+    refresh_module.main()
+
+    written = json.loads(summary_out.read_text(encoding="utf-8"))
+    assert written["status"] == "complete"
+    assert written["source_result_paths"] == [
+        refresh_module._repo_relative(path)
+        for path in result_paths
+    ]
+    assert written["total_results"] == 105
 
 
 def test_require_generated_fresh_rejects_stale_page_block(tmp_path: Path) -> None:
