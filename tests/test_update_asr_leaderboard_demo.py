@@ -1198,6 +1198,38 @@ def test_refresh_asr_leaderboard_artifacts_combines_report_and_page(tmp_path: Pa
         )
     combined_report_path.write_text(combined_report_original, encoding="utf-8")
 
+    artifact_index_original = artifact_index.read_text(encoding="utf-8")
+    artifact_index.write_text(
+        artifact_index_original.replace(
+            '"total_results": 4',
+            '"total_results": 99',
+            1,
+        ),
+        encoding="utf-8",
+    )
+    with pytest.raises(ValueError, match="artifact-index.json.*stale"):
+        refresh_module._validate_generated_artifacts_fresh(
+            combined_results,
+            result_paths=[first, second],
+            page=page,
+            summary_out=summary,
+            refresh_report_out=refresh_report,
+            report_index_out=report_index,
+            report_links_out=report_links,
+            refresh_commands_out=refresh_commands,
+            run_manifest=run_manifest,
+            manifest_validation_out=manifest_validation,
+            seed_manifest_validation_out=seed_manifest_validation,
+            next_runs_out=next_runs,
+            hosted_manifest_out=None,
+            artifact_index_out=artifact_index,
+            runtime_status_out=runtime_status,
+            generated=generated,
+            expected_cases_per_model=2,
+            combined_results_path=out / "results.jsonl",
+        )
+    artifact_index.write_text(artifact_index_original, encoding="utf-8")
+
     hosted_manifest.write_text(
         hosted_manifest.read_text(encoding="utf-8").replace(
             '"artifact_count": 14',

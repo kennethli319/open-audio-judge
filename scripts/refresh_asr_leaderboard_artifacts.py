@@ -616,6 +616,40 @@ def _validate_generated_artifacts_fresh(
                 combined_report_path=combined_results_path.with_name("report.html"),
             )
             _compare_generated_text_artifact(hosted_manifest_out, expected_hosted_manifest)
+        if artifact_index_out is not None:
+            expected_artifact_index = tmp_dir / artifact_index_out.name
+            expected_artifact_index.write_text(
+                json.dumps(
+                    build_artifact_index_data(
+                        artifact_index_out,
+                        results=combined_results,
+                        results_path=combined_results_path,
+                        report_path=combined_results_path.with_name("report.html"),
+                        page=page,
+                        summary_out=summary_out,
+                        refresh_report_out=refresh_report_out or DEFAULT_REFRESH_REPORT,
+                        report_index_out=report_index_out or DEFAULT_REPORT_INDEX,
+                        report_links_out=report_links_out or DEFAULT_REPORT_LINKS,
+                        refresh_commands_out=refresh_commands_out or DEFAULT_REFRESH_COMMANDS,
+                        run_manifest=run_manifest or DEFAULT_RUN_MANIFEST,
+                        manifest_validation_out=(
+                            manifest_validation_out or DEFAULT_MANIFEST_VALIDATION
+                        ),
+                        seed_manifest_validation_out=(
+                            seed_manifest_validation_out or DEFAULT_SEED_MANIFEST_VALIDATION
+                        ),
+                        next_runs_out=next_runs_out or DEFAULT_NEXT_RUNS,
+                        hosted_manifest_out=hosted_manifest_out or DEFAULT_HOSTED_MANIFEST,
+                        runtime_status_out=runtime_status_out or DEFAULT_RUNTIME_STATUS,
+                        expected_cases_per_model=expected_cases_per_model,
+                    ),
+                    indent=2,
+                    sort_keys=True,
+                )
+                + "\n",
+                encoding="utf-8",
+            )
+            _compare_generated_text_artifact(artifact_index_out, expected_artifact_index)
         if run_manifest is not None:
             expected_run_manifest = tmp_dir / run_manifest.name
             write_run_manifest_artifact(
@@ -1102,6 +1136,56 @@ def write_artifact_index(
     report_links_out: Path | None = None,
     runtime_status_out: Path | None = None,
 ) -> None:
+    output_path.parent.mkdir(parents=True, exist_ok=True)
+    output_path.write_text(
+        json.dumps(
+            build_artifact_index_data(
+                output_path,
+                results=results,
+                results_path=results_path,
+                report_path=report_path,
+                page=page,
+                summary_out=summary_out,
+                refresh_report_out=refresh_report_out,
+                refresh_commands_out=refresh_commands_out,
+                run_manifest=run_manifest,
+                manifest_validation_out=manifest_validation_out,
+                seed_manifest_validation_out=seed_manifest_validation_out,
+                next_runs_out=next_runs_out,
+                hosted_manifest_out=hosted_manifest_out,
+                expected_cases_per_model=expected_cases_per_model,
+                report_index_out=report_index_out,
+                report_links_out=report_links_out,
+                runtime_status_out=runtime_status_out,
+            ),
+            indent=2,
+            sort_keys=True,
+        )
+        + "\n",
+        encoding="utf-8",
+    )
+
+
+def build_artifact_index_data(
+    output_path: Path,
+    *,
+    results: list,
+    results_path: Path,
+    report_path: Path,
+    page: Path,
+    summary_out: Path,
+    refresh_report_out: Path,
+    refresh_commands_out: Path,
+    run_manifest: Path,
+    manifest_validation_out: Path,
+    seed_manifest_validation_out: Path,
+    next_runs_out: Path,
+    hosted_manifest_out: Path,
+    expected_cases_per_model: int,
+    report_index_out: Path | None = None,
+    report_links_out: Path | None = None,
+    runtime_status_out: Path | None = None,
+) -> dict[str, object]:
     report_index_out = report_index_out or refresh_report_out.with_name(DEFAULT_REPORT_INDEX.name)
     report_links_out = report_links_out or refresh_report_out.with_name(DEFAULT_REPORT_LINKS.name)
     runtime_status_out = runtime_status_out or output_path.with_name(DEFAULT_RUNTIME_STATUS.name)
@@ -1176,25 +1260,16 @@ def write_artifact_index(
             for result in results
         }
     )
-    output_path.parent.mkdir(parents=True, exist_ok=True)
-    output_path.write_text(
-        json.dumps(
-            {
-                "description": "Generated index for the ASR leaderboard demo artifact bundle.",
-                "version": 1,
-                "status": "complete" if all(record["exists"] for record in records) else "incomplete",
-                "total_results": len(results),
-                "model_count": len(models),
-                "category_count": len(categories),
-                "expected_cases_per_model": expected_cases_per_model,
-                "artifacts": records,
-            },
-            indent=2,
-            sort_keys=True,
-        )
-        + "\n",
-        encoding="utf-8",
-    )
+    return {
+        "description": "Generated index for the ASR leaderboard demo artifact bundle.",
+        "version": 1,
+        "status": "complete" if all(record["exists"] for record in records) else "incomplete",
+        "total_results": len(results),
+        "model_count": len(models),
+        "category_count": len(categories),
+        "expected_cases_per_model": expected_cases_per_model,
+        "artifacts": records,
+    }
 
 
 def _sha256_file(path: Path) -> str:
