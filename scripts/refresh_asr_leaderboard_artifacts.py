@@ -15,6 +15,7 @@ from open_audio_judge.reports import write_html_report  # noqa: E402
 from open_audio_judge.runner import load_cases, load_results_jsonl, write_results_jsonl  # noqa: E402
 from scripts.check_asr_leaderboard_page import check_asr_leaderboard_page  # noqa: E402
 from scripts.update_asr_leaderboard_demo import (  # noqa: E402
+    ASR_LEADERBOARD_MODELS,
     DEFAULT_PAGE,
     DEFAULT_REFRESH_REPORT,
     DEFAULT_SEED_MANIFEST_VALIDATION,
@@ -143,6 +144,20 @@ def main() -> None:
         ),
     )
     parser.add_argument(
+        "--discover-complete-model-runs",
+        action="store_true",
+        help=(
+            "When --results is omitted, scan --runs-root for complete result files and "
+            "select the newest complete run for each primary ASR leaderboard model."
+        ),
+    )
+    parser.add_argument(
+        "--runs-root",
+        type=Path,
+        default=ROOT / "runs" / "asr-leaderboard",
+        help="Root scanned by --discover-complete-model-runs.",
+    )
+    parser.add_argument(
         "--update-run-manifest",
         action="store_true",
         help="Rewrite --run-manifest from the verified result files before validation and hosted sync.",
@@ -166,6 +181,11 @@ def main() -> None:
     result_paths = (
         [_normalize_results_path(path) for path in args.results]
         if args.results
+        else discover_complete_model_result_paths(
+            args.runs_root,
+            expected_cases_per_model=args.expected_cases_per_model,
+        )
+        if args.discover_complete_model_runs
         else _default_result_paths(
             args.expected_cases_per_model,
             run_manifest=args.run_manifest,
@@ -567,6 +587,76 @@ def _result_paths_from_run_manifest(manifest_path: Path) -> list[Path]:
         paths.append(_normalize_results_path(path))
     _validate_unique_result_paths(paths, context=f"ASR run manifest {manifest_path}")
     return paths
+
+
+def discover_complete_model_result_paths(
+    runs_root: Path,
+    *,
+    expected_cases_per_model: int,
+    model_ids: list[str] | None = None,
+) -> list[Path]:
+    if not runs_root.exists():
+        raise FileNotFoundError(f"Missing ASR runs root: {runs_root}")
+
+    target_models = model_ids or [model for model, _ in ASR_LEADERBOARD_MODELS]
+    candidates: dict[str, list[tuple[float, Path]]] = {model: [] for model in target_models}
+    for path in sorted(runs_root.rglob("results.jsonl")):
+        result_path = _normalize_results_path(path)
+        try:
+            results = load_results_jsonl(result_path)
+            model = _complete_result_file_model(
+                results,
+                expected_cases_per_model=expected_cases_per_model,
+            )
+        except Exception:
+            continue
+        if model in candidates:
+            candidates[model].append((result_path.stat().st_mtime, result_path))
+
+    missing_models = [
+        model
+        for model, model_candidates in candidates.items()
+        if not model_candidates
+    ]
+    if missing_models:
+        raise ValueError(
+            "No complete ASR result file found for model(s): "
+            + ", ".join(missing_models)
+            + f" under {_repo_relative(runs_root)}."
+        )
+
+    discovered_paths = [
+        sorted(model_candidates, key=lambda item: (item[0], item[1].as_posix()))[-1][1]
+        for model_candidates in candidates.values()
+    ]
+    _validate_candidate_paths(
+        discovered_paths,
+        expected_cases_per_model=expected_cases_per_model,
+    )
+    return discovered_paths
+
+
+def _complete_result_file_model(
+    results: list,
+    *,
+    expected_cases_per_model: int,
+) -> str:
+    if not results:
+        raise ValueError("empty result file")
+    models = sorted(
+        {
+            str(result.metadata.get("candidate_model") or "")
+            for result in results
+        }
+    )
+    if len(models) != 1 or not models[0]:
+        raise ValueError("result file must contain exactly one model")
+    render_generated_sections(
+        results,
+        results_path=DEFAULT_COMBINED_OUT / "results.jsonl",
+        expected_cases_per_model=expected_cases_per_model,
+    )
+    return models[0]
 
 
 def _validate_candidate_paths(paths: list[Path], *, expected_cases_per_model: int) -> None:

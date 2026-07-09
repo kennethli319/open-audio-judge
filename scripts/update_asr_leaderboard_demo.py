@@ -173,6 +173,7 @@ def render_generated_sections(
         ("Validate seed manifest", workflow["seed_manifest_validation_command"]),
         ("Materialize audio", workflow["audio_materialization_command"]),
         ("Run one MLX ASR model", workflow["model_run_template"]),
+        ("Discover latest complete runs", workflow["discover_refresh_command"]),
         ("Refresh committed artifacts", workflow["manifest_refresh_command"]),
         ("Check generated page", workflow["page_validation_command"]),
         ("Sync hosted artifacts", workflow["hosted_artifact_command"]),
@@ -478,6 +479,7 @@ def write_refresh_report(
                 + ", ".join(f"`{model}`" for model in workflow["fallback_model_ids"]),
                 f"- Fallback handling: {workflow['fallback_handling']}",
                 f"- Combine and refresh committed artifacts: `{_shell_join(workflow['combine_refresh_command'])}`",
+                f"- Discover latest complete runs: `{_shell_join(workflow['discover_refresh_command'])}`",
                 f"- Manifest-based refresh: `{_shell_join(workflow['manifest_refresh_command'])}`",
                 f"- Page validation: `{_shell_join(workflow['page_validation_command'])}`",
                 f"- Hosted artifact sync: `{_shell_join(workflow['hosted_artifact_command'])}`",
@@ -566,6 +568,12 @@ def _refresh_workflow(source_result_paths: list[Path]) -> dict[str, object]:
             "explicitly before trying the fallback model list; do not substitute silently."
         ),
         "combine_refresh_command": refresh_command,
+        "discover_refresh_command": [
+            ".venv/bin/python",
+            "scripts/refresh_asr_leaderboard_artifacts.py",
+            "--discover-complete-model-runs",
+            "--update-run-manifest",
+        ],
         "manifest_refresh_command": [
             ".venv/bin/python",
             "scripts/refresh_asr_leaderboard_artifacts.py",

@@ -295,6 +295,12 @@
       "runs/asr-leaderboard/vibevoice-asr-noise-smoke/judge-report/results.jsonl",
       "--update-run-manifest"
     ],
+    "discover_refresh_command": [
+      ".venv/bin/python",
+      "scripts/refresh_asr_leaderboard_artifacts.py",
+      "--discover-complete-model-runs",
+      "--update-run-manifest"
+    ],
     "fallback_handling": "If a primary MLX ASR model is blocked or unsupported, record the unsupported state explicitly before trying the fallback model list; do not substitute silently.",
     "fallback_model_ids": [
       "mlx-community/whisper-small.en-asr-4bit",

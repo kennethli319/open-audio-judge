@@ -1,6 +1,7 @@
 import importlib.util
 import hashlib
 import json
+import os
 import sys
 from pathlib import Path
 
@@ -199,6 +200,8 @@ def test_render_generated_sections_summarizes_verified_asr_results(tmp_path: Pat
     assert "Generated Refresh Workflow" in html
     assert "Generated Artifacts" in html
     assert "Validate seed manifest" in html
+    assert "Discover latest complete runs" in html
+    assert "--discover-complete-model-runs" in html
     assert "scripts/validate_asr_seed_manifest.py" in html
     assert "Check generated page" in html
     assert "scripts/check_asr_leaderboard_page.py" in html
@@ -440,6 +443,12 @@ def test_write_summary_artifact_records_models_and_categories(tmp_path: Path) ->
         str(source_results_path),
         "--update-run-manifest",
     ]
+    assert summary["refresh_workflow"]["discover_refresh_command"] == [
+        ".venv/bin/python",
+        "scripts/refresh_asr_leaderboard_artifacts.py",
+        "--discover-complete-model-runs",
+        "--update-run-manifest",
+    ]
     assert summary["refresh_workflow"]["manifest_refresh_command"] == [
         ".venv/bin/python",
         "scripts/refresh_asr_leaderboard_artifacts.py",
@@ -665,6 +674,8 @@ def test_write_refresh_report_records_coverage_and_commands(tmp_path: Path) -> N
     assert "mlx-community/parakeet-rnnt-0.6b" in text
     assert "--results " + str(source_results_path) in text
     assert "--update-run-manifest" in text
+    assert "Discover latest complete runs" in text
+    assert "--discover-complete-model-runs" in text
     assert "Hosted artifact sync" in text
     assert "Page validation" in text
     assert "scripts/check_asr_leaderboard_page.py" in text
@@ -881,6 +892,84 @@ def test_refresh_asr_leaderboard_artifacts_combines_report_and_page(tmp_path: Pa
     assert (
         hosted_dir / "asr-leaderboard" / "full-35-combined" / "report.html"
     ).read_text(encoding="utf-8") == (out / "report.html").read_text(encoding="utf-8")
+
+
+def test_discover_complete_model_result_paths_selects_newest_complete_runs(tmp_path: Path) -> None:
+    refresh_module = load_refresh_module()
+    runs_root = tmp_path / "runs" / "asr-leaderboard"
+    older = runs_root / "model-a-older" / "judge-report" / "results.jsonl"
+    newer = runs_root / "model-a-newer" / "judge-report" / "results.jsonl"
+    model_b = runs_root / "model-b" / "judge-report" / "results.jsonl"
+    incomplete = runs_root / "model-a-incomplete" / "judge-report" / "results.jsonl"
+    for path in (older, newer, model_b, incomplete):
+        path.parent.mkdir(parents=True, exist_ok=True)
+
+    older_records = [
+        result_record(
+            case_id="asr-a-model-a-older",
+            model="mlx-community/model-a",
+            category="transcription_accuracy_wer",
+            score=70,
+            label="needs_review",
+        ),
+        result_record(
+            case_id="asr-b-model-a-older",
+            model="mlx-community/model-a",
+            category="numeric_unit_integrity",
+            score=70,
+            label="needs_review",
+        ),
+    ]
+    newer_records = [
+        result_record(
+            case_id="asr-a-model-a-newer",
+            model="mlx-community/model-a",
+            category="transcription_accuracy_wer",
+            score=100,
+            label="accurate",
+        ),
+        result_record(
+            case_id="asr-b-model-a-newer",
+            model="mlx-community/model-a",
+            category="numeric_unit_integrity",
+            score=100,
+            label="accurate",
+        ),
+    ]
+    model_b_records = [
+        result_record(
+            case_id="asr-a-model-b",
+            model="mlx-community/model-b",
+            category="transcription_accuracy_wer",
+            score=90,
+            label="accurate",
+        ),
+        result_record(
+            case_id="asr-b-model-b",
+            model="mlx-community/model-b",
+            category="numeric_unit_integrity",
+            score=90,
+            label="accurate",
+        ),
+    ]
+    incomplete_records = newer_records[:1]
+    for path, records in (
+        (older, older_records),
+        (newer, newer_records),
+        (model_b, model_b_records),
+        (incomplete, incomplete_records),
+    ):
+        path.write_text("".join(json.dumps(record) + "\n" for record in records), encoding="utf-8")
+
+    os.utime(older, (1, 1))
+    os.utime(model_b, (2, 2))
+    os.utime(newer, (3, 3))
+
+    assert refresh_module.discover_complete_model_result_paths(
+        runs_root,
+        expected_cases_per_model=2,
+        model_ids=["mlx-community/model-a", "mlx-community/model-b"],
+    ) == [newer, model_b]
 
 
 def test_check_asr_leaderboard_page_validates_generated_artifacts(tmp_path: Path) -> None:
