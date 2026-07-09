@@ -308,7 +308,8 @@ def render_generated_sections(
                 "<code>--hosted-dir-from-env</code> to copy the same verified artifacts into the hosted Pages checkout. "
                 f"Use <code>{report_index_label}</code> as the generated map from the demo page to the combined full-35 report "
                 "and per-source run reports; use "
-                f"<code>{report_links_label}</code> for the same map in machine-readable form.</p>"
+                f"<code>{report_links_label}</code> for the same map in machine-readable form, including "
+                "the source artifact list behind each model/category cell.</p>"
             ),
             "",
             "    <h2>Generated Refresh Workflow</h2>",
@@ -729,6 +730,10 @@ def write_report_links_artifact(
     model_summaries = summarize_models(results)
     validate_coverage(results, model_summaries, expected_cases_per_model=expected_cases_per_model)
     source_file_summaries = summarize_source_result_files(source_result_paths or [])
+    source_coverage = build_source_report_coverage_matrix(
+        results,
+        source_file_summaries,
+    )
     output_path.parent.mkdir(parents=True, exist_ok=True)
     output_path.write_text(
         json.dumps(
@@ -758,6 +763,7 @@ def write_report_links_artifact(
                     "model_count": len(model_summaries),
                     "expected_cases_per_model": expected_cases_per_model,
                 },
+                "source_coverage_matrix": source_coverage,
                 "source_reports": [
                     {
                         "results_path": _repo_relative(summary.path),
@@ -1283,6 +1289,67 @@ def build_model_category_matrix(results: list[EvaluationResult]) -> list[dict[st
                     category: counts.get(category, 0)
                     for category in category_order
                 },
+            }
+        )
+    return matrix
+
+
+def build_source_report_coverage_matrix(
+    results: list[EvaluationResult],
+    source_file_summaries: list[SourceResultFileSummary],
+) -> list[dict[str, object]]:
+    category_order = [category for category, _ in category_columns_for_results(results)]
+    coverage: dict[tuple[str, str], list[dict[str, object]]] = defaultdict(list)
+    for summary in source_file_summaries:
+        source_results = load_results_jsonl(summary.path)
+        source_counts = Counter(
+            (
+                str(result.metadata.get("candidate_model") or ""),
+                str(result.metadata.get("eval_category") or ""),
+            )
+            for result in source_results
+        )
+        for model in summary.models:
+            for category in category_order:
+                case_count = source_counts.get((model, category), 0)
+                if case_count == 0:
+                    continue
+                coverage[(model, category)].append(
+                    {
+                        "results_path": _repo_relative(summary.path),
+                        "report_path": _repo_relative(summary.report_path),
+                        "hosted_report_path": (
+                            f"{HOSTED_BASE_PATH}/{_hosted_report_path_for_source_report(summary.report_path)}"
+                            if summary.report_exists
+                            else None
+                        ),
+                        "hosted_report_url": (
+                            f"{HOSTED_BASE_URL}/{_hosted_report_path_for_source_report(summary.report_path)}"
+                            if summary.report_exists
+                            else None
+                        ),
+                        "case_count": case_count,
+                    }
+                )
+
+    matrix = []
+    for row in build_model_category_matrix(results):
+        counts = row["category_counts"]
+        if not isinstance(counts, dict):
+            raise TypeError("category_counts must be a dictionary")
+        cells = [
+            {
+                "category": category,
+                "case_count": counts.get(category, 0),
+                "source_reports": coverage.get((str(row["model"]), category), []),
+            }
+            for category in category_order
+        ]
+        matrix.append(
+            {
+                "model": row["model"],
+                "total_results": row["total_results"],
+                "cells": cells,
             }
         )
     return matrix

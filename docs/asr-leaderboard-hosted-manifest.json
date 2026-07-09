@@ -2,11 +2,11 @@
   "artifact_count": 33,
   "artifacts": [
     {
-      "bytes": 29590,
+      "bytes": 29658,
       "hosted_paths": [
         "asr-leaderboard-demo.html"
       ],
-      "sha256": "3e821ec7d44ccfcff6dfbab484170cfdd1a6d7ab1f9196576dd8023563af3957",
+      "sha256": "c7395d33ea01303059cad06370a8466e062be5bd278009a1ee02066681be5db5",
       "source_path": "docs/asr-leaderboard-demo.html"
     },
     {
@@ -34,11 +34,11 @@
       "source_path": "docs/asr-leaderboard-report-index.md"
     },
     {
-      "bytes": 18580,
+      "bytes": 40350,
       "hosted_paths": [
         "asr-leaderboard-report-links.json"
       ],
-      "sha256": "287e711ca0f378c619457d7255117d5061ae9e6a64632eacd039dbd7b8b694c1",
+      "sha256": "e1ff542adb93bf0098ec3847df25cf1d1dede920900e98b4a86b1cf30dfa6fb0",
       "source_path": "docs/asr-leaderboard-report-links.json"
     },
     {
@@ -94,7 +94,7 @@
       "hosted_paths": [
         "asr-leaderboard-artifacts.json"
       ],
-      "sha256": "160d0ee9b0b04a053c38bdf46efb89529295f865f9c66102b68911feb81face1",
+      "sha256": "44c1f3879626d332798c5f287005b2d3c2a53d8189030a33602e2fce5ae59d2b",
       "source_path": "docs/asr-leaderboard-artifacts.json"
     },
     {

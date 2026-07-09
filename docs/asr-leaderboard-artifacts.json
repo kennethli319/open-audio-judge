@@ -12,7 +12,7 @@
       "sha256": null
     },
     {
-      "bytes": 29590,
+      "bytes": 29658,
       "digest_status": "ok",
       "exists": true,
       "hosted_paths": [
@@ -20,7 +20,7 @@
       ],
       "path": "docs/asr-leaderboard-demo.html",
       "purpose": "Generated ASR leaderboard demo HTML page.",
-      "sha256": "3e821ec7d44ccfcff6dfbab484170cfdd1a6d7ab1f9196576dd8023563af3957"
+      "sha256": "c7395d33ea01303059cad06370a8466e062be5bd278009a1ee02066681be5db5"
     },
     {
       "bytes": null,
@@ -100,7 +100,7 @@
       "sha256": "7393934dca2e1dc7564e64865a344445bbc7b2cfe9a285d277f7b1d2ccde656a"
     },
     {
-      "bytes": 18580,
+      "bytes": 40350,
       "digest_status": "ok",
       "exists": true,
       "hosted_paths": [
@@ -108,7 +108,7 @@
       ],
       "path": "docs/asr-leaderboard-report-links.json",
       "purpose": "Machine-readable map linking the demo page to combined and source ASR reports.",
-      "sha256": "287e711ca0f378c619457d7255117d5061ae9e6a64632eacd039dbd7b8b694c1"
+      "sha256": "e1ff542adb93bf0098ec3847df25cf1d1dede920900e98b4a86b1cf30dfa6fb0"
     },
     {
       "bytes": 10460,

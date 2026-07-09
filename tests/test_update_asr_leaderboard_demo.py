@@ -934,6 +934,76 @@ def test_write_report_index_records_matrix_and_source_report_status(tmp_path: Pa
     assert "`numeric_unit_integrity`: 1, `transcription_accuracy_wer`: 1" in text
 
 
+def test_write_report_links_records_source_coverage_matrix(tmp_path: Path) -> None:
+    module = load_script_module()
+    results_path = tmp_path / "combined" / "results.jsonl"
+    source_results_path = tmp_path / "model-a" / "judge-report" / "results.jsonl"
+    source_report_path = source_results_path.with_name("report.html")
+    records = [
+        result_record(
+            case_id="asr-a-model-a",
+            model="mlx-community/model-a",
+            category="transcription_accuracy_wer",
+            score=100,
+            label="accurate",
+        ),
+        result_record(
+            case_id="asr-b-model-a",
+            model="mlx-community/model-a",
+            category="numeric_unit_integrity",
+            score=80,
+            label="accurate",
+        ),
+    ]
+    results_path.parent.mkdir(parents=True)
+    source_results_path.parent.mkdir(parents=True)
+    serialized = "".join(json.dumps(record) + "\n" for record in records)
+    results_path.write_text(serialized, encoding="utf-8")
+    source_results_path.write_text(serialized, encoding="utf-8")
+    source_report_path.write_text("<html>source</html>\n", encoding="utf-8")
+    report_links_path = tmp_path / "report-links.json"
+    results = module.load_results_jsonl(results_path)
+
+    module.write_report_links_artifact(
+        results,
+        report_links_path,
+        results_path=results_path,
+        expected_cases_per_model=2,
+        source_result_paths=[source_results_path],
+    )
+
+    report_links = json.loads(report_links_path.read_text(encoding="utf-8"))
+    [matrix_row] = report_links["source_coverage_matrix"]
+    assert matrix_row["model"] == "mlx-community/model-a"
+    assert matrix_row["total_results"] == 2
+    assert len(matrix_row["cells"]) == 7
+    populated_cells = {
+        cell["category"]: cell
+        for cell in matrix_row["cells"]
+        if cell["source_reports"]
+    }
+    assert set(populated_cells) == {
+        "numeric_unit_integrity",
+        "transcription_accuracy_wer",
+    }
+    for cell in populated_cells.values():
+        assert cell["case_count"] == 1
+        assert cell["source_reports"] == [
+            {
+                "results_path": str(source_results_path),
+                "report_path": str(source_report_path),
+                "hosted_report_path": (
+                    "open-audio-judge/asr-leaderboard/source-reports/model-a/report.html"
+                ),
+                "hosted_report_url": (
+                    "https://kennethli319.github.io/open-audio-judge/"
+                    "asr-leaderboard/source-reports/model-a/report.html"
+                ),
+                "case_count": 1,
+            }
+        ]
+
+
 def test_render_generated_sections_includes_source_run_reports(tmp_path: Path) -> None:
     module = load_script_module()
     results_path = tmp_path / "combined" / "results.jsonl"
