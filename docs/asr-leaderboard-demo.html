@@ -115,7 +115,7 @@
       <div class="metric"><span>Seed eval cases</span><strong>35</strong></div>
       <div class="metric"><span>Research categories</span><strong>7</strong></div>
       <div class="metric"><span>MLX ASR models</span><strong>3</strong></div>
-      <div class="metric"><span>Verified smoke results</span><strong>69</strong></div>
+      <div class="metric"><span>Verified judged transcripts</span><strong>105</strong></div>
     </section>
 
     <h2>Demo Run</h2>
@@ -130,13 +130,13 @@
     <table>
       <thead><tr><th>Model</th><th>Wrapper</th><th>Status</th><th>Why This Model</th></tr></thead>
       <tbody>
-        <tr><td><code>mlx-community/whisper-large-v3-turbo-asr-fp16</code></td><td><code>mlx-audio</code></td><td class="good">smoke passed</td><td>Strong Whisper-family baseline with MLX conversion.</td></tr>
-        <tr><td><code>mlx-community/Qwen3-ASR-1.7B-8bit</code></td><td><code>mlx-audio</code></td><td class="good">smoke passed</td><td>Recent ASR-specific model for comparison against Whisper.</td></tr>
-        <tr><td><code>mlx-community/VibeVoice-ASR-4bit</code></td><td><code>mlx-audio</code></td><td class="good">smoke passed</td><td>Compact quantized ASR model to expose speed/quality tradeoffs.</td></tr>
+        <tr><td><code>mlx-community/whisper-large-v3-turbo-asr-fp16</code></td><td><code>mlx-audio</code></td><td class="good">35-case run passed</td><td>Strong Whisper-family baseline with MLX conversion.</td></tr>
+        <tr><td><code>mlx-community/Qwen3-ASR-1.7B-8bit</code></td><td><code>mlx-audio</code></td><td class="good">35-case run passed</td><td>Recent ASR-specific model for comparison against Whisper.</td></tr>
+        <tr><td><code>mlx-community/VibeVoice-ASR-4bit</code></td><td><code>mlx-audio</code></td><td class="good">35-case run passed</td><td>Compact quantized ASR model to expose speed/quality tradeoffs.</td></tr>
       </tbody>
     </table>
 
-    <h2>Verified Smoke Results</h2>
+    <h2>Verified Leaderboard Results</h2>
     <p class="muted">On 2026-07-08, cron materialized all 35 public-safe ASR audio cases locally, then ran every case through each model with three Gemini judge samples per case. The verified matrix covers <code>transcription_accuracy_wer</code>, <code>numeric_unit_integrity</code>, <code>negation_modality_scope</code>, <code>temporal_scheduling_accuracy</code>, <code>entity_factual_integrity</code>, <code>semantic_paraphrase_preservation</code>, and <code>acoustic_noise_robustness</code>.</p>
     <table>
       <thead><tr><th>Model</th><th>Cases</th><th>Gemini Samples</th><th>Average Score</th><th>Labels</th></tr></thead>
@@ -177,7 +177,7 @@ oaj autojudge-mlx-asr \
   --model mlx-community/whisper-large-v3-turbo-asr-fp16 \
   --judge-provider gemini \
   --judge-samples 3 \
-  --out runs/asr-leaderboard/whisper-large-v3-turbo
+  --out runs/asr-leaderboard/whisper-large-v3-turbo-full
 
 oaj autojudge-mlx-asr \
   --python-bin .venv/bin/python \
@@ -185,7 +185,7 @@ oaj autojudge-mlx-asr \
   --model mlx-community/Qwen3-ASR-1.7B-8bit \
   --judge-provider gemini \
   --judge-samples 3 \
-  --out runs/asr-leaderboard/qwen3-asr-1.7b
+  --out runs/asr-leaderboard/qwen3-asr-1.7b-full
 
 oaj autojudge-mlx-asr \
   --python-bin .venv/bin/python \
@@ -193,13 +193,13 @@ oaj autojudge-mlx-asr \
   --model mlx-community/VibeVoice-ASR-4bit \
   --judge-provider gemini \
   --judge-samples 3 \
-  --out runs/asr-leaderboard/vibevoice-asr
+  --out runs/asr-leaderboard/vibevoice-asr-full
 
 oaj report \
-  --results runs/asr-leaderboard/whisper-large-v3-turbo/judge-report/results.jsonl \
-  --results runs/asr-leaderboard/qwen3-asr-1.7b/judge-report/results.jsonl \
-  --results runs/asr-leaderboard/vibevoice-asr/judge-report/results.jsonl \
-  --out runs/asr-leaderboard/combined</code></pre>
+  --results runs/asr-leaderboard/whisper-large-v3-turbo-full/judge-report/results.jsonl \
+  --results runs/asr-leaderboard/qwen3-asr-1.7b-full/judge-report/results.jsonl \
+  --results runs/asr-leaderboard/vibevoice-asr-full/judge-report/results.jsonl \
+  --out runs/asr-leaderboard/full-35-combined</code></pre>
 
     <h2>Expected Output Files</h2>
     <table>
@@ -229,7 +229,7 @@ oaj report \
 }</code></pre>
 
     <h2>Research Notes</h2>
-    <p>See <code>docs/asr-eval-taxonomy.md</code> for the category rationale and <code>examples/asr_research_cases.jsonl</code> for the seed manifest. Smoke results are verified local artifacts; the page should move to full leaderboard rankings only after all seven categories are run for each model.</p>
+    <p>See <code>docs/asr-eval-taxonomy.md</code> for the category rationale and <code>examples/asr_research_cases.jsonl</code> for the seed manifest. These leaderboard results are verified local artifacts from all seven categories, with private/generated audio kept out of the repository.</p>
   </main>
 </body>
 </html>
