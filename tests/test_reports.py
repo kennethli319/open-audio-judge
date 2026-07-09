@@ -277,6 +277,57 @@ def test_write_html_report_aggregates_tts_candidate_metadata(tmp_path: Path) -> 
     assert "Regression Examples" in html
 
 
+def test_write_html_report_groups_asr_by_candidate_model(tmp_path: Path) -> None:
+    results = [
+        EvaluationResult(
+            case_id="asr-wer-001-local-tts",
+            task="asr_error",
+            judge_id="asr_error",
+            judge_version="0.1.0",
+            provider="gemini",
+            overall_score=100,
+            reason="Exact transcript.",
+            error_categories=["no_error"],
+            label="accurate",
+            metadata={
+                "eval_category": "transcription_accuracy_wer",
+                "asr_slice": "function_word_substitution",
+                "synthesis_model": "mlx-community/chatterbox-turbo-6bit",
+                "candidate_model": "mlx-community/whisper-large-v3-turbo-asr-fp16",
+                "candidate_transcriber": "mlx-audio-stt",
+            },
+        ),
+        EvaluationResult(
+            case_id="asr-wer-001-local-tts",
+            task="asr_error",
+            judge_id="asr_error",
+            judge_version="0.1.0",
+            provider="gemini",
+            overall_score=78,
+            reason="Merged a function word.",
+            error_categories=["substitution"],
+            label="needs_review",
+            metadata={
+                "eval_category": "transcription_accuracy_wer",
+                "asr_slice": "function_word_substitution",
+                "synthesis_model": "mlx-community/chatterbox-turbo-6bit",
+                "candidate_model": "mlx-community/VibeVoice-ASR-4bit",
+                "candidate_transcriber": "mlx-audio-stt",
+            },
+        ),
+    ]
+
+    output = write_html_report(results, tmp_path / "report.html")
+    html = output.read_text(encoding="utf-8")
+
+    assert "mlx-community/whisper-large-v3-turbo-asr-fp16" in html
+    assert "mlx-community/VibeVoice-ASR-4bit / substitution" in html
+    assert 'data-model="mlx-community/whisper-large-v3-turbo-asr-fp16"' in html
+    assert 'data-slice="function_word_substitution"' in html
+    assert "ASR slice" in html
+    assert "Candidate model" in html
+
+
 def test_write_html_report_shows_sample_provenance_per_row(tmp_path: Path) -> None:
     result = EvaluationResult(
         case_id="tts-date-local-tts",

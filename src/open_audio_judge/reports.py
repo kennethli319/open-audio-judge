@@ -1412,7 +1412,9 @@ def _result_search_text(result: EvaluationResult) -> str:
             "evaluation_category",
             "source_category",
             "tts_slice",
+            "asr_slice",
             "synthesis_model",
+            "candidate_model",
             "synthesis_voice",
             "language",
             "synthesis_lang_code",
@@ -1473,9 +1475,9 @@ def _researcher_note_counts(results: list[EvaluationResult]) -> list[tuple[str, 
 def _metadata_counts(results: list[EvaluationResult], field: str) -> list[tuple[str, int]]:
     counts: Counter[str] = Counter()
     for result in results:
-        value = result.metadata.get(field)
-        if isinstance(value, str) and value.strip():
-            counts[value.strip()] += 1
+        value = _metadata_group_value(result, field)
+        if value is not None:
+            counts[value] += 1
     return counts.most_common()
 
 
@@ -2132,9 +2134,23 @@ def _metadata_group_value(result: EvaluationResult, field: str) -> str | None:
         return _language_value(result)
     if field == "evaluation_category":
         return _evaluation_category_value(result)
+    if field == "synthesis_model":
+        if _first_metadata_value(result, ("candidate_transcriber",)) is not None:
+            return _first_metadata_value(result, ("candidate_model", "synthesis_model"))
+        return _first_metadata_value(result, ("synthesis_model", "candidate_model"))
+    if field == "tts_slice":
+        return _first_metadata_value(result, ("tts_slice", "asr_slice"))
     value = result.metadata.get(field)
     if isinstance(value, str) and value.strip():
         return value.strip()
+    return None
+
+
+def _first_metadata_value(result: EvaluationResult, fields: tuple[str, ...]) -> str | None:
+    for field in fields:
+        value = result.metadata.get(field)
+        if isinstance(value, str) and value.strip():
+            return value.strip()
     return None
 
 
@@ -2340,7 +2356,9 @@ def _render_provenance(result: EvaluationResult) -> str:
     fields = [
         ("Category", "eval_category"),
         ("Slice", "tts_slice"),
+        ("ASR slice", "asr_slice"),
         ("Model", "synthesis_model"),
+        ("Candidate model", "candidate_model"),
         ("Voice", "synthesis_voice"),
         ("Language", "language"),
         ("Lang code", "synthesis_lang_code"),

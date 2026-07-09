@@ -3,6 +3,7 @@ from __future__ import annotations
 import json
 import subprocess
 import sys
+import tempfile
 from collections.abc import Callable, Iterable, Sequence
 from dataclasses import dataclass
 from pathlib import Path
@@ -81,27 +82,30 @@ def transcribe_case_with_mlx_asr(
     if config.timeout_seconds is not None and config.timeout_seconds <= 0:
         raise ValueError("MLX ASR timeout_seconds must be greater than zero.")
 
-    command = _mlx_asr_command(config, audio_path)
-    try:
-        completed = runner(
-            command,
-            check=True,
-            capture_output=True,
-            text=True,
-            timeout=config.timeout_seconds,
-        )
-    except subprocess.TimeoutExpired as exc:
-        raise TimeoutError(
-            f"MLX ASR timed out after {config.timeout_seconds} seconds for case {case.id} "
-            f"with model {config.model}."
-        ) from exc
-    except subprocess.CalledProcessError as exc:
-        details = _command_failure_details(exc.stdout, exc.stderr)
-        raise RuntimeError(
-            f"MLX ASR command failed for case {case.id} with model {config.model} "
-            f"(exit code {exc.returncode}).{details}"
-        ) from exc
-    text = _extract_mlx_transcript_text(completed.stdout)
+    with tempfile.TemporaryDirectory(prefix="oaj-mlx-asr-") as temp_dir:
+        output_path = Path(temp_dir) / "transcript"
+        command = _mlx_asr_command(config, audio_path, output_path=output_path)
+        try:
+            completed = runner(
+                command,
+                check=True,
+                capture_output=True,
+                text=True,
+                timeout=config.timeout_seconds,
+            )
+        except subprocess.TimeoutExpired as exc:
+            raise TimeoutError(
+                f"MLX ASR timed out after {config.timeout_seconds} seconds for case {case.id} "
+                f"with model {config.model}."
+            ) from exc
+        except subprocess.CalledProcessError as exc:
+            details = _command_failure_details(exc.stdout, exc.stderr)
+            raise RuntimeError(
+                f"MLX ASR command failed for case {case.id} with model {config.model} "
+                f"(exit code {exc.returncode}).{details}"
+            ) from exc
+        output_text = _read_mlx_output_text(output_path)
+    text = _extract_mlx_transcript_text(output_text) or _extract_mlx_transcript_text(completed.stdout)
     if not text:
         raise ValueError(f"MLX ASR returned no transcript text for case {case.id}.")
     return MlxAsrTranscript(
@@ -143,7 +147,7 @@ def write_mlx_asr_summary_json(
     return path
 
 
-def _mlx_asr_command(config: MlxAsrConfig, audio_path: Path) -> list[str]:
+def _mlx_asr_command(config: MlxAsrConfig, audio_path: Path, *, output_path: Path) -> list[str]:
     return [
         config.python_bin,
         "-m",
@@ -152,8 +156,19 @@ def _mlx_asr_command(config: MlxAsrConfig, audio_path: Path) -> list[str]:
         config.model,
         "--audio",
         str(audio_path),
+        "--output-path",
+        str(output_path),
+        "--format",
+        "txt",
         *config.extra_args,
     ]
+
+
+def _read_mlx_output_text(output_path: Path) -> str:
+    for candidate in (output_path, output_path.with_suffix(".txt")):
+        if candidate.is_file():
+            return candidate.read_text(encoding="utf-8")
+    return ""
 
 
 def _extract_mlx_transcript_text(stdout: str) -> str:

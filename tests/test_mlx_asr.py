@@ -33,6 +33,8 @@ def test_transcribe_cases_with_mlx_asr_adds_candidate_metadata(tmp_path: Path) -
             "--audio",
         ]
         assert Path(command[6]) == audio
+        assert command[7] == "--output-path"
+        assert command[9:11] == ["--format", "txt"]
         assert kwargs["capture_output"] is True
         return subprocess.CompletedProcess(command, 0, stdout='{"text":"Transfer fifty dollars."}')
 
@@ -49,6 +51,25 @@ def test_transcribe_cases_with_mlx_asr_adds_candidate_metadata(tmp_path: Path) -
     assert cases[0].candidate_text == "Transfer fifty dollars."
     assert cases[0].metadata["candidate_model"] == "mlx-community/whisper-large-v3-turbo-asr-fp16"
     assert cases[0].metadata["candidate_transcriber"] == "mlx-audio-stt"
+
+
+def test_transcribe_case_with_mlx_asr_reads_output_path(tmp_path: Path) -> None:
+    audio = tmp_path / "sample.wav"
+    audio.write_bytes(b"RIFF")
+    case = EvaluationCase(id="case-1", task="asr_error", audio_path=str(audio))
+
+    def fake_runner(command, **kwargs):
+        output_path = Path(command[command.index("--output-path") + 1])
+        output_path.with_suffix(".txt").write_text("file transcript\n", encoding="utf-8")
+        return subprocess.CompletedProcess(command, 0, stdout="stdout transcript", stderr="")
+
+    transcript = transcribe_case_with_mlx_asr(
+        case,
+        config=MlxAsrConfig(model="model", python_bin="python3"),
+        runner=fake_runner,
+    )
+
+    assert transcript.text == "file transcript"
 
 
 def test_transcribe_case_with_mlx_asr_can_parse_last_text_line(tmp_path: Path) -> None:

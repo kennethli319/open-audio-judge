@@ -552,7 +552,7 @@ def report_command(
         {
             model
             for result in combined_results
-            if isinstance((model := result.metadata.get("synthesis_model")), str) and model.strip()
+            if (model := _result_model_name(result.metadata)) is not None
         }
     )
     console.print(f"[bold]Wrote combined report for {len(combined_results)} results[/bold]")
@@ -561,6 +561,19 @@ def report_command(
     console.print(f"Baseline: {baseline_model}")
     console.print(f"Results: {combined_path}")
     console.print(f"Report:  {report_path}")
+
+
+def _result_model_name(metadata: dict[str, object]) -> str | None:
+    fields = (
+        ("candidate_model", "synthesis_model")
+        if isinstance(metadata.get("candidate_transcriber"), str)
+        else ("synthesis_model", "candidate_model")
+    )
+    for field in fields:
+        value = metadata.get(field)
+        if isinstance(value, str) and value.strip():
+            return value.strip()
+    return None
 
 
 @app.command("serve")
