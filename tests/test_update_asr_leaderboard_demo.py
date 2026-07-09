@@ -265,6 +265,11 @@ def test_render_generated_sections_summarizes_verified_asr_results(tmp_path: Pat
     assert "--require-generated-fresh" in html
     assert "Run commit verification" in html
     assert ".venv/bin/python scripts/verify_asr_leaderboard_commit.py" in html
+    assert "Run hosted commit verification" in html
+    assert (
+        ".venv/bin/python scripts/verify_asr_leaderboard_commit.py --hosted-dir-from-env"
+        in html
+    )
     assert "Check hosted mirror" in html
     assert (
         ".venv/bin/python scripts/refresh_asr_leaderboard_artifacts.py --check-only --hosted-dir-from-env --require-hosted-current"
@@ -618,6 +623,11 @@ def test_write_summary_artifact_records_models_and_categories(tmp_path: Path) ->
         ".venv/bin/python",
         "scripts/verify_asr_leaderboard_commit.py",
     ]
+    assert summary["refresh_workflow"]["hosted_commit_verification_command"] == [
+        ".venv/bin/python",
+        "scripts/verify_asr_leaderboard_commit.py",
+        "--hosted-dir-from-env",
+    ]
     assert summary["refresh_workflow"]["manifest_refresh_command"] == [
         ".venv/bin/python",
         "scripts/refresh_asr_leaderboard_artifacts.py",
@@ -952,6 +962,11 @@ def test_write_refresh_report_records_coverage_and_commands(tmp_path: Path) -> N
     assert "--require-generated-fresh" in text
     assert "Commit verification" in text
     assert ".venv/bin/python scripts/verify_asr_leaderboard_commit.py" in text
+    assert "Commit verification with hosted mirror" in text
+    assert (
+        ".venv/bin/python scripts/verify_asr_leaderboard_commit.py --hosted-dir-from-env"
+        in text
+    )
     assert "--results " + str(source_results_path) in text
     assert "--update-run-manifest" in text
     assert "Discover latest complete runs" in text

@@ -45,3 +45,5 @@ fi
 
 # Final non-secret verification before committing generated ASR artifacts.
 .venv/bin/python scripts/verify_asr_leaderboard_commit.py
+# Include hosted mirror verification when ASR_LEADERBOARD_HOSTED_DIR is set.
+# .venv/bin/python scripts/verify_asr_leaderboard_commit.py --hosted-dir-from-env

@@ -378,6 +378,11 @@
       "--hosted-dir-from-env"
     ],
     "hosted_artifact_env_var": "ASR_LEADERBOARD_HOSTED_DIR",
+    "hosted_commit_verification_command": [
+      ".venv/bin/python",
+      "scripts/verify_asr_leaderboard_commit.py",
+      "--hosted-dir-from-env"
+    ],
     "hosted_validation_command": [
       ".venv/bin/python",
       "scripts/refresh_asr_leaderboard_artifacts.py",

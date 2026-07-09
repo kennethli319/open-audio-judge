@@ -314,6 +314,7 @@ def render_generated_sections(
         ("Check generated page", workflow["page_validation_command"]),
         ("Verify generated artifacts are fresh", workflow["freshness_check_command"]),
         ("Run commit verification", workflow["commit_verification_command"]),
+        ("Run hosted commit verification", workflow["hosted_commit_verification_command"]),
         ("Sync hosted artifacts", workflow["hosted_artifact_command"]),
         ("Check hosted mirror", workflow["hosted_validation_command"]),
     ]
@@ -658,6 +659,7 @@ def write_refresh_report(
                 f"- Page validation: `{_shell_join(workflow['page_validation_command'])}`",
                 f"- Generated artifact freshness check: `{_shell_join(workflow['freshness_check_command'])}`",
                 f"- Commit verification: `{_shell_join(workflow['commit_verification_command'])}`",
+                f"- Commit verification with hosted mirror: `{_shell_join(workflow['hosted_commit_verification_command'])}`",
                 f"- Hosted artifact sync: `{_shell_join(workflow['hosted_artifact_command'])}`",
                 f"- Hosted mirror validation: `{_shell_join(workflow['hosted_validation_command'])}`",
                 f"- Live model refresh script: `bash {workflow['live_refresh_script_path']}`",
@@ -928,6 +930,8 @@ def write_refresh_commands_script(
         "",
         "# Final non-secret verification before committing generated ASR artifacts.",
         _shell_join(workflow["commit_verification_command"]),
+        "# Include hosted mirror verification when ASR_LEADERBOARD_HOSTED_DIR is set.",
+        "# " + _shell_join(workflow["hosted_commit_verification_command"]),
         "",
     ]
     output_path.parent.mkdir(parents=True, exist_ok=True)
@@ -1161,6 +1165,11 @@ def _refresh_workflow(source_result_paths: list[Path]) -> dict[str, object]:
         "commit_verification_command": [
             ".venv/bin/python",
             "scripts/verify_asr_leaderboard_commit.py",
+        ],
+        "hosted_commit_verification_command": [
+            ".venv/bin/python",
+            "scripts/verify_asr_leaderboard_commit.py",
+            "--hosted-dir-from-env",
         ],
         "manifest_refresh_command": [
             ".venv/bin/python",
