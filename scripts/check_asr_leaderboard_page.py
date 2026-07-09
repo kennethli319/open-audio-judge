@@ -60,11 +60,17 @@ def main() -> None:
         path_maps=parse_path_maps(args.path_map),
         allow_missing_source_results=args.allow_missing_source_results,
     )
+    hosted_fragment = ""
+    if summary["hosted_artifact_count"]:
+        hosted_fragment = (
+            f", {summary['hosted_digest_verified_path_count']}/"
+            f"{summary['hosted_path_count']} hosted paths digest-verified"
+        )
     print(
         "Validated ASR leaderboard page "
         f"{summary['page']} against {summary['summary_path']} "
         f"({summary['total_results']} results, {summary['model_count']} models, "
-        f"{summary['category_count']} categories)."
+        f"{summary['category_count']} categories{hosted_fragment})."
     )
 
 
@@ -1126,26 +1132,60 @@ def _hosted_manifest_stats(
 ) -> dict[str, int]:
     raw_path = summary.get("hosted_manifest_path")
     if not isinstance(raw_path, str) or not raw_path:
-        return {"hosted_artifact_count": 0, "hosted_path_count": 0}
+        return {
+            "hosted_artifact_count": 0,
+            "hosted_path_count": 0,
+            "hosted_digest_verified_artifact_count": 0,
+            "hosted_digest_verified_path_count": 0,
+        }
 
     path = _resolve_summary_path(raw_path, artifact_root=artifact_root, path_maps=path_maps)
     manifest = json.loads(path.read_text(encoding="utf-8"))
     artifacts = manifest.get("artifacts", []) if isinstance(manifest, dict) else []
     if not isinstance(artifacts, list):
-        return {"hosted_artifact_count": 0, "hosted_path_count": 0}
+        return {
+            "hosted_artifact_count": 0,
+            "hosted_path_count": 0,
+            "hosted_digest_verified_artifact_count": 0,
+            "hosted_digest_verified_path_count": 0,
+        }
 
     hosted_path_count = 0
+    hosted_digest_verified_artifact_count = 0
+    hosted_digest_verified_path_count = 0
     for artifact in artifacts:
         if not isinstance(artifact, dict):
             continue
         hosted_paths = artifact.get("hosted_paths", [])
-        if isinstance(hosted_paths, list):
-            hosted_path_count += sum(
-                1 for hosted_path in hosted_paths if isinstance(hosted_path, str) and hosted_path
-            )
+        expected_bytes = artifact.get("bytes")
+        expected_sha256 = artifact.get("sha256")
+        if not isinstance(hosted_paths, list):
+            continue
+        valid_hosted_paths = [
+            hosted_path
+            for hosted_path in hosted_paths
+            if isinstance(hosted_path, str) and hosted_path
+        ]
+        hosted_path_count += len(valid_hosted_paths)
+        verified_paths_for_artifact = 0
+        for hosted_path in valid_hosted_paths:
+            candidate = artifact_root / hosted_path
+            if (
+                candidate.exists()
+                and isinstance(expected_bytes, int)
+                and candidate.stat().st_size == expected_bytes
+                and isinstance(expected_sha256, str)
+                and _sha256_file(candidate) == expected_sha256
+            ):
+                verified_paths_for_artifact += 1
+        hosted_digest_verified_path_count += verified_paths_for_artifact
+        if valid_hosted_paths and verified_paths_for_artifact == len(valid_hosted_paths):
+            hosted_digest_verified_artifact_count += 1
     return {
         "hosted_artifact_count": len(artifacts),
         "hosted_path_count": hosted_path_count,
+        "hosted_digest_verified_artifact_count": hosted_digest_verified_artifact_count,
+        "hosted_digest_verified_path_count": hosted_digest_verified_path_count,
     }
 
 

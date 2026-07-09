@@ -2067,6 +2067,8 @@ def test_check_asr_leaderboard_page_validates_generated_artifacts(tmp_path: Path
     assert validation["output_artifact_count"] == len(summary_data["output_artifacts"])
     assert validation["hosted_artifact_count"] == 2
     assert validation["hosted_path_count"] == 2
+    assert validation["hosted_digest_verified_artifact_count"] == 0
+    assert validation["hosted_digest_verified_path_count"] == 0
 
     report_links.unlink()
     with pytest.raises(ValueError, match="report_links_path=.*asr-leaderboard-report-links.json"):
@@ -2656,6 +2658,8 @@ def test_check_asr_leaderboard_page_validates_hosted_artifact_layout(tmp_path: P
     assert validation["status"] == "complete"
     assert validation["hosted_artifact_count"] == 7
     assert validation["hosted_path_count"] == 7
+    assert validation["hosted_digest_verified_artifact_count"] == 7
+    assert validation["hosted_digest_verified_path_count"] == 7
 
 
 def test_check_asr_leaderboard_page_rejects_stale_run_manifest(tmp_path: Path) -> None:
