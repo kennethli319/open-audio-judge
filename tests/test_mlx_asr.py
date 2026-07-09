@@ -6,6 +6,7 @@ import pytest
 
 from open_audio_judge.mlx_asr import (
     MlxAsrConfig,
+    check_mlx_asr_runtime,
     transcribe_case_with_mlx_asr,
     transcribe_cases_with_mlx_asr,
     write_mlx_asr_summary_json,
@@ -117,6 +118,54 @@ def test_transcribe_case_with_mlx_asr_reports_command_failure(tmp_path: Path) ->
         transcribe_case_with_mlx_asr(
             case,
             config=MlxAsrConfig(model="model"),
+            runner=fake_runner,
+        )
+
+
+def test_check_mlx_asr_runtime_imports_configured_module() -> None:
+    calls = []
+
+    def fake_runner(command, **kwargs):
+        calls.append((command, kwargs))
+        return subprocess.CompletedProcess(command, 0, stdout="", stderr="")
+
+    check_mlx_asr_runtime(
+        MlxAsrConfig(
+            model="model",
+            python_bin=".venv/bin/python",
+            module="mlx_audio.stt.generate",
+        ),
+        runner=fake_runner,
+    )
+
+    assert calls == [
+        (
+            [
+                ".venv/bin/python",
+                "-c",
+                (
+                    "import importlib.util, sys; "
+                    "module = sys.argv[1]; "
+                    "sys.exit(0 if importlib.util.find_spec(module) else 1)"
+                ),
+                "mlx_audio.stt.generate",
+            ],
+            {"check": True, "capture_output": True, "text": True},
+        )
+    ]
+
+
+def test_check_mlx_asr_runtime_reports_missing_module() -> None:
+    def fake_runner(command, **kwargs):
+        raise subprocess.CalledProcessError(
+            1,
+            command,
+            stderr="ModuleNotFoundError: No module named 'mlx_audio'",
+        )
+
+    with pytest.raises(RuntimeError, match="cannot import 'mlx_audio.stt.generate'"):
+        check_mlx_asr_runtime(
+            MlxAsrConfig(model="model", python_bin=".venv/bin/python"),
             runner=fake_runner,
         )
 

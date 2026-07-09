@@ -67,6 +67,37 @@ def transcribe_cases_with_mlx_asr(
     return transcribed
 
 
+def check_mlx_asr_runtime(
+    config: MlxAsrConfig,
+    *,
+    runner: CommandRunner = subprocess.run,
+) -> None:
+    command = [
+        config.python_bin,
+        "-c",
+        (
+            "import importlib.util, sys; "
+            "module = sys.argv[1]; "
+            "sys.exit(0 if importlib.util.find_spec(module) else 1)"
+        ),
+        config.module,
+    ]
+    try:
+        runner(command, check=True, capture_output=True, text=True)
+    except FileNotFoundError as exc:
+        raise FileNotFoundError(
+            f"MLX ASR python executable not found: {config.python_bin}. "
+            "Pass --python-bin pointing at the environment with mlx-audio installed."
+        ) from exc
+    except subprocess.CalledProcessError as exc:
+        details = _command_failure_details(exc.stdout, exc.stderr)
+        raise RuntimeError(
+            f"MLX ASR runtime is not ready: {config.python_bin} cannot import "
+            f"{config.module!r}.{details} Install mlx-audio in that environment "
+            "or pass --python-bin pointing at one that has it."
+        ) from exc
+
+
 def transcribe_case_with_mlx_asr(
     case: EvaluationCase,
     *,

@@ -30,6 +30,7 @@ from open_audio_judge.local_tts import (
 from open_audio_judge.mlx_asr import (
     DEFAULT_MLX_ASR_MODELS,
     MlxAsrConfig,
+    check_mlx_asr_runtime,
     transcribe_cases_with_mlx_asr,
     write_mlx_asr_cases_jsonl,
     write_mlx_asr_summary_json,
@@ -174,15 +175,17 @@ def autojudge_mlx_asr_command(
         loaded_cases = loaded_cases[:limit]
 
     try:
+        config = MlxAsrConfig(
+            model=model,
+            python_bin=python_bin,
+            module=mlx_module,
+            timeout_seconds=timeout_seconds,
+            extra_args=tuple(mlx_extra_arg or ()),
+        )
+        check_mlx_asr_runtime(config)
         candidate_cases = transcribe_cases_with_mlx_asr(
             loaded_cases,
-            config=MlxAsrConfig(
-                model=model,
-                python_bin=python_bin,
-                module=mlx_module,
-                timeout_seconds=timeout_seconds,
-                extra_args=tuple(mlx_extra_arg or ()),
-            ),
+            config=config,
             base_dir=cases.parent,
         )
     except (FileNotFoundError, RuntimeError, TimeoutError, ValueError) as exc:

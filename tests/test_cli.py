@@ -92,6 +92,11 @@ def test_autojudge_mlx_asr_cli_writes_candidate_cases_and_report(
 
     monkeypatch.setattr(
         cli,
+        "check_mlx_asr_runtime",
+        lambda config: None,
+    )
+    monkeypatch.setattr(
+        cli,
         "transcribe_cases_with_mlx_asr",
         lambda loaded_cases, config, base_dir: [
             loaded_cases[0].model_copy(
@@ -157,6 +162,7 @@ def test_autojudge_mlx_asr_cli_reports_transcription_failure(
     def fail_transcription(*args, **kwargs):
         raise RuntimeError("MLX ASR command failed: No module named 'mlx_audio'")
 
+    monkeypatch.setattr(cli, "check_mlx_asr_runtime", lambda config: None)
     monkeypatch.setattr(cli, "transcribe_cases_with_mlx_asr", fail_transcription)
 
     result = CliRunner().invoke(
@@ -175,6 +181,62 @@ def test_autojudge_mlx_asr_cli_reports_transcription_failure(
     assert result.exit_code != 0
     assert "No module named 'mlx_audio'" in result.output
     assert "Traceback" not in result.output
+
+
+def test_autojudge_mlx_asr_cli_preflights_runtime_before_writing_outputs(
+    tmp_path: Path,
+    monkeypatch,
+) -> None:
+    audio = tmp_path / "sample.wav"
+    audio.write_bytes(b"RIFF")
+    cases = tmp_path / "cases.jsonl"
+    out = tmp_path / "out"
+    cases.write_text(
+        json.dumps(
+            {
+                "id": "amount-case",
+                "task": "asr_error",
+                "audio_path": str(audio),
+                "reference_text": "Transfer fifteen dollars.",
+            }
+        )
+        + "\n",
+        encoding="utf-8",
+    )
+
+    def fail_preflight(config):
+        raise RuntimeError(
+            "MLX ASR runtime is not ready: .venv/bin/python cannot import "
+            "'mlx_audio.stt.generate'."
+        )
+
+    def unexpected_transcription(*args, **kwargs):
+        raise AssertionError("transcription should not run after runtime preflight failure")
+
+    monkeypatch.setattr(cli, "check_mlx_asr_runtime", fail_preflight)
+    monkeypatch.setattr(cli, "transcribe_cases_with_mlx_asr", unexpected_transcription)
+
+    result = CliRunner().invoke(
+        app,
+        [
+            "autojudge-mlx-asr",
+            "--cases",
+            str(cases),
+            "--model",
+            "mlx-community/whisper-large-v3-turbo-asr-fp16",
+            "--judge-provider",
+            "mock",
+            "--out",
+            str(out),
+            "--python-bin",
+            ".venv/bin/python",
+        ],
+    )
+
+    assert result.exit_code != 0
+    assert "MLX ASR runtime is not ready" in result.output
+    assert "Traceback" not in result.output
+    assert not out.exists()
 
 
 def test_autojudge_local_tts_cli_writes_synthesized_cases_and_report(
