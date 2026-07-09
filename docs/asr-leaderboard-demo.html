@@ -38,7 +38,13 @@
     h2 { margin: 30px 0 12px; font-size: 19px; letter-spacing: 0; }
     h3 { margin: 0 0 8px; font-size: 15px; }
     p { margin: 0 0 12px; }
-    code { background: #edf1f5; border-radius: 4px; padding: 0.12rem 0.28rem; }
+    code {
+      background: #edf1f5;
+      border-radius: 4px;
+      overflow-wrap: anywhere;
+      padding: 0.12rem 0.28rem;
+      word-break: break-word;
+    }
     pre {
       background: #172026;
       border-radius: 8px;
@@ -58,6 +64,12 @@
       border: 1px solid var(--line);
       border-radius: 8px;
       padding: 14px 16px;
+      min-width: 0;
+    }
+    .panel h3 {
+      line-height: 1.25;
+      overflow-wrap: anywhere;
+      word-break: break-word;
     }
     .metric span { color: var(--muted); display: block; font-size: 13px; }
     .metric strong { display: block; font-size: 27px; margin-top: 4px; }
