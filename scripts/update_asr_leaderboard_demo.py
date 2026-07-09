@@ -53,6 +53,18 @@ class CategorySummary:
     labels: Counter[str]
 
 
+@dataclass(frozen=True)
+class SourceResultFileSummary:
+    path: Path
+    models: tuple[str, ...]
+    result_count: int
+    ok_count: int
+    judge_samples: int
+    average_score: float
+    labels: Counter[str]
+    categories: Counter[str]
+
+
 def main() -> None:
     parser = argparse.ArgumentParser(
         description="Refresh the ASR leaderboard demo from verified result JSONL artifacts.",
@@ -227,6 +239,7 @@ def write_summary_artifact(
     category_summaries = summarize_categories(results)
     runtime_status = build_refresh_runtime_status(results)
     coverage_matrix = build_model_category_matrix(results)
+    source_file_summaries = summarize_source_result_files(source_result_paths or [])
     output_path.parent.mkdir(parents=True, exist_ok=True)
     output_path.write_text(
         json.dumps(
@@ -236,6 +249,10 @@ def write_summary_artifact(
                 "source_result_paths": [
                     _repo_relative(path)
                     for path in source_result_paths or []
+                ],
+                "source_result_files": [
+                    _source_file_summary_json(summary)
+                    for summary in source_file_summaries
                 ],
                 "run_manifest_path": _repo_relative(DEFAULT_RUN_MANIFEST),
                 "manifest_validation_path": _repo_relative(DEFAULT_MANIFEST_VALIDATION),
@@ -290,6 +307,7 @@ def write_refresh_report(
     workflow = _refresh_workflow(source_result_paths or [])
     runtime_status = build_refresh_runtime_status(results)
     coverage_matrix = build_model_category_matrix(results)
+    source_file_summaries = summarize_source_result_files(source_result_paths or [])
     output_path.parent.mkdir(parents=True, exist_ok=True)
     output_path.write_text(
         "\n".join(
@@ -333,6 +351,15 @@ def write_refresh_report(
                 *(
                     f"- `{_repo_relative(path)}`"
                     for path in source_result_paths or [results_path]
+                ),
+                "",
+                "## Source Result File Coverage",
+                "",
+                "| Path | Models | Cases | Categories | Gemini Samples | Average Score | Labels |",
+                "| --- | --- | ---: | --- | ---: | ---: | --- |",
+                *(
+                    _source_file_markdown_row(summary)
+                    for summary in source_file_summaries
                 ),
                 "",
                 "## Refresh Commands",
@@ -449,6 +476,40 @@ def build_model_category_matrix(results: list[EvaluationResult]) -> list[dict[st
             }
         )
     return matrix
+
+
+def summarize_source_result_files(result_paths: list[Path]) -> list[SourceResultFileSummary]:
+    summaries = []
+    for path in result_paths:
+        file_results = load_results_jsonl(path)
+        if not file_results:
+            raise ValueError(f"Source result file is empty: {path}")
+        models = tuple(
+            sorted(
+                {
+                    str(result.metadata.get("candidate_model") or "")
+                    for result in file_results
+                }
+            )
+        )
+        if any(not model for model in models):
+            raise ValueError(f"Missing metadata.candidate_model in {path}")
+        categories = Counter(str(result.metadata.get("eval_category") or "") for result in file_results)
+        if any(not category for category in categories):
+            raise ValueError(f"Missing metadata.eval_category in {path}")
+        summaries.append(
+            SourceResultFileSummary(
+                path=path,
+                models=models,
+                result_count=len(file_results),
+                ok_count=sum(1 for result in file_results if result.status == "ok"),
+                judge_samples=sum(int(result.metadata.get("judge_sample_count") or 1) for result in file_results),
+                average_score=statistics.mean(result.overall_score for result in file_results),
+                labels=Counter(result.label for result in file_results),
+                categories=categories,
+            )
+        )
+    return summaries
 
 
 def summarize_models(results: list[EvaluationResult]) -> list[ModelSummary]:
@@ -589,6 +650,40 @@ def _model_category_matrix_row(row: dict[str, object]) -> str:
         raise TypeError("category_counts must be a dictionary")
     cells = " | ".join(str(counts[category]) for category, _ in CATEGORY_COLUMNS)
     return f"| `{row['model']}` | {cells} |"
+
+
+def _source_file_summary_json(summary: SourceResultFileSummary) -> dict[str, object]:
+    return {
+        "path": _repo_relative(summary.path),
+        "models": list(summary.models),
+        "result_count": summary.result_count,
+        "ok_count": summary.ok_count,
+        "judge_samples": summary.judge_samples,
+        "average_score": round(summary.average_score, 3),
+        "labels": _ordered_label_counts(summary.labels),
+        "categories": {
+            category: summary.categories[category]
+            for category in sorted(summary.categories)
+        },
+    }
+
+
+def _source_file_markdown_row(summary: SourceResultFileSummary) -> str:
+    models = "<br>".join(f"`{model}`" for model in summary.models)
+    categories = ", ".join(
+        f"`{category}`: {count}"
+        for category, count in sorted(summary.categories.items())
+    )
+    labels = ", ".join(
+        f"{summary.labels[label]} {label}"
+        for label in ("accurate", "needs_review", "inaccurate")
+        if summary.labels[label]
+    )
+    return (
+        f"| `{_repo_relative(summary.path)}` | {models} | "
+        f"{summary.ok_count}/{summary.result_count} ok | {categories} | "
+        f"{summary.judge_samples} | {summary.average_score:.1f} | {labels} |"
+    )
 
 
 def _shell_join(command: object) -> str:

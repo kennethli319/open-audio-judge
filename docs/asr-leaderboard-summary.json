@@ -238,6 +238,322 @@
   "report_path": "runs/asr-leaderboard/full-35-combined/report.html",
   "results_path": "runs/asr-leaderboard/full-35-combined/results.jsonl",
   "run_manifest_path": "docs/asr-leaderboard-run-manifest.json",
+  "source_result_files": [
+    {
+      "average_score": 92,
+      "categories": {
+        "transcription_accuracy_wer": 3
+      },
+      "judge_samples": 9,
+      "labels": {
+        "accurate": 2,
+        "needs_review": 1
+      },
+      "models": [
+        "mlx-community/whisper-large-v3-turbo-asr-fp16"
+      ],
+      "ok_count": 3,
+      "path": "runs/asr-leaderboard/whisper-large-v3-turbo-smoke/judge-report/results.jsonl",
+      "result_count": 3
+    },
+    {
+      "average_score": 92.583,
+      "categories": {
+        "negation_modality_scope": 3,
+        "numeric_unit_integrity": 3,
+        "temporal_scheduling_accuracy": 4,
+        "transcription_accuracy_wer": 2
+      },
+      "judge_samples": 36,
+      "labels": {
+        "accurate": 10,
+        "inaccurate": 1,
+        "needs_review": 1
+      },
+      "models": [
+        "mlx-community/whisper-large-v3-turbo-asr-fp16"
+      ],
+      "ok_count": 12,
+      "path": "runs/asr-leaderboard/whisper-large-v3-turbo-full-gap/judge-report/results.jsonl",
+      "result_count": 12
+    },
+    {
+      "average_score": 93.4,
+      "categories": {
+        "negation_modality_scope": 2,
+        "numeric_unit_integrity": 2,
+        "temporal_scheduling_accuracy": 1
+      },
+      "judge_samples": 15,
+      "labels": {
+        "accurate": 4,
+        "needs_review": 1
+      },
+      "models": [
+        "mlx-community/whisper-large-v3-turbo-asr-fp16"
+      ],
+      "ok_count": 5,
+      "path": "runs/asr-leaderboard/whisper-large-v3-turbo-semantic-smoke/judge-report/results.jsonl",
+      "result_count": 5
+    },
+    {
+      "average_score": 88.6,
+      "categories": {
+        "entity_factual_integrity": 5
+      },
+      "judge_samples": 15,
+      "labels": {
+        "accurate": 4,
+        "inaccurate": 1
+      },
+      "models": [
+        "mlx-community/whisper-large-v3-turbo-asr-fp16"
+      ],
+      "ok_count": 5,
+      "path": "runs/asr-leaderboard/whisper-large-v3-turbo-entity-smoke/judge-report/results.jsonl",
+      "result_count": 5
+    },
+    {
+      "average_score": 97.6,
+      "categories": {
+        "semantic_paraphrase_preservation": 5
+      },
+      "judge_samples": 15,
+      "labels": {
+        "accurate": 5
+      },
+      "models": [
+        "mlx-community/whisper-large-v3-turbo-asr-fp16"
+      ],
+      "ok_count": 5,
+      "path": "runs/asr-leaderboard/whisper-large-v3-turbo-paraphrase-smoke/judge-report/results.jsonl",
+      "result_count": 5
+    },
+    {
+      "average_score": 96.6,
+      "categories": {
+        "acoustic_noise_robustness": 5
+      },
+      "judge_samples": 15,
+      "labels": {
+        "accurate": 5
+      },
+      "models": [
+        "mlx-community/whisper-large-v3-turbo-asr-fp16"
+      ],
+      "ok_count": 5,
+      "path": "runs/asr-leaderboard/whisper-large-v3-turbo-noise-smoke/judge-report/results.jsonl",
+      "result_count": 5
+    },
+    {
+      "average_score": 88,
+      "categories": {
+        "transcription_accuracy_wer": 3
+      },
+      "judge_samples": 9,
+      "labels": {
+        "accurate": 2,
+        "needs_review": 1
+      },
+      "models": [
+        "mlx-community/Qwen3-ASR-1.7B-8bit"
+      ],
+      "ok_count": 3,
+      "path": "runs/asr-leaderboard/qwen3-asr-1.7b-smoke/judge-report/results.jsonl",
+      "result_count": 3
+    },
+    {
+      "average_score": 96.667,
+      "categories": {
+        "negation_modality_scope": 3,
+        "numeric_unit_integrity": 3,
+        "temporal_scheduling_accuracy": 4,
+        "transcription_accuracy_wer": 2
+      },
+      "judge_samples": 36,
+      "labels": {
+        "accurate": 11,
+        "needs_review": 1
+      },
+      "models": [
+        "mlx-community/Qwen3-ASR-1.7B-8bit"
+      ],
+      "ok_count": 12,
+      "path": "runs/asr-leaderboard/qwen3-asr-1.7b-full-gap/judge-report/results.jsonl",
+      "result_count": 12
+    },
+    {
+      "average_score": 100,
+      "categories": {
+        "negation_modality_scope": 2,
+        "numeric_unit_integrity": 2,
+        "temporal_scheduling_accuracy": 1
+      },
+      "judge_samples": 15,
+      "labels": {
+        "accurate": 5
+      },
+      "models": [
+        "mlx-community/Qwen3-ASR-1.7B-8bit"
+      ],
+      "ok_count": 5,
+      "path": "runs/asr-leaderboard/qwen3-asr-1.7b-semantic-smoke/judge-report/results.jsonl",
+      "result_count": 5
+    },
+    {
+      "average_score": 89,
+      "categories": {
+        "entity_factual_integrity": 5
+      },
+      "judge_samples": 15,
+      "labels": {
+        "accurate": 4,
+        "inaccurate": 1
+      },
+      "models": [
+        "mlx-community/Qwen3-ASR-1.7B-8bit"
+      ],
+      "ok_count": 5,
+      "path": "runs/asr-leaderboard/qwen3-asr-1.7b-entity-smoke/judge-report/results.jsonl",
+      "result_count": 5
+    },
+    {
+      "average_score": 100,
+      "categories": {
+        "semantic_paraphrase_preservation": 5
+      },
+      "judge_samples": 15,
+      "labels": {
+        "accurate": 5
+      },
+      "models": [
+        "mlx-community/Qwen3-ASR-1.7B-8bit"
+      ],
+      "ok_count": 5,
+      "path": "runs/asr-leaderboard/qwen3-asr-1.7b-paraphrase-smoke/judge-report/results.jsonl",
+      "result_count": 5
+    },
+    {
+      "average_score": 92.4,
+      "categories": {
+        "acoustic_noise_robustness": 5
+      },
+      "judge_samples": 15,
+      "labels": {
+        "accurate": 4,
+        "needs_review": 1
+      },
+      "models": [
+        "mlx-community/Qwen3-ASR-1.7B-8bit"
+      ],
+      "ok_count": 5,
+      "path": "runs/asr-leaderboard/qwen3-asr-1.7b-noise-smoke/judge-report/results.jsonl",
+      "result_count": 5
+    },
+    {
+      "average_score": 94.333,
+      "categories": {
+        "transcription_accuracy_wer": 3
+      },
+      "judge_samples": 9,
+      "labels": {
+        "accurate": 3
+      },
+      "models": [
+        "mlx-community/VibeVoice-ASR-4bit"
+      ],
+      "ok_count": 3,
+      "path": "runs/asr-leaderboard/vibevoice-asr-smoke/judge-report/results.jsonl",
+      "result_count": 3
+    },
+    {
+      "average_score": 99.333,
+      "categories": {
+        "negation_modality_scope": 3,
+        "numeric_unit_integrity": 3,
+        "temporal_scheduling_accuracy": 4,
+        "transcription_accuracy_wer": 2
+      },
+      "judge_samples": 36,
+      "labels": {
+        "accurate": 12
+      },
+      "models": [
+        "mlx-community/VibeVoice-ASR-4bit"
+      ],
+      "ok_count": 12,
+      "path": "runs/asr-leaderboard/vibevoice-asr-full-gap/judge-report/results.jsonl",
+      "result_count": 12
+    },
+    {
+      "average_score": 98.8,
+      "categories": {
+        "negation_modality_scope": 2,
+        "numeric_unit_integrity": 2,
+        "temporal_scheduling_accuracy": 1
+      },
+      "judge_samples": 15,
+      "labels": {
+        "accurate": 5
+      },
+      "models": [
+        "mlx-community/VibeVoice-ASR-4bit"
+      ],
+      "ok_count": 5,
+      "path": "runs/asr-leaderboard/vibevoice-asr-semantic-smoke/judge-report/results.jsonl",
+      "result_count": 5
+    },
+    {
+      "average_score": 90.2,
+      "categories": {
+        "entity_factual_integrity": 5
+      },
+      "judge_samples": 15,
+      "labels": {
+        "accurate": 4,
+        "inaccurate": 1
+      },
+      "models": [
+        "mlx-community/VibeVoice-ASR-4bit"
+      ],
+      "ok_count": 5,
+      "path": "runs/asr-leaderboard/vibevoice-asr-entity-smoke/judge-report/results.jsonl",
+      "result_count": 5
+    },
+    {
+      "average_score": 98.4,
+      "categories": {
+        "semantic_paraphrase_preservation": 5
+      },
+      "judge_samples": 15,
+      "labels": {
+        "accurate": 5
+      },
+      "models": [
+        "mlx-community/VibeVoice-ASR-4bit"
+      ],
+      "ok_count": 5,
+      "path": "runs/asr-leaderboard/vibevoice-asr-paraphrase-smoke/judge-report/results.jsonl",
+      "result_count": 5
+    },
+    {
+      "average_score": 92.8,
+      "categories": {
+        "acoustic_noise_robustness": 5
+      },
+      "judge_samples": 15,
+      "labels": {
+        "accurate": 4,
+        "needs_review": 1
+      },
+      "models": [
+        "mlx-community/VibeVoice-ASR-4bit"
+      ],
+      "ok_count": 5,
+      "path": "runs/asr-leaderboard/vibevoice-asr-noise-smoke/judge-report/results.jsonl",
+      "result_count": 5
+    }
+  ],
   "source_result_paths": [
     "runs/asr-leaderboard/whisper-large-v3-turbo-smoke/judge-report/results.jsonl",
     "runs/asr-leaderboard/whisper-large-v3-turbo-full-gap/judge-report/results.jsonl",

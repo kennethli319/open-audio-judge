@@ -161,6 +161,12 @@ def test_write_summary_artifact_records_models_and_categories(tmp_path: Path) ->
         "".join(json.dumps(record) + "\n" for record in records),
         encoding="utf-8",
     )
+    source_results_path = tmp_path / "model-a" / "judge-report" / "results.jsonl"
+    source_results_path.parent.mkdir(parents=True)
+    source_results_path.write_text(
+        "".join(json.dumps(record) + "\n" for record in records[:2]),
+        encoding="utf-8",
+    )
     results = module.load_results_jsonl(results_path)
 
     module.write_summary_artifact(
@@ -168,7 +174,7 @@ def test_write_summary_artifact_records_models_and_categories(tmp_path: Path) ->
         summary_path,
         results_path=results_path,
         expected_cases_per_model=2,
-        source_result_paths=[tmp_path / "model-a" / "judge-report" / "results.jsonl"],
+        source_result_paths=[source_results_path],
     )
 
     summary = json.loads(summary_path.read_text(encoding="utf-8"))
@@ -177,7 +183,22 @@ def test_write_summary_artifact_records_models_and_categories(tmp_path: Path) ->
     assert summary["category_count"] == 2
     assert summary["total_gemini_judge_samples"] == 12
     assert summary["source_result_paths"] == [
-        str(tmp_path / "model-a" / "judge-report" / "results.jsonl")
+        str(source_results_path)
+    ]
+    assert summary["source_result_files"] == [
+        {
+            "path": str(source_results_path),
+            "models": ["mlx-community/model-a"],
+            "result_count": 2,
+            "ok_count": 2,
+            "judge_samples": 6,
+            "average_score": 90,
+            "labels": {"accurate": 2},
+            "categories": {
+                "numeric_unit_integrity": 1,
+                "transcription_accuracy_wer": 1,
+            },
+        }
     ]
     assert summary["run_manifest_path"] == "docs/asr-leaderboard-run-manifest.json"
     assert summary["manifest_validation_path"] == "docs/asr-leaderboard-manifest-validation.json"
@@ -212,7 +233,7 @@ def test_write_summary_artifact_records_models_and_categories(tmp_path: Path) ->
         ".venv/bin/python",
         "scripts/refresh_asr_leaderboard_artifacts.py",
         "--results",
-        str(tmp_path / "model-a" / "judge-report" / "results.jsonl"),
+        str(source_results_path),
     ]
     assert summary["refresh_workflow"]["manifest_refresh_command"] == [
         ".venv/bin/python",
@@ -305,6 +326,12 @@ def test_write_refresh_report_records_coverage_and_commands(tmp_path: Path) -> N
         "".join(json.dumps(record) + "\n" for record in records),
         encoding="utf-8",
     )
+    source_results_path = tmp_path / "model-a" / "judge-report" / "results.jsonl"
+    source_results_path.parent.mkdir(parents=True)
+    source_results_path.write_text(
+        "".join(json.dumps(record) + "\n" for record in records[:2]),
+        encoding="utf-8",
+    )
     results = module.load_results_jsonl(results_path)
 
     module.write_refresh_report(
@@ -312,7 +339,7 @@ def test_write_refresh_report_records_coverage_and_commands(tmp_path: Path) -> N
         report_path,
         results_path=results_path,
         expected_cases_per_model=2,
-        source_result_paths=[tmp_path / "model-a" / "judge-report" / "results.jsonl"],
+        source_result_paths=[source_results_path],
     )
 
     text = report_path.read_text(encoding="utf-8")
@@ -321,7 +348,7 @@ def test_write_refresh_report_records_coverage_and_commands(tmp_path: Path) -> N
     assert "`mlx-community/model-a`" in text
     assert "`transcription_accuracy_wer`" in text
     assert ".venv/bin/python scripts/refresh_asr_leaderboard_artifacts.py" in text
-    assert "--results " + str(tmp_path / "model-a" / "judge-report" / "results.jsonl") in text
+    assert "--results " + str(source_results_path) in text
     assert "Hosted artifact sync" in text
     assert "## Runtime Status" in text
     assert "MLX ASR: not_executed_by_refresh" in text
@@ -330,6 +357,8 @@ def test_write_refresh_report_records_coverage_and_commands(tmp_path: Path) -> N
     assert "## Model Category Matrix" in text
     assert "| Model | WER | Numeric/Unit | Negation/Modality | Temporal | Entity | Paraphrase | Acoustic Noise |" in text
     assert "| `mlx-community/model-a` | 1 | 1 | 0 | 0 | 0 | 0 | 0 |" in text
+    assert "## Source Result File Coverage" in text
+    assert f"| `{source_results_path}` | `mlx-community/model-a` | 2/2 ok |" in text
 
 
 def test_replace_generated_block_only_updates_marked_section(tmp_path: Path) -> None:
