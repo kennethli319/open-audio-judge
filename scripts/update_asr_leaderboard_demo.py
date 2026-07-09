@@ -685,13 +685,14 @@ def write_report_index(
     if source_file_summaries:
         lines.extend(
             [
-                "| Results | Report | Model | Cases | Score | Report Status | Categories |",
-                "| --- | --- | --- | ---: | ---: | --- | --- |",
+                "| Results | Local Report | Hosted Report | Model | Cases | Score | Report Status | Categories |",
+                "| --- | --- | --- | --- | ---: | ---: | --- | --- |",
                 *(
                     "| "
                     f"`{_repo_relative(summary.path)}` | "
                     f"`{_repo_relative(summary.report_path)}`"
                     f"{'' if summary.report_exists else ' missing'} | "
+                    f"{_format_hosted_source_report_link(summary.report_path) if summary.report_exists else 'missing'} | "
                     f"{', '.join(f'`{model}`' for model in summary.models)} | "
                     f"{summary.ok_count}/{summary.result_count} ok | "
                     f"{summary.average_score:.1f} | "
@@ -710,7 +711,7 @@ def write_report_index(
             "",
             "- The demo page and generated docs are copied to `open-audio-judge/`.",
             "- The combined full-35 results and report are copied to `open-audio-judge/asr-leaderboard/full-35-combined/`.",
-            "- Source run reports remain local unless their run directories are explicitly published.",
+            "- Source run reports are copied to their matching `open-audio-judge/asr-leaderboard/.../report.html` paths when they live under `runs/asr-leaderboard/`.",
             "",
         ]
     )
@@ -766,6 +767,16 @@ def write_report_links_artifact(
                         "report_exists": summary.report_exists,
                         "report_bytes": summary.report_bytes,
                         "report_sha256": summary.report_sha256,
+                        "hosted_report_path": (
+                            f"{HOSTED_BASE_PATH}/{_hosted_report_path_for_source_report(summary.report_path)}"
+                            if summary.report_exists
+                            else None
+                        ),
+                        "hosted_report_url": (
+                            f"{HOSTED_BASE_URL}/{_hosted_report_path_for_source_report(summary.report_path)}"
+                            if summary.report_exists
+                            else None
+                        ),
                         "models": list(summary.models),
                         "result_count": summary.result_count,
                         "ok_count": summary.ok_count,
@@ -1453,6 +1464,19 @@ def _format_source_report_status(summary: SourceResultFileSummary) -> str:
     )
 
 
+def _hosted_report_path_for_source_report(source_report: Path) -> str:
+    raw_path = _repo_relative(source_report)
+    prefix = "runs/asr-leaderboard/"
+    if raw_path.startswith(prefix):
+        return "asr-leaderboard/" + raw_path.removeprefix(prefix)
+    return f"asr-leaderboard/source-reports/{source_report.parent.parent.name}/report.html"
+
+
+def _format_hosted_source_report_link(source_report: Path) -> str:
+    hosted_path = _hosted_report_path_for_source_report(source_report)
+    return f"`{HOSTED_BASE_URL}/{hosted_path}`"
+
+
 def _model_category_matrix_row(
     row: dict[str, object],
     *,
@@ -1519,10 +1543,11 @@ def _render_source_report_rows(summaries: list[SourceResultFileSummary]) -> list
         "    <h2>Source Run Reports</h2>",
         (
             "    <p class=\"muted\">Each source run keeps its own local report alongside "
-            "the JSONL file that feeds the combined 35-case leaderboard.</p>"
+            "the JSONL file that feeds the combined 35-case leaderboard; hosted refreshes "
+            "mirror available source reports under the same ASR leaderboard path.</p>"
         ),
         "    <table>",
-        "      <thead><tr><th>Result File</th><th>Local Report</th><th>Cases</th><th>Categories</th></tr></thead>",
+        "      <thead><tr><th>Result File</th><th>Local Report</th><th>Hosted Report</th><th>Cases</th><th>Categories</th></tr></thead>",
         "      <tbody>",
     ]
     for summary in summaries:
@@ -1534,6 +1559,8 @@ def _render_source_report_rows(summaries: list[SourceResultFileSummary]) -> list
             "        <tr>"
             f"<td><code>{html.escape(_repo_relative(summary.path))}</code></td>"
             f"<td><code>{html.escape(_repo_relative(summary.report_path))}</code>"
+            f"{'' if summary.report_exists else ' missing'}</td>"
+            f"<td><code>{html.escape(HOSTED_BASE_URL + '/' + _hosted_report_path_for_source_report(summary.report_path))}</code>"
             f"{'' if summary.report_exists else ' missing'}</td>"
             f"<td>{summary.ok_count}/{summary.result_count} ok</td>"
             f"<td>{categories}</td>"

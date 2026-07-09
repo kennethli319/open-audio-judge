@@ -2,11 +2,11 @@
   "artifact_count": 33,
   "artifacts": [
     {
-      "bytes": 26974,
+      "bytes": 29590,
       "hosted_paths": [
         "asr-leaderboard-demo.html"
       ],
-      "sha256": "ec37acb3593aa581541437f7ea035dd287a2d9ffec25eba91524c36a349ba426",
+      "sha256": "3e821ec7d44ccfcff6dfbab484170cfdd1a6d7ab1f9196576dd8023563af3957",
       "source_path": "docs/asr-leaderboard-demo.html"
     },
     {
@@ -26,19 +26,19 @@
       "source_path": "docs/asr-leaderboard-refresh-report.md"
     },
     {
-      "bytes": 8642,
+      "bytes": 10936,
       "hosted_paths": [
         "asr-leaderboard-report-index.md"
       ],
-      "sha256": "eab987e66b2bcd454151677a1f6c9904c72bd310cbc4d2975af7d8d75a6221c6",
+      "sha256": "7393934dca2e1dc7564e64865a344445bbc7b2cfe9a285d277f7b1d2ccde656a",
       "source_path": "docs/asr-leaderboard-report-index.md"
     },
     {
-      "bytes": 13780,
+      "bytes": 18580,
       "hosted_paths": [
         "asr-leaderboard-report-links.json"
       ],
-      "sha256": "08b0a3735618701173dd820f8e9279b0199488a1157cf8e19485215d02d18b3a",
+      "sha256": "287e711ca0f378c619457d7255117d5061ae9e6a64632eacd039dbd7b8b694c1",
       "source_path": "docs/asr-leaderboard-report-links.json"
     },
     {
@@ -90,11 +90,11 @@
       "source_path": "docs/asr-leaderboard-next-runs.json"
     },
     {
-      "bytes": 33834,
+      "bytes": 33835,
       "hosted_paths": [
         "asr-leaderboard-artifacts.json"
       ],
-      "sha256": "2439656a7fb962a651f949d7de751232b5fb4a1efe19765a4ea2b9492786ee64",
+      "sha256": "298619555866928d1eacb8b6f73599c8bf0ce7219960d8c2a44e01ce0621bc77",
       "source_path": "docs/asr-leaderboard-artifacts.json"
     },
     {
