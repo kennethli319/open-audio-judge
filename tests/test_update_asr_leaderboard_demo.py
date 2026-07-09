@@ -165,6 +165,7 @@ def test_render_generated_sections_summarizes_verified_asr_results(tmp_path: Pat
     assert "docs/asr-leaderboard-manifest-validation.json" in html
     assert "docs/asr-seed-manifest-validation.json" in html
     assert "reproducible refresh workflow" in html
+    assert "docs/asr-leaderboard-hosted-manifest.json" in html
     assert "--hosted-dir /path/to/kennethli319.github.io/open-audio-judge" in html
     assert "Generated Refresh Workflow" in html
     assert "Generated Artifacts" in html
@@ -264,6 +265,7 @@ def test_write_summary_artifact_records_models_and_categories(tmp_path: Path) ->
     assert summary["manifest_validation_path"] == "docs/asr-leaderboard-manifest-validation.json"
     assert summary["seed_manifest_validation_path"] == "docs/asr-seed-manifest-validation.json"
     assert summary["next_runs_path"] == "docs/asr-leaderboard-next-runs.json"
+    assert summary["hosted_manifest_path"] == "docs/asr-leaderboard-hosted-manifest.json"
     assert summary["next_run_plan"]["status"] == "complete"
     assert summary["next_run_plan"]["missing_cell_count"] == 0
     assert summary["output_artifacts"] == [
@@ -298,6 +300,13 @@ def test_write_summary_artifact_records_models_and_categories(tmp_path: Path) ->
         {
             "path": "docs/asr-leaderboard-next-runs.json",
             "purpose": "Machine-readable next-refresh plan for missing ASR model/category cells.",
+        },
+        {
+            "path": "docs/asr-leaderboard-hosted-manifest.json",
+            "purpose": (
+                "Machine-readable manifest of ASR demo artifacts mirrored to the "
+                "hosted Pages checkout."
+            ),
         },
     ]
     assert summary["refresh_workflow"]["seed_manifest_validation_command"] == [
@@ -617,6 +626,7 @@ def test_write_refresh_report_records_coverage_and_commands(tmp_path: Path) -> N
     assert ".venv/bin/python scripts/refresh_asr_leaderboard_artifacts.py" in text
     assert ".venv/bin/python scripts/validate_asr_seed_manifest.py" in text
     assert "Seed manifest validation: `docs/asr-seed-manifest-validation.json`" in text
+    assert "Hosted artifact manifest: `docs/asr-leaderboard-hosted-manifest.json`" in text
     assert "--summary-out docs/asr-seed-manifest-validation.json" in text
     assert "Load local Gemini secret before model runs" in text
     assert "Run mlx-community/whisper-large-v3-turbo-asr-fp16" in text
@@ -722,6 +732,7 @@ def test_refresh_asr_leaderboard_artifacts_combines_report_and_page(tmp_path: Pa
     manifest_validation = tmp_path / "manifest-validation.json"
     seed_manifest_validation = tmp_path / "seed-manifest-validation.json"
     next_runs = tmp_path / "next-runs.json"
+    hosted_manifest = tmp_path / "hosted-manifest.json"
     hosted_dir = tmp_path / "hosted" / "open-audio-judge"
     records_a = [
         result_record(
@@ -779,6 +790,7 @@ def test_refresh_asr_leaderboard_artifacts_combines_report_and_page(tmp_path: Pa
         update_run_manifest=True,
         seed_manifest_validation_out=seed_manifest_validation,
         next_runs_out=next_runs,
+        hosted_manifest_out=hosted_manifest,
         hosted_dir=hosted_dir,
         expected_cases_per_model=2,
     )
@@ -826,6 +838,14 @@ def test_refresh_asr_leaderboard_artifacts_combines_report_and_page(tmp_path: Pa
     assert (hosted_dir / "asr-leaderboard-next-runs.json").read_text(
         encoding="utf-8"
     ) == next_runs.read_text(encoding="utf-8")
+    hosted_manifest_data = json.loads(hosted_manifest.read_text(encoding="utf-8"))
+    assert hosted_manifest_data["artifact_count"] == 9
+    assert {
+        "asr-leaderboard/full-35-combined/results.jsonl"
+    } in [set(artifact["hosted_paths"]) for artifact in hosted_manifest_data["artifacts"]]
+    assert (hosted_dir / "asr-leaderboard-hosted-manifest.json").read_text(
+        encoding="utf-8"
+    ) == hosted_manifest.read_text(encoding="utf-8")
     assert (
         hosted_dir / "asr-leaderboard" / "full-35-combined" / "results.jsonl"
     ).read_text(encoding="utf-8") == (out / "results.jsonl").read_text(encoding="utf-8")

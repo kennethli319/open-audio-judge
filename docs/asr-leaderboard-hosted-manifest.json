@@ -1,0 +1,80 @@
+{
+  "artifact_count": 9,
+  "artifacts": [
+    {
+      "bytes": 23527,
+      "hosted_paths": [
+        "asr-leaderboard-demo.html"
+      ],
+      "sha256": "78a57b851e2e574180856cb7797ef80d0300663d7e9a614faba7ce260ce933d4",
+      "source_path": "docs/asr-leaderboard-demo.html"
+    },
+    {
+      "bytes": 24462,
+      "hosted_paths": [
+        "asr-leaderboard-summary.json"
+      ],
+      "sha256": "b84c8dd65fe0c726f7d72f835403e8e8932103cc19d2ca1a0ac671bfa146493a",
+      "source_path": "docs/asr-leaderboard-summary.json"
+    },
+    {
+      "bytes": 14737,
+      "hosted_paths": [
+        "asr-leaderboard-refresh-report.md"
+      ],
+      "sha256": "c74e2b5f54cd52a5fe8048acdfe30c05b5d6b717abee7a3c4a7b0fcb6423e4f6",
+      "source_path": "docs/asr-leaderboard-refresh-report.md"
+    },
+    {
+      "bytes": 8552,
+      "hosted_paths": [
+        "asr-leaderboard-run-manifest.json"
+      ],
+      "sha256": "d2b6675a68f760ad69c1658cc3c5cee16975eab32137d1771e13a91bd26e9b3a",
+      "source_path": "docs/asr-leaderboard-run-manifest.json"
+    },
+    {
+      "bytes": 8545,
+      "hosted_paths": [
+        "asr-leaderboard-manifest-validation.json"
+      ],
+      "sha256": "13e9d7787d9122bc7aac0ce2a8eaa8a6f45002ac870f2075b181f42401f82553",
+      "source_path": "docs/asr-leaderboard-manifest-validation.json"
+    },
+    {
+      "bytes": 1634,
+      "hosted_paths": [
+        "asr-seed-manifest-validation.json"
+      ],
+      "sha256": "abbc54c696de3f52693ab26213e19f16eb01014034724e2b87a58a25a4ab2f24",
+      "source_path": "docs/asr-seed-manifest-validation.json"
+    },
+    {
+      "bytes": 546,
+      "hosted_paths": [
+        "asr-leaderboard-next-runs.json"
+      ],
+      "sha256": "cc918bbaa552b7099e89e2084aff8590d960456dee407eb318d26442488f93e7",
+      "source_path": "docs/asr-leaderboard-next-runs.json"
+    },
+    {
+      "bytes": 404226,
+      "hosted_paths": [
+        "asr-leaderboard/full-35-combined/results.jsonl"
+      ],
+      "sha256": "381ea5a536fed20456887b2bb171b64618f51ba5b22cb0b23a625189cfa61976",
+      "source_path": "runs/asr-leaderboard/full-35-combined/results.jsonl"
+    },
+    {
+      "bytes": 434978,
+      "hosted_paths": [
+        "asr-leaderboard/full-35-combined/report.html"
+      ],
+      "sha256": "21246cd2be336e37d0c5da76ab7edfd7944e4bb38c509a0c3ccce9dc5fd45cf7",
+      "source_path": "runs/asr-leaderboard/full-35-combined/report.html"
+    }
+  ],
+  "description": "Generated manifest for ASR leaderboard artifacts copied to kennethli319.github.io/open-audio-judge.",
+  "hosted_base_path": "open-audio-judge",
+  "version": 1
+}

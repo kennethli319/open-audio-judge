@@ -95,6 +95,7 @@
   ],
   "category_count": 7,
   "expected_cases_per_model": 35,
+  "hosted_manifest_path": "docs/asr-leaderboard-hosted-manifest.json",
   "manifest_validation_path": "docs/asr-leaderboard-manifest-validation.json",
   "model_category_matrix": [
     {
@@ -226,6 +227,10 @@
     {
       "path": "docs/asr-leaderboard-next-runs.json",
       "purpose": "Machine-readable next-refresh plan for missing ASR model/category cells."
+    },
+    {
+      "path": "docs/asr-leaderboard-hosted-manifest.json",
+      "purpose": "Machine-readable manifest of ASR demo artifacts mirrored to the hosted Pages checkout."
     }
   ],
   "refresh_runtime_status": {

@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import argparse
+import hashlib
 import json
 import shutil
 import sys
@@ -18,6 +19,7 @@ from scripts.update_asr_leaderboard_demo import (  # noqa: E402
     DEFAULT_REFRESH_REPORT,
     DEFAULT_SEED_MANIFEST_VALIDATION,
     DEFAULT_SUMMARY,
+    DEFAULT_HOSTED_MANIFEST,
     DEFAULT_NEXT_RUNS,
     build_next_run_plan,
     render_generated_sections,
@@ -126,6 +128,12 @@ def main() -> None:
         help="Write a machine-readable next-refresh plan for missing ASR model/category cells.",
     )
     parser.add_argument(
+        "--hosted-manifest-out",
+        type=Path,
+        default=DEFAULT_HOSTED_MANIFEST,
+        help="Write a machine-readable manifest of ASR demo artifacts mirrored to Pages.",
+    )
+    parser.add_argument(
         "--run-manifest",
         type=Path,
         default=DEFAULT_RUN_MANIFEST,
@@ -173,6 +181,7 @@ def main() -> None:
         seed_cases=args.seed_cases,
         seed_manifest_validation_out=args.seed_manifest_validation_out,
         next_runs_out=args.next_runs_out,
+        hosted_manifest_out=args.hosted_manifest_out,
         run_manifest=args.run_manifest,
         update_run_manifest=args.update_run_manifest,
         hosted_dir=args.hosted_dir,
@@ -194,6 +203,7 @@ def refresh_asr_leaderboard_artifacts(
     seed_cases: Path = DEFAULT_CASES,
     seed_manifest_validation_out: Path = DEFAULT_SEED_MANIFEST_VALIDATION,
     next_runs_out: Path = DEFAULT_NEXT_RUNS,
+    hosted_manifest_out: Path = DEFAULT_HOSTED_MANIFEST,
     hosted_dir: Path | None = None,
 ) -> None:
     result_paths = [_normalize_results_path(path) for path in result_paths]
@@ -259,6 +269,18 @@ def refresh_asr_leaderboard_artifacts(
         next_runs_out,
         expected_cases_per_model=expected_cases_per_model,
     )
+    write_hosted_manifest_artifact(
+        hosted_manifest_out,
+        page=page,
+        summary_out=summary_out,
+        refresh_report_out=refresh_report_out,
+        run_manifest=run_manifest,
+        manifest_validation_out=manifest_validation_out,
+        seed_manifest_validation_out=seed_manifest_validation_out,
+        next_runs_out=next_runs_out,
+        combined_results_path=combined_results_path,
+        combined_report_path=combined_report_path,
+    )
     copied_hosted_paths = (
         copy_hosted_asr_artifacts(
             hosted_dir,
@@ -269,6 +291,7 @@ def refresh_asr_leaderboard_artifacts(
             manifest_validation_out=manifest_validation_out,
             seed_manifest_validation_out=seed_manifest_validation_out,
             next_runs_out=next_runs_out,
+            hosted_manifest_out=hosted_manifest_out,
             combined_results_path=combined_results_path,
             combined_report_path=combined_report_path,
         )
@@ -296,6 +319,7 @@ def refresh_asr_leaderboard_artifacts(
     print(f"Manifest validation: {manifest_validation_out}")
     print(f"Seed manifest validation: {seed_manifest_validation_out}")
     print(f"Next-refresh plan: {next_runs_out}")
+    print(f"Hosted manifest: {hosted_manifest_out}")
     for copied_path in copied_hosted_paths:
         print(f"Hosted:  {copied_path}")
 
@@ -374,6 +398,7 @@ def copy_hosted_asr_artifacts(
     manifest_validation_out: Path = DEFAULT_MANIFEST_VALIDATION,
     seed_manifest_validation_out: Path = DEFAULT_SEED_MANIFEST_VALIDATION,
     next_runs_out: Path = DEFAULT_NEXT_RUNS,
+    hosted_manifest_out: Path = DEFAULT_HOSTED_MANIFEST,
     combined_results_path: Path | None = None,
     combined_report_path: Path | None = None,
 ) -> list[Path]:
@@ -387,6 +412,7 @@ def copy_hosted_asr_artifacts(
         (manifest_validation_out, {manifest_validation_out.name, DEFAULT_MANIFEST_VALIDATION.name}),
         (seed_manifest_validation_out, {seed_manifest_validation_out.name, DEFAULT_SEED_MANIFEST_VALIDATION.name}),
         (next_runs_out, {next_runs_out.name, DEFAULT_NEXT_RUNS.name}),
+        (hosted_manifest_out, {hosted_manifest_out.name, DEFAULT_HOSTED_MANIFEST.name}),
     )
     for source, destination_names in source_destinations:
         if not source.exists():
@@ -408,6 +434,72 @@ def copy_hosted_asr_artifacts(
             shutil.copyfile(source, destination)
             copied_paths.append(destination)
     return copied_paths
+
+
+def write_hosted_manifest_artifact(
+    output_path: Path,
+    *,
+    page: Path = DEFAULT_PAGE,
+    summary_out: Path = DEFAULT_SUMMARY,
+    refresh_report_out: Path = DEFAULT_REFRESH_REPORT,
+    run_manifest: Path = DEFAULT_RUN_MANIFEST,
+    manifest_validation_out: Path = DEFAULT_MANIFEST_VALIDATION,
+    seed_manifest_validation_out: Path = DEFAULT_SEED_MANIFEST_VALIDATION,
+    next_runs_out: Path = DEFAULT_NEXT_RUNS,
+    combined_results_path: Path,
+    combined_report_path: Path,
+) -> None:
+    artifacts = []
+    source_destinations = (
+        (page, {page.name, DEFAULT_PAGE.name}),
+        (summary_out, {summary_out.name, DEFAULT_SUMMARY.name}),
+        (refresh_report_out, {refresh_report_out.name, DEFAULT_REFRESH_REPORT.name}),
+        (run_manifest, {run_manifest.name, DEFAULT_RUN_MANIFEST.name}),
+        (manifest_validation_out, {manifest_validation_out.name, DEFAULT_MANIFEST_VALIDATION.name}),
+        (seed_manifest_validation_out, {seed_manifest_validation_out.name, DEFAULT_SEED_MANIFEST_VALIDATION.name}),
+        (next_runs_out, {next_runs_out.name, DEFAULT_NEXT_RUNS.name}),
+        (output_path, {output_path.name, DEFAULT_HOSTED_MANIFEST.name}),
+        (combined_results_path, {"asr-leaderboard/full-35-combined/results.jsonl"}),
+        (combined_report_path, {"asr-leaderboard/full-35-combined/report.html"}),
+    )
+    for source, hosted_paths in source_destinations:
+        if source == output_path:
+            continue
+        if not source.exists():
+            raise FileNotFoundError(f"Missing ASR hosted manifest source artifact: {source}")
+        artifacts.append(
+            {
+                "source_path": _repo_relative(source),
+                "hosted_paths": sorted(hosted_paths),
+                "bytes": source.stat().st_size,
+                "sha256": _sha256_file(source),
+            }
+        )
+
+    output_path.parent.mkdir(parents=True, exist_ok=True)
+    output_path.write_text(
+        json.dumps(
+            {
+                "description": "Generated manifest for ASR leaderboard artifacts copied to kennethli319.github.io/open-audio-judge.",
+                "version": 1,
+                "hosted_base_path": "open-audio-judge",
+                "artifact_count": len(artifacts),
+                "artifacts": artifacts,
+            },
+            indent=2,
+            sort_keys=True,
+        )
+        + "\n",
+        encoding="utf-8",
+    )
+
+
+def _sha256_file(path: Path) -> str:
+    digest = hashlib.sha256()
+    with path.open("rb") as handle:
+        for chunk in iter(lambda: handle.read(1024 * 1024), b""):
+            digest.update(chunk)
+    return digest.hexdigest()
 
 
 def _normalize_results_path(path: Path) -> Path:

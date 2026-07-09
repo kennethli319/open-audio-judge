@@ -21,6 +21,7 @@ DEFAULT_RUN_MANIFEST = ROOT / "docs" / "asr-leaderboard-run-manifest.json"
 DEFAULT_MANIFEST_VALIDATION = ROOT / "docs" / "asr-leaderboard-manifest-validation.json"
 DEFAULT_SEED_MANIFEST_VALIDATION = ROOT / "docs" / "asr-seed-manifest-validation.json"
 DEFAULT_NEXT_RUNS = ROOT / "docs" / "asr-leaderboard-next-runs.json"
+DEFAULT_HOSTED_MANIFEST = ROOT / "docs" / "asr-leaderboard-hosted-manifest.json"
 DEFAULT_AUDIO_CASES = ROOT / "runs" / "asr-research-audio" / "tts_audio_cases.jsonl"
 DEFAULT_SEED_CASES = ROOT / "examples" / "asr_research_cases.jsonl"
 START_MARKER = "<!-- ASR_LEADERBOARD_GENERATED_START -->"
@@ -166,6 +167,7 @@ def render_generated_sections(
     validation_label = html.escape(_repo_relative(DEFAULT_MANIFEST_VALIDATION))
     seed_validation_label = html.escape(_repo_relative(DEFAULT_SEED_MANIFEST_VALIDATION))
     next_runs_label = html.escape(_repo_relative(DEFAULT_NEXT_RUNS))
+    hosted_manifest_label = html.escape(_repo_relative(DEFAULT_HOSTED_MANIFEST))
     workflow = _refresh_workflow([])
     workflow_commands = [
         ("Validate seed manifest", workflow["seed_manifest_validation_command"]),
@@ -219,7 +221,8 @@ def render_generated_sections(
                 f"<code>{manifest_label}</code>, with coverage validation in "
                 f"<code>{validation_label}</code> and seed-manifest validation in "
                 f"<code>{seed_validation_label}</code>. The next-refresh plan is "
-                f"<code>{next_runs_label}</code>; together they include the source result files, "
+                f"<code>{next_runs_label}</code>, and the hosted artifact manifest is "
+                f"<code>{hosted_manifest_label}</code>; together they include the source result files, "
                 "complete model/category matrix, missing-cell guidance, and reproducible refresh workflow. Pass "
                 "<code>--hosted-dir /path/to/kennethli319.github.io/open-audio-judge</code> "
                 "to copy the same verified artifacts into the hosted Pages checkout.</p>"
@@ -320,6 +323,7 @@ def write_summary_artifact(
                 "manifest_validation_path": _repo_relative(DEFAULT_MANIFEST_VALIDATION),
                 "seed_manifest_validation_path": _repo_relative(DEFAULT_SEED_MANIFEST_VALIDATION),
                 "next_runs_path": _repo_relative(DEFAULT_NEXT_RUNS),
+                "hosted_manifest_path": _repo_relative(DEFAULT_HOSTED_MANIFEST),
                 "output_artifacts": output_artifacts,
                 "refresh_workflow": _refresh_workflow(source_result_paths or []),
                 "refresh_runtime_status": runtime_status,
@@ -398,6 +402,7 @@ def write_refresh_report(
                 f"- Manifest validation: `{_repo_relative(DEFAULT_MANIFEST_VALIDATION)}`",
                 f"- Seed manifest validation: `{_repo_relative(DEFAULT_SEED_MANIFEST_VALIDATION)}`",
                 f"- Next-refresh plan: `{_repo_relative(DEFAULT_NEXT_RUNS)}`",
+                f"- Hosted artifact manifest: `{_repo_relative(DEFAULT_HOSTED_MANIFEST)}`",
                 f"- Total judged transcripts: {len(results)}",
                 f"- Models: {len(model_summaries)}",
                 f"- Categories: {len(category_summaries)}",
@@ -654,6 +659,10 @@ def build_output_artifact_index(*, results_path: Path) -> list[dict[str, str]]:
         {
             "path": _repo_relative(DEFAULT_NEXT_RUNS),
             "purpose": "Machine-readable next-refresh plan for missing ASR model/category cells.",
+        },
+        {
+            "path": _repo_relative(DEFAULT_HOSTED_MANIFEST),
+            "purpose": "Machine-readable manifest of ASR demo artifacts mirrored to the hosted Pages checkout.",
         },
     ]
 
