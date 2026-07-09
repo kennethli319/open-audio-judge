@@ -234,6 +234,8 @@ def test_render_generated_sections_summarizes_verified_asr_results(tmp_path: Pat
     assert "--check-only" in html
     assert "Require audio manifest readiness" in html
     assert "--require-audio-ready" in html
+    assert "Refresh runtime status" in html
+    assert "--check-mlx-runtime" in html
     assert "Run refresh shell playbook" in html
     assert "Generated Artifacts" in html
     assert "Validate seed manifest" in html
@@ -545,6 +547,12 @@ def test_write_summary_artifact_records_models_and_categories(tmp_path: Path) ->
         "--check-only",
         "--require-audio-ready",
     ]
+    assert summary["refresh_workflow"]["runtime_status_check_command"] == [
+        ".venv/bin/python",
+        "scripts/refresh_asr_leaderboard_artifacts.py",
+        "--check-only",
+        "--check-mlx-runtime",
+    ]
     assert summary["refresh_workflow"]["freshness_check_command"] == [
         ".venv/bin/python",
         "scripts/refresh_asr_leaderboard_artifacts.py",
@@ -795,6 +803,8 @@ def test_write_refresh_report_records_coverage_and_commands(tmp_path: Path) -> N
     assert "--check-only" in text
     assert "Require audio manifest readiness" in text
     assert "--require-audio-ready" in text
+    assert "Refresh runtime status artifact" in text
+    assert "--check-mlx-runtime" in text
     assert "Generated artifact freshness check" in text
     assert "--require-generated-fresh" in text
     assert "--results " + str(source_results_path) in text
@@ -1028,6 +1038,10 @@ def test_refresh_asr_leaderboard_artifacts_combines_report_and_page(tmp_path: Pa
     )
     assert (
         ".venv/bin/python scripts/refresh_asr_leaderboard_artifacts.py --check-only --require-audio-ready"
+        in refresh_command_text
+    )
+    assert (
+        ".venv/bin/python scripts/refresh_asr_leaderboard_artifacts.py --check-only --check-mlx-runtime"
         in refresh_command_text
     )
     assert (
