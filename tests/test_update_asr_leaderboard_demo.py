@@ -325,6 +325,9 @@ def test_write_summary_artifact_records_models_and_categories(tmp_path: Path) ->
         {
             "path": str(source_results_path),
             "report_path": str(source_results_path.with_name("report.html")),
+            "report_exists": False,
+            "report_bytes": None,
+            "report_sha256": None,
             "models": ["mlx-community/model-a"],
             "result_count": 2,
             "ok_count": 2,
@@ -786,7 +789,7 @@ def test_write_refresh_report_records_coverage_and_commands(tmp_path: Path) -> N
     assert "| `mlx-community/model-a` | 1 | 1 | 0 | 0 | 0 | 0 | 0 |" in text
     assert "## Source Result File Coverage" in text
     assert (
-        f"| `{source_results_path}` | `{source_results_path.with_name('report.html')}` | "
+        f"| `{source_results_path}` | `{source_results_path.with_name('report.html')}` missing | "
         "`mlx-community/model-a` | 2/2 ok |"
     ) in text
     assert "## Generated Artifact Index" in text
@@ -1643,6 +1646,43 @@ def test_check_asr_leaderboard_page_rejects_stale_refresh_commands(tmp_path: Pat
             summary_path=tmp_path / "summary.json",
             artifact_root=tmp_path,
             path_maps=[],
+        )
+
+
+def test_check_asr_leaderboard_page_rejects_stale_source_run_report(tmp_path: Path) -> None:
+    check_module = load_check_module()
+    source_report = tmp_path / "model-a" / "judge-report" / "report.html"
+    source_report.parent.mkdir(parents=True)
+    source_report.write_text("<html>fresh report</html>\n", encoding="utf-8")
+    summary = {
+        "source_result_files": [
+            {
+                "path": str(source_report.with_name("results.jsonl")),
+                "report_path": str(source_report),
+                "report_exists": True,
+                "report_bytes": source_report.stat().st_size,
+                "report_sha256": file_sha256(source_report),
+            }
+        ]
+    }
+
+    check_module._validate_source_result_file_reports(
+        summary,
+        summary_path=tmp_path / "summary.json",
+        artifact_root=tmp_path,
+        path_maps=[],
+        allow_missing_source_results=False,
+    )
+
+    source_report.write_text("<html>stale report</html>\n", encoding="utf-8")
+
+    with pytest.raises(ValueError, match="report sha256 is stale"):
+        check_module._validate_source_result_file_reports(
+            summary,
+            summary_path=tmp_path / "summary.json",
+            artifact_root=tmp_path,
+            path_maps=[],
+            allow_missing_source_results=False,
         )
 
 

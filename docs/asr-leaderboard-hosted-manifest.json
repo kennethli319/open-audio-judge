@@ -10,11 +10,11 @@
       "source_path": "docs/asr-leaderboard-demo.html"
     },
     {
-      "bytes": 26195,
+      "bytes": 28877,
       "hosted_paths": [
         "asr-leaderboard-summary.json"
       ],
-      "sha256": "cce78d1575457a428e4b19b806b2f351bee68faf751ba86ab4d9f81c2111febc",
+      "sha256": "bf21c3becb7c158694ef94ef3ea88aa251e6a5e65faae816d1451ba21cc044a2",
       "source_path": "docs/asr-leaderboard-summary.json"
     },
     {
@@ -70,7 +70,7 @@
       "hosted_paths": [
         "asr-leaderboard-artifacts.json"
       ],
-      "sha256": "e31047d0c6d5f3334fce8e5a8532bc07ca80c0f7a3c2a9cba8e8cd0e192b7d48",
+      "sha256": "11de13531099271530c1774ad8c7bceea09889d7fc1344b2f4579109fc64c9ab",
       "source_path": "docs/asr-leaderboard-artifacts.json"
     },
     {

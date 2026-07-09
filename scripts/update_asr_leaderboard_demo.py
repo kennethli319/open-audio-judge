@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import argparse
+import hashlib
 import html
 import json
 import statistics
@@ -76,6 +77,9 @@ class CategorySummary:
 class SourceResultFileSummary:
     path: Path
     report_path: Path
+    report_exists: bool
+    report_bytes: int | None
+    report_sha256: str | None
     models: tuple[str, ...]
     result_count: int
     ok_count: int
@@ -973,6 +977,13 @@ def summarize_source_result_files(result_paths: list[Path]) -> list[SourceResult
             SourceResultFileSummary(
                 path=path,
                 report_path=path.with_name("report.html"),
+                report_exists=path.with_name("report.html").exists(),
+                report_bytes=path.with_name("report.html").stat().st_size
+                if path.with_name("report.html").exists()
+                else None,
+                report_sha256=_sha256_file(path.with_name("report.html"))
+                if path.with_name("report.html").exists()
+                else None,
                 models=models,
                 result_count=len(file_results),
                 ok_count=sum(1 for result in file_results if result.status == "ok"),
@@ -1134,6 +1145,9 @@ def _source_file_summary_json(summary: SourceResultFileSummary) -> dict[str, obj
     return {
         "path": _repo_relative(summary.path),
         "report_path": _repo_relative(summary.report_path),
+        "report_exists": summary.report_exists,
+        "report_bytes": summary.report_bytes,
+        "report_sha256": summary.report_sha256,
         "models": list(summary.models),
         "result_count": summary.result_count,
         "ok_count": summary.ok_count,
@@ -1158,8 +1172,13 @@ def _source_file_markdown_row(summary: SourceResultFileSummary) -> str:
         for label in ("accurate", "needs_review", "inaccurate")
         if summary.labels[label]
     )
+    report_status = (
+        f"`{_repo_relative(summary.report_path)}`"
+        if summary.report_exists
+        else f"`{_repo_relative(summary.report_path)}` missing"
+    )
     return (
-        f"| `{_repo_relative(summary.path)}` | `{_repo_relative(summary.report_path)}` | {models} | "
+        f"| `{_repo_relative(summary.path)}` | {report_status} | {models} | "
         f"{summary.ok_count}/{summary.result_count} ok | {categories} | "
         f"{summary.judge_samples} | {summary.average_score:.1f} | {labels} |"
     )
@@ -1187,7 +1206,8 @@ def _render_source_report_rows(summaries: list[SourceResultFileSummary]) -> list
         rows.append(
             "        <tr>"
             f"<td><code>{html.escape(_repo_relative(summary.path))}</code></td>"
-            f"<td><code>{html.escape(_repo_relative(summary.report_path))}</code></td>"
+            f"<td><code>{html.escape(_repo_relative(summary.report_path))}</code>"
+            f"{'' if summary.report_exists else ' missing'}</td>"
             f"<td>{summary.ok_count}/{summary.result_count} ok</td>"
             f"<td>{categories}</td>"
             "</tr>"
@@ -1245,6 +1265,14 @@ def _repo_relative(path: Path) -> str:
         return path.resolve().relative_to(ROOT).as_posix()
     except ValueError:
         return path.as_posix()
+
+
+def _sha256_file(path: Path) -> str:
+    digest = hashlib.sha256()
+    with path.open("rb") as handle:
+        for chunk in iter(lambda: handle.read(1024 * 1024), b""):
+            digest.update(chunk)
+    return digest.hexdigest()
 
 
 if __name__ == "__main__":

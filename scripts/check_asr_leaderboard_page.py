@@ -156,6 +156,13 @@ def _validate_summary(
         path_maps=path_maps,
         allow_missing_source_results=allow_missing_source_results,
     )
+    _validate_source_result_file_reports(
+        summary,
+        summary_path=summary_path,
+        artifact_root=artifact_root,
+        path_maps=path_maps,
+        allow_missing_source_results=allow_missing_source_results,
+    )
     _validate_run_manifest_artifact(
         summary,
         summary_path=summary_path,
@@ -268,6 +275,82 @@ def _validate_referenced_artifacts(
     if missing:
         formatted = ", ".join(f"{key}={path}" for key, path in missing)
         raise ValueError(f"{summary_path} references missing ASR artifact(s): {formatted}")
+
+
+def _validate_source_result_file_reports(
+    summary: dict[str, Any],
+    *,
+    summary_path: Path,
+    artifact_root: Path,
+    path_maps: list[tuple[str, str]],
+    allow_missing_source_results: bool,
+) -> None:
+    source_files = summary.get("source_result_files", [])
+    if source_files is None:
+        return
+    if not isinstance(source_files, list):
+        raise ValueError(f"{summary_path} source_result_files must be a list.")
+
+    for index, source_file in enumerate(source_files):
+        if not isinstance(source_file, dict):
+            raise ValueError(f"{summary_path} source_result_files[{index}] must be an object.")
+        raw_report_path = source_file.get("report_path")
+        if not isinstance(raw_report_path, str) or not raw_report_path:
+            raise ValueError(
+                f"{summary_path} source_result_files[{index}] has invalid report_path: "
+                f"{raw_report_path!r}"
+            )
+        report_path = _resolve_summary_path(
+            raw_report_path,
+            artifact_root=artifact_root,
+            path_maps=path_maps,
+        )
+        expected_exists = source_file.get("report_exists")
+        if expected_exists is False:
+            continue
+        if not report_path.exists():
+            if allow_missing_source_results:
+                continue
+            raise ValueError(
+                f"{summary_path} source_result_files[{index}] references missing "
+                f"source run report: {raw_report_path}"
+            )
+
+        has_digest_fields = (
+            "report_exists" in source_file
+            or "report_bytes" in source_file
+            or "report_sha256" in source_file
+        )
+        if not has_digest_fields:
+            continue
+
+        expected_bytes = source_file.get("report_bytes")
+        expected_sha256 = source_file.get("report_sha256")
+        if not isinstance(expected_bytes, int) or expected_bytes < 0:
+            raise ValueError(
+                f"{summary_path} source_result_files[{index}] has invalid report_bytes: "
+                f"{expected_bytes!r}"
+            )
+        if (
+            not isinstance(expected_sha256, str)
+            or len(expected_sha256) != 64
+            or any(char not in "0123456789abcdef" for char in expected_sha256)
+        ):
+            raise ValueError(
+                f"{summary_path} source_result_files[{index}] has invalid report_sha256: "
+                f"{expected_sha256!r}"
+            )
+        if report_path.stat().st_size != expected_bytes:
+            raise ValueError(
+                f"{summary_path} source_result_files[{index}] report byte size is stale: "
+                f"{raw_report_path}"
+            )
+        actual_sha256 = _sha256_file(report_path)
+        if actual_sha256 != expected_sha256:
+            raise ValueError(
+                f"{summary_path} source_result_files[{index}] report sha256 is stale: "
+                f"{raw_report_path}"
+            )
 
 
 def _validate_run_manifest_artifact(
