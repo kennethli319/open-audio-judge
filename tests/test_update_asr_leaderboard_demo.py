@@ -1324,7 +1324,7 @@ def test_check_asr_leaderboard_page_validates_generated_artifacts(tmp_path: Path
     refresh_report = tmp_path / "refresh-report.md"
     refresh_report.write_text("# report\n", encoding="utf-8")
     refresh_commands = tmp_path / "refresh-commands.sh"
-    refresh_commands.write_text("#!/usr/bin/env bash\n", encoding="utf-8")
+    update_module.write_refresh_commands_script(refresh_commands)
     summary_data = json.loads(summary.read_text(encoding="utf-8"))
     summary_data["refresh_commands_path"] = str(refresh_commands)
     summary.write_text(json.dumps(summary_data), encoding="utf-8")
@@ -1369,7 +1369,33 @@ def test_check_asr_leaderboard_page_validates_generated_artifacts(tmp_path: Path
         check_module.check_asr_leaderboard_page(page, summary_path=summary)
 
 
+def test_check_asr_leaderboard_page_rejects_stale_refresh_commands(tmp_path: Path) -> None:
+    update_module = load_script_module()
+    check_module = load_check_module()
+    refresh_commands = tmp_path / "refresh-commands.sh"
+    update_module.write_refresh_commands_script(refresh_commands)
+    text = refresh_commands.read_text(encoding="utf-8").replace(
+        ".venv/bin/python scripts/validate_asr_seed_manifest.py --summary-out docs/asr-seed-manifest-validation.json",
+        ".venv/bin/python scripts/validate_asr_seed_manifest.py --stale-summary docs/asr-seed-manifest-validation.json",
+        1,
+    )
+    refresh_commands.write_text(text, encoding="utf-8")
+    summary = {
+        "refresh_commands_path": str(refresh_commands),
+        "refresh_workflow": update_module._refresh_workflow([]),
+    }
+
+    with pytest.raises(ValueError, match="seed_manifest_validation_command"):
+        check_module._validate_refresh_commands_script(
+            summary,
+            summary_path=tmp_path / "summary.json",
+            artifact_root=tmp_path,
+            path_maps=[],
+        )
+
+
 def test_check_asr_leaderboard_page_validates_hosted_artifact_layout(tmp_path: Path) -> None:
+    update_module = load_script_module()
     check_module = load_check_module()
     hosted = tmp_path / "hosted"
     page = hosted / "asr-leaderboard-demo.html"
@@ -1450,7 +1476,7 @@ def test_check_asr_leaderboard_page_validates_hosted_artifact_layout(tmp_path: P
         encoding="utf-8",
     )
     seed_manifest_validation.write_text(json.dumps({"status": "complete"}) + "\n", encoding="utf-8")
-    refresh_commands.write_text("#!/usr/bin/env bash\n", encoding="utf-8")
+    update_module.write_refresh_commands_script(refresh_commands)
     next_runs.write_text(
         json.dumps(
             {
@@ -1578,31 +1604,7 @@ def test_check_asr_leaderboard_page_validates_hosted_artifact_layout(tmp_path: P
                             "purpose": "Single machine-readable index for the ASR leaderboard artifact bundle.",
                         },
                     ],
-                "refresh_workflow": {
-                    "seed_manifest_validation_command": [
-                        ".venv/bin/python",
-                        "scripts/validate_asr_seed_manifest.py",
-                    ],
-                    "audio_materialization_command": [
-                        ".venv/bin/python",
-                        "scripts/synthesize_tts_cases.py",
-                    ],
-                    "model_run_template": [".venv/bin/oaj", "autojudge-mlx-asr"],
-                    "manifest_refresh_command": [
-                        ".venv/bin/python",
-                        "scripts/refresh_asr_leaderboard_artifacts.py",
-                    ],
-                    "page_validation_command": [
-                        ".venv/bin/python",
-                        "scripts/check_asr_leaderboard_page.py",
-                    ],
-                    "hosted_artifact_command": [
-                        ".venv/bin/python",
-                        "scripts/refresh_asr_leaderboard_artifacts.py",
-                        "--hosted-dir-from-env",
-                    ],
-                    "hosted_artifact_env_var": "ASR_LEADERBOARD_HOSTED_DIR",
-                },
+                "refresh_workflow": update_module._refresh_workflow([]),
                 "total_results": 4,
                 "model_count": 2,
                 "category_count": 2,
@@ -1635,12 +1637,13 @@ def test_check_asr_leaderboard_page_validates_hosted_artifact_layout(tmp_path: P
                 "mlx-community/model-b",
                 "transcription_accuracy_wer",
                 "numeric_unit_integrity",
-                ".venv/bin/python scripts/validate_asr_seed_manifest.py",
-                ".venv/bin/python scripts/synthesize_tts_cases.py",
-                ".venv/bin/oaj autojudge-mlx-asr",
+                ".venv/bin/python scripts/validate_asr_seed_manifest.py --summary-out docs/asr-seed-manifest-validation.json",
+                ".venv/bin/python scripts/synthesize_tts_cases.py --cases examples/asr_research_cases.jsonl --out runs/asr-research-audio --discard-text-sidecars --summary-out runs/asr-research-audio/summary.json",
+                ".venv/bin/oaj autojudge-mlx-asr --python-bin .venv/bin/python --cases runs/asr-research-audio/tts_audio_cases.jsonl --model &lt;mlx-community/model-id&gt; --judge-provider gemini --judge-samples 3 --out runs/asr-leaderboard/&lt;run-name&gt;",
                 ".venv/bin/python scripts/refresh_asr_leaderboard_artifacts.py",
                 ".venv/bin/python scripts/check_asr_leaderboard_page.py",
                 ".venv/bin/python scripts/refresh_asr_leaderboard_artifacts.py --hosted-dir-from-env",
+                ".venv/bin/python scripts/refresh_asr_leaderboard_artifacts.py --check-only --hosted-dir-from-env",
                 "runs/asr-leaderboard/full-35-combined/results.jsonl",
                 "Combined ASR judge results used by the generated page and report.",
                 "runs/asr-leaderboard/full-35-combined/report.html",
