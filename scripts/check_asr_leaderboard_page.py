@@ -918,12 +918,15 @@ def _validate_refresh_commands_script(
 
     command_keys = (
         "refresh_check_command",
+        "audio_ready_check_command",
         "seed_manifest_validation_command",
+        "freshness_check_command",
         "combine_refresh_command",
         "page_validation_command",
         "hosted_artifact_command",
         "hosted_validation_command",
         "audio_materialization_command",
+        "mlx_runtime_check_command",
         "local_secret_env_command",
         "discover_refresh_command",
     )

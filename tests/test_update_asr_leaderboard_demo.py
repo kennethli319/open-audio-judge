@@ -1999,6 +1999,31 @@ def test_check_asr_leaderboard_page_rejects_stale_refresh_commands(tmp_path: Pat
         )
 
 
+def test_check_asr_leaderboard_page_rejects_missing_refresh_preflights(tmp_path: Path) -> None:
+    update_module = load_script_module()
+    check_module = load_check_module()
+    refresh_commands = tmp_path / "refresh-commands.sh"
+    update_module.write_refresh_commands_script(refresh_commands)
+    text = refresh_commands.read_text(encoding="utf-8").replace(
+        ".venv/bin/python scripts/refresh_asr_leaderboard_artifacts.py --check-only --require-audio-ready\n",
+        "",
+        1,
+    )
+    refresh_commands.write_text(text, encoding="utf-8")
+    summary = {
+        "refresh_commands_path": str(refresh_commands),
+        "refresh_workflow": update_module._refresh_workflow([]),
+    }
+
+    with pytest.raises(ValueError, match="audio_ready_check_command"):
+        check_module._validate_refresh_commands_script(
+            summary,
+            summary_path=tmp_path / "summary.json",
+            artifact_root=tmp_path,
+            path_maps=[],
+        )
+
+
 def test_check_asr_leaderboard_page_rejects_stale_runtime_result_bundle(tmp_path: Path) -> None:
     check_module = load_check_module()
     runtime_status = tmp_path / "runtime-status.json"
