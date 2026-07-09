@@ -588,6 +588,8 @@ def write_run_manifest_artifact(
                 "run_name": _run_name_from_results_path(path),
                 "model": models[0],
                 "results_path": _repo_relative(path),
+                "bytes": path.stat().st_size,
+                "sha256": _sha256_file(path),
                 "result_count": len(results),
                 "ok_count": sum(1 for result in results if result.status == "ok"),
                 "category_counts": dict(sorted(categories.items())),
@@ -1204,7 +1206,7 @@ def build_manifest_validation(
     model_counts: dict[str, int] = {}
     model_ok_counts: dict[str, int] = {}
     category_counts: dict[str, int] = {}
-    manifest_models_by_path = _manifest_declared_models_by_result_path(run_manifest)
+    manifest_runs_by_path = _manifest_declared_runs_by_result_path(run_manifest)
 
     for result in results:
         model = str(result.metadata.get("candidate_model") or "")
@@ -1250,11 +1252,11 @@ def build_manifest_validation(
         )
 
     result_file_checks = [
-        _result_file_manifest_check(path, manifest_models_by_path)
+        _result_file_manifest_check(path, manifest_runs_by_path)
         for path in result_paths
     ]
     complete = all(model["complete"] for model in models) and all(
-        check["model_match"] for check in result_file_checks
+        check["model_match"] and check["digest_match"] for check in result_file_checks
     )
 
     return {
@@ -1276,7 +1278,7 @@ def build_manifest_validation(
     }
 
 
-def _manifest_declared_models_by_result_path(manifest_path: Path) -> dict[Path, str]:
+def _manifest_declared_runs_by_result_path(manifest_path: Path) -> dict[Path, dict[str, object]]:
     if not manifest_path.exists():
         return {}
     data = json.loads(manifest_path.read_text(encoding="utf-8"))
@@ -1284,7 +1286,7 @@ def _manifest_declared_models_by_result_path(manifest_path: Path) -> dict[Path, 
     if not isinstance(runs, list):
         return {}
 
-    models_by_path = {}
+    runs_by_path = {}
     for run in runs:
         if not isinstance(run, dict):
             continue
@@ -1297,11 +1299,11 @@ def _manifest_declared_models_by_result_path(manifest_path: Path) -> dict[Path, 
         path = Path(raw_path)
         if not path.is_absolute():
             path = ROOT / path
-        models_by_path[_normalize_results_path(path).resolve()] = model
-    return models_by_path
+        runs_by_path[_normalize_results_path(path).resolve()] = run
+    return runs_by_path
 
 
-def _result_file_manifest_check(path: Path, manifest_models_by_path: dict[Path, str]) -> dict[str, object]:
+def _result_file_manifest_check(path: Path, manifest_runs_by_path: dict[Path, dict[str, object]]) -> dict[str, object]:
     file_results = load_results_jsonl(path)
     actual_models = sorted(
         {
@@ -1309,16 +1311,30 @@ def _result_file_manifest_check(path: Path, manifest_models_by_path: dict[Path, 
             for result in file_results
         }
     )
-    declared_model = manifest_models_by_path.get(path.resolve())
+    manifest_run = manifest_runs_by_path.get(path.resolve(), {})
+    declared_model = manifest_run.get("model")
     model_match = (
         declared_model is None
         or actual_models == [declared_model]
+    )
+    declared_bytes = manifest_run.get("bytes")
+    declared_sha256 = manifest_run.get("sha256")
+    actual_bytes = path.stat().st_size
+    actual_sha256 = _sha256_file(path)
+    digest_match = (
+        (declared_bytes is None or declared_bytes == actual_bytes)
+        and (declared_sha256 is None or declared_sha256 == actual_sha256)
     )
     return {
         "path": _repo_relative(path),
         "declared_model": declared_model,
         "actual_models": actual_models,
         "model_match": model_match,
+        "declared_bytes": declared_bytes,
+        "actual_bytes": actual_bytes,
+        "declared_sha256": declared_sha256,
+        "actual_sha256": actual_sha256,
+        "digest_match": digest_match,
     }
 
 

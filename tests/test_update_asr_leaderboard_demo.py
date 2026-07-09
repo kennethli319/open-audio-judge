@@ -89,11 +89,21 @@ def run_manifest_record(
         for record in records:
             category = str(record["metadata"]["eval_category"])
             category_counts[category] = category_counts.get(category, 0) + 1
+        path = Path(results_path)
+        digest_fields = (
+            {
+                "bytes": path.stat().st_size,
+                "sha256": file_sha256(path),
+            }
+            if path.exists()
+            else {}
+        )
         runs.append(
             {
                 "run_name": Path(results_path).parent.name,
                 "model": models[0],
                 "results_path": results_path,
+                **digest_fields,
                 "result_count": len(records),
                 "ok_count": sum(1 for record in records if record["status"] == "ok"),
                 "category_counts": dict(sorted(category_counts.items())),
@@ -937,10 +947,15 @@ def test_refresh_asr_leaderboard_artifacts_combines_report_and_page(tmp_path: Pa
     assert validation["status"] == "complete"
     assert validation["result_file_count"] == 2
     assert validation["expected_cases_per_category"] == 1
+    assert all(check["digest_match"] for check in validation["result_file_checks"])
+    assert all(check["actual_sha256"] for check in validation["result_file_checks"])
     assert validation["models"][0]["category_counts"] == {
         "numeric_unit_integrity": 1,
         "transcription_accuracy_wer": 1,
     }
+    written_manifest = json.loads(run_manifest.read_text(encoding="utf-8"))
+    assert all(run["bytes"] > 0 for run in written_manifest["runs"])
+    assert all(len(run["sha256"]) == 64 for run in written_manifest["runs"])
     assert (hosted_dir / "demo.html").read_text(encoding="utf-8") == page.read_text(
         encoding="utf-8"
     )
@@ -1210,6 +1225,67 @@ def test_discover_or_default_result_paths_falls_back_to_run_manifest(
 
     assert paths == [model_a, model_b]
     assert "using the committed run manifest/segmented sources instead" in capsys.readouterr().err
+
+
+def test_manifest_validation_detects_source_result_digest_drift(tmp_path: Path) -> None:
+    refresh_module = load_refresh_module()
+    result_path = tmp_path / "model-a" / "judge-report" / "results.jsonl"
+    manifest = tmp_path / "run-manifest.json"
+    records = [
+        result_record(
+            case_id="asr-a-model-a",
+            model="mlx-community/model-a",
+            category="transcription_accuracy_wer",
+            score=100,
+            label="accurate",
+        ),
+        result_record(
+            case_id="asr-b-model-a",
+            model="mlx-community/model-a",
+            category="numeric_unit_integrity",
+            score=80,
+            label="accurate",
+        ),
+    ]
+    result_path.parent.mkdir(parents=True)
+    result_path.write_text("".join(json.dumps(record) + "\n" for record in records), encoding="utf-8")
+    manifest.write_text(
+        json.dumps(
+            run_manifest_record(
+                [(str(result_path), records)],
+                expected_cases_per_model=2,
+            )
+        ),
+        encoding="utf-8",
+    )
+
+    drifted_records = [
+        {**records[0], "overall_score": 99},
+        records[1],
+    ]
+    result_path.write_text(
+        "".join(json.dumps(record) + "\n" for record in drifted_records),
+        encoding="utf-8",
+    )
+    results = refresh_module.combined_results_from_paths([result_path])
+
+    validation = refresh_module.build_manifest_validation(
+        results,
+        result_paths=[result_path],
+        run_manifest=manifest,
+        expected_cases_per_model=2,
+    )
+
+    assert validation["status"] == "incomplete"
+    check = validation["result_file_checks"][0]
+    assert check["path"] == str(result_path)
+    assert check["declared_model"] == "mlx-community/model-a"
+    assert check["actual_models"] == ["mlx-community/model-a"]
+    assert check["model_match"] is True
+    assert check["declared_bytes"] != check["actual_bytes"] or check["declared_sha256"] != check["actual_sha256"]
+    assert check["actual_bytes"] == result_path.stat().st_size
+    assert check["actual_sha256"] == file_sha256(result_path)
+    assert check["digest_match"] is False
 
 
 def test_check_asr_leaderboard_page_validates_generated_artifacts(tmp_path: Path) -> None:
@@ -2151,11 +2227,16 @@ def test_write_run_manifest_artifact_records_verified_result_sources(tmp_path: P
     assert data["version"] == 2
     assert data["expected_cases_per_model"] == 2
     assert data["result_paths"] == [str(results_path)]
+    run = data["runs"][0]
+    assert run["bytes"] == results_path.stat().st_size
+    assert run["sha256"] == file_sha256(results_path)
     assert data["runs"] == [
         {
             "run_name": "run-a",
             "model": "mlx-community/model-a",
             "results_path": str(results_path),
+            "bytes": results_path.stat().st_size,
+            "sha256": file_sha256(results_path),
             "result_count": 2,
             "ok_count": 2,
             "category_counts": {
@@ -2242,14 +2323,16 @@ def test_manifest_validation_checks_declared_models(tmp_path: Path) -> None:
     )
 
     assert validation["status"] == "complete"
-    assert validation["result_file_checks"] == [
-        {
-            "path": str(results_path),
-            "declared_model": "mlx-community/model-a",
-            "actual_models": ["mlx-community/model-a"],
-            "model_match": True,
-        }
-    ]
+    check = validation["result_file_checks"][0]
+    assert check["path"] == str(results_path)
+    assert check["declared_model"] == "mlx-community/model-a"
+    assert check["actual_models"] == ["mlx-community/model-a"]
+    assert check["model_match"] is True
+    assert check["declared_bytes"] is None
+    assert check["actual_bytes"] == results_path.stat().st_size
+    assert check["declared_sha256"] is None
+    assert check["actual_sha256"] == file_sha256(results_path)
+    assert check["digest_match"] is True
 
 
 def test_manifest_validation_marks_declared_model_mismatch_incomplete(tmp_path: Path) -> None:

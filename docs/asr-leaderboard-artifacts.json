@@ -22,11 +22,11 @@
       "sha256": null
     },
     {
-      "bytes": 8545,
+      "bytes": 13441,
       "digest_status": "ok",
       "exists": true,
       "path": "docs/asr-leaderboard-manifest-validation.json",
-      "sha256": "13e9d7787d9122bc7aac0ce2a8eaa8a6f45002ac870f2075b181f42401f82553"
+      "sha256": "3a015832118f91558b9b3664c0c97470476cd43fc282d9268aafad1ca9328a0a"
     },
     {
       "bytes": 546,
@@ -50,11 +50,11 @@
       "sha256": "347bf4673b9100cc54981ffcd74e0044553501c670a9f7a81fba2b753f85a5e8"
     },
     {
-      "bytes": 8552,
+      "bytes": 10460,
       "digest_status": "ok",
       "exists": true,
       "path": "docs/asr-leaderboard-run-manifest.json",
-      "sha256": "d2b6675a68f760ad69c1658cc3c5cee16975eab32137d1771e13a91bd26e9b3a"
+      "sha256": "af02532d0b8837c14c34b0fd71a6def65e5afa5e3baa187acdbf56c82e611ea4"
     },
     {
       "bytes": 1049,

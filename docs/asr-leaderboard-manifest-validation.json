@@ -61,146 +61,236 @@
   ],
   "result_file_checks": [
     {
+      "actual_bytes": 12081,
       "actual_models": [
         "mlx-community/whisper-large-v3-turbo-asr-fp16"
       ],
+      "actual_sha256": "bbd88190b8993e094468890b9821d0805984b43d5219bc1fd6601ff9c32bbd82",
+      "declared_bytes": 12081,
       "declared_model": "mlx-community/whisper-large-v3-turbo-asr-fp16",
+      "declared_sha256": "bbd88190b8993e094468890b9821d0805984b43d5219bc1fd6601ff9c32bbd82",
+      "digest_match": true,
       "model_match": true,
       "path": "runs/asr-leaderboard/whisper-large-v3-turbo-smoke/judge-report/results.jsonl"
     },
     {
+      "actual_bytes": 47155,
       "actual_models": [
         "mlx-community/whisper-large-v3-turbo-asr-fp16"
       ],
+      "actual_sha256": "29514fa7ac55d1add005080261b6f6efc3b8249c76112689ca74d47907385302",
+      "declared_bytes": 47155,
       "declared_model": "mlx-community/whisper-large-v3-turbo-asr-fp16",
+      "declared_sha256": "29514fa7ac55d1add005080261b6f6efc3b8249c76112689ca74d47907385302",
+      "digest_match": true,
       "model_match": true,
       "path": "runs/asr-leaderboard/whisper-large-v3-turbo-full-gap/judge-report/results.jsonl"
     },
     {
+      "actual_bytes": 19260,
       "actual_models": [
         "mlx-community/whisper-large-v3-turbo-asr-fp16"
       ],
+      "actual_sha256": "1731a6bef87dee5500efdc5fdccd60c68cc2813696ae5d58126f889349118451",
+      "declared_bytes": 19260,
       "declared_model": "mlx-community/whisper-large-v3-turbo-asr-fp16",
+      "declared_sha256": "1731a6bef87dee5500efdc5fdccd60c68cc2813696ae5d58126f889349118451",
+      "digest_match": true,
       "model_match": true,
       "path": "runs/asr-leaderboard/whisper-large-v3-turbo-semantic-smoke/judge-report/results.jsonl"
     },
     {
+      "actual_bytes": 19449,
       "actual_models": [
         "mlx-community/whisper-large-v3-turbo-asr-fp16"
       ],
+      "actual_sha256": "68a3bd82f09c109a7e623c594ff639a36f467877a39943e859729d5d16bb776d",
+      "declared_bytes": 19449,
       "declared_model": "mlx-community/whisper-large-v3-turbo-asr-fp16",
+      "declared_sha256": "68a3bd82f09c109a7e623c594ff639a36f467877a39943e859729d5d16bb776d",
+      "digest_match": true,
       "model_match": true,
       "path": "runs/asr-leaderboard/whisper-large-v3-turbo-entity-smoke/judge-report/results.jsonl"
     },
     {
+      "actual_bytes": 18953,
       "actual_models": [
         "mlx-community/whisper-large-v3-turbo-asr-fp16"
       ],
+      "actual_sha256": "29c1777225f052e42f0d2028e30c9f14530259ebea2cf4ac5299bbd997239b4d",
+      "declared_bytes": 18953,
       "declared_model": "mlx-community/whisper-large-v3-turbo-asr-fp16",
+      "declared_sha256": "29c1777225f052e42f0d2028e30c9f14530259ebea2cf4ac5299bbd997239b4d",
+      "digest_match": true,
       "model_match": true,
       "path": "runs/asr-leaderboard/whisper-large-v3-turbo-paraphrase-smoke/judge-report/results.jsonl"
     },
     {
+      "actual_bytes": 18758,
       "actual_models": [
         "mlx-community/whisper-large-v3-turbo-asr-fp16"
       ],
+      "actual_sha256": "ef1ecb77514c22e38c0efc097df7f5c4151749ebb7b99156d74ad976047b5ebb",
+      "declared_bytes": 18758,
       "declared_model": "mlx-community/whisper-large-v3-turbo-asr-fp16",
+      "declared_sha256": "ef1ecb77514c22e38c0efc097df7f5c4151749ebb7b99156d74ad976047b5ebb",
+      "digest_match": true,
       "model_match": true,
       "path": "runs/asr-leaderboard/whisper-large-v3-turbo-noise-smoke/judge-report/results.jsonl"
     },
     {
+      "actual_bytes": 12269,
       "actual_models": [
         "mlx-community/Qwen3-ASR-1.7B-8bit"
       ],
+      "actual_sha256": "c1b68dbc36a7025f0060bcc85f173a113d37841fb4c03b8308a62727274fff4c",
+      "declared_bytes": 12269,
       "declared_model": "mlx-community/Qwen3-ASR-1.7B-8bit",
+      "declared_sha256": "c1b68dbc36a7025f0060bcc85f173a113d37841fb4c03b8308a62727274fff4c",
+      "digest_match": true,
       "model_match": true,
       "path": "runs/asr-leaderboard/qwen3-asr-1.7b-smoke/judge-report/results.jsonl"
     },
     {
+      "actual_bytes": 46978,
       "actual_models": [
         "mlx-community/Qwen3-ASR-1.7B-8bit"
       ],
+      "actual_sha256": "4fe693498472d0071b3cd2e24d6cf2c04f616f973f05f978d742d2eb5f935a25",
+      "declared_bytes": 46978,
       "declared_model": "mlx-community/Qwen3-ASR-1.7B-8bit",
+      "declared_sha256": "4fe693498472d0071b3cd2e24d6cf2c04f616f973f05f978d742d2eb5f935a25",
+      "digest_match": true,
       "model_match": true,
       "path": "runs/asr-leaderboard/qwen3-asr-1.7b-full-gap/judge-report/results.jsonl"
     },
     {
+      "actual_bytes": 17782,
       "actual_models": [
         "mlx-community/Qwen3-ASR-1.7B-8bit"
       ],
+      "actual_sha256": "13cf26a6451d2ecc5e53af0bf7719d8ad328d6b1608f179b9351ea1edcccc0dd",
+      "declared_bytes": 17782,
       "declared_model": "mlx-community/Qwen3-ASR-1.7B-8bit",
+      "declared_sha256": "13cf26a6451d2ecc5e53af0bf7719d8ad328d6b1608f179b9351ea1edcccc0dd",
+      "digest_match": true,
       "model_match": true,
       "path": "runs/asr-leaderboard/qwen3-asr-1.7b-semantic-smoke/judge-report/results.jsonl"
     },
     {
+      "actual_bytes": 19955,
       "actual_models": [
         "mlx-community/Qwen3-ASR-1.7B-8bit"
       ],
+      "actual_sha256": "fe06d5f677f8eb271a8f98e599d1063dfac4cf3bac6e7a5a6e9be4a50bb3bca8",
+      "declared_bytes": 19955,
       "declared_model": "mlx-community/Qwen3-ASR-1.7B-8bit",
+      "declared_sha256": "fe06d5f677f8eb271a8f98e599d1063dfac4cf3bac6e7a5a6e9be4a50bb3bca8",
+      "digest_match": true,
       "model_match": true,
       "path": "runs/asr-leaderboard/qwen3-asr-1.7b-entity-smoke/judge-report/results.jsonl"
     },
     {
+      "actual_bytes": 17661,
       "actual_models": [
         "mlx-community/Qwen3-ASR-1.7B-8bit"
       ],
+      "actual_sha256": "31e3f291ff565d63a3d361bda80930ed9722bb6b5d9b7262c5996be547cfc125",
+      "declared_bytes": 17661,
       "declared_model": "mlx-community/Qwen3-ASR-1.7B-8bit",
+      "declared_sha256": "31e3f291ff565d63a3d361bda80930ed9722bb6b5d9b7262c5996be547cfc125",
+      "digest_match": true,
       "model_match": true,
       "path": "runs/asr-leaderboard/qwen3-asr-1.7b-paraphrase-smoke/judge-report/results.jsonl"
     },
     {
+      "actual_bytes": 19038,
       "actual_models": [
         "mlx-community/Qwen3-ASR-1.7B-8bit"
       ],
+      "actual_sha256": "984f75e7a808b20f619805ecfa0405ea0d84787cb5fde7af62b8667bf313a0c5",
+      "declared_bytes": 19038,
       "declared_model": "mlx-community/Qwen3-ASR-1.7B-8bit",
+      "declared_sha256": "984f75e7a808b20f619805ecfa0405ea0d84787cb5fde7af62b8667bf313a0c5",
+      "digest_match": true,
       "model_match": true,
       "path": "runs/asr-leaderboard/qwen3-asr-1.7b-noise-smoke/judge-report/results.jsonl"
     },
     {
+      "actual_bytes": 11196,
       "actual_models": [
         "mlx-community/VibeVoice-ASR-4bit"
       ],
+      "actual_sha256": "ecfb6e2cade45368ba7320cf5e2e08e1b8a70015604f59506817ea5cd34018c0",
+      "declared_bytes": 11196,
       "declared_model": "mlx-community/VibeVoice-ASR-4bit",
+      "declared_sha256": "ecfb6e2cade45368ba7320cf5e2e08e1b8a70015604f59506817ea5cd34018c0",
+      "digest_match": true,
       "model_match": true,
       "path": "runs/asr-leaderboard/vibevoice-asr-smoke/judge-report/results.jsonl"
     },
     {
+      "actual_bytes": 45543,
       "actual_models": [
         "mlx-community/VibeVoice-ASR-4bit"
       ],
+      "actual_sha256": "19a0905ab13fce72d669d5d0c8fc075963bd23a578a2f8c072f6f328998f041e",
+      "declared_bytes": 45543,
       "declared_model": "mlx-community/VibeVoice-ASR-4bit",
+      "declared_sha256": "19a0905ab13fce72d669d5d0c8fc075963bd23a578a2f8c072f6f328998f041e",
+      "digest_match": true,
       "model_match": true,
       "path": "runs/asr-leaderboard/vibevoice-asr-full-gap/judge-report/results.jsonl"
     },
     {
+      "actual_bytes": 18984,
       "actual_models": [
         "mlx-community/VibeVoice-ASR-4bit"
       ],
+      "actual_sha256": "40e11be673f96ad4cf2cb57d7fbb51be3e02443a2d4fbc291971cd1d80a943ee",
+      "declared_bytes": 18984,
       "declared_model": "mlx-community/VibeVoice-ASR-4bit",
+      "declared_sha256": "40e11be673f96ad4cf2cb57d7fbb51be3e02443a2d4fbc291971cd1d80a943ee",
+      "digest_match": true,
       "model_match": true,
       "path": "runs/asr-leaderboard/vibevoice-asr-semantic-smoke/judge-report/results.jsonl"
     },
     {
+      "actual_bytes": 19752,
       "actual_models": [
         "mlx-community/VibeVoice-ASR-4bit"
       ],
+      "actual_sha256": "0b30d9564cbc330e44d1994765412fadd65b2c5849d77d849bc4babd69a7a7c9",
+      "declared_bytes": 19752,
       "declared_model": "mlx-community/VibeVoice-ASR-4bit",
+      "declared_sha256": "0b30d9564cbc330e44d1994765412fadd65b2c5849d77d849bc4babd69a7a7c9",
+      "digest_match": true,
       "model_match": true,
       "path": "runs/asr-leaderboard/vibevoice-asr-entity-smoke/judge-report/results.jsonl"
     },
     {
+      "actual_bytes": 19869,
       "actual_models": [
         "mlx-community/VibeVoice-ASR-4bit"
       ],
+      "actual_sha256": "427cb36f67fc2f8fb468b66d3d56197fa5899c8318be9752dac76bf34b1313f7",
+      "declared_bytes": 19869,
       "declared_model": "mlx-community/VibeVoice-ASR-4bit",
+      "declared_sha256": "427cb36f67fc2f8fb468b66d3d56197fa5899c8318be9752dac76bf34b1313f7",
+      "digest_match": true,
       "model_match": true,
       "path": "runs/asr-leaderboard/vibevoice-asr-paraphrase-smoke/judge-report/results.jsonl"
     },
     {
+      "actual_bytes": 19543,
       "actual_models": [
         "mlx-community/VibeVoice-ASR-4bit"
       ],
+      "actual_sha256": "dea03c102fae8b37591eed82519ed54c489dfcff589b292c8eba50213bd5ab3f",
+      "declared_bytes": 19543,
       "declared_model": "mlx-community/VibeVoice-ASR-4bit",
+      "declared_sha256": "dea03c102fae8b37591eed82519ed54c489dfcff589b292c8eba50213bd5ab3f",
+      "digest_match": true,
       "model_match": true,
       "path": "runs/asr-leaderboard/vibevoice-asr-noise-smoke/judge-report/results.jsonl"
     }

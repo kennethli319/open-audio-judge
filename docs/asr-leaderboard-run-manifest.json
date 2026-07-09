@@ -24,6 +24,7 @@
   ],
   "runs": [
     {
+      "bytes": 12081,
       "category_counts": {
         "transcription_accuracy_wer": 3
       },
@@ -31,9 +32,11 @@
       "ok_count": 3,
       "result_count": 3,
       "results_path": "runs/asr-leaderboard/whisper-large-v3-turbo-smoke/judge-report/results.jsonl",
-      "run_name": "whisper-large-v3-turbo-smoke"
+      "run_name": "whisper-large-v3-turbo-smoke",
+      "sha256": "bbd88190b8993e094468890b9821d0805984b43d5219bc1fd6601ff9c32bbd82"
     },
     {
+      "bytes": 47155,
       "category_counts": {
         "negation_modality_scope": 3,
         "numeric_unit_integrity": 3,
@@ -44,9 +47,11 @@
       "ok_count": 12,
       "result_count": 12,
       "results_path": "runs/asr-leaderboard/whisper-large-v3-turbo-full-gap/judge-report/results.jsonl",
-      "run_name": "whisper-large-v3-turbo-full-gap"
+      "run_name": "whisper-large-v3-turbo-full-gap",
+      "sha256": "29514fa7ac55d1add005080261b6f6efc3b8249c76112689ca74d47907385302"
     },
     {
+      "bytes": 19260,
       "category_counts": {
         "negation_modality_scope": 2,
         "numeric_unit_integrity": 2,
@@ -56,9 +61,11 @@
       "ok_count": 5,
       "result_count": 5,
       "results_path": "runs/asr-leaderboard/whisper-large-v3-turbo-semantic-smoke/judge-report/results.jsonl",
-      "run_name": "whisper-large-v3-turbo-semantic-smoke"
+      "run_name": "whisper-large-v3-turbo-semantic-smoke",
+      "sha256": "1731a6bef87dee5500efdc5fdccd60c68cc2813696ae5d58126f889349118451"
     },
     {
+      "bytes": 19449,
       "category_counts": {
         "entity_factual_integrity": 5
       },
@@ -66,9 +73,11 @@
       "ok_count": 5,
       "result_count": 5,
       "results_path": "runs/asr-leaderboard/whisper-large-v3-turbo-entity-smoke/judge-report/results.jsonl",
-      "run_name": "whisper-large-v3-turbo-entity-smoke"
+      "run_name": "whisper-large-v3-turbo-entity-smoke",
+      "sha256": "68a3bd82f09c109a7e623c594ff639a36f467877a39943e859729d5d16bb776d"
     },
     {
+      "bytes": 18953,
       "category_counts": {
         "semantic_paraphrase_preservation": 5
       },
@@ -76,9 +85,11 @@
       "ok_count": 5,
       "result_count": 5,
       "results_path": "runs/asr-leaderboard/whisper-large-v3-turbo-paraphrase-smoke/judge-report/results.jsonl",
-      "run_name": "whisper-large-v3-turbo-paraphrase-smoke"
+      "run_name": "whisper-large-v3-turbo-paraphrase-smoke",
+      "sha256": "29c1777225f052e42f0d2028e30c9f14530259ebea2cf4ac5299bbd997239b4d"
     },
     {
+      "bytes": 18758,
       "category_counts": {
         "acoustic_noise_robustness": 5
       },
@@ -86,9 +97,11 @@
       "ok_count": 5,
       "result_count": 5,
       "results_path": "runs/asr-leaderboard/whisper-large-v3-turbo-noise-smoke/judge-report/results.jsonl",
-      "run_name": "whisper-large-v3-turbo-noise-smoke"
+      "run_name": "whisper-large-v3-turbo-noise-smoke",
+      "sha256": "ef1ecb77514c22e38c0efc097df7f5c4151749ebb7b99156d74ad976047b5ebb"
     },
     {
+      "bytes": 12269,
       "category_counts": {
         "transcription_accuracy_wer": 3
       },
@@ -96,9 +109,11 @@
       "ok_count": 3,
       "result_count": 3,
       "results_path": "runs/asr-leaderboard/qwen3-asr-1.7b-smoke/judge-report/results.jsonl",
-      "run_name": "qwen3-asr-1.7b-smoke"
+      "run_name": "qwen3-asr-1.7b-smoke",
+      "sha256": "c1b68dbc36a7025f0060bcc85f173a113d37841fb4c03b8308a62727274fff4c"
     },
     {
+      "bytes": 46978,
       "category_counts": {
         "negation_modality_scope": 3,
         "numeric_unit_integrity": 3,
@@ -109,9 +124,11 @@
       "ok_count": 12,
       "result_count": 12,
       "results_path": "runs/asr-leaderboard/qwen3-asr-1.7b-full-gap/judge-report/results.jsonl",
-      "run_name": "qwen3-asr-1.7b-full-gap"
+      "run_name": "qwen3-asr-1.7b-full-gap",
+      "sha256": "4fe693498472d0071b3cd2e24d6cf2c04f616f973f05f978d742d2eb5f935a25"
     },
     {
+      "bytes": 17782,
       "category_counts": {
         "negation_modality_scope": 2,
         "numeric_unit_integrity": 2,
@@ -121,9 +138,11 @@
       "ok_count": 5,
       "result_count": 5,
       "results_path": "runs/asr-leaderboard/qwen3-asr-1.7b-semantic-smoke/judge-report/results.jsonl",
-      "run_name": "qwen3-asr-1.7b-semantic-smoke"
+      "run_name": "qwen3-asr-1.7b-semantic-smoke",
+      "sha256": "13cf26a6451d2ecc5e53af0bf7719d8ad328d6b1608f179b9351ea1edcccc0dd"
     },
     {
+      "bytes": 19955,
       "category_counts": {
         "entity_factual_integrity": 5
       },
@@ -131,9 +150,11 @@
       "ok_count": 5,
       "result_count": 5,
       "results_path": "runs/asr-leaderboard/qwen3-asr-1.7b-entity-smoke/judge-report/results.jsonl",
-      "run_name": "qwen3-asr-1.7b-entity-smoke"
+      "run_name": "qwen3-asr-1.7b-entity-smoke",
+      "sha256": "fe06d5f677f8eb271a8f98e599d1063dfac4cf3bac6e7a5a6e9be4a50bb3bca8"
     },
     {
+      "bytes": 17661,
       "category_counts": {
         "semantic_paraphrase_preservation": 5
       },
@@ -141,9 +162,11 @@
       "ok_count": 5,
       "result_count": 5,
       "results_path": "runs/asr-leaderboard/qwen3-asr-1.7b-paraphrase-smoke/judge-report/results.jsonl",
-      "run_name": "qwen3-asr-1.7b-paraphrase-smoke"
+      "run_name": "qwen3-asr-1.7b-paraphrase-smoke",
+      "sha256": "31e3f291ff565d63a3d361bda80930ed9722bb6b5d9b7262c5996be547cfc125"
     },
     {
+      "bytes": 19038,
       "category_counts": {
         "acoustic_noise_robustness": 5
       },
@@ -151,9 +174,11 @@
       "ok_count": 5,
       "result_count": 5,
       "results_path": "runs/asr-leaderboard/qwen3-asr-1.7b-noise-smoke/judge-report/results.jsonl",
-      "run_name": "qwen3-asr-1.7b-noise-smoke"
+      "run_name": "qwen3-asr-1.7b-noise-smoke",
+      "sha256": "984f75e7a808b20f619805ecfa0405ea0d84787cb5fde7af62b8667bf313a0c5"
     },
     {
+      "bytes": 11196,
       "category_counts": {
         "transcription_accuracy_wer": 3
       },
@@ -161,9 +186,11 @@
       "ok_count": 3,
       "result_count": 3,
       "results_path": "runs/asr-leaderboard/vibevoice-asr-smoke/judge-report/results.jsonl",
-      "run_name": "vibevoice-asr-smoke"
+      "run_name": "vibevoice-asr-smoke",
+      "sha256": "ecfb6e2cade45368ba7320cf5e2e08e1b8a70015604f59506817ea5cd34018c0"
     },
     {
+      "bytes": 45543,
       "category_counts": {
         "negation_modality_scope": 3,
         "numeric_unit_integrity": 3,
@@ -174,9 +201,11 @@
       "ok_count": 12,
       "result_count": 12,
       "results_path": "runs/asr-leaderboard/vibevoice-asr-full-gap/judge-report/results.jsonl",
-      "run_name": "vibevoice-asr-full-gap"
+      "run_name": "vibevoice-asr-full-gap",
+      "sha256": "19a0905ab13fce72d669d5d0c8fc075963bd23a578a2f8c072f6f328998f041e"
     },
     {
+      "bytes": 18984,
       "category_counts": {
         "negation_modality_scope": 2,
         "numeric_unit_integrity": 2,
@@ -186,9 +215,11 @@
       "ok_count": 5,
       "result_count": 5,
       "results_path": "runs/asr-leaderboard/vibevoice-asr-semantic-smoke/judge-report/results.jsonl",
-      "run_name": "vibevoice-asr-semantic-smoke"
+      "run_name": "vibevoice-asr-semantic-smoke",
+      "sha256": "40e11be673f96ad4cf2cb57d7fbb51be3e02443a2d4fbc291971cd1d80a943ee"
     },
     {
+      "bytes": 19752,
       "category_counts": {
         "entity_factual_integrity": 5
       },
@@ -196,9 +227,11 @@
       "ok_count": 5,
       "result_count": 5,
       "results_path": "runs/asr-leaderboard/vibevoice-asr-entity-smoke/judge-report/results.jsonl",
-      "run_name": "vibevoice-asr-entity-smoke"
+      "run_name": "vibevoice-asr-entity-smoke",
+      "sha256": "0b30d9564cbc330e44d1994765412fadd65b2c5849d77d849bc4babd69a7a7c9"
     },
     {
+      "bytes": 19869,
       "category_counts": {
         "semantic_paraphrase_preservation": 5
       },
@@ -206,9 +239,11 @@
       "ok_count": 5,
       "result_count": 5,
       "results_path": "runs/asr-leaderboard/vibevoice-asr-paraphrase-smoke/judge-report/results.jsonl",
-      "run_name": "vibevoice-asr-paraphrase-smoke"
+      "run_name": "vibevoice-asr-paraphrase-smoke",
+      "sha256": "427cb36f67fc2f8fb468b66d3d56197fa5899c8318be9752dac76bf34b1313f7"
     },
     {
+      "bytes": 19543,
       "category_counts": {
         "acoustic_noise_robustness": 5
       },
@@ -216,7 +251,8 @@
       "ok_count": 5,
       "result_count": 5,
       "results_path": "runs/asr-leaderboard/vibevoice-asr-noise-smoke/judge-report/results.jsonl",
-      "run_name": "vibevoice-asr-noise-smoke"
+      "run_name": "vibevoice-asr-noise-smoke",
+      "sha256": "dea03c102fae8b37591eed82519ed54c489dfcff589b292c8eba50213bd5ab3f"
     }
   ],
   "version": 2
