@@ -60,17 +60,27 @@ def main() -> None:
         path_maps=parse_path_maps(args.path_map),
         allow_missing_source_results=args.allow_missing_source_results,
     )
-    hosted_fragment = ""
-    if summary["hosted_artifact_count"]:
-        hosted_fragment = (
-            f", {summary['hosted_digest_verified_path_count']}/"
-            f"{summary['hosted_path_count']} hosted paths digest-verified"
-        )
+    hosted_fragment = _format_hosted_validation_fragment(summary)
     print(
         "Validated ASR leaderboard page "
         f"{summary['page']} against {summary['summary_path']} "
         f"({summary['total_results']} results, {summary['model_count']} models, "
         f"{summary['category_count']} categories{hosted_fragment})."
+    )
+
+
+def _format_hosted_validation_fragment(summary: dict[str, Any]) -> str:
+    hosted_artifact_count = summary["hosted_artifact_count"]
+    if not hosted_artifact_count:
+        return ""
+
+    verified_path_count = summary["hosted_digest_verified_path_count"]
+    hosted_path_count = summary["hosted_path_count"]
+    if verified_path_count:
+        return f", {verified_path_count}/{hosted_path_count} hosted paths digest-verified"
+    return (
+        f", {hosted_path_count} hosted paths declared; run with the hosted checkout as "
+        "artifact root to digest-verify them"
     )
 
 
