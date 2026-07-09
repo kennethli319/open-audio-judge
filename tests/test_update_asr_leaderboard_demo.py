@@ -361,6 +361,7 @@ def test_write_summary_artifact_records_models_and_categories(tmp_path: Path) ->
     ]
     assert summary["run_manifest_path"] == "docs/asr-leaderboard-run-manifest.json"
     assert summary["refresh_commands_path"] == "docs/asr-leaderboard-refresh-commands.sh"
+    assert summary["refresh_workflow_path"] == "docs/asr-leaderboard-refresh-workflow.json"
     assert summary["live_refresh_script_path"] == "docs/asr-leaderboard-live-refresh.sh"
     assert summary["manifest_validation_path"] == "docs/asr-leaderboard-manifest-validation.json"
     assert summary["seed_manifest_validation_path"] == "docs/asr-seed-manifest-validation.json"
@@ -400,6 +401,10 @@ def test_write_summary_artifact_records_models_and_categories(tmp_path: Path) ->
         {
             "path": "docs/asr-leaderboard-refresh-commands.sh",
             "purpose": "Generated shell playbook for repeatable ASR leaderboard refreshes.",
+        },
+        {
+            "path": "docs/asr-leaderboard-refresh-workflow.json",
+            "purpose": "Machine-readable generated workflow for ASR refresh automation.",
         },
         {
             "path": "docs/asr-leaderboard-live-refresh.sh",
@@ -470,6 +475,7 @@ def test_write_summary_artifact_records_models_and_categories(tmp_path: Path) ->
         "--out",
         "runs/asr-leaderboard/<run-name>",
     ]
+    assert "refresh_workflow_path" in summary["refresh_workflow"]
     assert summary["refresh_workflow"]["mlx_runtime_check_command"] == [
         "PYTHONPATH=src",
         ".venv/bin/python",
@@ -1332,8 +1338,8 @@ def test_refresh_asr_leaderboard_artifacts_combines_report_and_page(tmp_path: Pa
     )
     assert hosted_current == {
         "status": "complete",
-        "hosted_artifact_count": 17,
-        "hosted_path_count": 28,
+        "hosted_artifact_count": 18,
+        "hosted_path_count": 29,
     }
     assert (hosted_dir / "asr-leaderboard-run-manifest.json").exists()
     assert (hosted_dir / "manifest-validation.json").read_text(
@@ -1459,7 +1465,7 @@ def test_refresh_asr_leaderboard_artifacts_combines_report_and_page(tmp_path: Pa
         f"asr-leaderboard/source-reports/{tmp_path.name}/report.html"
     ]
     hosted_manifest_data = json.loads(hosted_manifest.read_text(encoding="utf-8"))
-    assert hosted_manifest_data["artifact_count"] == 17
+    assert hosted_manifest_data["artifact_count"] == 18
     assert {"asr-leaderboard/full-35-combined/results.jsonl"} in [
         set(artifact["hosted_paths"]) for artifact in hosted_manifest_data["artifacts"]
     ]
@@ -2455,10 +2461,13 @@ def test_check_asr_leaderboard_page_validates_generated_artifacts(tmp_path: Path
     )
     refresh_commands = tmp_path / "refresh-commands.sh"
     update_module.write_refresh_commands_script(refresh_commands)
+    refresh_workflow = tmp_path / "refresh-workflow.json"
+    update_module.write_refresh_workflow_artifact(refresh_workflow)
     live_refresh_script = tmp_path / "live-refresh.sh"
     update_module.write_live_refresh_script(live_refresh_script)
     summary_data = json.loads(summary.read_text(encoding="utf-8"))
     summary_data["refresh_commands_path"] = str(refresh_commands)
+    summary_data["refresh_workflow_path"] = str(refresh_workflow)
     summary_data["live_refresh_script_path"] = str(live_refresh_script)
     summary_data["report_index_path"] = str(report_index)
     summary_data["report_links_path"] = str(report_links)
@@ -2474,6 +2483,7 @@ def test_check_asr_leaderboard_page_validates_generated_artifacts(tmp_path: Path
         report_index_out=report_index,
         report_links_out=report_links,
         refresh_commands_out=refresh_commands,
+        refresh_workflow_out=refresh_workflow,
         live_refresh_script_out=live_refresh_script,
         run_manifest=run_manifest,
         manifest_validation_out=manifest_validation,

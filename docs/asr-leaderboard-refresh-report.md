@@ -9,6 +9,7 @@ This generated report summarizes the verified ASR leaderboard artifact set.
 - Summary JSON: `docs/asr-leaderboard-summary.json`
 - Run manifest: `docs/asr-leaderboard-run-manifest.json`
 - Refresh command playbook: `docs/asr-leaderboard-refresh-commands.sh`
+- Refresh workflow JSON: `docs/asr-leaderboard-refresh-workflow.json`
 - Live model refresh script: `docs/asr-leaderboard-live-refresh.sh`
 - Report index: `docs/asr-leaderboard-report-index.md`
 - Report links JSON: `docs/asr-leaderboard-report-links.json`
@@ -114,6 +115,7 @@ This generated report summarizes the verified ASR leaderboard artifact set.
 | `docs/asr-leaderboard-report-index.md` | Human-readable index linking the demo page, combined report, and source run reports. |
 | `docs/asr-leaderboard-report-links.json` | Machine-readable map linking the demo page to combined and source ASR reports. |
 | `docs/asr-leaderboard-refresh-commands.sh` | Generated shell playbook for repeatable ASR leaderboard refreshes. |
+| `docs/asr-leaderboard-refresh-workflow.json` | Machine-readable generated workflow for ASR refresh automation. |
 | `docs/asr-leaderboard-live-refresh.sh` | Opt-in generated shell script for live MLX ASR/Gemini refreshes. |
 | `docs/asr-leaderboard-run-manifest.json` | Committed source result manifest for manifest-based refreshes. |
 | `docs/asr-leaderboard-manifest-validation.json` | Coverage validation for the model/category result matrix. |
@@ -126,6 +128,7 @@ This generated report summarizes the verified ASR leaderboard artifact set.
 ## Refresh Commands
 
 - Generated shell playbook: `docs/asr-leaderboard-refresh-commands.sh`
+- Generated workflow JSON: `docs/asr-leaderboard-refresh-workflow.json`
 - Generated live refresh script: `docs/asr-leaderboard-live-refresh.sh`
 - Seed manifest validation: `.venv/bin/python scripts/validate_asr_seed_manifest.py --summary-out docs/asr-seed-manifest-validation.json`
 - Audio materialization: `.venv/bin/python scripts/synthesize_tts_cases.py --cases examples/asr_research_cases.jsonl --out runs/asr-research-audio --discard-text-sidecars --summary-out runs/asr-research-audio/summary.json`

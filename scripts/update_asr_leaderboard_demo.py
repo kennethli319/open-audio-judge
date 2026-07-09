@@ -21,6 +21,7 @@ DEFAULT_REFRESH_REPORT = ROOT / "docs" / "asr-leaderboard-refresh-report.md"
 DEFAULT_REPORT_INDEX = ROOT / "docs" / "asr-leaderboard-report-index.md"
 DEFAULT_REPORT_LINKS = ROOT / "docs" / "asr-leaderboard-report-links.json"
 DEFAULT_REFRESH_COMMANDS = ROOT / "docs" / "asr-leaderboard-refresh-commands.sh"
+DEFAULT_REFRESH_WORKFLOW = ROOT / "docs" / "asr-leaderboard-refresh-workflow.json"
 DEFAULT_LIVE_REFRESH_SCRIPT = ROOT / "docs" / "asr-leaderboard-live-refresh.sh"
 DEFAULT_RUN_MANIFEST = ROOT / "docs" / "asr-leaderboard-run-manifest.json"
 DEFAULT_MANIFEST_VALIDATION = ROOT / "docs" / "asr-leaderboard-manifest-validation.json"
@@ -140,6 +141,12 @@ def main() -> None:
         help="Write a shell playbook with the generated ASR leaderboard refresh commands.",
     )
     parser.add_argument(
+        "--refresh-workflow-out",
+        type=Path,
+        default=DEFAULT_REFRESH_WORKFLOW,
+        help="Write a machine-readable ASR leaderboard refresh workflow artifact.",
+    )
+    parser.add_argument(
         "--live-refresh-script-out",
         type=Path,
         default=DEFAULT_LIVE_REFRESH_SCRIPT,
@@ -212,6 +219,10 @@ def main() -> None:
         args.refresh_commands_out,
         source_result_paths=source_result_paths,
     )
+    write_refresh_workflow_artifact(
+        args.refresh_workflow_out,
+        source_result_paths=source_result_paths,
+    )
     write_live_refresh_script(args.live_refresh_script_out)
     write_next_run_plan_artifact(
         results,
@@ -274,6 +285,7 @@ def render_generated_sections(
     report_index_label = html.escape(_repo_relative(DEFAULT_REPORT_INDEX))
     report_links_label = html.escape(_repo_relative(DEFAULT_REPORT_LINKS))
     refresh_commands_label = html.escape(_repo_relative(DEFAULT_REFRESH_COMMANDS))
+    refresh_workflow_label = html.escape(_repo_relative(DEFAULT_REFRESH_WORKFLOW))
     live_refresh_script_label = html.escape(_repo_relative(DEFAULT_LIVE_REFRESH_SCRIPT))
     manifest_label = html.escape(_repo_relative(DEFAULT_RUN_MANIFEST))
     validation_label = html.escape(_repo_relative(DEFAULT_MANIFEST_VALIDATION))
@@ -344,7 +356,8 @@ def render_generated_sections(
                 f"<code>{report_label}</code> and the committed summary artifact is "
                 f"<code>{summary_label}</code>. The generated refresh report is "
                 f"<code>{refresh_report_label}</code>, and the generated shell playbook is "
-                f"<code>{refresh_commands_label}</code>. The opt-in live model refresh script is "
+                f"<code>{refresh_commands_label}</code>. The machine-readable workflow is "
+                f"<code>{refresh_workflow_label}</code>. The opt-in live model refresh script is "
                 f"<code>{live_refresh_script_label}</code>. The committed run manifest is "
                 f"<code>{manifest_label}</code>, with coverage validation in "
                 f"<code>{validation_label}</code> and seed-manifest validation in "
@@ -455,6 +468,7 @@ def write_summary_artifact(
                 ],
                 "run_manifest_path": _repo_relative(DEFAULT_RUN_MANIFEST),
                 "refresh_commands_path": _repo_relative(DEFAULT_REFRESH_COMMANDS),
+                "refresh_workflow_path": _repo_relative(DEFAULT_REFRESH_WORKFLOW),
                 "live_refresh_script_path": _repo_relative(DEFAULT_LIVE_REFRESH_SCRIPT),
                 "report_index_path": _repo_relative(DEFAULT_REPORT_INDEX),
                 "report_links_path": _repo_relative(DEFAULT_REPORT_LINKS),
@@ -540,6 +554,7 @@ def write_refresh_report(
                 f"- Summary JSON: `{_repo_relative(DEFAULT_SUMMARY)}`",
                 f"- Run manifest: `{_repo_relative(DEFAULT_RUN_MANIFEST)}`",
                 f"- Refresh command playbook: `{_repo_relative(DEFAULT_REFRESH_COMMANDS)}`",
+                f"- Refresh workflow JSON: `{_repo_relative(DEFAULT_REFRESH_WORKFLOW)}`",
                 f"- Live model refresh script: `{_repo_relative(DEFAULT_LIVE_REFRESH_SCRIPT)}`",
                 f"- Report index: `{_repo_relative(DEFAULT_REPORT_INDEX)}`",
                 f"- Report links JSON: `{_repo_relative(DEFAULT_REPORT_LINKS)}`",
@@ -616,6 +631,7 @@ def write_refresh_report(
                 "## Refresh Commands",
                 "",
                 f"- Generated shell playbook: `{_repo_relative(DEFAULT_REFRESH_COMMANDS)}`",
+                f"- Generated workflow JSON: `{_repo_relative(DEFAULT_REFRESH_WORKFLOW)}`",
                 f"- Generated live refresh script: `{_repo_relative(DEFAULT_LIVE_REFRESH_SCRIPT)}`",
                 f"- Seed manifest validation: `{_shell_join(workflow['seed_manifest_validation_command'])}`",
                 f"- Audio materialization: `{_shell_join(workflow['audio_materialization_command'])}`",
@@ -911,6 +927,40 @@ def write_refresh_commands_script(
     output_path.write_text("\n".join(lines), encoding="utf-8")
 
 
+def write_refresh_workflow_artifact(
+    output_path: Path,
+    *,
+    source_result_paths: list[Path] | None = None,
+) -> None:
+    workflow = _refresh_workflow(source_result_paths or [])
+    command_keys = sorted(
+        key
+        for key, value in workflow.items()
+        if key.endswith("_command")
+        and isinstance(value, list)
+        and all(isinstance(part, str) for part in value)
+    )
+    output_path.parent.mkdir(parents=True, exist_ok=True)
+    output_path.write_text(
+        json.dumps(
+            {
+                "description": "Generated machine-readable ASR leaderboard refresh workflow.",
+                "version": 1,
+                "refresh_commands_path": _repo_relative(DEFAULT_REFRESH_COMMANDS),
+                "live_refresh_script_path": _repo_relative(DEFAULT_LIVE_REFRESH_SCRIPT),
+                "command_keys": command_keys,
+                "primary_model_count": len(ASR_LEADERBOARD_MODELS),
+                "fallback_model_count": len(ASR_FALLBACK_MODELS),
+                "workflow": workflow,
+            },
+            indent=2,
+            sort_keys=True,
+        )
+        + "\n",
+        encoding="utf-8",
+    )
+
+
 def write_live_refresh_script(output_path: Path) -> None:
     workflow = _refresh_workflow([])
     model_run_lines: list[str] = []
@@ -1106,6 +1156,7 @@ def _refresh_workflow(source_result_paths: list[Path]) -> dict[str, object]:
             "scripts/refresh_asr_leaderboard_artifacts.py",
         ],
         "refresh_commands_path": _repo_relative(DEFAULT_REFRESH_COMMANDS),
+        "refresh_workflow_path": _repo_relative(DEFAULT_REFRESH_WORKFLOW),
         "live_refresh_script_path": _repo_relative(DEFAULT_LIVE_REFRESH_SCRIPT),
         "page_validation_command": [
             ".venv/bin/python",
@@ -1199,6 +1250,10 @@ def build_output_artifact_index(*, results_path: Path) -> list[dict[str, str]]:
         {
             "path": _repo_relative(DEFAULT_REFRESH_COMMANDS),
             "purpose": "Generated shell playbook for repeatable ASR leaderboard refreshes.",
+        },
+        {
+            "path": _repo_relative(DEFAULT_REFRESH_WORKFLOW),
+            "purpose": "Machine-readable generated workflow for ASR refresh automation.",
         },
         {
             "path": _repo_relative(DEFAULT_LIVE_REFRESH_SCRIPT),

@@ -26,6 +26,7 @@ from scripts.update_asr_leaderboard_demo import (  # noqa: E402
     DEFAULT_REPORT_LINKS,
     DEFAULT_LIVE_REFRESH_SCRIPT,
     DEFAULT_REFRESH_COMMANDS,
+    DEFAULT_REFRESH_WORKFLOW,
     DEFAULT_REFRESH_REPORT,
     DEFAULT_SEED_MANIFEST_VALIDATION,
     DEFAULT_SUMMARY,
@@ -48,6 +49,7 @@ from scripts.update_asr_leaderboard_demo import (  # noqa: E402
     write_report_index,
     write_report_links_artifact,
     write_refresh_commands_script,
+    write_refresh_workflow_artifact,
     write_live_refresh_script,
     write_summary_artifact,
 )
@@ -131,6 +133,7 @@ def main() -> None:
     parser.add_argument("--report-index-out", type=Path, default=DEFAULT_REPORT_INDEX)
     parser.add_argument("--report-links-out", type=Path, default=DEFAULT_REPORT_LINKS)
     parser.add_argument("--refresh-commands-out", type=Path, default=DEFAULT_REFRESH_COMMANDS)
+    parser.add_argument("--refresh-workflow-out", type=Path, default=DEFAULT_REFRESH_WORKFLOW)
     parser.add_argument("--live-refresh-script-out", type=Path, default=DEFAULT_LIVE_REFRESH_SCRIPT)
     parser.add_argument(
         "--manifest-validation-out",
@@ -309,6 +312,7 @@ def main() -> None:
             report_index_out=args.report_index_out,
             report_links_out=args.report_links_out,
             refresh_commands_out=args.refresh_commands_out,
+            refresh_workflow_out=args.refresh_workflow_out,
             live_refresh_script_out=args.live_refresh_script_out,
             next_runs_out=args.next_runs_out,
             seed_cases=args.seed_cases,
@@ -358,6 +362,7 @@ def main() -> None:
         report_index_out=args.report_index_out,
         report_links_out=args.report_links_out,
         refresh_commands_out=args.refresh_commands_out,
+        refresh_workflow_out=args.refresh_workflow_out,
         live_refresh_script_out=args.live_refresh_script_out,
         manifest_validation_out=args.manifest_validation_out,
         seed_cases=args.seed_cases,
@@ -395,6 +400,7 @@ def check_asr_leaderboard_refresh_inputs(
     report_index_out: Path = DEFAULT_REPORT_INDEX,
     report_links_out: Path = DEFAULT_REPORT_LINKS,
     refresh_commands_out: Path = DEFAULT_REFRESH_COMMANDS,
+    refresh_workflow_out: Path = DEFAULT_REFRESH_WORKFLOW,
     live_refresh_script_out: Path = DEFAULT_LIVE_REFRESH_SCRIPT,
     next_runs_out: Path = DEFAULT_NEXT_RUNS,
     artifact_root: Path = ROOT,
@@ -447,6 +453,7 @@ def check_asr_leaderboard_refresh_inputs(
             report_index_out=report_index_out,
             report_links_out=report_links_out,
             refresh_commands_out=refresh_commands_out,
+            refresh_workflow_out=refresh_workflow_out,
             live_refresh_script_out=live_refresh_script_out,
             run_manifest=DEFAULT_RUN_MANIFEST,
             manifest_validation_out=DEFAULT_MANIFEST_VALIDATION,
@@ -613,6 +620,7 @@ def _validate_generated_artifacts_fresh(
     report_index_out: Path | None = None,
     report_links_out: Path | None = None,
     refresh_commands_out: Path | None = None,
+    refresh_workflow_out: Path | None = None,
     live_refresh_script_out: Path | None = None,
     run_manifest: Path | None = None,
     manifest_validation_out: Path | None = None,
@@ -673,6 +681,13 @@ def _validate_generated_artifacts_fresh(
                 source_result_paths=result_paths,
             )
             _compare_generated_text_artifact(refresh_commands_out, expected_refresh_commands)
+        if refresh_workflow_out is not None:
+            expected_refresh_workflow = tmp_dir / refresh_workflow_out.name
+            write_refresh_workflow_artifact(
+                expected_refresh_workflow,
+                source_result_paths=result_paths,
+            )
+            _compare_generated_text_artifact(refresh_workflow_out, expected_refresh_workflow)
         if live_refresh_script_out is not None:
             expected_live_refresh_script = tmp_dir / live_refresh_script_out.name
             write_live_refresh_script(expected_live_refresh_script)
@@ -715,6 +730,12 @@ def _validate_generated_artifacts_fresh(
                 report_index_out=report_index_out or DEFAULT_REPORT_INDEX,
                 report_links_out=report_links_out or DEFAULT_REPORT_LINKS,
                 refresh_commands_out=refresh_commands_out or DEFAULT_REFRESH_COMMANDS,
+                refresh_workflow_out=(
+                    refresh_workflow_out
+                    or (refresh_commands_out.with_name(DEFAULT_REFRESH_WORKFLOW.name)
+                        if refresh_commands_out is not None
+                        else DEFAULT_REFRESH_WORKFLOW)
+                ),
                 live_refresh_script_out=live_refresh_script_out or DEFAULT_LIVE_REFRESH_SCRIPT,
                 run_manifest=run_manifest or DEFAULT_RUN_MANIFEST,
                 manifest_validation_out=manifest_validation_out or DEFAULT_MANIFEST_VALIDATION,
@@ -744,6 +765,12 @@ def _validate_generated_artifacts_fresh(
                         report_index_out=report_index_out or DEFAULT_REPORT_INDEX,
                         report_links_out=report_links_out or DEFAULT_REPORT_LINKS,
                         refresh_commands_out=refresh_commands_out or DEFAULT_REFRESH_COMMANDS,
+                        refresh_workflow_out=(
+                            refresh_workflow_out
+                            or (refresh_commands_out.with_name(DEFAULT_REFRESH_WORKFLOW.name)
+                                if refresh_commands_out is not None
+                                else DEFAULT_REFRESH_WORKFLOW)
+                        ),
                         live_refresh_script_out=(
                             live_refresh_script_out or DEFAULT_LIVE_REFRESH_SCRIPT
                         ),
@@ -859,12 +886,16 @@ def refresh_asr_leaderboard_artifacts(
     hosted_manifest_out: Path = DEFAULT_HOSTED_MANIFEST,
     artifact_index_out: Path = DEFAULT_ARTIFACT_INDEX,
     runtime_status_out: Path | None = None,
+    refresh_workflow_out: Path | None = None,
     hosted_dir: Path | None = None,
     check_mlx_runtime: bool = False,
 ) -> None:
     report_index_out = report_index_out or refresh_report_out.with_name(DEFAULT_REPORT_INDEX.name)
     report_links_out = report_links_out or refresh_report_out.with_name(DEFAULT_REPORT_LINKS.name)
     runtime_status_out = runtime_status_out or artifact_index_out.with_name(DEFAULT_RUNTIME_STATUS.name)
+    refresh_workflow_out = refresh_workflow_out or refresh_commands_out.with_name(
+        DEFAULT_REFRESH_WORKFLOW.name
+    )
     result_paths = [_normalize_results_path(path) for path in result_paths]
     _validate_unique_result_paths(result_paths, context="ASR refresh result sources")
     for path in result_paths:
@@ -930,6 +961,10 @@ def refresh_asr_leaderboard_artifacts(
         refresh_commands_out,
         source_result_paths=result_paths,
     )
+    write_refresh_workflow_artifact(
+        refresh_workflow_out,
+        source_result_paths=result_paths,
+    )
     write_live_refresh_script(live_refresh_script_out)
     write_manifest_validation_artifact(
         combined_results,
@@ -965,6 +1000,7 @@ def refresh_asr_leaderboard_artifacts(
         report_index_out=report_index_out,
         report_links_out=report_links_out,
         refresh_commands_out=refresh_commands_out,
+        refresh_workflow_out=refresh_workflow_out,
         live_refresh_script_out=live_refresh_script_out,
         run_manifest=run_manifest,
         manifest_validation_out=manifest_validation_out,
@@ -983,6 +1019,7 @@ def refresh_asr_leaderboard_artifacts(
         report_index_out=report_index_out,
         report_links_out=report_links_out,
         refresh_commands_out=refresh_commands_out,
+        refresh_workflow_out=refresh_workflow_out,
         live_refresh_script_out=live_refresh_script_out,
         run_manifest=run_manifest,
         manifest_validation_out=manifest_validation_out,
@@ -1003,6 +1040,7 @@ def refresh_asr_leaderboard_artifacts(
             report_index_out=report_index_out,
             report_links_out=report_links_out,
             refresh_commands_out=refresh_commands_out,
+            refresh_workflow_out=refresh_workflow_out,
             live_refresh_script_out=live_refresh_script_out,
             run_manifest=run_manifest,
             manifest_validation_out=manifest_validation_out,
@@ -1125,6 +1163,7 @@ def copy_hosted_asr_artifacts(
     report_index_out: Path = DEFAULT_REPORT_INDEX,
     report_links_out: Path = DEFAULT_REPORT_LINKS,
     refresh_commands_out: Path = DEFAULT_REFRESH_COMMANDS,
+    refresh_workflow_out: Path = DEFAULT_REFRESH_WORKFLOW,
     live_refresh_script_out: Path = DEFAULT_LIVE_REFRESH_SCRIPT,
     run_manifest: Path = DEFAULT_RUN_MANIFEST,
     manifest_validation_out: Path = DEFAULT_MANIFEST_VALIDATION,
@@ -1146,6 +1185,7 @@ def copy_hosted_asr_artifacts(
         (report_index_out, {report_index_out.name, DEFAULT_REPORT_INDEX.name}),
         (report_links_out, {report_links_out.name, DEFAULT_REPORT_LINKS.name}),
         (refresh_commands_out, {refresh_commands_out.name, DEFAULT_REFRESH_COMMANDS.name}),
+        (refresh_workflow_out, {refresh_workflow_out.name, DEFAULT_REFRESH_WORKFLOW.name}),
         (live_refresh_script_out, {live_refresh_script_out.name, DEFAULT_LIVE_REFRESH_SCRIPT.name}),
         (run_manifest, {run_manifest.name, DEFAULT_RUN_MANIFEST.name}),
         (manifest_validation_out, {manifest_validation_out.name, DEFAULT_MANIFEST_VALIDATION.name}),
@@ -1196,6 +1236,7 @@ def write_hosted_manifest_artifact(
     report_index_out: Path = DEFAULT_REPORT_INDEX,
     report_links_out: Path = DEFAULT_REPORT_LINKS,
     refresh_commands_out: Path = DEFAULT_REFRESH_COMMANDS,
+    refresh_workflow_out: Path = DEFAULT_REFRESH_WORKFLOW,
     live_refresh_script_out: Path = DEFAULT_LIVE_REFRESH_SCRIPT,
     run_manifest: Path = DEFAULT_RUN_MANIFEST,
     manifest_validation_out: Path = DEFAULT_MANIFEST_VALIDATION,
@@ -1215,6 +1256,7 @@ def write_hosted_manifest_artifact(
         (report_index_out, {report_index_out.name, DEFAULT_REPORT_INDEX.name}),
         (report_links_out, {report_links_out.name, DEFAULT_REPORT_LINKS.name}),
         (refresh_commands_out, {refresh_commands_out.name, DEFAULT_REFRESH_COMMANDS.name}),
+        (refresh_workflow_out, {refresh_workflow_out.name, DEFAULT_REFRESH_WORKFLOW.name}),
         (live_refresh_script_out, {live_refresh_script_out.name, DEFAULT_LIVE_REFRESH_SCRIPT.name}),
         (run_manifest, {run_manifest.name, DEFAULT_RUN_MANIFEST.name}),
         (manifest_validation_out, {manifest_validation_out.name, DEFAULT_MANIFEST_VALIDATION.name}),
@@ -1298,6 +1340,7 @@ def write_artifact_index(
     report_links_out: Path | None = None,
     runtime_status_out: Path | None = None,
     live_refresh_script_out: Path | None = None,
+    refresh_workflow_out: Path | None = None,
     source_result_paths: list[Path] | None = None,
 ) -> None:
     output_path.parent.mkdir(parents=True, exist_ok=True)
@@ -1312,6 +1355,7 @@ def write_artifact_index(
                 summary_out=summary_out,
                 refresh_report_out=refresh_report_out,
                 refresh_commands_out=refresh_commands_out,
+                refresh_workflow_out=refresh_workflow_out,
                 live_refresh_script_out=live_refresh_script_out,
                 run_manifest=run_manifest,
                 manifest_validation_out=manifest_validation_out,
@@ -1342,6 +1386,7 @@ def build_artifact_index_data(
     summary_out: Path,
     refresh_report_out: Path,
     refresh_commands_out: Path,
+    refresh_workflow_out: Path | None = None,
     run_manifest: Path,
     manifest_validation_out: Path,
     seed_manifest_validation_out: Path,
@@ -1360,6 +1405,9 @@ def build_artifact_index_data(
     live_refresh_script_out = live_refresh_script_out or refresh_commands_out.with_name(
         DEFAULT_LIVE_REFRESH_SCRIPT.name
     )
+    refresh_workflow_out = refresh_workflow_out or refresh_commands_out.with_name(
+        DEFAULT_REFRESH_WORKFLOW.name
+    )
     artifact_paths = {
         _repo_relative(results_path): results_path,
         _repo_relative(report_path): report_path,
@@ -1369,6 +1417,7 @@ def build_artifact_index_data(
         _repo_relative(report_index_out): report_index_out,
         _repo_relative(report_links_out): report_links_out,
         _repo_relative(refresh_commands_out): refresh_commands_out,
+        _repo_relative(refresh_workflow_out): refresh_workflow_out,
         _repo_relative(live_refresh_script_out): live_refresh_script_out,
         _repo_relative(run_manifest): run_manifest,
         _repo_relative(manifest_validation_out): manifest_validation_out,
@@ -1382,6 +1431,7 @@ def build_artifact_index_data(
         _repo_relative(DEFAULT_REPORT_INDEX): report_index_out,
         _repo_relative(DEFAULT_REPORT_LINKS): report_links_out,
         _repo_relative(DEFAULT_REFRESH_COMMANDS): refresh_commands_out,
+        _repo_relative(DEFAULT_REFRESH_WORKFLOW): refresh_workflow_out,
         _repo_relative(DEFAULT_LIVE_REFRESH_SCRIPT): live_refresh_script_out,
         _repo_relative(DEFAULT_RUN_MANIFEST): run_manifest,
         _repo_relative(DEFAULT_MANIFEST_VALIDATION): manifest_validation_out,
@@ -1536,6 +1586,7 @@ def _hosted_paths_for_artifact(
         "docs/asr-leaderboard-report-index.md": ["asr-leaderboard-report-index.md"],
         "docs/asr-leaderboard-report-links.json": ["asr-leaderboard-report-links.json"],
         "docs/asr-leaderboard-refresh-commands.sh": ["asr-leaderboard-refresh-commands.sh"],
+        "docs/asr-leaderboard-refresh-workflow.json": ["asr-leaderboard-refresh-workflow.json"],
         "docs/asr-leaderboard-live-refresh.sh": ["asr-leaderboard-live-refresh.sh"],
         "docs/asr-leaderboard-run-manifest.json": ["asr-leaderboard-run-manifest.json"],
         "docs/asr-leaderboard-manifest-validation.json": [

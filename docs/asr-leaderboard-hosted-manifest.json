@@ -1,28 +1,28 @@
 {
-  "artifact_count": 33,
+  "artifact_count": 34,
   "artifacts": [
     {
-      "bytes": 29990,
+      "bytes": 30234,
       "hosted_paths": [
         "asr-leaderboard-demo.html"
       ],
-      "sha256": "11736162f06a6aa0607a767d90ff705d9175d899d1b9d39cfe3165a96c2c4cc4",
+      "sha256": "bf4776f4a49f2d107d8a92ed5b087a86b9d287f32665e0b27ed8a7e3b4b3bd38",
       "source_path": "docs/asr-leaderboard-demo.html"
     },
     {
-      "bytes": 32967,
+      "bytes": 33271,
       "hosted_paths": [
         "asr-leaderboard-summary.json"
       ],
-      "sha256": "eb1c2e5e3881b9b2e067e338c012b305465be2b98e57e69ce6c6a67a4e1d63ba",
+      "sha256": "64a3c24ac4080533dd92fba47f830d9a0dac8c7147b429bc40db3ff69571dc7f",
       "source_path": "docs/asr-leaderboard-summary.json"
     },
     {
-      "bytes": 17834,
+      "bytes": 18091,
       "hosted_paths": [
         "asr-leaderboard-refresh-report.md"
       ],
-      "sha256": "247d7314750e8da135a27c6e72149f7d2ea908ad7cf11e4df2339d1c82ab58d1",
+      "sha256": "f4ce6c28764b108de05da0d62de86358c2b18b1747ace12d0b8e1543eaebc63e",
       "source_path": "docs/asr-leaderboard-refresh-report.md"
     },
     {
@@ -48,6 +48,14 @@
       ],
       "sha256": "5df65301315609b3744b79e1be76dcfd69f0c39a8e8e2da91a2f3541f10e9b10",
       "source_path": "docs/asr-leaderboard-refresh-commands.sh"
+    },
+    {
+      "bytes": 9069,
+      "hosted_paths": [
+        "asr-leaderboard-refresh-workflow.json"
+      ],
+      "sha256": "5f064893bbbe10bfc4b34bd3d22c25d409da070fdbf5f59d1b7860ba201f0d59",
+      "source_path": "docs/asr-leaderboard-refresh-workflow.json"
     },
     {
       "bytes": 3601,
@@ -90,11 +98,11 @@
       "source_path": "docs/asr-leaderboard-next-runs.json"
     },
     {
-      "bytes": 33835,
+      "bytes": 34228,
       "hosted_paths": [
         "asr-leaderboard-artifacts.json"
       ],
-      "sha256": "524ecc0d8a43e4de4f0c66a0a995b76e2398e9de7dffb42fccd441af04718b77",
+      "sha256": "c00961fa57d749aaaab48644a00b8dce31d44de45c9b03d9da4fc71243cd3bda",
       "source_path": "docs/asr-leaderboard-artifacts.json"
     },
     {

@@ -227,6 +227,10 @@
       "purpose": "Generated shell playbook for repeatable ASR leaderboard refreshes."
     },
     {
+      "path": "docs/asr-leaderboard-refresh-workflow.json",
+      "purpose": "Machine-readable generated workflow for ASR refresh automation."
+    },
+    {
       "path": "docs/asr-leaderboard-live-refresh.sh",
       "purpose": "Opt-in generated shell script for live MLX ASR/Gemini refreshes."
     },
@@ -486,6 +490,7 @@
       "--check-only"
     ],
     "refresh_commands_path": "docs/asr-leaderboard-refresh-commands.sh",
+    "refresh_workflow_path": "docs/asr-leaderboard-refresh-workflow.json",
     "runtime_ready_check_command": [
       ".venv/bin/python",
       "scripts/refresh_asr_leaderboard_artifacts.py",
@@ -506,6 +511,7 @@
       "docs/asr-seed-manifest-validation.json"
     ]
   },
+  "refresh_workflow_path": "docs/asr-leaderboard-refresh-workflow.json",
   "report_index_path": "docs/asr-leaderboard-report-index.md",
   "report_links_path": "docs/asr-leaderboard-report-links.json",
   "report_path": "runs/asr-leaderboard/full-35-combined/report.html",

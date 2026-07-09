@@ -1,0 +1,265 @@
+{
+  "command_keys": [
+    "audio_materialization_command",
+    "audio_ready_check_command",
+    "combine_refresh_command",
+    "discover_refresh_command",
+    "freshness_check_command",
+    "full_preflight_command",
+    "hosted_artifact_command",
+    "hosted_validation_command",
+    "local_secret_env_command",
+    "manifest_refresh_command",
+    "mlx_runtime_check_command",
+    "page_validation_command",
+    "preflight_summary_command",
+    "refresh_check_command",
+    "runtime_ready_check_command",
+    "runtime_status_check_command",
+    "seed_manifest_validation_command"
+  ],
+  "description": "Generated machine-readable ASR leaderboard refresh workflow.",
+  "fallback_model_count": 3,
+  "live_refresh_script_path": "docs/asr-leaderboard-live-refresh.sh",
+  "primary_model_count": 3,
+  "refresh_commands_path": "docs/asr-leaderboard-refresh-commands.sh",
+  "version": 1,
+  "workflow": {
+    "audio_materialization_command": [
+      ".venv/bin/python",
+      "scripts/synthesize_tts_cases.py",
+      "--cases",
+      "examples/asr_research_cases.jsonl",
+      "--out",
+      "runs/asr-research-audio",
+      "--discard-text-sidecars",
+      "--summary-out",
+      "runs/asr-research-audio/summary.json"
+    ],
+    "audio_ready_check_command": [
+      ".venv/bin/python",
+      "scripts/refresh_asr_leaderboard_artifacts.py",
+      "--check-only",
+      "--require-audio-ready"
+    ],
+    "combine_refresh_command": [
+      ".venv/bin/python",
+      "scripts/refresh_asr_leaderboard_artifacts.py",
+      "--results",
+      "runs/asr-leaderboard/whisper-large-v3-turbo-smoke/judge-report/results.jsonl",
+      "--results",
+      "runs/asr-leaderboard/whisper-large-v3-turbo-full-gap/judge-report/results.jsonl",
+      "--results",
+      "runs/asr-leaderboard/whisper-large-v3-turbo-semantic-smoke/judge-report/results.jsonl",
+      "--results",
+      "runs/asr-leaderboard/whisper-large-v3-turbo-entity-smoke/judge-report/results.jsonl",
+      "--results",
+      "runs/asr-leaderboard/whisper-large-v3-turbo-paraphrase-smoke/judge-report/results.jsonl",
+      "--results",
+      "runs/asr-leaderboard/whisper-large-v3-turbo-noise-smoke/judge-report/results.jsonl",
+      "--results",
+      "runs/asr-leaderboard/qwen3-asr-1.7b-smoke/judge-report/results.jsonl",
+      "--results",
+      "runs/asr-leaderboard/qwen3-asr-1.7b-full-gap/judge-report/results.jsonl",
+      "--results",
+      "runs/asr-leaderboard/qwen3-asr-1.7b-semantic-smoke/judge-report/results.jsonl",
+      "--results",
+      "runs/asr-leaderboard/qwen3-asr-1.7b-entity-smoke/judge-report/results.jsonl",
+      "--results",
+      "runs/asr-leaderboard/qwen3-asr-1.7b-paraphrase-smoke/judge-report/results.jsonl",
+      "--results",
+      "runs/asr-leaderboard/qwen3-asr-1.7b-noise-smoke/judge-report/results.jsonl",
+      "--results",
+      "runs/asr-leaderboard/vibevoice-asr-smoke/judge-report/results.jsonl",
+      "--results",
+      "runs/asr-leaderboard/vibevoice-asr-full-gap/judge-report/results.jsonl",
+      "--results",
+      "runs/asr-leaderboard/vibevoice-asr-semantic-smoke/judge-report/results.jsonl",
+      "--results",
+      "runs/asr-leaderboard/vibevoice-asr-entity-smoke/judge-report/results.jsonl",
+      "--results",
+      "runs/asr-leaderboard/vibevoice-asr-paraphrase-smoke/judge-report/results.jsonl",
+      "--results",
+      "runs/asr-leaderboard/vibevoice-asr-noise-smoke/judge-report/results.jsonl",
+      "--update-run-manifest"
+    ],
+    "discover_refresh_command": [
+      ".venv/bin/python",
+      "scripts/refresh_asr_leaderboard_artifacts.py",
+      "--discover-complete-model-runs",
+      "--update-run-manifest"
+    ],
+    "fallback_handling": "If a primary MLX ASR model is blocked or unsupported, record the unsupported state explicitly before trying the fallback model list; do not substitute silently.",
+    "fallback_model_ids": [
+      "mlx-community/whisper-small.en-asr-4bit",
+      "mlx-community/parakeet-rnnt-0.6b",
+      "mlx-community/GLM-ASR-Nano-2512-4bit"
+    ],
+    "freshness_check_command": [
+      ".venv/bin/python",
+      "scripts/refresh_asr_leaderboard_artifacts.py",
+      "--check-only",
+      "--require-generated-fresh"
+    ],
+    "full_preflight_command": [
+      ".venv/bin/python",
+      "scripts/refresh_asr_leaderboard_artifacts.py",
+      "--check-only",
+      "--require-generated-fresh",
+      "--require-audio-ready",
+      "--check-mlx-runtime",
+      "--require-runtime-ready",
+      "--check-summary-out",
+      "runs/asr-leaderboard/preflight-summary.json"
+    ],
+    "hosted_artifact_command": [
+      ".venv/bin/python",
+      "scripts/refresh_asr_leaderboard_artifacts.py",
+      "--hosted-dir-from-env"
+    ],
+    "hosted_artifact_env_var": "ASR_LEADERBOARD_HOSTED_DIR",
+    "hosted_validation_command": [
+      ".venv/bin/python",
+      "scripts/refresh_asr_leaderboard_artifacts.py",
+      "--check-only",
+      "--hosted-dir-from-env",
+      "--require-hosted-current"
+    ],
+    "live_refresh_script_path": "docs/asr-leaderboard-live-refresh.sh",
+    "local_secret_env_command": [
+      "source",
+      "/Users/wangyauli/.openclaw/secrets/open-audio-judge-gemini.env"
+    ],
+    "manifest_refresh_command": [
+      ".venv/bin/python",
+      "scripts/refresh_asr_leaderboard_artifacts.py"
+    ],
+    "mlx_runtime_check_command": [
+      "PYTHONPATH=src",
+      ".venv/bin/python",
+      "-m",
+      "open_audio_judge.cli",
+      "check-mlx-asr-runtime",
+      "--python-bin",
+      ".venv/bin/python",
+      "--model",
+      "mlx-community/whisper-large-v3-turbo-asr-fp16"
+    ],
+    "model_run_commands": [
+      {
+        "command": [
+          ".venv/bin/oaj",
+          "autojudge-mlx-asr",
+          "--python-bin",
+          ".venv/bin/python",
+          "--cases",
+          "runs/asr-research-audio/tts_audio_cases.jsonl",
+          "--model",
+          "mlx-community/whisper-large-v3-turbo-asr-fp16",
+          "--judge-provider",
+          "gemini",
+          "--judge-samples",
+          "3",
+          "--out",
+          "runs/asr-leaderboard/whisper-large-v3-turbo-refresh"
+        ],
+        "model": "mlx-community/whisper-large-v3-turbo-asr-fp16",
+        "run_name": "whisper-large-v3-turbo-refresh"
+      },
+      {
+        "command": [
+          ".venv/bin/oaj",
+          "autojudge-mlx-asr",
+          "--python-bin",
+          ".venv/bin/python",
+          "--cases",
+          "runs/asr-research-audio/tts_audio_cases.jsonl",
+          "--model",
+          "mlx-community/Qwen3-ASR-1.7B-8bit",
+          "--judge-provider",
+          "gemini",
+          "--judge-samples",
+          "3",
+          "--out",
+          "runs/asr-leaderboard/qwen3-asr-1.7b-refresh"
+        ],
+        "model": "mlx-community/Qwen3-ASR-1.7B-8bit",
+        "run_name": "qwen3-asr-1.7b-refresh"
+      },
+      {
+        "command": [
+          ".venv/bin/oaj",
+          "autojudge-mlx-asr",
+          "--python-bin",
+          ".venv/bin/python",
+          "--cases",
+          "runs/asr-research-audio/tts_audio_cases.jsonl",
+          "--model",
+          "mlx-community/VibeVoice-ASR-4bit",
+          "--judge-provider",
+          "gemini",
+          "--judge-samples",
+          "3",
+          "--out",
+          "runs/asr-leaderboard/vibevoice-asr-refresh"
+        ],
+        "model": "mlx-community/VibeVoice-ASR-4bit",
+        "run_name": "vibevoice-asr-refresh"
+      }
+    ],
+    "model_run_template": [
+      ".venv/bin/oaj",
+      "autojudge-mlx-asr",
+      "--python-bin",
+      ".venv/bin/python",
+      "--cases",
+      "runs/asr-research-audio/tts_audio_cases.jsonl",
+      "--model",
+      "<mlx-community/model-id>",
+      "--judge-provider",
+      "gemini",
+      "--judge-samples",
+      "3",
+      "--out",
+      "runs/asr-leaderboard/<run-name>"
+    ],
+    "page_validation_command": [
+      ".venv/bin/python",
+      "scripts/check_asr_leaderboard_page.py"
+    ],
+    "preflight_summary_command": [
+      ".venv/bin/python",
+      "scripts/refresh_asr_leaderboard_artifacts.py",
+      "--check-only",
+      "--require-generated-fresh",
+      "--check-summary-out",
+      "runs/asr-leaderboard/preflight-summary.json"
+    ],
+    "refresh_check_command": [
+      ".venv/bin/python",
+      "scripts/refresh_asr_leaderboard_artifacts.py",
+      "--check-only"
+    ],
+    "refresh_commands_path": "docs/asr-leaderboard-refresh-commands.sh",
+    "refresh_workflow_path": "docs/asr-leaderboard-refresh-workflow.json",
+    "runtime_ready_check_command": [
+      ".venv/bin/python",
+      "scripts/refresh_asr_leaderboard_artifacts.py",
+      "--check-only",
+      "--require-runtime-ready"
+    ],
+    "runtime_status_check_command": [
+      ".venv/bin/python",
+      "scripts/refresh_asr_leaderboard_artifacts.py",
+      "--check-only",
+      "--check-mlx-runtime"
+    ],
+    "secret_handling": "Load the Gemini API key from the local secret file only at runtime; do not commit or print secrets.",
+    "seed_manifest_validation_command": [
+      ".venv/bin/python",
+      "scripts/validate_asr_seed_manifest.py",
+      "--summary-out",
+      "docs/asr-seed-manifest-validation.json"
+    ]
+  }
+}
