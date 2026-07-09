@@ -118,6 +118,8 @@ def test_render_generated_sections_summarizes_verified_asr_results(tmp_path: Pat
     assert "--hosted-dir /path/to/kennethli319.github.io/open-audio-judge" in html
     assert "Generated Refresh Workflow" in html
     assert "Generated Artifacts" in html
+    assert "Validate seed manifest" in html
+    assert "scripts/validate_asr_seed_manifest.py" in html
     assert "Run one MLX ASR model" in html
     assert "--model &lt;mlx-community/model-id&gt;" in html
     assert "Machine-readable leaderboard summary" in html
@@ -202,6 +204,10 @@ def test_write_summary_artifact_records_models_and_categories(tmp_path: Path) ->
     ]
     assert summary["run_manifest_path"] == "docs/asr-leaderboard-run-manifest.json"
     assert summary["manifest_validation_path"] == "docs/asr-leaderboard-manifest-validation.json"
+    assert summary["refresh_workflow"]["seed_manifest_validation_command"] == [
+        ".venv/bin/python",
+        "scripts/validate_asr_seed_manifest.py",
+    ]
     assert summary["refresh_workflow"]["audio_materialization_command"] == [
         ".venv/bin/python",
         "scripts/synthesize_tts_cases.py",
@@ -348,6 +354,7 @@ def test_write_refresh_report_records_coverage_and_commands(tmp_path: Path) -> N
     assert "`mlx-community/model-a`" in text
     assert "`transcription_accuracy_wer`" in text
     assert ".venv/bin/python scripts/refresh_asr_leaderboard_artifacts.py" in text
+    assert ".venv/bin/python scripts/validate_asr_seed_manifest.py" in text
     assert "--results " + str(source_results_path) in text
     assert "Hosted artifact sync" in text
     assert "## Runtime Status" in text

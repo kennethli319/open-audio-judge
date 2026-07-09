@@ -137,6 +137,7 @@ def render_generated_sections(
     validation_label = html.escape(_repo_relative(DEFAULT_MANIFEST_VALIDATION))
     workflow = _refresh_workflow([])
     workflow_commands = [
+        ("Validate seed manifest", workflow["seed_manifest_validation_command"]),
         ("Materialize audio", workflow["audio_materialization_command"]),
         ("Run one MLX ASR model", workflow["model_run_template"]),
         ("Refresh committed artifacts", workflow["manifest_refresh_command"]),
@@ -364,6 +365,7 @@ def write_refresh_report(
                 "",
                 "## Refresh Commands",
                 "",
+                f"- Seed manifest validation: `{_shell_join(workflow['seed_manifest_validation_command'])}`",
                 f"- Audio materialization: `{_shell_join(workflow['audio_materialization_command'])}`",
                 f"- Combine and refresh committed artifacts: `{_shell_join(workflow['combine_refresh_command'])}`",
                 f"- Manifest-based refresh: `{_shell_join(workflow['manifest_refresh_command'])}`",
@@ -394,6 +396,10 @@ def _refresh_workflow(source_result_paths: list[Path]) -> dict[str, object]:
         refresh_command.extend(["--results", _repo_relative(path)])
 
     return {
+        "seed_manifest_validation_command": [
+            ".venv/bin/python",
+            "scripts/validate_asr_seed_manifest.py",
+        ],
         "audio_materialization_command": [
             ".venv/bin/python",
             "scripts/synthesize_tts_cases.py",

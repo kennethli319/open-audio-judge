@@ -11,6 +11,8 @@ Manifest: `examples/asr_research_cases.jsonl`
 - 35 public-safe seed cases.
 - 7 categories with exactly 5 cases each.
 - Cases are text/reference seeds with `metadata.requires_audio_materialization=true`.
+- Validate seed coverage before synthesis with
+  `.venv/bin/python scripts/validate_asr_seed_manifest.py`.
 - Cron runs should materialize local audio under ignored `runs/`, transcribe it
   with MLX ASR models, judge candidate transcripts with Gemini, and publish only
   safe aggregate/demo artifacts.

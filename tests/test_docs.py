@@ -160,6 +160,7 @@ def test_asr_leaderboard_demo_page_documents_workflow() -> None:
         "examples/asr_research_cases.jsonl",
         "docs/asr-eval-taxonomy.md",
         "docs/asr-leaderboard-run-manifest.json",
+        "scripts/validate_asr_seed_manifest.py",
         "Representative Result JSON",
     ]
     for text in required_text:
@@ -177,6 +178,7 @@ def test_asr_research_docs_list_categories() -> None:
 
     for category in categories:
         assert category in docs
+    assert ".venv/bin/python scripts/validate_asr_seed_manifest.py" in docs
 
 
 def test_tts_multiturn_examples_cover_requested_categories() -> None:

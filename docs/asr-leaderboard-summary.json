@@ -233,7 +233,11 @@
       "--out",
       "runs/asr-leaderboard/<run-name>"
     ],
-    "secret_handling": "Load the Gemini API key from the local secret file only at runtime; do not commit or print secrets."
+    "secret_handling": "Load the Gemini API key from the local secret file only at runtime; do not commit or print secrets.",
+    "seed_manifest_validation_command": [
+      ".venv/bin/python",
+      "scripts/validate_asr_seed_manifest.py"
+    ]
   },
   "report_path": "runs/asr-leaderboard/full-35-combined/report.html",
   "results_path": "runs/asr-leaderboard/full-35-combined/results.jsonl",
