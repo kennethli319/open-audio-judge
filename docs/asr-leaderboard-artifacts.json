@@ -2,72 +2,84 @@
   "artifacts": [
     {
       "bytes": null,
+      "digest_status": "deferred_circular_reference",
       "exists": true,
       "path": "docs/asr-leaderboard-artifacts.json",
       "sha256": null
     },
     {
       "bytes": 24447,
+      "digest_status": "ok",
       "exists": true,
       "path": "docs/asr-leaderboard-demo.html",
       "sha256": "8bffff5331b6652c1a8ac33be23a7a1d76d85a329e271c425f1760fc0fa85e27"
     },
     {
       "bytes": null,
+      "digest_status": "deferred_circular_reference",
       "exists": true,
       "path": "docs/asr-leaderboard-hosted-manifest.json",
       "sha256": null
     },
     {
       "bytes": 8545,
+      "digest_status": "ok",
       "exists": true,
       "path": "docs/asr-leaderboard-manifest-validation.json",
       "sha256": "13e9d7787d9122bc7aac0ce2a8eaa8a6f45002ac870f2075b181f42401f82553"
     },
     {
       "bytes": 546,
+      "digest_status": "ok",
       "exists": true,
       "path": "docs/asr-leaderboard-next-runs.json",
       "sha256": "cc918bbaa552b7099e89e2084aff8590d960456dee407eb318d26442488f93e7"
     },
     {
       "bytes": 4030,
+      "digest_status": "ok",
       "exists": true,
       "path": "docs/asr-leaderboard-refresh-commands.sh",
       "sha256": "8cd4bc5c115f1887d990e742c379bf0e4bd5d7d34300abeba0e9fb0b74289815"
     },
     {
       "bytes": 15388,
+      "digest_status": "ok",
       "exists": true,
       "path": "docs/asr-leaderboard-refresh-report.md",
       "sha256": "c25c9686168e215ea36910a4397e298ae15201120a4d42264d47ce37ee49379b"
     },
     {
       "bytes": 8552,
+      "digest_status": "ok",
       "exists": true,
       "path": "docs/asr-leaderboard-run-manifest.json",
       "sha256": "d2b6675a68f760ad69c1658cc3c5cee16975eab32137d1771e13a91bd26e9b3a"
     },
     {
       "bytes": 25325,
+      "digest_status": "ok",
       "exists": true,
       "path": "docs/asr-leaderboard-summary.json",
       "sha256": "7326dda35d42f14033d97b0616376f8934340f5a9b6f0109f106230be82cd4a1"
     },
     {
       "bytes": 1634,
+      "digest_status": "ok",
       "exists": true,
       "path": "docs/asr-seed-manifest-validation.json",
       "sha256": "abbc54c696de3f52693ab26213e19f16eb01014034724e2b87a58a25a4ab2f24"
     },
     {
       "bytes": 434978,
+      "digest_status": "ok",
       "exists": true,
       "path": "runs/asr-leaderboard/full-35-combined/report.html",
       "sha256": "21246cd2be336e37d0c5da76ab7edfd7944e4bb38c509a0c3ccce9dc5fd45cf7"
     },
     {
       "bytes": 404226,
+      "digest_status": "ok",
       "exists": true,
       "path": "runs/asr-leaderboard/full-35-combined/results.jsonl",
       "sha256": "381ea5a536fed20456887b2bb171b64618f51ba5b22cb0b23a625189cfa61976"

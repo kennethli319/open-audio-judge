@@ -584,6 +584,22 @@ def _validate_artifact_index(
             raise ValueError(f"{path} references missing artifact: {raw_artifact_path}")
         expected_bytes = artifact.get("bytes")
         expected_sha256 = artifact.get("sha256")
+        digest_status = artifact.get("digest_status", "ok")
+        if digest_status not in {"ok", "alias", "missing", "deferred_circular_reference"}:
+            raise ValueError(
+                f"{path} has invalid digest_status for {raw_artifact_path}: {digest_status!r}"
+            )
+        if digest_status == "deferred_circular_reference" and (
+            expected_bytes is not None or expected_sha256 is not None
+        ):
+            raise ValueError(
+                f"{path} deferred digest artifact must not include bytes or sha256: "
+                f"{raw_artifact_path}"
+            )
+        if expected_bytes is None and digest_status == "ok":
+            raise ValueError(f"{path} is missing byte size for {raw_artifact_path}.")
+        if expected_sha256 is None and digest_status == "ok":
+            raise ValueError(f"{path} is missing sha256 for {raw_artifact_path}.")
         if expected_bytes is not None and resolved.stat().st_size != expected_bytes:
             raise ValueError(f"{path} byte size for {raw_artifact_path} does not match.")
         if expected_sha256 is not None and _sha256_file(resolved) != expected_sha256:

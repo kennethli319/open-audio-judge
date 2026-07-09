@@ -731,6 +731,13 @@ def write_artifact_index(
         path = artifact_paths.get(raw_path, ROOT / raw_path)
         is_generated_after_index = path in {output_path, hosted_manifest_out}
         is_stable_alias = raw_path != _repo_relative(path)
+        digest_status = "ok"
+        if is_generated_after_index:
+            digest_status = "deferred_circular_reference"
+        elif is_stable_alias:
+            digest_status = "alias"
+        elif not path.exists():
+            digest_status = "missing"
         records.append(
             {
                 "path": raw_path,
@@ -741,6 +748,7 @@ def write_artifact_index(
                 "sha256": None
                 if is_generated_after_index or is_stable_alias or not path.exists()
                 else _sha256_file(path),
+                "digest_status": digest_status,
             }
         )
 

@@ -137,6 +137,29 @@ def file_sha256(path: Path) -> str:
     return digest.hexdigest()
 
 
+def artifact_index_record(
+    raw_path: str,
+    actual_path: Path,
+    *,
+    digest_status: str = "ok",
+) -> dict:
+    if digest_status == "ok":
+        return {
+            "path": raw_path,
+            "exists": actual_path.exists(),
+            "bytes": actual_path.stat().st_size,
+            "sha256": file_sha256(actual_path),
+            "digest_status": "ok",
+        }
+    return {
+        "path": raw_path,
+        "exists": True,
+        "bytes": None,
+        "sha256": None,
+        "digest_status": digest_status,
+    }
+
+
 def test_render_generated_sections_summarizes_verified_asr_results(tmp_path: Path) -> None:
     module = load_script_module()
     results_path = tmp_path / "results.jsonl"
@@ -924,6 +947,13 @@ def test_refresh_asr_leaderboard_artifacts_combines_report_and_page(tmp_path: Pa
         str(artifact_index),
         "docs/asr-leaderboard-artifacts.json",
     }
+    digest_statuses = {
+        artifact["path"]: artifact["digest_status"]
+        for artifact in artifact_index_data["artifacts"]
+    }
+    assert digest_statuses[str(artifact_index)] == "deferred_circular_reference"
+    assert digest_statuses[str(hosted_manifest)] == "deferred_circular_reference"
+    assert digest_statuses[str(out / "results.jsonl")] == "ok"
     hosted_manifest_data = json.loads(hosted_manifest.read_text(encoding="utf-8"))
     assert hosted_manifest_data["artifact_count"] == 11
     assert {
@@ -1443,15 +1473,44 @@ def test_check_asr_leaderboard_page_validates_hosted_artifact_layout(tmp_path: P
                 "category_count": 2,
                 "expected_cases_per_model": 2,
                 "artifacts": [
-                    {"path": "runs/asr-leaderboard/full-35-combined/results.jsonl", "exists": True},
-                    {"path": "runs/asr-leaderboard/full-35-combined/report.html", "exists": True},
-                    {"path": "docs/asr-leaderboard-run-manifest.json", "exists": True},
-                    {"path": "docs/asr-leaderboard-manifest-validation.json", "exists": True},
-                    {"path": "docs/asr-seed-manifest-validation.json", "exists": True},
-                    {"path": "docs/asr-leaderboard-next-runs.json", "exists": True},
-                    {"path": "docs/asr-leaderboard-refresh-commands.sh", "exists": True},
-                    {"path": "docs/asr-leaderboard-hosted-manifest.json", "exists": True},
-                    {"path": "docs/asr-leaderboard-artifacts.json", "exists": True},
+                    artifact_index_record(
+                        "runs/asr-leaderboard/full-35-combined/results.jsonl",
+                        results_path,
+                    ),
+                    artifact_index_record(
+                        "runs/asr-leaderboard/full-35-combined/report.html",
+                        report_path,
+                    ),
+                    artifact_index_record(
+                        "docs/asr-leaderboard-run-manifest.json",
+                        run_manifest,
+                    ),
+                    artifact_index_record(
+                        "docs/asr-leaderboard-manifest-validation.json",
+                        manifest_validation,
+                    ),
+                    artifact_index_record(
+                        "docs/asr-seed-manifest-validation.json",
+                        seed_manifest_validation,
+                    ),
+                    artifact_index_record(
+                        "docs/asr-leaderboard-next-runs.json",
+                        next_runs,
+                    ),
+                    artifact_index_record(
+                        "docs/asr-leaderboard-refresh-commands.sh",
+                        refresh_commands,
+                    ),
+                    artifact_index_record(
+                        "docs/asr-leaderboard-hosted-manifest.json",
+                        hosted_manifest,
+                        digest_status="deferred_circular_reference",
+                    ),
+                    artifact_index_record(
+                        "docs/asr-leaderboard-artifacts.json",
+                        artifact_index,
+                        digest_status="deferred_circular_reference",
+                    ),
                 ],
             }
         )
