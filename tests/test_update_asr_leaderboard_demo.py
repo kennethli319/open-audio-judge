@@ -1044,6 +1044,8 @@ def test_refresh_asr_leaderboard_artifacts_combines_report_and_page(tmp_path: Pa
     second.parent.mkdir(parents=True)
     first.write_text("".join(json.dumps(record) + "\n" for record in records_a), encoding="utf-8")
     second.write_text("".join(json.dumps(record) + "\n" for record in records_b), encoding="utf-8")
+    first.with_name("report.html").write_text("<html>model-a report</html>\n", encoding="utf-8")
+    second.with_name("report.html").write_text("<html>model-b report</html>\n", encoding="utf-8")
     page.write_text(
         "Open Audio Judge ASR Leaderboard\n"
         f"{update_module.START_MARKER}\n"
@@ -1238,8 +1240,11 @@ def test_refresh_asr_leaderboard_artifacts_combines_report_and_page(tmp_path: Pa
     assert digest_statuses[str(hosted_manifest)] == "deferred_circular_reference"
     assert digest_statuses[str(out / "results.jsonl")] == "ok"
     hosted_manifest_data = json.loads(hosted_manifest.read_text(encoding="utf-8"))
-    assert hosted_manifest_data["artifact_count"] == 15
+    assert hosted_manifest_data["artifact_count"] == 17
     assert {"asr-leaderboard/full-35-combined/results.jsonl"} in [
+        set(artifact["hosted_paths"]) for artifact in hosted_manifest_data["artifacts"]
+    ]
+    assert {"asr-leaderboard/source-reports/model-a/report.html"} in [
         set(artifact["hosted_paths"]) for artifact in hosted_manifest_data["artifacts"]
     ]
     assert {"asr-leaderboard-report-index.md"} in [
@@ -1260,6 +1265,12 @@ def test_refresh_asr_leaderboard_artifacts_combines_report_and_page(tmp_path: Pa
     assert (hosted_dir / "asr-leaderboard" / "full-35-combined" / "report.html").read_text(
         encoding="utf-8"
     ) == (out / "report.html").read_text(encoding="utf-8")
+    assert (hosted_dir / "asr-leaderboard" / "source-reports" / "model-a" / "report.html").read_text(
+        encoding="utf-8"
+    ) == first.with_name("report.html").read_text(encoding="utf-8")
+    assert (hosted_dir / "asr-leaderboard" / "source-reports" / tmp_path.name / "report.html").read_text(
+        encoding="utf-8"
+    ) == second.with_name("report.html").read_text(encoding="utf-8")
 
     combined_results = update_module.load_results_jsonl(out / "results.jsonl")
     generated = update_module.render_generated_sections(

@@ -640,6 +640,7 @@ def _validate_generated_artifacts_fresh(
                 runtime_status_out=runtime_status_out,
                 combined_results_path=combined_results_path,
                 combined_report_path=combined_results_path.with_name("report.html"),
+                source_result_paths=result_paths,
             )
             _compare_generated_text_artifact(hosted_manifest_out, expected_hosted_manifest)
         if artifact_index_out is not None:
@@ -654,11 +655,13 @@ def _validate_generated_artifacts_fresh(
                         page=page,
                         summary_out=summary_out,
                         refresh_report_out=refresh_report_out or DEFAULT_REFRESH_REPORT,
-                    report_index_out=report_index_out or DEFAULT_REPORT_INDEX,
-                    report_links_out=report_links_out or DEFAULT_REPORT_LINKS,
-                    refresh_commands_out=refresh_commands_out or DEFAULT_REFRESH_COMMANDS,
-                    live_refresh_script_out=live_refresh_script_out or DEFAULT_LIVE_REFRESH_SCRIPT,
-                    run_manifest=run_manifest or DEFAULT_RUN_MANIFEST,
+                        report_index_out=report_index_out or DEFAULT_REPORT_INDEX,
+                        report_links_out=report_links_out or DEFAULT_REPORT_LINKS,
+                        refresh_commands_out=refresh_commands_out or DEFAULT_REFRESH_COMMANDS,
+                        live_refresh_script_out=(
+                            live_refresh_script_out or DEFAULT_LIVE_REFRESH_SCRIPT
+                        ),
+                        run_manifest=run_manifest or DEFAULT_RUN_MANIFEST,
                         manifest_validation_out=(
                             manifest_validation_out or DEFAULT_MANIFEST_VALIDATION
                         ),
@@ -669,6 +672,7 @@ def _validate_generated_artifacts_fresh(
                         hosted_manifest_out=hosted_manifest_out or DEFAULT_HOSTED_MANIFEST,
                         runtime_status_out=runtime_status_out or DEFAULT_RUNTIME_STATUS,
                         expected_cases_per_model=expected_cases_per_model,
+                        source_result_paths=result_paths,
                     ),
                     indent=2,
                     sort_keys=True,
@@ -883,6 +887,7 @@ def refresh_asr_leaderboard_artifacts(
         hosted_manifest_out=hosted_manifest_out,
         runtime_status_out=runtime_status_out,
         expected_cases_per_model=expected_cases_per_model,
+        source_result_paths=result_paths,
     )
     write_hosted_manifest_artifact(
         hosted_manifest_out,
@@ -901,6 +906,7 @@ def refresh_asr_leaderboard_artifacts(
         runtime_status_out=runtime_status_out,
         combined_results_path=combined_results_path,
         combined_report_path=combined_report_path,
+        source_result_paths=result_paths,
     )
     copied_hosted_paths = (
         copy_hosted_asr_artifacts(
@@ -921,6 +927,7 @@ def refresh_asr_leaderboard_artifacts(
             runtime_status_out=runtime_status_out,
             combined_results_path=combined_results_path,
             combined_report_path=combined_report_path,
+            source_result_paths=result_paths,
         )
         if hosted_dir
         else []
@@ -1042,6 +1049,7 @@ def copy_hosted_asr_artifacts(
     runtime_status_out: Path = DEFAULT_RUNTIME_STATUS,
     combined_results_path: Path | None = None,
     combined_report_path: Path | None = None,
+    source_result_paths: list[Path] | None = None,
 ) -> list[Path]:
     hosted_dir.mkdir(parents=True, exist_ok=True)
     copied_paths = []
@@ -1068,6 +1076,16 @@ def copy_hosted_asr_artifacts(
             destination = hosted_dir / destination_name
             shutil.copyfile(source, destination)
             copied_paths.append(destination)
+
+    for source_result_path in source_result_paths or []:
+        source_report = _normalize_results_path(source_result_path).with_name("report.html")
+        if not source_report.exists():
+            continue
+        hosted_report_path = _hosted_report_path_for_source_report(source_report)
+        destination = hosted_dir / hosted_report_path
+        destination.parent.mkdir(parents=True, exist_ok=True)
+        shutil.copyfile(source_report, destination)
+        copied_paths.append(destination)
 
     if combined_results_path or combined_report_path:
         hosted_combined_dir = hosted_dir / "asr-leaderboard" / "full-35-combined"
@@ -1101,6 +1119,7 @@ def write_hosted_manifest_artifact(
     runtime_status_out: Path = DEFAULT_RUNTIME_STATUS,
     combined_results_path: Path,
     combined_report_path: Path,
+    source_result_paths: list[Path] | None = None,
 ) -> None:
     artifacts = []
     source_destinations = (
@@ -1134,6 +1153,18 @@ def write_hosted_manifest_artifact(
                 "sha256": _sha256_file(source),
             }
         )
+    for source_result_path in source_result_paths or []:
+        source_report = _normalize_results_path(source_result_path).with_name("report.html")
+        if not source_report.exists():
+            continue
+        artifacts.append(
+            {
+                "source_path": _repo_relative(source_report),
+                "hosted_paths": [_hosted_report_path_for_source_report(source_report)],
+                "bytes": source_report.stat().st_size,
+                "sha256": _sha256_file(source_report),
+            }
+        )
 
     output_path.parent.mkdir(parents=True, exist_ok=True)
     output_path.write_text(
@@ -1151,6 +1182,14 @@ def write_hosted_manifest_artifact(
         + "\n",
         encoding="utf-8",
     )
+
+
+def _hosted_report_path_for_source_report(source_report: Path) -> str:
+    raw_path = _repo_relative(source_report)
+    prefix = "runs/asr-leaderboard/"
+    if raw_path.startswith(prefix):
+        return "asr-leaderboard/" + raw_path.removeprefix(prefix)
+    return f"asr-leaderboard/source-reports/{source_report.parent.parent.name}/report.html"
 
 
 def write_artifact_index(
@@ -1173,6 +1212,7 @@ def write_artifact_index(
     report_links_out: Path | None = None,
     runtime_status_out: Path | None = None,
     live_refresh_script_out: Path | None = None,
+    source_result_paths: list[Path] | None = None,
 ) -> None:
     output_path.parent.mkdir(parents=True, exist_ok=True)
     output_path.write_text(
@@ -1196,6 +1236,7 @@ def write_artifact_index(
                 report_index_out=report_index_out,
                 report_links_out=report_links_out,
                 runtime_status_out=runtime_status_out,
+                source_result_paths=source_result_paths,
             ),
             indent=2,
             sort_keys=True,
@@ -1225,6 +1266,7 @@ def build_artifact_index_data(
     report_links_out: Path | None = None,
     runtime_status_out: Path | None = None,
     live_refresh_script_out: Path | None = None,
+    source_result_paths: list[Path] | None = None,
 ) -> dict[str, object]:
     report_index_out = report_index_out or refresh_report_out.with_name(DEFAULT_REPORT_INDEX.name)
     report_links_out = report_links_out or refresh_report_out.with_name(DEFAULT_REPORT_LINKS.name)
@@ -1263,12 +1305,23 @@ def build_artifact_index_data(
         _repo_relative(DEFAULT_ARTIFACT_INDEX): output_path,
         _repo_relative(DEFAULT_RUNTIME_STATUS): runtime_status_out,
     }
+    for source_result_path in source_result_paths or []:
+        source_report = _normalize_results_path(source_result_path).with_name("report.html")
+        if not source_report.exists():
+            continue
+        artifact_paths[_repo_relative(source_report)] = source_report
     artifact_index = build_output_artifact_index(results_path=results_path)
     artifact_purposes = {artifact["path"]: artifact["purpose"] for artifact in artifact_index}
     artifact_purposes[_repo_relative(page)] = "Generated ASR leaderboard demo HTML page."
     artifact_purposes[_repo_relative(refresh_report_out)] = (
         "Human-readable coverage, score, source-file, and command report."
     )
+    for source_result_path in source_result_paths or []:
+        source_report = _normalize_results_path(source_result_path).with_name("report.html")
+        if source_report.exists():
+            artifact_purposes[_repo_relative(source_report)] = (
+                "Hosted source run HTML report linked from the ASR report index."
+            )
     indexed_paths = set(artifact_purposes)
     indexed_paths.update({_repo_relative(page), _repo_relative(refresh_report_out)})
     indexed_paths.update(artifact_paths)
