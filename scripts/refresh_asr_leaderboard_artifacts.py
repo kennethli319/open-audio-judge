@@ -205,6 +205,7 @@ def refresh_asr_leaderboard_artifacts(
         combined_results,
         results_path=combined_results_path,
         expected_cases_per_model=expected_cases_per_model,
+        source_result_paths=result_paths,
     )
 
     out.mkdir(parents=True, exist_ok=True)

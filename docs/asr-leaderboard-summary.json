@@ -398,6 +398,7 @@
       ],
       "ok_count": 3,
       "path": "runs/asr-leaderboard/whisper-large-v3-turbo-smoke/judge-report/results.jsonl",
+      "report_path": "runs/asr-leaderboard/whisper-large-v3-turbo-smoke/judge-report/report.html",
       "result_count": 3
     },
     {
@@ -419,6 +420,7 @@
       ],
       "ok_count": 12,
       "path": "runs/asr-leaderboard/whisper-large-v3-turbo-full-gap/judge-report/results.jsonl",
+      "report_path": "runs/asr-leaderboard/whisper-large-v3-turbo-full-gap/judge-report/report.html",
       "result_count": 12
     },
     {
@@ -438,6 +440,7 @@
       ],
       "ok_count": 5,
       "path": "runs/asr-leaderboard/whisper-large-v3-turbo-semantic-smoke/judge-report/results.jsonl",
+      "report_path": "runs/asr-leaderboard/whisper-large-v3-turbo-semantic-smoke/judge-report/report.html",
       "result_count": 5
     },
     {
@@ -455,6 +458,7 @@
       ],
       "ok_count": 5,
       "path": "runs/asr-leaderboard/whisper-large-v3-turbo-entity-smoke/judge-report/results.jsonl",
+      "report_path": "runs/asr-leaderboard/whisper-large-v3-turbo-entity-smoke/judge-report/report.html",
       "result_count": 5
     },
     {
@@ -471,6 +475,7 @@
       ],
       "ok_count": 5,
       "path": "runs/asr-leaderboard/whisper-large-v3-turbo-paraphrase-smoke/judge-report/results.jsonl",
+      "report_path": "runs/asr-leaderboard/whisper-large-v3-turbo-paraphrase-smoke/judge-report/report.html",
       "result_count": 5
     },
     {
@@ -487,6 +492,7 @@
       ],
       "ok_count": 5,
       "path": "runs/asr-leaderboard/whisper-large-v3-turbo-noise-smoke/judge-report/results.jsonl",
+      "report_path": "runs/asr-leaderboard/whisper-large-v3-turbo-noise-smoke/judge-report/report.html",
       "result_count": 5
     },
     {
@@ -504,6 +510,7 @@
       ],
       "ok_count": 3,
       "path": "runs/asr-leaderboard/qwen3-asr-1.7b-smoke/judge-report/results.jsonl",
+      "report_path": "runs/asr-leaderboard/qwen3-asr-1.7b-smoke/judge-report/report.html",
       "result_count": 3
     },
     {
@@ -524,6 +531,7 @@
       ],
       "ok_count": 12,
       "path": "runs/asr-leaderboard/qwen3-asr-1.7b-full-gap/judge-report/results.jsonl",
+      "report_path": "runs/asr-leaderboard/qwen3-asr-1.7b-full-gap/judge-report/report.html",
       "result_count": 12
     },
     {
@@ -542,6 +550,7 @@
       ],
       "ok_count": 5,
       "path": "runs/asr-leaderboard/qwen3-asr-1.7b-semantic-smoke/judge-report/results.jsonl",
+      "report_path": "runs/asr-leaderboard/qwen3-asr-1.7b-semantic-smoke/judge-report/report.html",
       "result_count": 5
     },
     {
@@ -559,6 +568,7 @@
       ],
       "ok_count": 5,
       "path": "runs/asr-leaderboard/qwen3-asr-1.7b-entity-smoke/judge-report/results.jsonl",
+      "report_path": "runs/asr-leaderboard/qwen3-asr-1.7b-entity-smoke/judge-report/report.html",
       "result_count": 5
     },
     {
@@ -575,6 +585,7 @@
       ],
       "ok_count": 5,
       "path": "runs/asr-leaderboard/qwen3-asr-1.7b-paraphrase-smoke/judge-report/results.jsonl",
+      "report_path": "runs/asr-leaderboard/qwen3-asr-1.7b-paraphrase-smoke/judge-report/report.html",
       "result_count": 5
     },
     {
@@ -592,6 +603,7 @@
       ],
       "ok_count": 5,
       "path": "runs/asr-leaderboard/qwen3-asr-1.7b-noise-smoke/judge-report/results.jsonl",
+      "report_path": "runs/asr-leaderboard/qwen3-asr-1.7b-noise-smoke/judge-report/report.html",
       "result_count": 5
     },
     {
@@ -608,6 +620,7 @@
       ],
       "ok_count": 3,
       "path": "runs/asr-leaderboard/vibevoice-asr-smoke/judge-report/results.jsonl",
+      "report_path": "runs/asr-leaderboard/vibevoice-asr-smoke/judge-report/report.html",
       "result_count": 3
     },
     {
@@ -627,6 +640,7 @@
       ],
       "ok_count": 12,
       "path": "runs/asr-leaderboard/vibevoice-asr-full-gap/judge-report/results.jsonl",
+      "report_path": "runs/asr-leaderboard/vibevoice-asr-full-gap/judge-report/report.html",
       "result_count": 12
     },
     {
@@ -645,6 +659,7 @@
       ],
       "ok_count": 5,
       "path": "runs/asr-leaderboard/vibevoice-asr-semantic-smoke/judge-report/results.jsonl",
+      "report_path": "runs/asr-leaderboard/vibevoice-asr-semantic-smoke/judge-report/report.html",
       "result_count": 5
     },
     {
@@ -662,6 +677,7 @@
       ],
       "ok_count": 5,
       "path": "runs/asr-leaderboard/vibevoice-asr-entity-smoke/judge-report/results.jsonl",
+      "report_path": "runs/asr-leaderboard/vibevoice-asr-entity-smoke/judge-report/report.html",
       "result_count": 5
     },
     {
@@ -678,6 +694,7 @@
       ],
       "ok_count": 5,
       "path": "runs/asr-leaderboard/vibevoice-asr-paraphrase-smoke/judge-report/results.jsonl",
+      "report_path": "runs/asr-leaderboard/vibevoice-asr-paraphrase-smoke/judge-report/report.html",
       "result_count": 5
     },
     {
@@ -695,6 +712,7 @@
       ],
       "ok_count": 5,
       "path": "runs/asr-leaderboard/vibevoice-asr-noise-smoke/judge-report/results.jsonl",
+      "report_path": "runs/asr-leaderboard/vibevoice-asr-noise-smoke/judge-report/report.html",
       "result_count": 5
     }
   ],

@@ -209,6 +209,7 @@ def test_write_summary_artifact_records_models_and_categories(tmp_path: Path) ->
     assert summary["source_result_files"] == [
         {
             "path": str(source_results_path),
+            "report_path": str(source_results_path.with_name("report.html")),
             "models": ["mlx-community/model-a"],
             "result_count": 2,
             "ok_count": 2,
@@ -591,9 +592,53 @@ def test_write_refresh_report_records_coverage_and_commands(tmp_path: Path) -> N
     assert "| Model | WER | Numeric/Unit | Negation/Modality | Temporal | Entity | Paraphrase | Acoustic Noise |" in text
     assert "| `mlx-community/model-a` | 1 | 1 | 0 | 0 | 0 | 0 | 0 |" in text
     assert "## Source Result File Coverage" in text
-    assert f"| `{source_results_path}` | `mlx-community/model-a` | 2/2 ok |" in text
+    assert (
+        f"| `{source_results_path}` | `{source_results_path.with_name('report.html')}` | "
+        "`mlx-community/model-a` | 2/2 ok |"
+    ) in text
     assert "## Generated Artifact Index" in text
     assert f"| `{results_path}` | Combined ASR judge results used by the generated page and report. |" in text
+
+
+def test_render_generated_sections_includes_source_run_reports(tmp_path: Path) -> None:
+    module = load_script_module()
+    results_path = tmp_path / "combined" / "results.jsonl"
+    source_results_path = tmp_path / "model-a" / "judge-report" / "results.jsonl"
+    records = [
+        result_record(
+            case_id="asr-a-model-a",
+            model="mlx-community/model-a",
+            category="transcription_accuracy_wer",
+            score=100,
+            label="accurate",
+        ),
+        result_record(
+            case_id="asr-b-model-a",
+            model="mlx-community/model-a",
+            category="numeric_unit_integrity",
+            score=80,
+            label="accurate",
+        ),
+    ]
+    results_path.parent.mkdir(parents=True)
+    source_results_path.parent.mkdir(parents=True)
+    serialized = "".join(json.dumps(record) + "\n" for record in records)
+    results_path.write_text(serialized, encoding="utf-8")
+    source_results_path.write_text(serialized, encoding="utf-8")
+    results = module.load_results_jsonl(results_path)
+
+    html = module.render_generated_sections(
+        results,
+        results_path=results_path,
+        expected_cases_per_model=2,
+        source_result_paths=[source_results_path],
+    )
+
+    assert "Source Run Reports" in html
+    assert str(source_results_path) in html
+    assert str(source_results_path.with_name("report.html")) in html
+    assert "transcription_accuracy_wer: 1" in html
+    assert "numeric_unit_integrity: 1" in html
 
 
 def test_replace_generated_block_only_updates_marked_section(tmp_path: Path) -> None:

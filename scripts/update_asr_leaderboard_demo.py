@@ -69,6 +69,7 @@ class CategorySummary:
 @dataclass(frozen=True)
 class SourceResultFileSummary:
     path: Path
+    report_path: Path
     models: tuple[str, ...]
     result_count: int
     ok_count: int
@@ -133,6 +134,7 @@ def render_generated_sections(
     *,
     results_path: Path,
     expected_cases_per_model: int,
+    source_result_paths: list[Path] | None = None,
 ) -> str:
     if not results:
         raise ValueError("No ASR evaluation results were loaded.")
@@ -160,6 +162,8 @@ def render_generated_sections(
         ("Sync hosted artifacts", workflow["hosted_artifact_command"]),
     ]
     output_artifacts = build_output_artifact_index(results_path=results_path)
+    source_file_summaries = summarize_source_result_files(source_result_paths or [])
+    source_report_rows = _render_source_report_rows(source_file_summaries)
 
     return "\n".join(
         [
@@ -260,6 +264,7 @@ def render_generated_sections(
             ),
             "      </tbody>",
             "    </table>",
+            *source_report_rows,
             END_MARKER,
         ]
     )
@@ -408,8 +413,8 @@ def write_refresh_report(
                 "",
                 "## Source Result File Coverage",
                 "",
-                "| Path | Models | Cases | Categories | Gemini Samples | Average Score | Labels |",
-                "| --- | --- | ---: | --- | ---: | ---: | --- |",
+                "| Path | Report | Models | Cases | Categories | Gemini Samples | Average Score | Labels |",
+                "| --- | --- | --- | ---: | --- | ---: | ---: | --- |",
                 *(
                     _source_file_markdown_row(summary)
                     for summary in source_file_summaries
@@ -676,6 +681,7 @@ def summarize_source_result_files(result_paths: list[Path]) -> list[SourceResult
         summaries.append(
             SourceResultFileSummary(
                 path=path,
+                report_path=path.with_name("report.html"),
                 models=models,
                 result_count=len(file_results),
                 ok_count=sum(1 for result in file_results if result.status == "ok"),
@@ -836,6 +842,7 @@ def _model_category_matrix_row(
 def _source_file_summary_json(summary: SourceResultFileSummary) -> dict[str, object]:
     return {
         "path": _repo_relative(summary.path),
+        "report_path": _repo_relative(summary.report_path),
         "models": list(summary.models),
         "result_count": summary.result_count,
         "ok_count": summary.ok_count,
@@ -861,10 +868,41 @@ def _source_file_markdown_row(summary: SourceResultFileSummary) -> str:
         if summary.labels[label]
     )
     return (
-        f"| `{_repo_relative(summary.path)}` | {models} | "
+        f"| `{_repo_relative(summary.path)}` | `{_repo_relative(summary.report_path)}` | {models} | "
         f"{summary.ok_count}/{summary.result_count} ok | {categories} | "
         f"{summary.judge_samples} | {summary.average_score:.1f} | {labels} |"
     )
+
+
+def _render_source_report_rows(summaries: list[SourceResultFileSummary]) -> list[str]:
+    if not summaries:
+        return []
+    rows = [
+        "",
+        "    <h2>Source Run Reports</h2>",
+        (
+            "    <p class=\"muted\">Each source run keeps its own local report alongside "
+            "the JSONL file that feeds the combined 35-case leaderboard.</p>"
+        ),
+        "    <table>",
+        "      <thead><tr><th>Result File</th><th>Local Report</th><th>Cases</th><th>Categories</th></tr></thead>",
+        "      <tbody>",
+    ]
+    for summary in summaries:
+        categories = ", ".join(
+            f"{html.escape(category)}: {count}"
+            for category, count in sorted(summary.categories.items())
+        )
+        rows.append(
+            "        <tr>"
+            f"<td><code>{html.escape(_repo_relative(summary.path))}</code></td>"
+            f"<td><code>{html.escape(_repo_relative(summary.report_path))}</code></td>"
+            f"<td>{summary.ok_count}/{summary.result_count} ok</td>"
+            f"<td>{categories}</td>"
+            "</tr>"
+        )
+    rows.extend(["      </tbody>", "    </table>"])
+    return rows
 
 
 def _shell_join(command: object) -> str:
