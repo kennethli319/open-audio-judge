@@ -7,6 +7,7 @@ import os
 import shutil
 import subprocess
 import sys
+import tempfile
 from collections import Counter
 from pathlib import Path
 
@@ -36,6 +37,7 @@ from scripts.update_asr_leaderboard_demo import (  # noqa: E402
     build_refresh_runtime_status,
     render_generated_sections,
     replace_generated_block,
+    write_next_run_plan_artifact,
     write_refresh_report,
     write_refresh_commands_script,
     write_summary_artifact,
@@ -262,6 +264,9 @@ def main() -> None:
             result_paths,
             page=args.page,
             summary_out=args.summary_out,
+            refresh_report_out=args.refresh_report_out,
+            refresh_commands_out=args.refresh_commands_out,
+            next_runs_out=args.next_runs_out,
             seed_cases=args.seed_cases,
             expected_cases_per_model=args.expected_cases_per_model,
             hosted_dir=hosted_dir,
@@ -323,6 +328,9 @@ def check_asr_leaderboard_refresh_inputs(
     summary_out: Path,
     seed_cases: Path,
     expected_cases_per_model: int,
+    refresh_report_out: Path = DEFAULT_REFRESH_REPORT,
+    refresh_commands_out: Path = DEFAULT_REFRESH_COMMANDS,
+    next_runs_out: Path = DEFAULT_NEXT_RUNS,
     artifact_root: Path = ROOT,
     path_maps: list[tuple[str, str]] | None = None,
     hosted_dir: Path | None = None,
@@ -367,6 +375,9 @@ def check_asr_leaderboard_refresh_inputs(
             result_paths=result_paths,
             page=page,
             summary_out=summary_out,
+            refresh_report_out=refresh_report_out,
+            refresh_commands_out=refresh_commands_out,
+            next_runs_out=next_runs_out,
             generated=generated,
             expected_cases_per_model=expected_cases_per_model,
         )
@@ -410,6 +421,9 @@ def _validate_generated_artifacts_fresh(
     result_paths: list[Path],
     page: Path,
     summary_out: Path,
+    refresh_report_out: Path | None = None,
+    refresh_commands_out: Path | None = None,
+    next_runs_out: Path | None = None,
     generated: str,
     expected_cases_per_model: int,
 ) -> None:
@@ -448,6 +462,46 @@ def _validate_generated_artifacts_fresh(
         raise ValueError(
             f"{_repo_relative(summary_out)} is stale for selected ASR result sources: "
             + json.dumps(mismatches, sort_keys=True)
+        )
+
+    with tempfile.TemporaryDirectory(prefix="asr-leaderboard-fresh-") as raw_tmp_dir:
+        tmp_dir = Path(raw_tmp_dir)
+        if refresh_report_out is not None:
+            expected_refresh_report = tmp_dir / refresh_report_out.name
+            write_refresh_report(
+                combined_results,
+                expected_refresh_report,
+                results_path=DEFAULT_COMBINED_OUT / "results.jsonl",
+                expected_cases_per_model=expected_cases_per_model,
+                source_result_paths=result_paths,
+            )
+            _compare_generated_text_artifact(refresh_report_out, expected_refresh_report)
+        if refresh_commands_out is not None:
+            expected_refresh_commands = tmp_dir / refresh_commands_out.name
+            write_refresh_commands_script(
+                expected_refresh_commands,
+                source_result_paths=result_paths,
+            )
+            _compare_generated_text_artifact(refresh_commands_out, expected_refresh_commands)
+        if next_runs_out is not None:
+            expected_next_runs = tmp_dir / next_runs_out.name
+            write_next_run_plan_artifact(
+                combined_results,
+                expected_next_runs,
+                expected_cases_per_model=expected_cases_per_model,
+            )
+            _compare_generated_text_artifact(next_runs_out, expected_next_runs)
+
+
+def _compare_generated_text_artifact(actual_path: Path, expected_path: Path) -> None:
+    if not actual_path.exists():
+        raise FileNotFoundError(f"Missing generated ASR leaderboard artifact: {actual_path}")
+    actual = actual_path.read_text(encoding="utf-8")
+    expected = expected_path.read_text(encoding="utf-8")
+    if actual != expected:
+        raise ValueError(
+            f"{_repo_relative(actual_path)} is stale for selected ASR result sources; "
+            "run `.venv/bin/python scripts/refresh_asr_leaderboard_artifacts.py`."
         )
 
 

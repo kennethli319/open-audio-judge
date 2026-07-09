@@ -1103,6 +1103,7 @@ def test_require_generated_fresh_rejects_stale_page_block(tmp_path: Path) -> Non
     refresh_module = load_refresh_module()
     results_path = tmp_path / "model-a" / "judge-report" / "results.jsonl"
     summary_path = tmp_path / "summary.json"
+    refresh_commands_path = tmp_path / "refresh-commands.sh"
     page = tmp_path / "demo.html"
     records = [
         result_record(
@@ -1148,14 +1149,42 @@ def test_require_generated_fresh_rejects_stale_page_block(tmp_path: Path) -> Non
         ),
         encoding="utf-8",
     )
+    update_module.write_refresh_commands_script(
+        refresh_commands_path,
+        source_result_paths=[results_path],
+    )
 
     refresh_module._validate_generated_artifacts_fresh(
         results,
         result_paths=[results_path],
         page=page,
         summary_out=summary_path,
+        refresh_commands_out=refresh_commands_path,
         generated=generated,
         expected_cases_per_model=2,
+    )
+
+    refresh_commands_path.write_text(
+        refresh_commands_path.read_text(encoding="utf-8").replace(
+            "--require-generated-fresh",
+            "--stale-generated-fresh",
+        ),
+        encoding="utf-8",
+    )
+    with pytest.raises(ValueError, match="refresh-commands.sh.*stale"):
+        refresh_module._validate_generated_artifacts_fresh(
+            results,
+            result_paths=[results_path],
+            page=page,
+            summary_out=summary_path,
+            refresh_commands_out=refresh_commands_path,
+            generated=generated,
+            expected_cases_per_model=2,
+        )
+
+    update_module.write_refresh_commands_script(
+        refresh_commands_path,
+        source_result_paths=[results_path],
     )
 
     page.write_text(
