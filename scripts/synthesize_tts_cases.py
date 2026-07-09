@@ -12,6 +12,7 @@ import contextlib
 import hashlib
 import json
 import subprocess
+import sys
 import time
 import wave
 from collections import Counter
@@ -20,12 +21,16 @@ from dataclasses import dataclass
 from pathlib import Path
 from typing import Any
 
-from open_audio_judge.case_contract import require_audio_and_text
-from open_audio_judge.models import EvaluationCase
-from open_audio_judge.runner import load_cases
-
-
 ROOT = Path(__file__).resolve().parents[1]
+SRC = ROOT / "src"
+if SRC.exists():
+    sys.path.insert(0, str(SRC))
+
+from open_audio_judge.case_contract import require_audio_and_text  # noqa: E402
+from open_audio_judge.models import EvaluationCase  # noqa: E402
+from open_audio_judge.runner import load_cases  # noqa: E402
+
+
 DEFAULT_TTS = Path(
     "/Users/wangyauli/.openclaw/workspace/local-asr-transcriber-mac/.venv/bin/local-tts-speak"
 )
@@ -269,10 +274,12 @@ def summarize_synthesized_cases(cases: Iterable[dict[str, Any]]) -> dict[str, An
     return {
         "total_cases": len(case_list),
         "by_slice": _sorted_counts(
-            str(metadata.get("tts_slice") or "unknown") for metadata in metadata_list
+            str(metadata.get("tts_slice") or metadata.get("asr_slice") or "unknown")
+            for metadata in metadata_list
         ),
         "by_source_category": _sorted_counts(
-            str(metadata.get("source_category") or "unknown") for metadata in metadata_list
+            str(metadata.get("source_category") or metadata.get("eval_category") or "unknown")
+            for metadata in metadata_list
         ),
         "by_sample_kind": _sorted_counts(
             str(metadata.get("sample_kind") or "unknown") for metadata in metadata_list

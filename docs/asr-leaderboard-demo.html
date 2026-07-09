@@ -115,7 +115,7 @@
       <div class="metric"><span>Seed eval cases</span><strong>35</strong></div>
       <div class="metric"><span>Research categories</span><strong>7</strong></div>
       <div class="metric"><span>MLX ASR models</span><strong>3</strong></div>
-      <div class="metric"><span>Judge samples</span><strong>3x Gemini</strong></div>
+      <div class="metric"><span>Verified smoke results</span><strong>9</strong></div>
     </section>
 
     <h2>Demo Run</h2>
@@ -130,9 +130,20 @@
     <table>
       <thead><tr><th>Model</th><th>Wrapper</th><th>Status</th><th>Why This Model</th></tr></thead>
       <tbody>
-        <tr><td><code>mlx-community/whisper-large-v3-turbo-asr-fp16</code></td><td><code>mlx-audio</code></td><td class="warn">scheduled</td><td>Strong Whisper-family baseline with MLX conversion.</td></tr>
-        <tr><td><code>mlx-community/Qwen3-ASR-1.7B-8bit</code></td><td><code>mlx-audio</code></td><td class="warn">scheduled</td><td>Recent ASR-specific model for comparison against Whisper.</td></tr>
-        <tr><td><code>mlx-community/VibeVoice-ASR-4bit</code></td><td><code>mlx-audio</code></td><td class="warn">scheduled</td><td>Compact quantized ASR model to expose speed/quality tradeoffs.</td></tr>
+        <tr><td><code>mlx-community/whisper-large-v3-turbo-asr-fp16</code></td><td><code>mlx-audio</code></td><td class="good">smoke passed</td><td>Strong Whisper-family baseline with MLX conversion.</td></tr>
+        <tr><td><code>mlx-community/Qwen3-ASR-1.7B-8bit</code></td><td><code>mlx-audio</code></td><td class="good">smoke passed</td><td>Recent ASR-specific model for comparison against Whisper.</td></tr>
+        <tr><td><code>mlx-community/VibeVoice-ASR-4bit</code></td><td><code>mlx-audio</code></td><td class="good">smoke passed</td><td>Compact quantized ASR model to expose speed/quality tradeoffs.</td></tr>
+      </tbody>
+    </table>
+
+    <h2>Verified Smoke Results</h2>
+    <p class="muted">On 2026-07-08, cron materialized all 35 public-safe ASR audio cases locally, then ran the first three <code>transcription_accuracy_wer</code> cases through each model with three Gemini judge samples per case. Full-slice leaderboard runs are still pending.</p>
+    <table>
+      <thead><tr><th>Model</th><th>Cases</th><th>Gemini Samples</th><th>Average Score</th><th>Labels</th></tr></thead>
+      <tbody>
+        <tr><td><code>mlx-community/whisper-large-v3-turbo-asr-fp16</code></td><td>3/3 ok</td><td>9</td><td>92.0</td><td>2 accurate, 1 needs_review</td></tr>
+        <tr><td><code>mlx-community/Qwen3-ASR-1.7B-8bit</code></td><td>3/3 ok</td><td>9</td><td>88.0</td><td>2 accurate, 1 needs_review</td></tr>
+        <tr><td><code>mlx-community/VibeVoice-ASR-4bit</code></td><td>3/3 ok</td><td>9</td><td>94.3</td><td>3 accurate</td></tr>
       </tbody>
     </table>
 
@@ -205,7 +216,7 @@ oaj report \
 }</code></pre>
 
     <h2>Research Notes</h2>
-    <p>See <code>docs/asr-eval-taxonomy.md</code> for the category rationale and <code>examples/asr_research_cases.jsonl</code> for the seed manifest. This page intentionally marks model status as scheduled until cron-generated runs produce verified artifacts.</p>
+    <p>See <code>docs/asr-eval-taxonomy.md</code> for the category rationale and <code>examples/asr_research_cases.jsonl</code> for the seed manifest. Smoke results are verified local artifacts; the page should move to full leaderboard rankings only after all seven categories are run for each model.</p>
   </main>
 </body>
 </html>

@@ -82,6 +82,24 @@ def test_synthesize_cases_dry_run_writes_local_audio_manifest(tmp_path: Path) ->
     )
 
 
+def test_summarize_synthesized_cases_uses_asr_metadata_fallbacks() -> None:
+    summary = summarize_synthesized_cases(
+        [
+            {
+                "id": "asr-case-local-tts",
+                "metadata": {
+                    "asr_slice": "amount_contrast",
+                    "eval_category": "numeric_unit_integrity",
+                    "sample_kind": "local_synthetic_tts",
+                },
+            }
+        ]
+    )
+
+    assert summary["by_slice"] == {"amount_contrast": 1}
+    assert summary["by_source_category"] == {"numeric_unit_integrity": 1}
+
+
 def test_synthesize_cases_can_label_non_chatterbox_wrapper(tmp_path: Path) -> None:
     cases_path = tmp_path / "tts_cases.jsonl"
     cases_path.write_text(
