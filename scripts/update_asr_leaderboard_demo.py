@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import argparse
 import html
+import json
 import statistics
 from collections import Counter, defaultdict
 from dataclasses import dataclass
@@ -14,6 +15,7 @@ from open_audio_judge.runner import load_results_jsonl
 ROOT = Path(__file__).resolve().parents[1]
 DEFAULT_RESULTS = ROOT / "runs" / "asr-leaderboard" / "full-35-combined" / "results.jsonl"
 DEFAULT_PAGE = ROOT / "docs" / "asr-leaderboard-demo.html"
+DEFAULT_SUMMARY = ROOT / "docs" / "asr-leaderboard-summary.json"
 START_MARKER = "<!-- ASR_LEADERBOARD_GENERATED_START -->"
 END_MARKER = "<!-- ASR_LEADERBOARD_GENERATED_END -->"
 
@@ -38,12 +40,26 @@ class ModelSummary:
     labels: Counter[str]
 
 
+@dataclass(frozen=True)
+class CategorySummary:
+    category: str
+    result_count: int
+    average_score: float
+    labels: Counter[str]
+
+
 def main() -> None:
     parser = argparse.ArgumentParser(
         description="Refresh the ASR leaderboard demo from verified result JSONL artifacts.",
     )
     parser.add_argument("--results", type=Path, default=DEFAULT_RESULTS)
     parser.add_argument("--page", type=Path, default=DEFAULT_PAGE)
+    parser.add_argument(
+        "--summary-out",
+        type=Path,
+        default=DEFAULT_SUMMARY,
+        help="Write a machine-readable summary artifact for the hosted ASR demo.",
+    )
     parser.add_argument(
         "--expected-cases-per-model",
         type=int,
@@ -59,7 +75,14 @@ def main() -> None:
         expected_cases_per_model=args.expected_cases_per_model,
     )
     replace_generated_block(args.page, generated)
+    write_summary_artifact(
+        results,
+        args.summary_out,
+        results_path=args.results,
+        expected_cases_per_model=args.expected_cases_per_model,
+    )
     print(f"Updated {args.page} from {args.results} ({len(results)} results)")
+    print(f"Summary: {args.summary_out}")
 
 
 def render_generated_sections(
@@ -77,6 +100,8 @@ def render_generated_sections(
     categories = sorted({str(result.metadata.get("eval_category", "")) for result in results})
     category_list = ", ".join(f"<code>{html.escape(category)}</code>" for category in categories)
     results_label = html.escape(_repo_relative(results_path))
+    report_label = html.escape(_repo_relative(results_path.with_name("report.html")))
+    summary_label = html.escape(_repo_relative(DEFAULT_SUMMARY))
 
     return "\n".join(
         [
@@ -108,10 +133,62 @@ def render_generated_sections(
                 '    <p class="muted">Total Gemini judge samples: '
                 f"{total_judge_samples}. Refresh this block with "
                 '<code>.venv/bin/python scripts/update_asr_leaderboard_demo.py</code> after rerunning '
-                "<code>oaj report</code> with verified ASR result files.</p>"
+                "<code>oaj report</code> with verified ASR result files. The combined local report is "
+                f"<code>{report_label}</code> and the committed summary artifact is "
+                f"<code>{summary_label}</code>.</p>"
             ),
             END_MARKER,
         ]
+    )
+
+
+def write_summary_artifact(
+    results: list[EvaluationResult],
+    output_path: Path,
+    *,
+    results_path: Path,
+    expected_cases_per_model: int,
+) -> None:
+    model_summaries = summarize_models(results)
+    validate_coverage(results, model_summaries, expected_cases_per_model=expected_cases_per_model)
+    category_summaries = summarize_categories(results)
+    output_path.parent.mkdir(parents=True, exist_ok=True)
+    output_path.write_text(
+        json.dumps(
+            {
+                "results_path": _repo_relative(results_path),
+                "report_path": _repo_relative(results_path.with_name("report.html")),
+                "total_results": len(results),
+                "model_count": len(model_summaries),
+                "category_count": len(category_summaries),
+                "expected_cases_per_model": expected_cases_per_model,
+                "total_gemini_judge_samples": sum(summary.judge_samples for summary in model_summaries),
+                "models": [
+                    {
+                        "model": summary.model,
+                        "result_count": summary.result_count,
+                        "ok_count": summary.ok_count,
+                        "judge_samples": summary.judge_samples,
+                        "average_score": round(summary.average_score, 3),
+                        "labels": _ordered_label_counts(summary.labels),
+                    }
+                    for summary in model_summaries
+                ],
+                "categories": [
+                    {
+                        "category": summary.category,
+                        "result_count": summary.result_count,
+                        "average_score": round(summary.average_score, 3),
+                        "labels": _ordered_label_counts(summary.labels),
+                    }
+                    for summary in category_summaries
+                ],
+            },
+            indent=2,
+            sort_keys=True,
+        )
+        + "\n",
+        encoding="utf-8",
     )
 
 
@@ -136,6 +213,31 @@ def summarize_models(results: list[EvaluationResult]) -> list[ModelSummary]:
             )
         )
     return sorted(summaries, key=lambda summary: (-summary.average_score, summary.model.lower()))
+
+
+def summarize_categories(results: list[EvaluationResult]) -> list[CategorySummary]:
+    by_category: dict[str, list[EvaluationResult]] = defaultdict(list)
+    for result in results:
+        category = str(result.metadata.get("eval_category") or "")
+        if not category:
+            raise ValueError(f"Missing metadata.eval_category for {result.case_id}")
+        by_category[category].append(result)
+
+    summaries = []
+    for category, category_results in by_category.items():
+        summaries.append(
+            CategorySummary(
+                category=category,
+                result_count=len(category_results),
+                average_score=statistics.mean(result.overall_score for result in category_results),
+                labels=Counter(result.label for result in category_results),
+            )
+        )
+    column_order = {category: index for index, (category, _) in enumerate(CATEGORY_COLUMNS)}
+    return sorted(
+        summaries,
+        key=lambda summary: (column_order.get(summary.category, len(column_order)), summary.category),
+    )
 
 
 def validate_coverage(
@@ -182,6 +284,14 @@ def _render_model_row(summary: ModelSummary) -> str:
         f"<td>{html.escape(labels)}</td>"
         "</tr>"
     )
+
+
+def _ordered_label_counts(labels: Counter[str]) -> dict[str, int]:
+    return {
+        label: labels[label]
+        for label in ("accurate", "needs_review", "inaccurate")
+        if labels[label]
+    }
 
 
 def _render_category_row(model: str, results: list[EvaluationResult]) -> str:
