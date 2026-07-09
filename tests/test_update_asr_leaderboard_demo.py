@@ -263,6 +263,9 @@ def test_write_summary_artifact_records_models_and_categories(tmp_path: Path) ->
     assert summary["run_manifest_path"] == "docs/asr-leaderboard-run-manifest.json"
     assert summary["manifest_validation_path"] == "docs/asr-leaderboard-manifest-validation.json"
     assert summary["seed_manifest_validation_path"] == "docs/asr-seed-manifest-validation.json"
+    assert summary["next_runs_path"] == "docs/asr-leaderboard-next-runs.json"
+    assert summary["next_run_plan"]["status"] == "complete"
+    assert summary["next_run_plan"]["missing_cell_count"] == 0
     assert summary["output_artifacts"] == [
         {
             "path": str(results_path),
@@ -291,6 +294,10 @@ def test_write_summary_artifact_records_models_and_categories(tmp_path: Path) ->
         {
             "path": "docs/asr-seed-manifest-validation.json",
             "purpose": "Seed-manifest validation proving public-safe ASR cases keep exact category coverage.",
+        },
+        {
+            "path": "docs/asr-leaderboard-next-runs.json",
+            "purpose": "Machine-readable next-refresh plan for missing ASR model/category cells.",
         },
     ]
     assert summary["refresh_workflow"]["seed_manifest_validation_command"] == [
@@ -714,6 +721,7 @@ def test_refresh_asr_leaderboard_artifacts_combines_report_and_page(tmp_path: Pa
     run_manifest = tmp_path / "run-manifest.json"
     manifest_validation = tmp_path / "manifest-validation.json"
     seed_manifest_validation = tmp_path / "seed-manifest-validation.json"
+    next_runs = tmp_path / "next-runs.json"
     hosted_dir = tmp_path / "hosted" / "open-audio-judge"
     records_a = [
         result_record(
@@ -770,6 +778,7 @@ def test_refresh_asr_leaderboard_artifacts_combines_report_and_page(tmp_path: Pa
         run_manifest=run_manifest,
         update_run_manifest=True,
         seed_manifest_validation_out=seed_manifest_validation,
+        next_runs_out=next_runs,
         hosted_dir=hosted_dir,
         expected_cases_per_model=2,
     )
@@ -813,6 +822,10 @@ def test_refresh_asr_leaderboard_artifacts_combines_report_and_page(tmp_path: Pa
     assert (hosted_dir / "seed-manifest-validation.json").read_text(
         encoding="utf-8"
     ) == seed_manifest_validation.read_text(encoding="utf-8")
+    assert json.loads(next_runs.read_text(encoding="utf-8"))["status"] == "complete"
+    assert (hosted_dir / "asr-leaderboard-next-runs.json").read_text(
+        encoding="utf-8"
+    ) == next_runs.read_text(encoding="utf-8")
     assert (
         hosted_dir / "asr-leaderboard" / "full-35-combined" / "results.jsonl"
     ).read_text(encoding="utf-8") == (out / "results.jsonl").read_text(encoding="utf-8")
@@ -830,6 +843,7 @@ def test_check_asr_leaderboard_page_validates_generated_artifacts(tmp_path: Path
     run_manifest = tmp_path / "run-manifest.json"
     manifest_validation = tmp_path / "manifest-validation.json"
     seed_manifest_validation = tmp_path / "seed-manifest-validation.json"
+    next_runs = tmp_path / "next-runs.json"
     records = [
         result_record(
             case_id="asr-a-model-a",
@@ -921,10 +935,25 @@ def test_check_asr_leaderboard_page_validates_generated_artifacts(tmp_path: Path
         json.dumps({"status": "complete"}) + "\n",
         encoding="utf-8",
     )
+    next_runs.write_text(
+        json.dumps(
+            {
+                "status": "complete",
+                "expected_cases_per_model": 2,
+                "model_count": 2,
+                "category_count": 2,
+                "missing_cell_count": 0,
+                "next_run_command_count": 0,
+            }
+        )
+        + "\n",
+        encoding="utf-8",
+    )
     summary_data = json.loads(summary.read_text(encoding="utf-8"))
     summary_data["run_manifest_path"] = str(run_manifest)
     summary_data["manifest_validation_path"] = str(manifest_validation)
     summary_data["seed_manifest_validation_path"] = str(seed_manifest_validation)
+    summary_data["next_runs_path"] = str(next_runs)
     summary.write_text(json.dumps(summary_data), encoding="utf-8")
 
     validation = check_module.check_asr_leaderboard_page(page, summary_path=summary)
@@ -942,6 +971,7 @@ def test_check_asr_leaderboard_page_validates_hosted_artifact_layout(tmp_path: P
     summary = hosted / "asr-leaderboard-summary.json"
     manifest_validation = hosted / "asr-leaderboard-manifest-validation.json"
     seed_manifest_validation = hosted / "asr-seed-manifest-validation.json"
+    next_runs = hosted / "asr-leaderboard-next-runs.json"
     run_manifest = hosted / "asr-leaderboard-run-manifest.json"
     results_path = hosted / "asr-leaderboard" / "full-35-combined" / "results.jsonl"
     report_path = hosted / "asr-leaderboard" / "full-35-combined" / "report.html"
@@ -1012,6 +1042,20 @@ def test_check_asr_leaderboard_page_validates_hosted_artifact_layout(tmp_path: P
         encoding="utf-8",
     )
     seed_manifest_validation.write_text(json.dumps({"status": "complete"}) + "\n", encoding="utf-8")
+    next_runs.write_text(
+        json.dumps(
+            {
+                "status": "complete",
+                "expected_cases_per_model": 2,
+                "model_count": 2,
+                "category_count": 2,
+                "missing_cell_count": 0,
+                "next_run_command_count": 0,
+            }
+        )
+        + "\n",
+        encoding="utf-8",
+    )
     summary.write_text(
         json.dumps(
             {
@@ -1020,6 +1064,7 @@ def test_check_asr_leaderboard_page_validates_hosted_artifact_layout(tmp_path: P
                 "run_manifest_path": "docs/asr-leaderboard-run-manifest.json",
                 "manifest_validation_path": "docs/asr-leaderboard-manifest-validation.json",
                 "seed_manifest_validation_path": "docs/asr-seed-manifest-validation.json",
+                "next_runs_path": "docs/asr-leaderboard-next-runs.json",
                 "source_result_paths": [
                     "runs/asr-leaderboard/model-a/judge-report/results.jsonl",
                     "runs/asr-leaderboard/model-b/judge-report/results.jsonl",
@@ -1040,6 +1085,10 @@ def test_check_asr_leaderboard_page_validates_hosted_artifact_layout(tmp_path: P
                     {
                         "path": "docs/asr-leaderboard-run-manifest.json",
                         "purpose": "Committed source result manifest for manifest-based refreshes.",
+                    },
+                    {
+                        "path": "docs/asr-leaderboard-next-runs.json",
+                        "purpose": "Machine-readable next-refresh plan for missing ASR model/category cells.",
                     },
                 ],
                 "refresh_workflow": {
@@ -1113,6 +1162,8 @@ def test_check_asr_leaderboard_page_validates_hosted_artifact_layout(tmp_path: P
                 "Machine-readable leaderboard summary and reproducible refresh workflow.",
                 "docs/asr-leaderboard-run-manifest.json",
                 "Committed source result manifest for manifest-based refreshes.",
+                "docs/asr-leaderboard-next-runs.json",
+                "Machine-readable next-refresh plan for missing ASR model/category cells.",
                 "<!-- ASR_LEADERBOARD_GENERATED_END -->",
                 "</body></html>",
             ]

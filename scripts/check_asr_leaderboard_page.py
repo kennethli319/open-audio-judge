@@ -183,6 +183,12 @@ def _validate_summary(
         artifact_root=artifact_root,
         path_maps=path_maps,
     )
+    _validate_next_runs_artifact(
+        summary,
+        summary_path=summary_path,
+        artifact_root=artifact_root,
+        path_maps=path_maps,
+    )
 
 
 def _validate_referenced_artifacts(
@@ -199,6 +205,7 @@ def _validate_referenced_artifacts(
         "run_manifest_path",
         "manifest_validation_path",
         "seed_manifest_validation_path",
+        "next_runs_path",
     )
     missing = []
     for key in artifact_keys:
@@ -385,6 +392,46 @@ def _validate_status_artifact(
                 f"{path} {field}={artifact.get(field)!r} does not match "
                 f"{summary_path} {field}={expected!r}."
             )
+
+
+def _validate_next_runs_artifact(
+    summary: dict[str, Any],
+    *,
+    summary_path: Path,
+    artifact_root: Path,
+    path_maps: list[tuple[str, str]],
+) -> None:
+    raw_path = summary.get("next_runs_path")
+    if not isinstance(raw_path, str) or not raw_path:
+        raise ValueError(f"{summary_path} has invalid next_runs_path: {raw_path!r}")
+    path = _resolve_summary_path(raw_path, artifact_root=artifact_root, path_maps=path_maps)
+    try:
+        artifact = json.loads(path.read_text(encoding="utf-8"))
+    except json.JSONDecodeError as exc:
+        raise ValueError(f"{path} must contain valid JSON: {exc}") from exc
+
+    if not isinstance(artifact, dict):
+        raise ValueError(f"{path} must contain a JSON object.")
+    if artifact.get("status") not in {"complete", "incomplete"}:
+        raise ValueError(f"{path} status must be complete or incomplete.")
+
+    expected_fields = {
+        "expected_cases_per_model": summary["expected_cases_per_model"],
+        "model_count": summary["model_count"],
+        "category_count": summary["category_count"],
+    }
+    for field, expected in expected_fields.items():
+        if artifact.get(field) != expected:
+            raise ValueError(
+                f"{path} {field}={artifact.get(field)!r} does not match "
+                f"{summary_path} {field}={expected!r}."
+            )
+
+    embedded = summary.get("next_run_plan")
+    if isinstance(embedded, dict):
+        for key in ("status", "missing_cell_count", "next_run_command_count"):
+            if artifact.get(key) != embedded.get(key):
+                raise ValueError(f"{path} {key} does not match embedded next_run_plan.")
 
 
 def _required_page_text(summary: dict[str, Any]) -> list[str]:

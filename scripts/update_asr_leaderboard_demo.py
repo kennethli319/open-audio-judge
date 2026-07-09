@@ -20,6 +20,7 @@ DEFAULT_REFRESH_REPORT = ROOT / "docs" / "asr-leaderboard-refresh-report.md"
 DEFAULT_RUN_MANIFEST = ROOT / "docs" / "asr-leaderboard-run-manifest.json"
 DEFAULT_MANIFEST_VALIDATION = ROOT / "docs" / "asr-leaderboard-manifest-validation.json"
 DEFAULT_SEED_MANIFEST_VALIDATION = ROOT / "docs" / "asr-seed-manifest-validation.json"
+DEFAULT_NEXT_RUNS = ROOT / "docs" / "asr-leaderboard-next-runs.json"
 DEFAULT_AUDIO_CASES = ROOT / "runs" / "asr-research-audio" / "tts_audio_cases.jsonl"
 DEFAULT_SEED_CASES = ROOT / "examples" / "asr_research_cases.jsonl"
 START_MARKER = "<!-- ASR_LEADERBOARD_GENERATED_START -->"
@@ -98,6 +99,12 @@ def main() -> None:
         help="Write a human-readable ASR leaderboard refresh report.",
     )
     parser.add_argument(
+        "--next-runs-out",
+        type=Path,
+        default=DEFAULT_NEXT_RUNS,
+        help="Write a machine-readable next-refresh plan for missing ASR model/category cells.",
+    )
+    parser.add_argument(
         "--expected-cases-per-model",
         type=int,
         default=35,
@@ -124,9 +131,15 @@ def main() -> None:
         results_path=args.results,
         expected_cases_per_model=args.expected_cases_per_model,
     )
+    write_next_run_plan_artifact(
+        results,
+        args.next_runs_out,
+        expected_cases_per_model=args.expected_cases_per_model,
+    )
     print(f"Updated {args.page} from {args.results} ({len(results)} results)")
     print(f"Summary: {args.summary_out}")
     print(f"Refresh report: {args.refresh_report_out}")
+    print(f"Next-refresh plan: {args.next_runs_out}")
 
 
 def render_generated_sections(
@@ -152,6 +165,7 @@ def render_generated_sections(
     manifest_label = html.escape(_repo_relative(DEFAULT_RUN_MANIFEST))
     validation_label = html.escape(_repo_relative(DEFAULT_MANIFEST_VALIDATION))
     seed_validation_label = html.escape(_repo_relative(DEFAULT_SEED_MANIFEST_VALIDATION))
+    next_runs_label = html.escape(_repo_relative(DEFAULT_NEXT_RUNS))
     workflow = _refresh_workflow([])
     workflow_commands = [
         ("Validate seed manifest", workflow["seed_manifest_validation_command"]),
@@ -204,8 +218,9 @@ def render_generated_sections(
                 f"<code>{refresh_report_label}</code>. The committed run manifest is "
                 f"<code>{manifest_label}</code>, with coverage validation in "
                 f"<code>{validation_label}</code> and seed-manifest validation in "
-                f"<code>{seed_validation_label}</code>; together they include the source result files, "
-                "complete model/category matrix, and reproducible refresh workflow. Pass "
+                f"<code>{seed_validation_label}</code>. The next-refresh plan is "
+                f"<code>{next_runs_label}</code>; together they include the source result files, "
+                "complete model/category matrix, missing-cell guidance, and reproducible refresh workflow. Pass "
                 "<code>--hosted-dir /path/to/kennethli319.github.io/open-audio-judge</code> "
                 "to copy the same verified artifacts into the hosted Pages checkout.</p>"
             ),
@@ -286,6 +301,7 @@ def write_summary_artifact(
     category_columns = category_columns_for_results(results)
     source_file_summaries = summarize_source_result_files(source_result_paths or [])
     output_artifacts = build_output_artifact_index(results_path=results_path)
+    next_runs = build_next_run_plan(results, expected_cases_per_model=expected_cases_per_model)
     output_path.parent.mkdir(parents=True, exist_ok=True)
     output_path.write_text(
         json.dumps(
@@ -303,9 +319,11 @@ def write_summary_artifact(
                 "run_manifest_path": _repo_relative(DEFAULT_RUN_MANIFEST),
                 "manifest_validation_path": _repo_relative(DEFAULT_MANIFEST_VALIDATION),
                 "seed_manifest_validation_path": _repo_relative(DEFAULT_SEED_MANIFEST_VALIDATION),
+                "next_runs_path": _repo_relative(DEFAULT_NEXT_RUNS),
                 "output_artifacts": output_artifacts,
                 "refresh_workflow": _refresh_workflow(source_result_paths or []),
                 "refresh_runtime_status": runtime_status,
+                "next_run_plan": next_runs,
                 "total_results": len(results),
                 "model_count": len(model_summaries),
                 "category_count": len(category_summaries),
@@ -362,6 +380,7 @@ def write_refresh_report(
     category_columns = category_columns_for_results(results)
     source_file_summaries = summarize_source_result_files(source_result_paths or [])
     output_artifacts = build_output_artifact_index(results_path=results_path)
+    next_runs = build_next_run_plan(results, expected_cases_per_model=expected_cases_per_model)
     output_path.parent.mkdir(parents=True, exist_ok=True)
     output_path.write_text(
         "\n".join(
@@ -378,6 +397,7 @@ def write_refresh_report(
                 f"- Run manifest: `{_repo_relative(DEFAULT_RUN_MANIFEST)}`",
                 f"- Manifest validation: `{_repo_relative(DEFAULT_MANIFEST_VALIDATION)}`",
                 f"- Seed manifest validation: `{_repo_relative(DEFAULT_SEED_MANIFEST_VALIDATION)}`",
+                f"- Next-refresh plan: `{_repo_relative(DEFAULT_NEXT_RUNS)}`",
                 f"- Total judged transcripts: {len(results)}",
                 f"- Models: {len(model_summaries)}",
                 f"- Categories: {len(category_summaries)}",
@@ -420,6 +440,17 @@ def write_refresh_report(
                     for summary in source_file_summaries
                 ),
                 "",
+                "## Next Refresh Plan",
+                "",
+                f"- Status: {next_runs['status']}",
+                f"- Missing model/category cells: {next_runs['missing_cell_count']}",
+                f"- Next run commands: {next_runs['next_run_command_count']}",
+                *(
+                    f"- Run {command['model']} for {command['missing_case_count']} missing case(s): "
+                    f"`{_shell_join(command['command'])}`"
+                    for command in next_runs["next_run_commands"]
+                ),
+                "",
                 "## Generated Artifact Index",
                 "",
                 "| Path | Purpose |",
@@ -458,6 +489,23 @@ def write_refresh_report(
                 "",
             ]
         ),
+        encoding="utf-8",
+    )
+
+
+def write_next_run_plan_artifact(
+    results: list[EvaluationResult],
+    output_path: Path,
+    *,
+    expected_cases_per_model: int,
+) -> None:
+    next_runs = build_next_run_plan(
+        results,
+        expected_cases_per_model=expected_cases_per_model,
+    )
+    output_path.parent.mkdir(parents=True, exist_ok=True)
+    output_path.write_text(
+        json.dumps(next_runs, indent=2, sort_keys=True) + "\n",
         encoding="utf-8",
     )
 
@@ -566,6 +614,13 @@ def _model_run_commands() -> list[dict[str, object]]:
     return commands
 
 
+def _run_name_for_model(model: str) -> str:
+    for configured_model, run_name in ASR_LEADERBOARD_MODELS:
+        if configured_model == model:
+            return run_name
+    return f"{model.split('/')[-1].replace(' ', '-').replace('_', '-').lower()}-refresh"
+
+
 def build_output_artifact_index(*, results_path: Path) -> list[dict[str, str]]:
     return [
         {
@@ -596,7 +651,95 @@ def build_output_artifact_index(*, results_path: Path) -> list[dict[str, str]]:
             "path": _repo_relative(DEFAULT_SEED_MANIFEST_VALIDATION),
             "purpose": "Seed-manifest validation proving public-safe ASR cases keep exact category coverage.",
         },
+        {
+            "path": _repo_relative(DEFAULT_NEXT_RUNS),
+            "purpose": "Machine-readable next-refresh plan for missing ASR model/category cells.",
+        },
     ]
+
+
+def build_next_run_plan(
+    results: list[EvaluationResult],
+    *,
+    expected_cases_per_model: int,
+) -> dict[str, object]:
+    categories = [summary.category for summary in summarize_categories(results)]
+    models = [summary.model for summary in summarize_models(results)]
+    expected_cases_per_category = (
+        expected_cases_per_model // len(categories)
+        if categories and expected_cases_per_model % len(categories) == 0
+        else None
+    )
+    counts_by_model_category: Counter[tuple[str, str]] = Counter(
+        (
+            str(result.metadata.get("candidate_model") or ""),
+            str(result.metadata.get("eval_category") or ""),
+        )
+        for result in results
+        if result.status == "ok"
+    )
+
+    missing_cells = []
+    next_run_commands = []
+    for model in models:
+        missing_for_model = []
+        for category in categories:
+            observed = counts_by_model_category.get((model, category), 0)
+            expected = expected_cases_per_category or observed
+            missing = max(expected - observed, 0)
+            if missing:
+                missing_for_model.append(
+                    {
+                        "category": category,
+                        "observed_ok_cases": observed,
+                        "expected_ok_cases": expected,
+                        "missing_ok_cases": missing,
+                    }
+                )
+        missing_cells.extend({"model": model, **cell} for cell in missing_for_model)
+        if missing_for_model:
+            run_name = _run_name_for_model(model)
+            next_run_commands.append(
+                {
+                    "model": model,
+                    "run_name": run_name,
+                    "missing_case_count": sum(int(cell["missing_ok_cases"]) for cell in missing_for_model),
+                    "categories": [str(cell["category"]) for cell in missing_for_model],
+                    "command": [
+                        ".venv/bin/oaj",
+                        "autojudge-mlx-asr",
+                        "--python-bin",
+                        ".venv/bin/python",
+                        "--cases",
+                        _repo_relative(DEFAULT_AUDIO_CASES),
+                        "--model",
+                        model,
+                        "--judge-provider",
+                        "gemini",
+                        "--judge-samples",
+                        "3",
+                        "--out",
+                        f"runs/asr-leaderboard/{run_name}",
+                    ],
+                }
+            )
+
+    return {
+        "status": "complete" if not missing_cells else "incomplete",
+        "expected_cases_per_model": expected_cases_per_model,
+        "expected_cases_per_category": expected_cases_per_category,
+        "model_count": len(models),
+        "category_count": len(categories),
+        "missing_cell_count": len(missing_cells),
+        "missing_cells": missing_cells,
+        "next_run_command_count": len(next_run_commands),
+        "next_run_commands": next_run_commands,
+        "fallback_model_ids": ASR_FALLBACK_MODELS,
+        "fallback_handling": (
+            "Record unsupported primary model states explicitly before trying fallbacks; "
+            "do not silently substitute models."
+        ),
+    }
 
 
 def build_refresh_runtime_status(results: list[EvaluationResult]) -> dict[str, object]:

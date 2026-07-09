@@ -10,6 +10,7 @@ This generated report summarizes the verified ASR leaderboard artifact set.
 - Run manifest: `docs/asr-leaderboard-run-manifest.json`
 - Manifest validation: `docs/asr-leaderboard-manifest-validation.json`
 - Seed manifest validation: `docs/asr-seed-manifest-validation.json`
+- Next-refresh plan: `docs/asr-leaderboard-next-runs.json`
 - Total judged transcripts: 105
 - Models: 3
 - Categories: 7
@@ -87,6 +88,12 @@ This generated report summarizes the verified ASR leaderboard artifact set.
 | `runs/asr-leaderboard/vibevoice-asr-paraphrase-smoke/judge-report/results.jsonl` | `runs/asr-leaderboard/vibevoice-asr-paraphrase-smoke/judge-report/report.html` | `mlx-community/VibeVoice-ASR-4bit` | 5/5 ok | `semantic_paraphrase_preservation`: 5 | 15 | 98.4 | 5 accurate |
 | `runs/asr-leaderboard/vibevoice-asr-noise-smoke/judge-report/results.jsonl` | `runs/asr-leaderboard/vibevoice-asr-noise-smoke/judge-report/report.html` | `mlx-community/VibeVoice-ASR-4bit` | 5/5 ok | `acoustic_noise_robustness`: 5 | 15 | 92.8 | 4 accurate, 1 needs_review |
 
+## Next Refresh Plan
+
+- Status: complete
+- Missing model/category cells: 0
+- Next run commands: 0
+
 ## Generated Artifact Index
 
 | Path | Purpose |
@@ -98,6 +105,7 @@ This generated report summarizes the verified ASR leaderboard artifact set.
 | `docs/asr-leaderboard-run-manifest.json` | Committed source result manifest for manifest-based refreshes. |
 | `docs/asr-leaderboard-manifest-validation.json` | Coverage validation for the model/category result matrix. |
 | `docs/asr-seed-manifest-validation.json` | Seed-manifest validation proving public-safe ASR cases keep exact category coverage. |
+| `docs/asr-leaderboard-next-runs.json` | Machine-readable next-refresh plan for missing ASR model/category cells. |
 
 ## Refresh Commands
 

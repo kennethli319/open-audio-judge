@@ -18,6 +18,8 @@ from scripts.update_asr_leaderboard_demo import (  # noqa: E402
     DEFAULT_REFRESH_REPORT,
     DEFAULT_SEED_MANIFEST_VALIDATION,
     DEFAULT_SUMMARY,
+    DEFAULT_NEXT_RUNS,
+    build_next_run_plan,
     render_generated_sections,
     replace_generated_block,
     write_refresh_report,
@@ -118,6 +120,12 @@ def main() -> None:
         help="Write seed-manifest validation summary for the ASR demo artifact set.",
     )
     parser.add_argument(
+        "--next-runs-out",
+        type=Path,
+        default=DEFAULT_NEXT_RUNS,
+        help="Write a machine-readable next-refresh plan for missing ASR model/category cells.",
+    )
+    parser.add_argument(
         "--run-manifest",
         type=Path,
         default=DEFAULT_RUN_MANIFEST,
@@ -164,6 +172,7 @@ def main() -> None:
         manifest_validation_out=args.manifest_validation_out,
         seed_cases=args.seed_cases,
         seed_manifest_validation_out=args.seed_manifest_validation_out,
+        next_runs_out=args.next_runs_out,
         run_manifest=args.run_manifest,
         update_run_manifest=args.update_run_manifest,
         hosted_dir=args.hosted_dir,
@@ -184,6 +193,7 @@ def refresh_asr_leaderboard_artifacts(
     update_run_manifest: bool = False,
     seed_cases: Path = DEFAULT_CASES,
     seed_manifest_validation_out: Path = DEFAULT_SEED_MANIFEST_VALIDATION,
+    next_runs_out: Path = DEFAULT_NEXT_RUNS,
     hosted_dir: Path | None = None,
 ) -> None:
     result_paths = [_normalize_results_path(path) for path in result_paths]
@@ -244,6 +254,11 @@ def refresh_asr_leaderboard_artifacts(
         seed_cases,
         seed_manifest_validation_out,
     )
+    write_next_runs_artifact(
+        combined_results,
+        next_runs_out,
+        expected_cases_per_model=expected_cases_per_model,
+    )
     copied_hosted_paths = (
         copy_hosted_asr_artifacts(
             hosted_dir,
@@ -253,6 +268,7 @@ def refresh_asr_leaderboard_artifacts(
             run_manifest=run_manifest,
             manifest_validation_out=manifest_validation_out,
             seed_manifest_validation_out=seed_manifest_validation_out,
+            next_runs_out=next_runs_out,
             combined_results_path=combined_results_path,
             combined_report_path=combined_report_path,
         )
@@ -279,6 +295,7 @@ def refresh_asr_leaderboard_artifacts(
     print(f"Refresh report: {refresh_report_out}")
     print(f"Manifest validation: {manifest_validation_out}")
     print(f"Seed manifest validation: {seed_manifest_validation_out}")
+    print(f"Next-refresh plan: {next_runs_out}")
     for copied_path in copied_hosted_paths:
         print(f"Hosted:  {copied_path}")
 
@@ -356,6 +373,7 @@ def copy_hosted_asr_artifacts(
     run_manifest: Path = DEFAULT_RUN_MANIFEST,
     manifest_validation_out: Path = DEFAULT_MANIFEST_VALIDATION,
     seed_manifest_validation_out: Path = DEFAULT_SEED_MANIFEST_VALIDATION,
+    next_runs_out: Path = DEFAULT_NEXT_RUNS,
     combined_results_path: Path | None = None,
     combined_report_path: Path | None = None,
 ) -> list[Path]:
@@ -368,6 +386,7 @@ def copy_hosted_asr_artifacts(
         (run_manifest, {run_manifest.name, DEFAULT_RUN_MANIFEST.name}),
         (manifest_validation_out, {manifest_validation_out.name, DEFAULT_MANIFEST_VALIDATION.name}),
         (seed_manifest_validation_out, {seed_manifest_validation_out.name, DEFAULT_SEED_MANIFEST_VALIDATION.name}),
+        (next_runs_out, {next_runs_out.name, DEFAULT_NEXT_RUNS.name}),
     )
     for source, destination_names in source_destinations:
         if not source.exists():
@@ -527,6 +546,23 @@ def write_seed_manifest_validation_artifact(
     output_path.parent.mkdir(parents=True, exist_ok=True)
     output_path.write_text(
         json.dumps(validation, indent=2, sort_keys=True) + "\n",
+        encoding="utf-8",
+    )
+
+
+def write_next_runs_artifact(
+    results: list,
+    output_path: Path,
+    *,
+    expected_cases_per_model: int,
+) -> None:
+    next_runs = build_next_run_plan(
+        results,
+        expected_cases_per_model=expected_cases_per_model,
+    )
+    output_path.parent.mkdir(parents=True, exist_ok=True)
+    output_path.write_text(
+        json.dumps(next_runs, indent=2, sort_keys=True) + "\n",
         encoding="utf-8",
     )
 

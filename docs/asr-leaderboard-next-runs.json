@@ -1,0 +1,17 @@
+{
+  "category_count": 7,
+  "expected_cases_per_category": 5,
+  "expected_cases_per_model": 35,
+  "fallback_handling": "Record unsupported primary model states explicitly before trying fallbacks; do not silently substitute models.",
+  "fallback_model_ids": [
+    "mlx-community/whisper-small.en-asr-4bit",
+    "mlx-community/parakeet-rnnt-0.6b",
+    "mlx-community/GLM-ASR-Nano-2512-4bit"
+  ],
+  "missing_cell_count": 0,
+  "missing_cells": [],
+  "model_count": 3,
+  "next_run_command_count": 0,
+  "next_run_commands": [],
+  "status": "complete"
+}

@@ -176,6 +176,24 @@
       "result_count": 35
     }
   ],
+  "next_run_plan": {
+    "category_count": 7,
+    "expected_cases_per_category": 5,
+    "expected_cases_per_model": 35,
+    "fallback_handling": "Record unsupported primary model states explicitly before trying fallbacks; do not silently substitute models.",
+    "fallback_model_ids": [
+      "mlx-community/whisper-small.en-asr-4bit",
+      "mlx-community/parakeet-rnnt-0.6b",
+      "mlx-community/GLM-ASR-Nano-2512-4bit"
+    ],
+    "missing_cell_count": 0,
+    "missing_cells": [],
+    "model_count": 3,
+    "next_run_command_count": 0,
+    "next_run_commands": [],
+    "status": "complete"
+  },
+  "next_runs_path": "docs/asr-leaderboard-next-runs.json",
   "output_artifacts": [
     {
       "path": "runs/asr-leaderboard/full-35-combined/results.jsonl",
@@ -204,6 +222,10 @@
     {
       "path": "docs/asr-seed-manifest-validation.json",
       "purpose": "Seed-manifest validation proving public-safe ASR cases keep exact category coverage."
+    },
+    {
+      "path": "docs/asr-leaderboard-next-runs.json",
+      "purpose": "Machine-readable next-refresh plan for missing ASR model/category cells."
     }
   ],
   "refresh_runtime_status": {
