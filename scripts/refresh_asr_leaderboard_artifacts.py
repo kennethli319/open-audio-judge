@@ -20,6 +20,7 @@ from scripts.update_asr_leaderboard_demo import (  # noqa: E402
     ASR_LEADERBOARD_MODELS,
     DEFAULT_PAGE,
     DEFAULT_ARTIFACT_INDEX,
+    DEFAULT_AUDIO_CASES,
     DEFAULT_REFRESH_COMMANDS,
     DEFAULT_REFRESH_REPORT,
     DEFAULT_SEED_MANIFEST_VALIDATION,
@@ -1210,6 +1211,7 @@ def write_runtime_status_artifact(
         }
     )
     status["gemini_secret"] = _gemini_secret_status()
+    status["audio_manifest"] = build_audio_manifest_status()
     status["secret_handling"] = (
         "Gemini secrets are checked only for file presence; secret values are never "
         "printed or written into artifacts."
@@ -1219,6 +1221,70 @@ def write_runtime_status_artifact(
         json.dumps(status, indent=2, sort_keys=True) + "\n",
         encoding="utf-8",
     )
+
+
+def build_audio_manifest_status(
+    *,
+    seed_cases_path: Path = DEFAULT_CASES,
+    audio_cases_path: Path = DEFAULT_AUDIO_CASES,
+) -> dict[str, object]:
+    command = [
+        ".venv/bin/python",
+        "scripts/synthesize_tts_cases.py",
+        "--cases",
+        _repo_relative(seed_cases_path),
+        "--out",
+        _repo_relative(audio_cases_path.parent),
+        "--discard-text-sidecars",
+        "--summary-out",
+        _repo_relative(audio_cases_path.parent / "summary.json"),
+    ]
+    if not audio_cases_path.exists():
+        return {
+            "status": "missing",
+            "seed_cases_path": _repo_relative(seed_cases_path),
+            "audio_cases_path": _repo_relative(audio_cases_path),
+            "command": command,
+            "issue": "materialized ASR audio manifest is missing",
+        }
+
+    seed_cases = load_cases(seed_cases_path)
+    audio_cases = load_cases(audio_cases_path)
+    seed_case_ids = {case.id for case in seed_cases}
+    audio_source_ids = {
+        str(case.metadata.get("source_case_id") or "")
+        for case in audio_cases
+    }
+    missing_source_ids = sorted(seed_case_ids - audio_source_ids)
+    extra_source_ids = sorted(audio_source_ids - seed_case_ids)
+    missing_audio_files = []
+    for case in audio_cases:
+        if not case.audio_path:
+            missing_audio_files.append(case.id)
+            continue
+        audio_path = Path(case.audio_path)
+        if not audio_path.is_absolute():
+            audio_path = audio_cases_path.parent / audio_path
+        if not audio_path.exists():
+            missing_audio_files.append(case.id)
+
+    status = (
+        "complete"
+        if not missing_source_ids and not extra_source_ids and not missing_audio_files
+        else "stale"
+    )
+    return {
+        "status": status,
+        "seed_cases_path": _repo_relative(seed_cases_path),
+        "audio_cases_path": _repo_relative(audio_cases_path),
+        "command": command,
+        "seed_case_count": len(seed_cases),
+        "audio_case_count": len(audio_cases),
+        "missing_source_case_ids": missing_source_ids,
+        "extra_source_case_ids": extra_source_ids,
+        "missing_audio_file_case_ids": missing_audio_files,
+        "audio_manifest_sha256": _sha256_file(audio_cases_path),
+    }
 
 
 def _run_mlx_runtime_preflight() -> dict[str, object]:

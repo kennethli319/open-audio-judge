@@ -1,5 +1,27 @@
 {
   "all_loaded_results_ok": true,
+  "audio_manifest": {
+    "audio_case_count": 35,
+    "audio_cases_path": "runs/asr-research-audio/tts_audio_cases.jsonl",
+    "audio_manifest_sha256": "2a3997f8801f69c05503f120dc81a78c1778be5e16c43c72d7cdded0a368b8ac",
+    "command": [
+      ".venv/bin/python",
+      "scripts/synthesize_tts_cases.py",
+      "--cases",
+      "examples/asr_research_cases.jsonl",
+      "--out",
+      "runs/asr-research-audio",
+      "--discard-text-sidecars",
+      "--summary-out",
+      "runs/asr-research-audio/summary.json"
+    ],
+    "extra_source_case_ids": [],
+    "missing_audio_file_case_ids": [],
+    "missing_source_case_ids": [],
+    "seed_case_count": 35,
+    "seed_cases_path": "examples/asr_research_cases.jsonl",
+    "status": "complete"
+  },
   "gemini_judge": "verified_from_loaded_results",
   "gemini_secret": {
     "path": "/Users/wangyauli/.openclaw/secrets/open-audio-judge-gemini.env",

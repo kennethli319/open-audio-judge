@@ -70,15 +70,15 @@
       "hosted_paths": [
         "asr-leaderboard-artifacts.json"
       ],
-      "sha256": "6e0f6397bd22a1d8ec32265f3ce16b0ce8fff264b94096dd628c86c5ab8c9175",
+      "sha256": "e31047d0c6d5f3334fce8e5a8532bc07ca80c0f7a3c2a9cba8e8cd0e192b7d48",
       "source_path": "docs/asr-leaderboard-artifacts.json"
     },
     {
-      "bytes": 1049,
+      "bytes": 1793,
       "hosted_paths": [
         "asr-leaderboard-runtime-status.json"
       ],
-      "sha256": "af4b11fcabf5291d7958bc50b630f91a261ee7993df256711dfdcbd6f23e5fc3",
+      "sha256": "26df1d6822f6f4507c64984067aa0b70989b8eee398aac80d1b400f80db73346",
       "source_path": "docs/asr-leaderboard-runtime-status.json"
     },
     {

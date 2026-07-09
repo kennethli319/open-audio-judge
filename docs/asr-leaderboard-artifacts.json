@@ -57,11 +57,11 @@
       "sha256": "af02532d0b8837c14c34b0fd71a6def65e5afa5e3baa187acdbf56c82e611ea4"
     },
     {
-      "bytes": 1049,
+      "bytes": 1793,
       "digest_status": "ok",
       "exists": true,
       "path": "docs/asr-leaderboard-runtime-status.json",
-      "sha256": "af4b11fcabf5291d7958bc50b630f91a261ee7993df256711dfdcbd6f23e5fc3"
+      "sha256": "26df1d6822f6f4507c64984067aa0b70989b8eee398aac80d1b400f80db73346"
     },
     {
       "bytes": 26195,

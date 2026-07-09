@@ -1377,6 +1377,60 @@ def test_manifest_validation_detects_source_result_digest_drift(tmp_path: Path) 
     assert check["digest_match"] is False
 
 
+def test_build_audio_manifest_status_validates_materialized_seed_audio(tmp_path: Path) -> None:
+    refresh_module = load_refresh_module()
+    seed_cases = tmp_path / "asr_research_cases.jsonl"
+    audio_cases = tmp_path / "asr-research-audio" / "tts_audio_cases.jsonl"
+    audio_file = audio_cases.parent / "audio" / "case-a.wav"
+    seed_record = {
+        "id": "asr-case-a",
+        "task": "asr_error",
+        "reference_text": "The public seed sentence is ready.",
+        "metadata": {
+            "language": "en",
+            "eval_category": "transcription_accuracy_wer",
+            "asr_slice": "unit_test_slice",
+            "source": "research-backed-asr-demo",
+            "source_basis": "Unit test source basis.",
+            "expected_error_focus": "Unit test focus.",
+            "requires_audio_materialization": True,
+        },
+    }
+    audio_record = {
+        **seed_record,
+        "id": "asr-case-a-local-tts",
+        "audio_path": "audio/case-a.wav",
+        "metadata": {
+            **seed_record["metadata"],
+            "source_case_id": "asr-case-a",
+        },
+    }
+    audio_file.parent.mkdir(parents=True)
+    audio_file.write_bytes(b"RIFF")
+    seed_cases.write_text(json.dumps(seed_record) + "\n", encoding="utf-8")
+    audio_cases.write_text(json.dumps(audio_record) + "\n", encoding="utf-8")
+
+    status = refresh_module.build_audio_manifest_status(
+        seed_cases_path=seed_cases,
+        audio_cases_path=audio_cases,
+    )
+
+    assert status["status"] == "complete"
+    assert status["seed_case_count"] == 1
+    assert status["audio_case_count"] == 1
+    assert status["missing_source_case_ids"] == []
+    assert status["missing_audio_file_case_ids"] == []
+
+    audio_file.unlink()
+    stale = refresh_module.build_audio_manifest_status(
+        seed_cases_path=seed_cases,
+        audio_cases_path=audio_cases,
+    )
+
+    assert stale["status"] == "stale"
+    assert stale["missing_audio_file_case_ids"] == ["asr-case-a-local-tts"]
+
+
 def test_check_asr_leaderboard_page_validates_generated_artifacts(tmp_path: Path) -> None:
     update_module = load_script_module()
     check_module = load_check_module()
@@ -1696,6 +1750,7 @@ def test_check_asr_leaderboard_page_validates_hosted_artifact_layout(tmp_path: P
                 "status": "complete",
                 "mlx_runtime_preflight": {"status": "not_checked"},
                 "gemini_secret": {"status": "present"},
+                "audio_manifest": {"status": "complete"},
                 "secret_handling": "test fixture",
             }
         )

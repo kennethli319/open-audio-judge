@@ -732,6 +732,11 @@ def _validate_runtime_status_artifact(
     secret = status.get("gemini_secret")
     if not isinstance(secret, dict) or secret.get("status") not in {"present", "missing"}:
         raise ValueError(f"{path} must include gemini_secret status.")
+    audio_manifest = status.get("audio_manifest")
+    if not isinstance(audio_manifest, dict):
+        raise ValueError(f"{path} must include audio_manifest status.")
+    if audio_manifest.get("status") not in {"complete", "missing", "stale"}:
+        raise ValueError(f"{path} has invalid audio_manifest.status.")
     if "secret_handling" not in status:
         raise ValueError(f"{path} must document secret_handling.")
 
