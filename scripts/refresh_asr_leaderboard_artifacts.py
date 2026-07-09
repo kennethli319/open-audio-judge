@@ -10,15 +10,20 @@ ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT))
 
 from open_audio_judge.reports import write_html_report  # noqa: E402
-from open_audio_judge.runner import load_results_jsonl, write_results_jsonl  # noqa: E402
+from open_audio_judge.runner import load_cases, load_results_jsonl, write_results_jsonl  # noqa: E402
 from scripts.update_asr_leaderboard_demo import (  # noqa: E402
     DEFAULT_PAGE,
     DEFAULT_REFRESH_REPORT,
+    DEFAULT_SEED_MANIFEST_VALIDATION,
     DEFAULT_SUMMARY,
     render_generated_sections,
     replace_generated_block,
     write_refresh_report,
     write_summary_artifact,
+)
+from scripts.validate_asr_seed_manifest import (  # noqa: E402
+    DEFAULT_CASES,
+    validate_asr_seed_manifest,
 )
 
 
@@ -99,6 +104,18 @@ def main() -> None:
         help="Write a machine-readable validation summary for the ASR run manifest.",
     )
     parser.add_argument(
+        "--seed-cases",
+        type=Path,
+        default=DEFAULT_CASES,
+        help="ASR seed manifest to validate as part of the refresh.",
+    )
+    parser.add_argument(
+        "--seed-manifest-validation-out",
+        type=Path,
+        default=DEFAULT_SEED_MANIFEST_VALIDATION,
+        help="Write seed-manifest validation summary for the ASR demo artifact set.",
+    )
+    parser.add_argument(
         "--run-manifest",
         type=Path,
         default=DEFAULT_RUN_MANIFEST,
@@ -138,6 +155,8 @@ def main() -> None:
         summary_out=args.summary_out,
         refresh_report_out=args.refresh_report_out,
         manifest_validation_out=args.manifest_validation_out,
+        seed_cases=args.seed_cases,
+        seed_manifest_validation_out=args.seed_manifest_validation_out,
         run_manifest=args.run_manifest,
         hosted_dir=args.hosted_dir,
         expected_cases_per_model=args.expected_cases_per_model,
@@ -154,6 +173,8 @@ def refresh_asr_leaderboard_artifacts(
     manifest_validation_out: Path,
     run_manifest: Path,
     expected_cases_per_model: int,
+    seed_cases: Path = DEFAULT_CASES,
+    seed_manifest_validation_out: Path = DEFAULT_SEED_MANIFEST_VALIDATION,
     hosted_dir: Path | None = None,
 ) -> None:
     result_paths = [_normalize_results_path(path) for path in result_paths]
@@ -202,6 +223,10 @@ def refresh_asr_leaderboard_artifacts(
         run_manifest=run_manifest,
         expected_cases_per_model=expected_cases_per_model,
     )
+    write_seed_manifest_validation_artifact(
+        seed_cases,
+        seed_manifest_validation_out,
+    )
     copied_hosted_paths = (
         copy_hosted_asr_artifacts(
             hosted_dir,
@@ -210,6 +235,7 @@ def refresh_asr_leaderboard_artifacts(
             refresh_report_out=refresh_report_out,
             run_manifest=run_manifest,
             manifest_validation_out=manifest_validation_out,
+            seed_manifest_validation_out=seed_manifest_validation_out,
         )
         if hosted_dir
         else []
@@ -222,6 +248,7 @@ def refresh_asr_leaderboard_artifacts(
     print(f"Summary: {summary_out}")
     print(f"Refresh report: {refresh_report_out}")
     print(f"Manifest validation: {manifest_validation_out}")
+    print(f"Seed manifest validation: {seed_manifest_validation_out}")
     for copied_path in copied_hosted_paths:
         print(f"Hosted:  {copied_path}")
 
@@ -234,10 +261,18 @@ def copy_hosted_asr_artifacts(
     refresh_report_out: Path = DEFAULT_REFRESH_REPORT,
     run_manifest: Path = DEFAULT_RUN_MANIFEST,
     manifest_validation_out: Path = DEFAULT_MANIFEST_VALIDATION,
+    seed_manifest_validation_out: Path = DEFAULT_SEED_MANIFEST_VALIDATION,
 ) -> list[Path]:
     hosted_dir.mkdir(parents=True, exist_ok=True)
     copied_paths = []
-    for source in (page, summary_out, refresh_report_out, run_manifest, manifest_validation_out):
+    for source in (
+        page,
+        summary_out,
+        refresh_report_out,
+        run_manifest,
+        manifest_validation_out,
+        seed_manifest_validation_out,
+    ):
         if not source.exists():
             raise FileNotFoundError(f"Missing hosted ASR source artifact: {source}")
         destination = hosted_dir / source.name
@@ -341,6 +376,25 @@ def write_manifest_validation_artifact(
         result_paths=result_paths,
         run_manifest=run_manifest,
         expected_cases_per_model=expected_cases_per_model,
+    )
+    output_path.parent.mkdir(parents=True, exist_ok=True)
+    output_path.write_text(
+        json.dumps(validation, indent=2, sort_keys=True) + "\n",
+        encoding="utf-8",
+    )
+
+
+def write_seed_manifest_validation_artifact(
+    cases_path: Path,
+    output_path: Path,
+    *,
+    expected_cases_per_category: int = 5,
+) -> None:
+    cases = load_cases(cases_path)
+    validation = validate_asr_seed_manifest(
+        cases,
+        cases_path=cases_path,
+        expected_cases_per_category=expected_cases_per_category,
     )
     output_path.parent.mkdir(parents=True, exist_ok=True)
     output_path.write_text(

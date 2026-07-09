@@ -19,6 +19,7 @@ DEFAULT_SUMMARY = ROOT / "docs" / "asr-leaderboard-summary.json"
 DEFAULT_REFRESH_REPORT = ROOT / "docs" / "asr-leaderboard-refresh-report.md"
 DEFAULT_RUN_MANIFEST = ROOT / "docs" / "asr-leaderboard-run-manifest.json"
 DEFAULT_MANIFEST_VALIDATION = ROOT / "docs" / "asr-leaderboard-manifest-validation.json"
+DEFAULT_SEED_MANIFEST_VALIDATION = ROOT / "docs" / "asr-seed-manifest-validation.json"
 DEFAULT_AUDIO_CASES = ROOT / "runs" / "asr-research-audio" / "tts_audio_cases.jsonl"
 DEFAULT_SEED_CASES = ROOT / "examples" / "asr_research_cases.jsonl"
 START_MARKER = "<!-- ASR_LEADERBOARD_GENERATED_START -->"
@@ -135,6 +136,7 @@ def render_generated_sections(
     refresh_report_label = html.escape(_repo_relative(DEFAULT_REFRESH_REPORT))
     manifest_label = html.escape(_repo_relative(DEFAULT_RUN_MANIFEST))
     validation_label = html.escape(_repo_relative(DEFAULT_MANIFEST_VALIDATION))
+    seed_validation_label = html.escape(_repo_relative(DEFAULT_SEED_MANIFEST_VALIDATION))
     workflow = _refresh_workflow([])
     workflow_commands = [
         ("Validate seed manifest", workflow["seed_manifest_validation_command"]),
@@ -150,6 +152,10 @@ def render_generated_sections(
         (refresh_report_label, "Human-readable coverage, score, source-file, and command report."),
         (manifest_label, "Committed source result manifest for manifest-based refreshes."),
         (validation_label, "Coverage validation for the model/category result matrix."),
+        (
+            seed_validation_label,
+            "Seed-manifest validation proving public-safe ASR cases keep exact category coverage.",
+        ),
     ]
 
     return "\n".join(
@@ -188,7 +194,7 @@ def render_generated_sections(
                 f"<code>{refresh_report_label}</code>. The committed run manifest is "
                 f"<code>{manifest_label}</code>, with coverage validation in "
                 f"<code>{validation_label}</code>; together they include the source result files, "
-                "complete model/category matrix, and reproducible refresh workflow. Pass "
+                "complete model/category matrix, seed-manifest validation, and reproducible refresh workflow. Pass "
                 "<code>--hosted-dir /path/to/kennethli319.github.io/open-audio-judge</code> "
                 "to copy the same verified artifacts into the hosted Pages checkout.</p>"
             ),
@@ -257,6 +263,7 @@ def write_summary_artifact(
                 ],
                 "run_manifest_path": _repo_relative(DEFAULT_RUN_MANIFEST),
                 "manifest_validation_path": _repo_relative(DEFAULT_MANIFEST_VALIDATION),
+                "seed_manifest_validation_path": _repo_relative(DEFAULT_SEED_MANIFEST_VALIDATION),
                 "refresh_workflow": _refresh_workflow(source_result_paths or []),
                 "refresh_runtime_status": runtime_status,
                 "total_results": len(results),
@@ -324,6 +331,7 @@ def write_refresh_report(
                 f"- Summary JSON: `{_repo_relative(DEFAULT_SUMMARY)}`",
                 f"- Run manifest: `{_repo_relative(DEFAULT_RUN_MANIFEST)}`",
                 f"- Manifest validation: `{_repo_relative(DEFAULT_MANIFEST_VALIDATION)}`",
+                f"- Seed manifest validation: `{_repo_relative(DEFAULT_SEED_MANIFEST_VALIDATION)}`",
                 f"- Total judged transcripts: {len(results)}",
                 f"- Models: {len(model_summaries)}",
                 f"- Categories: {len(category_summaries)}",
@@ -399,6 +407,8 @@ def _refresh_workflow(source_result_paths: list[Path]) -> dict[str, object]:
         "seed_manifest_validation_command": [
             ".venv/bin/python",
             "scripts/validate_asr_seed_manifest.py",
+            "--summary-out",
+            _repo_relative(DEFAULT_SEED_MANIFEST_VALIDATION),
         ],
         "audio_materialization_command": [
             ".venv/bin/python",

@@ -236,12 +236,15 @@
     "secret_handling": "Load the Gemini API key from the local secret file only at runtime; do not commit or print secrets.",
     "seed_manifest_validation_command": [
       ".venv/bin/python",
-      "scripts/validate_asr_seed_manifest.py"
+      "scripts/validate_asr_seed_manifest.py",
+      "--summary-out",
+      "docs/asr-seed-manifest-validation.json"
     ]
   },
   "report_path": "runs/asr-leaderboard/full-35-combined/report.html",
   "results_path": "runs/asr-leaderboard/full-35-combined/results.jsonl",
   "run_manifest_path": "docs/asr-leaderboard-run-manifest.json",
+  "seed_manifest_validation_path": "docs/asr-seed-manifest-validation.json",
   "source_result_files": [
     {
       "average_score": 92,

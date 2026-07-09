@@ -114,6 +114,7 @@ def test_render_generated_sections_summarizes_verified_asr_results(tmp_path: Pat
     assert "docs/asr-leaderboard-refresh-report.md" in html
     assert "docs/asr-leaderboard-run-manifest.json" in html
     assert "docs/asr-leaderboard-manifest-validation.json" in html
+    assert "docs/asr-seed-manifest-validation.json" in html
     assert "reproducible refresh workflow" in html
     assert "--hosted-dir /path/to/kennethli319.github.io/open-audio-judge" in html
     assert "Generated Refresh Workflow" in html
@@ -204,9 +205,12 @@ def test_write_summary_artifact_records_models_and_categories(tmp_path: Path) ->
     ]
     assert summary["run_manifest_path"] == "docs/asr-leaderboard-run-manifest.json"
     assert summary["manifest_validation_path"] == "docs/asr-leaderboard-manifest-validation.json"
+    assert summary["seed_manifest_validation_path"] == "docs/asr-seed-manifest-validation.json"
     assert summary["refresh_workflow"]["seed_manifest_validation_command"] == [
         ".venv/bin/python",
         "scripts/validate_asr_seed_manifest.py",
+        "--summary-out",
+        "docs/asr-seed-manifest-validation.json",
     ]
     assert summary["refresh_workflow"]["audio_materialization_command"] == [
         ".venv/bin/python",
@@ -355,6 +359,8 @@ def test_write_refresh_report_records_coverage_and_commands(tmp_path: Path) -> N
     assert "`transcription_accuracy_wer`" in text
     assert ".venv/bin/python scripts/refresh_asr_leaderboard_artifacts.py" in text
     assert ".venv/bin/python scripts/validate_asr_seed_manifest.py" in text
+    assert "Seed manifest validation: `docs/asr-seed-manifest-validation.json`" in text
+    assert "--summary-out docs/asr-seed-manifest-validation.json" in text
     assert "--results " + str(source_results_path) in text
     assert "Hosted artifact sync" in text
     assert "## Runtime Status" in text
@@ -401,6 +407,7 @@ def test_refresh_asr_leaderboard_artifacts_combines_report_and_page(tmp_path: Pa
     summary = tmp_path / "summary.json"
     refresh_report = tmp_path / "refresh-report.md"
     manifest_validation = tmp_path / "manifest-validation.json"
+    seed_manifest_validation = tmp_path / "seed-manifest-validation.json"
     hosted_dir = tmp_path / "hosted" / "open-audio-judge"
     records_a = [
         result_record(
@@ -455,6 +462,7 @@ def test_refresh_asr_leaderboard_artifacts_combines_report_and_page(tmp_path: Pa
         refresh_report_out=refresh_report,
         manifest_validation_out=manifest_validation,
         run_manifest=refresh_module.DEFAULT_RUN_MANIFEST,
+        seed_manifest_validation_out=seed_manifest_validation,
         hosted_dir=hosted_dir,
         expected_cases_per_model=2,
     )
@@ -494,6 +502,10 @@ def test_refresh_asr_leaderboard_artifacts_combines_report_and_page(tmp_path: Pa
     assert (hosted_dir / "manifest-validation.json").read_text(
         encoding="utf-8"
     ) == manifest_validation.read_text(encoding="utf-8")
+    assert json.loads(seed_manifest_validation.read_text(encoding="utf-8"))["status"] == "complete"
+    assert (hosted_dir / "seed-manifest-validation.json").read_text(
+        encoding="utf-8"
+    ) == seed_manifest_validation.read_text(encoding="utf-8")
 
 
 def test_refresh_asr_leaderboard_artifacts_reads_run_manifest(tmp_path: Path) -> None:
