@@ -34,6 +34,14 @@ This generated report summarizes the verified ASR leaderboard artifact set.
 | `semantic_paraphrase_preservation` | 15 | 98.7 | 15 accurate |
 | `acoustic_noise_robustness` | 15 | 93.9 | 13 accurate, 2 needs_review |
 
+## Model Category Matrix
+
+| Model | WER | Numeric/Unit | Negation/Modality | Temporal | Entity | Paraphrase | Acoustic Noise |
+| --- | ---: | ---: | ---: | ---: | ---: | ---: | ---: |
+| `mlx-community/VibeVoice-ASR-4bit` | 5 | 5 | 5 | 5 | 5 | 5 | 5 |
+| `mlx-community/Qwen3-ASR-1.7B-8bit` | 5 | 5 | 5 | 5 | 5 | 5 | 5 |
+| `mlx-community/whisper-large-v3-turbo-asr-fp16` | 5 | 5 | 5 | 5 | 5 | 5 | 5 |
+
 ## Source Result Files
 
 - `runs/asr-leaderboard/whisper-large-v3-turbo-smoke/judge-report/results.jsonl`

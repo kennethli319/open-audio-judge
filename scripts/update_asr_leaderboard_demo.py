@@ -226,6 +226,7 @@ def write_summary_artifact(
     validate_coverage(results, model_summaries, expected_cases_per_model=expected_cases_per_model)
     category_summaries = summarize_categories(results)
     runtime_status = build_refresh_runtime_status(results)
+    coverage_matrix = build_model_category_matrix(results)
     output_path.parent.mkdir(parents=True, exist_ok=True)
     output_path.write_text(
         json.dumps(
@@ -245,6 +246,7 @@ def write_summary_artifact(
                 "category_count": len(category_summaries),
                 "expected_cases_per_model": expected_cases_per_model,
                 "total_gemini_judge_samples": sum(summary.judge_samples for summary in model_summaries),
+                "model_category_matrix": coverage_matrix,
                 "models": [
                     {
                         "model": summary.model,
@@ -287,6 +289,7 @@ def write_refresh_report(
     category_summaries = summarize_categories(results)
     workflow = _refresh_workflow(source_result_paths or [])
     runtime_status = build_refresh_runtime_status(results)
+    coverage_matrix = build_model_category_matrix(results)
     output_path.parent.mkdir(parents=True, exist_ok=True)
     output_path.write_text(
         "\n".join(
@@ -318,6 +321,12 @@ def write_refresh_report(
                 "| Category | Results | Average Score | Labels |",
                 "| --- | ---: | ---: | --- |",
                 *(_category_markdown_row(summary) for summary in category_summaries),
+                "",
+                "## Model Category Matrix",
+                "",
+                "| Model | " + " | ".join(label for _, label in CATEGORY_COLUMNS) + " |",
+                "| --- | " + " | ".join("---:" for _ in CATEGORY_COLUMNS) + " |",
+                *(_model_category_matrix_row(row) for row in coverage_matrix),
                 "",
                 "## Source Result Files",
                 "",
@@ -416,6 +425,30 @@ def build_refresh_runtime_status(results: list[EvaluationResult]) -> dict[str, o
         "loaded_result_providers": providers,
         "all_loaded_results_ok": all(result.status == "ok" for result in results),
     }
+
+
+def build_model_category_matrix(results: list[EvaluationResult]) -> list[dict[str, object]]:
+    model_summaries = summarize_models(results)
+    category_order = [category for category, _ in CATEGORY_COLUMNS]
+    matrix = []
+    for summary in model_summaries:
+        model_results = [
+            result
+            for result in results
+            if result.metadata.get("candidate_model") == summary.model
+        ]
+        counts = Counter(str(result.metadata.get("eval_category") or "") for result in model_results)
+        matrix.append(
+            {
+                "model": summary.model,
+                "total_results": len(model_results),
+                "category_counts": {
+                    category: counts.get(category, 0)
+                    for category in category_order
+                },
+            }
+        )
+    return matrix
 
 
 def summarize_models(results: list[EvaluationResult]) -> list[ModelSummary]:
@@ -548,6 +581,14 @@ def _category_markdown_row(summary: CategorySummary) -> str:
         if summary.labels[label]
     )
     return f"| `{summary.category}` | {summary.result_count} | {summary.average_score:.1f} | {labels} |"
+
+
+def _model_category_matrix_row(row: dict[str, object]) -> str:
+    counts = row["category_counts"]
+    if not isinstance(counts, dict):
+        raise TypeError("category_counts must be a dictionary")
+    cells = " | ".join(str(counts[category]) for category, _ in CATEGORY_COLUMNS)
+    return f"| `{row['model']}` | {cells} |"
 
 
 def _shell_join(command: object) -> str:

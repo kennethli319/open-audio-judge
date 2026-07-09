@@ -66,6 +66,47 @@
   "category_count": 7,
   "expected_cases_per_model": 35,
   "manifest_validation_path": "docs/asr-leaderboard-manifest-validation.json",
+  "model_category_matrix": [
+    {
+      "category_counts": {
+        "acoustic_noise_robustness": 5,
+        "entity_factual_integrity": 5,
+        "negation_modality_scope": 5,
+        "numeric_unit_integrity": 5,
+        "semantic_paraphrase_preservation": 5,
+        "temporal_scheduling_accuracy": 5,
+        "transcription_accuracy_wer": 5
+      },
+      "model": "mlx-community/VibeVoice-ASR-4bit",
+      "total_results": 35
+    },
+    {
+      "category_counts": {
+        "acoustic_noise_robustness": 5,
+        "entity_factual_integrity": 5,
+        "negation_modality_scope": 5,
+        "numeric_unit_integrity": 5,
+        "semantic_paraphrase_preservation": 5,
+        "temporal_scheduling_accuracy": 5,
+        "transcription_accuracy_wer": 5
+      },
+      "model": "mlx-community/Qwen3-ASR-1.7B-8bit",
+      "total_results": 35
+    },
+    {
+      "category_counts": {
+        "acoustic_noise_robustness": 5,
+        "entity_factual_integrity": 5,
+        "negation_modality_scope": 5,
+        "numeric_unit_integrity": 5,
+        "semantic_paraphrase_preservation": 5,
+        "temporal_scheduling_accuracy": 5,
+        "transcription_accuracy_wer": 5
+      },
+      "model": "mlx-community/whisper-large-v3-turbo-asr-fp16",
+      "total_results": 35
+    }
+  ],
   "model_count": 3,
   "models": [
     {

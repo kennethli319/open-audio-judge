@@ -232,6 +232,34 @@ def test_write_summary_artifact_records_models_and_categories(tmp_path: Path) ->
         "loaded_result_providers": ["gemini"],
         "mlx_asr": "not_executed_by_refresh; transcripts loaded from verified result artifacts",
     }
+    assert summary["model_category_matrix"] == [
+        {
+            "model": "mlx-community/model-a",
+            "total_results": 2,
+            "category_counts": {
+                "transcription_accuracy_wer": 1,
+                "numeric_unit_integrity": 1,
+                "negation_modality_scope": 0,
+                "temporal_scheduling_accuracy": 0,
+                "entity_factual_integrity": 0,
+                "semantic_paraphrase_preservation": 0,
+                "acoustic_noise_robustness": 0,
+            },
+        },
+        {
+            "model": "mlx-community/model-b",
+            "total_results": 2,
+            "category_counts": {
+                "transcription_accuracy_wer": 1,
+                "numeric_unit_integrity": 1,
+                "negation_modality_scope": 0,
+                "temporal_scheduling_accuracy": 0,
+                "entity_factual_integrity": 0,
+                "semantic_paraphrase_preservation": 0,
+                "acoustic_noise_robustness": 0,
+            },
+        },
+    ]
     assert summary["models"][0]["model"] == "mlx-community/model-a"
     assert summary["models"][0]["average_score"] == 90
     assert summary["models"][0]["labels"] == {"accurate": 2}
@@ -299,6 +327,9 @@ def test_write_refresh_report_records_coverage_and_commands(tmp_path: Path) -> N
     assert "MLX ASR: not_executed_by_refresh" in text
     assert "Gemini judge: verified_from_loaded_results" in text
     assert "Live model calls during refresh: none" in text
+    assert "## Model Category Matrix" in text
+    assert "| Model | WER | Numeric/Unit | Negation/Modality | Temporal | Entity | Paraphrase | Acoustic Noise |" in text
+    assert "| `mlx-community/model-a` | 1 | 1 | 0 | 0 | 0 | 0 | 0 |" in text
 
 
 def test_replace_generated_block_only_updates_marked_section(tmp_path: Path) -> None:
