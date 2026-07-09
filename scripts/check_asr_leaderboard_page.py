@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import argparse
+import hashlib
 import html
 import json
 import sys
@@ -132,6 +133,7 @@ def _validate_summary(
         "models",
         "categories",
         "refresh_workflow",
+        "hosted_manifest_path",
     )
     missing_keys = [key for key in required_keys if key not in summary]
     if missing_keys:
@@ -189,6 +191,12 @@ def _validate_summary(
         artifact_root=artifact_root,
         path_maps=path_maps,
     )
+    _validate_hosted_manifest_artifact(
+        summary,
+        summary_path=summary_path,
+        artifact_root=artifact_root,
+        path_maps=path_maps,
+    )
 
 
 def _validate_referenced_artifacts(
@@ -206,6 +214,7 @@ def _validate_referenced_artifacts(
         "manifest_validation_path",
         "seed_manifest_validation_path",
         "next_runs_path",
+        "hosted_manifest_path",
     )
     missing = []
     for key in artifact_keys:
@@ -434,6 +443,81 @@ def _validate_next_runs_artifact(
                 raise ValueError(f"{path} {key} does not match embedded next_run_plan.")
 
 
+def _validate_hosted_manifest_artifact(
+    summary: dict[str, Any],
+    *,
+    summary_path: Path,
+    artifact_root: Path,
+    path_maps: list[tuple[str, str]],
+) -> None:
+    raw_path = summary.get("hosted_manifest_path")
+    if not isinstance(raw_path, str) or not raw_path:
+        raise ValueError(f"{summary_path} has invalid hosted_manifest_path: {raw_path!r}")
+    path = _resolve_summary_path(raw_path, artifact_root=artifact_root, path_maps=path_maps)
+    try:
+        manifest = json.loads(path.read_text(encoding="utf-8"))
+    except json.JSONDecodeError as exc:
+        raise ValueError(f"{path} must contain valid JSON: {exc}") from exc
+
+    if not isinstance(manifest, dict):
+        raise ValueError(f"{path} must contain a JSON object.")
+    if manifest.get("hosted_base_path") != "open-audio-judge":
+        raise ValueError(f"{path} hosted_base_path must be open-audio-judge.")
+
+    artifacts = manifest.get("artifacts")
+    if not isinstance(artifacts, list) or not artifacts:
+        raise ValueError(f"{path} must include a non-empty artifacts list.")
+    if manifest.get("artifact_count") != len(artifacts):
+        raise ValueError(f"{path} artifact_count does not match artifacts length.")
+
+    for index, artifact in enumerate(artifacts):
+        if not isinstance(artifact, dict):
+            raise ValueError(f"{path} artifacts[{index}] must be an object.")
+        source_path = artifact.get("source_path")
+        hosted_paths = artifact.get("hosted_paths")
+        expected_bytes = artifact.get("bytes")
+        expected_sha256 = artifact.get("sha256")
+        if not isinstance(source_path, str) or not source_path:
+            raise ValueError(f"{path} artifacts[{index}] has invalid source_path: {source_path!r}")
+        if (
+            not isinstance(hosted_paths, list)
+            or not hosted_paths
+            or not all(isinstance(hosted_path, str) and hosted_path for hosted_path in hosted_paths)
+        ):
+            raise ValueError(f"{path} artifacts[{index}] has invalid hosted_paths: {hosted_paths!r}")
+        if not isinstance(expected_bytes, int) or expected_bytes < 0:
+            raise ValueError(f"{path} artifacts[{index}] has invalid bytes: {expected_bytes!r}")
+        if (
+            not isinstance(expected_sha256, str)
+            or len(expected_sha256) != 64
+            or any(char not in "0123456789abcdef" for char in expected_sha256)
+        ):
+            raise ValueError(f"{path} artifacts[{index}] has invalid sha256: {expected_sha256!r}")
+
+        candidates = [
+            _resolve_summary_path(source_path, artifact_root=artifact_root, path_maps=path_maps),
+            *[artifact_root / hosted_path for hosted_path in hosted_paths],
+        ]
+        existing_candidates = [candidate for candidate in candidates if candidate.exists()]
+        if not existing_candidates:
+            raise ValueError(
+                f"{path} artifacts[{index}] references no existing source or hosted path: "
+                f"{source_path}, {hosted_paths}"
+            )
+        for candidate in existing_candidates:
+            if candidate.stat().st_size != expected_bytes:
+                raise ValueError(
+                    f"{path} artifacts[{index}] byte size for {candidate}="
+                    f"{candidate.stat().st_size} does not match manifest bytes={expected_bytes}."
+                )
+            actual_sha256 = _sha256_file(candidate)
+            if actual_sha256 != expected_sha256:
+                raise ValueError(
+                    f"{path} artifacts[{index}] sha256 for {candidate}={actual_sha256} "
+                    f"does not match manifest sha256={expected_sha256}."
+                )
+
+
 def _required_page_text(summary: dict[str, Any]) -> list[str]:
     model_names = [
         str(model["model"])
@@ -525,6 +609,14 @@ def _resolve_summary_path(
             mapped = destination + mapped[len(source):]
             break
     return artifact_root / mapped
+
+
+def _sha256_file(path: Path) -> str:
+    digest = hashlib.sha256()
+    with path.open("rb") as handle:
+        for chunk in iter(lambda: handle.read(1024 * 1024), b""):
+            digest.update(chunk)
+    return digest.hexdigest()
 
 
 def _rendered_command_text(command: list[object]) -> str:

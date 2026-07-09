@@ -1,4 +1,5 @@
 import importlib.util
+import hashlib
 import json
 import sys
 from pathlib import Path
@@ -105,6 +106,34 @@ def run_manifest_record(
         "result_paths": [results_path for results_path, _ in path_records],
         "runs": runs,
     }
+
+
+def hosted_manifest_record(path_records: list[tuple[str, Path]]) -> dict:
+    artifacts = []
+    for hosted_path, source in path_records:
+        artifacts.append(
+            {
+                "source_path": str(source),
+                "hosted_paths": [hosted_path],
+                "bytes": source.stat().st_size,
+                "sha256": file_sha256(source),
+            }
+        )
+    return {
+        "description": "Unit-test ASR hosted artifact manifest.",
+        "version": 1,
+        "hosted_base_path": "open-audio-judge",
+        "artifact_count": len(artifacts),
+        "artifacts": artifacts,
+    }
+
+
+def file_sha256(path: Path) -> str:
+    digest = hashlib.sha256()
+    with path.open("rb") as handle:
+        for chunk in iter(lambda: handle.read(1024 * 1024), b""):
+            digest.update(chunk)
+    return digest.hexdigest()
 
 
 def test_render_generated_sections_summarizes_verified_asr_results(tmp_path: Path) -> None:
@@ -864,6 +893,7 @@ def test_check_asr_leaderboard_page_validates_generated_artifacts(tmp_path: Path
     manifest_validation = tmp_path / "manifest-validation.json"
     seed_manifest_validation = tmp_path / "seed-manifest-validation.json"
     next_runs = tmp_path / "next-runs.json"
+    hosted_manifest = tmp_path / "hosted-manifest.json"
     records = [
         result_record(
             case_id="asr-a-model-a",
@@ -969,11 +999,24 @@ def test_check_asr_leaderboard_page_validates_generated_artifacts(tmp_path: Path
         + "\n",
         encoding="utf-8",
     )
+    hosted_manifest.write_text(
+        json.dumps(
+            hosted_manifest_record(
+                [
+                    ("results.jsonl", results_path),
+                    ("run-manifest.json", run_manifest),
+                ]
+            )
+        )
+        + "\n",
+        encoding="utf-8",
+    )
     summary_data = json.loads(summary.read_text(encoding="utf-8"))
     summary_data["run_manifest_path"] = str(run_manifest)
     summary_data["manifest_validation_path"] = str(manifest_validation)
     summary_data["seed_manifest_validation_path"] = str(seed_manifest_validation)
     summary_data["next_runs_path"] = str(next_runs)
+    summary_data["hosted_manifest_path"] = str(hosted_manifest)
     summary.write_text(json.dumps(summary_data), encoding="utf-8")
 
     validation = check_module.check_asr_leaderboard_page(page, summary_path=summary)
@@ -993,6 +1036,7 @@ def test_check_asr_leaderboard_page_validates_hosted_artifact_layout(tmp_path: P
     seed_manifest_validation = hosted / "asr-seed-manifest-validation.json"
     next_runs = hosted / "asr-leaderboard-next-runs.json"
     run_manifest = hosted / "asr-leaderboard-run-manifest.json"
+    hosted_manifest = hosted / "asr-leaderboard-hosted-manifest.json"
     results_path = hosted / "asr-leaderboard" / "full-35-combined" / "results.jsonl"
     report_path = hosted / "asr-leaderboard" / "full-35-combined" / "report.html"
 
@@ -1076,6 +1120,19 @@ def test_check_asr_leaderboard_page_validates_hosted_artifact_layout(tmp_path: P
         + "\n",
         encoding="utf-8",
     )
+    hosted_manifest.write_text(
+        json.dumps(
+            hosted_manifest_record(
+                [
+                    ("asr-leaderboard/full-35-combined/results.jsonl", results_path),
+                    ("asr-leaderboard/full-35-combined/report.html", report_path),
+                    ("asr-leaderboard-run-manifest.json", run_manifest),
+                ]
+            )
+        )
+        + "\n",
+        encoding="utf-8",
+    )
     summary.write_text(
         json.dumps(
             {
@@ -1085,6 +1142,7 @@ def test_check_asr_leaderboard_page_validates_hosted_artifact_layout(tmp_path: P
                 "manifest_validation_path": "docs/asr-leaderboard-manifest-validation.json",
                 "seed_manifest_validation_path": "docs/asr-seed-manifest-validation.json",
                 "next_runs_path": "docs/asr-leaderboard-next-runs.json",
+                "hosted_manifest_path": "docs/asr-leaderboard-hosted-manifest.json",
                 "source_result_paths": [
                     "runs/asr-leaderboard/model-a/judge-report/results.jsonl",
                     "runs/asr-leaderboard/model-b/judge-report/results.jsonl",
