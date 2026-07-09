@@ -1058,6 +1058,7 @@ def _refresh_workflow(source_result_paths: list[Path]) -> dict[str, object]:
             "scripts/refresh_asr_leaderboard_artifacts.py",
             "--check-only",
             "--hosted-dir-from-env",
+            "--require-hosted-current",
         ],
         "hosted_artifact_env_var": DEFAULT_HOSTED_DIR_ENV,
         "local_secret_env_command": [

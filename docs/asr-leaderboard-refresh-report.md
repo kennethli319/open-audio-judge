@@ -147,7 +147,7 @@ This generated report summarizes the verified ASR leaderboard artifact set.
 - Page validation: `.venv/bin/python scripts/check_asr_leaderboard_page.py`
 - Generated artifact freshness check: `.venv/bin/python scripts/refresh_asr_leaderboard_artifacts.py --check-only --require-generated-fresh`
 - Hosted artifact sync: `.venv/bin/python scripts/refresh_asr_leaderboard_artifacts.py --hosted-dir-from-env`
-- Hosted mirror validation: `.venv/bin/python scripts/refresh_asr_leaderboard_artifacts.py --check-only --hosted-dir-from-env`
+- Hosted mirror validation: `.venv/bin/python scripts/refresh_asr_leaderboard_artifacts.py --check-only --hosted-dir-from-env --require-hosted-current`
 - Live model refresh script: `bash docs/asr-leaderboard-live-refresh.sh`
 
 ## Runtime Status

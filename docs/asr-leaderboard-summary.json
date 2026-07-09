@@ -356,7 +356,8 @@
       ".venv/bin/python",
       "scripts/refresh_asr_leaderboard_artifacts.py",
       "--check-only",
-      "--hosted-dir-from-env"
+      "--hosted-dir-from-env",
+      "--require-hosted-current"
     ],
     "live_refresh_script_path": "docs/asr-leaderboard-live-refresh.sh",
     "local_secret_env_command": [

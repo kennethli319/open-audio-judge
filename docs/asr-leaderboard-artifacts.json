@@ -12,7 +12,7 @@
       "sha256": null
     },
     {
-      "bytes": 29658,
+      "bytes": 29683,
       "digest_status": "ok",
       "exists": true,
       "hosted_paths": [
@@ -20,7 +20,7 @@
       ],
       "path": "docs/asr-leaderboard-demo.html",
       "purpose": "Generated ASR leaderboard demo HTML page.",
-      "sha256": "c7395d33ea01303059cad06370a8466e062be5bd278009a1ee02066681be5db5"
+      "sha256": "adb28312b4edfa50f24c4fe54edee02a5c87fe20ec526305aa15757627725dd3"
     },
     {
       "bytes": null,
@@ -67,7 +67,7 @@
       "sha256": "cc918bbaa552b7099e89e2084aff8590d960456dee407eb318d26442488f93e7"
     },
     {
-      "bytes": 5093,
+      "bytes": 5118,
       "digest_status": "ok",
       "exists": true,
       "hosted_paths": [
@@ -75,10 +75,10 @@
       ],
       "path": "docs/asr-leaderboard-refresh-commands.sh",
       "purpose": "Generated shell playbook for repeatable ASR leaderboard refreshes.",
-      "sha256": "6827f32d1a5a9fe72a422021d48bd23ce01b04191f910f8fe75a92407484eb9b"
+      "sha256": "4e7e49de0f7acf50ac4b3654fa7a4486370b21279c7a31a822e9b42caeb95381"
     },
     {
-      "bytes": 17544,
+      "bytes": 17569,
       "digest_status": "ok",
       "exists": true,
       "hosted_paths": [
@@ -86,7 +86,7 @@
       ],
       "path": "docs/asr-leaderboard-refresh-report.md",
       "purpose": "Human-readable coverage, score, source-file, and command report.",
-      "sha256": "7469883ef7e897b4ced344786ea89a8727de0523422b0a504a3d5a038ccbdba5"
+      "sha256": "1a4a96ed28777afd6cab1d0f8f678c8181e3a26a1ca0ea200444e1e9c113a60f"
     },
     {
       "bytes": 10936,
@@ -133,7 +133,7 @@
       "sha256": "e8e830755dfbce3545e74384a29286f7fcfdc852ac9c07b20867649eba9963a0"
     },
     {
-      "bytes": 32583,
+      "bytes": 32617,
       "digest_status": "ok",
       "exists": true,
       "hosted_paths": [
@@ -141,7 +141,7 @@
       ],
       "path": "docs/asr-leaderboard-summary.json",
       "purpose": "Machine-readable leaderboard summary and reproducible refresh workflow.",
-      "sha256": "91296188b2169916868c06594ba3722ad5fdcd838ce2918ff08fe45c0a8b2374"
+      "sha256": "bf374d8d8794c7ca9543f46f1366682b07ceeea791c6b304ea95da4c92d36d33"
     },
     {
       "bytes": 1634,

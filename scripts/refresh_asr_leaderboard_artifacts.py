@@ -269,6 +269,14 @@ def main() -> None:
         ),
     )
     parser.add_argument(
+        "--require-hosted-current",
+        action="store_true",
+        help=(
+            "With --check-only and --hosted-dir/--hosted-dir-from-env, fail unless every "
+            "hosted Pages artifact matches the current local hosted manifest digests."
+        ),
+    )
+    parser.add_argument(
         "--expected-cases-per-model",
         type=int,
         default=35,
@@ -308,6 +316,7 @@ def main() -> None:
             hosted_dir=hosted_dir,
             require_generated_fresh=args.require_generated_fresh,
             require_audio_ready=args.require_audio_ready,
+            require_hosted_current=args.require_hosted_current,
         )
         if args.check_summary_out:
             args.check_summary_out.parent.mkdir(parents=True, exist_ok=True)
@@ -393,6 +402,7 @@ def check_asr_leaderboard_refresh_inputs(
     hosted_dir: Path | None = None,
     require_generated_fresh: bool = False,
     require_audio_ready: bool = False,
+    require_hosted_current: bool = False,
 ) -> dict[str, object]:
     result_paths = [_normalize_results_path(path) for path in result_paths]
     _validate_unique_result_paths(result_paths, context="ASR refresh preflight result sources")
@@ -495,7 +505,102 @@ def check_asr_leaderboard_refresh_inputs(
         summary["hosted_page_status"] = hosted_validation["status"]
         summary["hosted_artifact_count"] = hosted_validation["hosted_artifact_count"]
         summary["hosted_path_count"] = hosted_validation["hosted_path_count"]
+        if require_hosted_current:
+            hosted_current = validate_hosted_artifacts_current(
+                hosted_dir,
+                hosted_manifest_out=DEFAULT_HOSTED_MANIFEST,
+            )
+            summary["hosted_current_status"] = hosted_current["status"]
+            summary["hosted_current_path_count"] = hosted_current["hosted_path_count"]
+    elif require_hosted_current:
+        raise ValueError("--require-hosted-current requires --hosted-dir or --hosted-dir-from-env.")
     return summary
+
+
+def validate_hosted_artifacts_current(
+    hosted_dir: Path,
+    *,
+    hosted_manifest_out: Path = DEFAULT_HOSTED_MANIFEST,
+) -> dict[str, object]:
+    if not hosted_dir.exists():
+        raise FileNotFoundError(f"Missing hosted ASR directory: {hosted_dir}")
+    if not hosted_manifest_out.exists():
+        raise FileNotFoundError(f"Missing local ASR hosted manifest: {hosted_manifest_out}")
+
+    manifest = json.loads(hosted_manifest_out.read_text(encoding="utf-8"))
+    artifacts = manifest.get("artifacts")
+    if not isinstance(artifacts, list) or not artifacts:
+        raise ValueError(f"{hosted_manifest_out} must include a non-empty artifacts list.")
+
+    checked_paths = 0
+    for index, artifact in enumerate(artifacts):
+        if not isinstance(artifact, dict):
+            raise ValueError(f"{hosted_manifest_out} artifacts[{index}] must be an object.")
+        source_path = artifact.get("source_path")
+        hosted_paths = artifact.get("hosted_paths")
+        expected_bytes = artifact.get("bytes")
+        expected_sha256 = artifact.get("sha256")
+        if not isinstance(source_path, str) or not source_path:
+            raise ValueError(
+                f"{hosted_manifest_out} artifacts[{index}] has invalid source_path: "
+                f"{source_path!r}"
+            )
+        if (
+            not isinstance(hosted_paths, list)
+            or not hosted_paths
+            or not all(isinstance(path, str) and path for path in hosted_paths)
+        ):
+            raise ValueError(
+                f"{hosted_manifest_out} artifacts[{index}] has invalid hosted_paths: "
+                f"{hosted_paths!r}"
+            )
+        if not isinstance(expected_bytes, int) or expected_bytes < 0:
+            raise ValueError(
+                f"{hosted_manifest_out} artifacts[{index}] has invalid bytes: "
+                f"{expected_bytes!r}"
+            )
+        if (
+            not isinstance(expected_sha256, str)
+            or len(expected_sha256) != 64
+            or any(char not in "0123456789abcdef" for char in expected_sha256)
+        ):
+            raise ValueError(
+                f"{hosted_manifest_out} artifacts[{index}] has invalid sha256: "
+                f"{expected_sha256!r}"
+            )
+
+        source = ROOT / source_path
+        if not source.exists():
+            raise FileNotFoundError(
+                f"Hosted current check source is missing: {source_path}"
+            )
+        if source.stat().st_size != expected_bytes or _sha256_file(source) != expected_sha256:
+            raise ValueError(
+                f"{_repo_relative(hosted_manifest_out)} is stale for source artifact: "
+                f"{source_path}"
+            )
+        for hosted_path in hosted_paths:
+            destination = hosted_dir / hosted_path
+            if not destination.exists():
+                raise FileNotFoundError(
+                    f"Hosted Pages artifact is missing: {destination}"
+                )
+            if destination.stat().st_size != expected_bytes:
+                raise ValueError(
+                    f"Hosted Pages artifact byte size is stale: {destination}"
+                )
+            actual_sha256 = _sha256_file(destination)
+            if actual_sha256 != expected_sha256:
+                raise ValueError(
+                    f"Hosted Pages artifact sha256 is stale: {destination}"
+                )
+            checked_paths += 1
+
+    return {
+        "status": "complete",
+        "hosted_artifact_count": len(artifacts),
+        "hosted_path_count": checked_paths,
+    }
 
 
 def _validate_generated_artifacts_fresh(

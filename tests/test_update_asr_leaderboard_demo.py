@@ -261,7 +261,7 @@ def test_render_generated_sections_summarizes_verified_asr_results(tmp_path: Pat
     assert "--require-generated-fresh" in html
     assert "Check hosted mirror" in html
     assert (
-        ".venv/bin/python scripts/refresh_asr_leaderboard_artifacts.py --check-only --hosted-dir-from-env"
+        ".venv/bin/python scripts/refresh_asr_leaderboard_artifacts.py --check-only --hosted-dir-from-env --require-hosted-current"
         in html
     )
     assert "Run one MLX ASR model" in html
@@ -615,6 +615,7 @@ def test_write_summary_artifact_records_models_and_categories(tmp_path: Path) ->
         "scripts/refresh_asr_leaderboard_artifacts.py",
         "--check-only",
         "--hosted-dir-from-env",
+        "--require-hosted-current",
     ]
     assert summary["refresh_workflow"]["hosted_artifact_env_var"] == "ASR_LEADERBOARD_HOSTED_DIR"
     assert summary["refresh_workflow"]["local_secret_env_command"] == [
@@ -853,7 +854,7 @@ def test_write_refresh_report_records_coverage_and_commands(tmp_path: Path) -> N
     assert "Hosted artifact sync" in text
     assert "Hosted mirror validation" in text
     assert (
-        ".venv/bin/python scripts/refresh_asr_leaderboard_artifacts.py --check-only --hosted-dir-from-env"
+        ".venv/bin/python scripts/refresh_asr_leaderboard_artifacts.py --check-only --hosted-dir-from-env --require-hosted-current"
         in text
     )
     assert "Page validation" in text
@@ -1242,9 +1243,18 @@ def test_refresh_asr_leaderboard_artifacts_combines_report_and_page(tmp_path: Pa
         in refresh_command_text
     )
     assert (
-        ".venv/bin/python scripts/refresh_asr_leaderboard_artifacts.py --check-only --hosted-dir-from-env"
+        ".venv/bin/python scripts/refresh_asr_leaderboard_artifacts.py --check-only --hosted-dir-from-env --require-hosted-current"
         in refresh_command_text
     )
+    hosted_current = refresh_module.validate_hosted_artifacts_current(
+        hosted_dir,
+        hosted_manifest_out=hosted_manifest,
+    )
+    assert hosted_current == {
+        "status": "complete",
+        "hosted_artifact_count": 17,
+        "hosted_path_count": 28,
+    }
     assert (hosted_dir / "asr-leaderboard-run-manifest.json").exists()
     assert (hosted_dir / "manifest-validation.json").read_text(
         encoding="utf-8"
@@ -2923,7 +2933,7 @@ def test_check_asr_leaderboard_page_validates_hosted_artifact_layout(tmp_path: P
                 ".venv/bin/python scripts/refresh_asr_leaderboard_artifacts.py",
                 ".venv/bin/python scripts/check_asr_leaderboard_page.py",
                 ".venv/bin/python scripts/refresh_asr_leaderboard_artifacts.py --hosted-dir-from-env",
-                ".venv/bin/python scripts/refresh_asr_leaderboard_artifacts.py --check-only --hosted-dir-from-env",
+                ".venv/bin/python scripts/refresh_asr_leaderboard_artifacts.py --check-only --hosted-dir-from-env --require-hosted-current",
                 "runs/asr-leaderboard/full-35-combined/results.jsonl",
                 "Combined ASR judge results used by the generated page and report.",
                 "runs/asr-leaderboard/full-35-combined/report.html",
