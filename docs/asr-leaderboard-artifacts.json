@@ -45,7 +45,7 @@
       "sha256": "c2455986c08956a6f84f1d80e02acab9db94c2e9ff625eaaab80fee0c0d9b35d"
     },
     {
-      "bytes": 13441,
+      "bytes": 13545,
       "digest_status": "ok",
       "exists": true,
       "hosted_paths": [
@@ -53,7 +53,7 @@
       ],
       "path": "docs/asr-leaderboard-manifest-validation.json",
       "purpose": "Coverage validation for the model/category result matrix.",
-      "sha256": "3a015832118f91558b9b3664c0c97470476cd43fc282d9268aafad1ca9328a0a"
+      "sha256": "d976da8486bd27929cf73c83897aa5f11d1434d1f3b038d5fbd54abdbb4bf7ba"
     },
     {
       "bytes": 546,

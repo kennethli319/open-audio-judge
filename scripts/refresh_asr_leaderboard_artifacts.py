@@ -2138,6 +2138,26 @@ def build_manifest_validation(
     model_ok_counts: dict[str, int] = {}
     category_counts: dict[str, int] = {}
     manifest_runs_by_path = _manifest_declared_runs_by_result_path(run_manifest)
+    manifest_result_paths = set(manifest_runs_by_path)
+    selected_result_paths = {
+        _normalize_results_path(path).resolve()
+        for path in result_paths
+    }
+    missing_from_manifest = sorted(
+        _repo_relative(path)
+        for path in selected_result_paths - manifest_result_paths
+    )
+    extra_in_manifest = sorted(
+        _repo_relative(path)
+        for path in manifest_result_paths - selected_result_paths
+    )
+    manifest_source_match = (
+        not run_manifest.exists()
+        or (
+            not missing_from_manifest
+            and not extra_in_manifest
+        )
+    )
 
     for result in results:
         model = str(result.metadata.get("candidate_model") or "")
@@ -2186,13 +2206,20 @@ def build_manifest_validation(
         _result_file_manifest_check(path, manifest_runs_by_path)
         for path in result_paths
     ]
-    complete = all(model["complete"] for model in models) and all(
-        check["model_match"] and check["digest_match"] for check in result_file_checks
+    complete = (
+        manifest_source_match
+        and all(model["complete"] for model in models)
+        and all(
+            check["model_match"] and check["digest_match"] for check in result_file_checks
+        )
     )
 
     return {
         "status": "complete" if complete else "incomplete",
         "run_manifest": _repo_relative(run_manifest),
+        "manifest_source_match": manifest_source_match,
+        "manifest_missing_selected_paths": missing_from_manifest,
+        "manifest_extra_paths": extra_in_manifest,
         "result_file_count": len(result_paths),
         "result_paths": [_repo_relative(path) for path in result_paths],
         "result_file_checks": result_file_checks,

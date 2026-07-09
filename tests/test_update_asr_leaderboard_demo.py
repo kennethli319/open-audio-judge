@@ -3898,6 +3898,9 @@ def test_manifest_validation_checks_declared_models(tmp_path: Path) -> None:
     )
 
     assert validation["status"] == "complete"
+    assert validation["manifest_source_match"] is True
+    assert validation["manifest_missing_selected_paths"] == []
+    assert validation["manifest_extra_paths"] == []
     check = validation["result_file_checks"][0]
     assert check["path"] == str(results_path)
     assert check["declared_model"] == "mlx-community/model-a"
@@ -3962,6 +3965,71 @@ def test_manifest_validation_marks_declared_model_mismatch_incomplete(tmp_path: 
     assert validation["result_file_checks"][0]["declared_model"] == "mlx-community/model-b"
     assert validation["result_file_checks"][0]["actual_models"] == ["mlx-community/model-a"]
     assert validation["result_file_checks"][0]["model_match"] is False
+
+
+def test_manifest_validation_marks_source_list_mismatch_incomplete(tmp_path: Path) -> None:
+    refresh_module = load_refresh_module()
+    results_path = tmp_path / "run-a" / "judge-report" / "results.jsonl"
+    extra_path = tmp_path / "run-b" / "judge-report" / "results.jsonl"
+    manifest = tmp_path / "manifest.json"
+    records = [
+        result_record(
+            case_id="asr-a-model-a",
+            model="mlx-community/model-a",
+            category="transcription_accuracy_wer",
+            score=100,
+            label="accurate",
+        ),
+        result_record(
+            case_id="asr-b-model-a",
+            model="mlx-community/model-a",
+            category="numeric_unit_integrity",
+            score=80,
+            label="accurate",
+        ),
+    ]
+    results_path.parent.mkdir(parents=True)
+    extra_path.parent.mkdir(parents=True)
+    results_path.write_text(
+        "".join(json.dumps(record) + "\n" for record in records),
+        encoding="utf-8",
+    )
+    extra_path.write_text(
+        "".join(json.dumps(record) + "\n" for record in records),
+        encoding="utf-8",
+    )
+    manifest.write_text(
+        json.dumps(
+            {
+                "runs": [
+                    {
+                        "run_name": "run-a",
+                        "model": "mlx-community/model-a",
+                        "results_path": str(results_path),
+                    },
+                    {
+                        "run_name": "run-b",
+                        "model": "mlx-community/model-a",
+                        "results_path": str(extra_path),
+                    },
+                ]
+            }
+        ),
+        encoding="utf-8",
+    )
+    results = refresh_module.load_results_jsonl(results_path)
+
+    validation = refresh_module.build_manifest_validation(
+        results,
+        result_paths=[results_path],
+        run_manifest=manifest,
+        expected_cases_per_model=2,
+    )
+
+    assert validation["status"] == "incomplete"
+    assert validation["manifest_source_match"] is False
+    assert validation["manifest_missing_selected_paths"] == []
+    assert validation["manifest_extra_paths"] == [str(extra_path)]
 
 
 def test_validate_coverage_rejects_uneven_model_category_counts(tmp_path: Path) -> None:

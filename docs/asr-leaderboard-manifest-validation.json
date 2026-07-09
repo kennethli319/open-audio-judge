@@ -11,6 +11,9 @@
   },
   "expected_cases_per_category": 5,
   "expected_cases_per_model": 35,
+  "manifest_extra_paths": [],
+  "manifest_missing_selected_paths": [],
+  "manifest_source_match": true,
   "model_count": 3,
   "models": [
     {
