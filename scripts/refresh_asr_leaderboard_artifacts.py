@@ -238,14 +238,18 @@ def main() -> None:
             summary_out=args.summary_out,
             seed_cases=args.seed_cases,
             expected_cases_per_model=args.expected_cases_per_model,
+            hosted_dir=hosted_dir,
         )
-        print(
+        message = (
             "ASR refresh preflight OK: "
             f"{check_summary['total_results']} results, "
             f"{check_summary['model_count']} models, "
             f"{check_summary['category_count']} categories, "
             f"{check_summary['result_file_count']} source files."
         )
+        if check_summary.get("hosted_page_status"):
+            message += f" Hosted mirror: {check_summary['hosted_page_status']}."
+        print(message)
         return
     refresh_asr_leaderboard_artifacts(
         result_paths,
@@ -286,6 +290,7 @@ def check_asr_leaderboard_refresh_inputs(
     expected_cases_per_model: int,
     artifact_root: Path = ROOT,
     path_maps: list[tuple[str, str]] | None = None,
+    hosted_dir: Path | None = None,
 ) -> dict[str, object]:
     result_paths = [_normalize_results_path(path) for path in result_paths]
     _validate_unique_result_paths(result_paths, context="ASR refresh preflight result sources")
@@ -320,7 +325,7 @@ def check_asr_leaderboard_refresh_inputs(
         artifact_root=artifact_root,
         path_maps=path_maps or [],
     )
-    return {
+    summary: dict[str, object] = {
         "status": "complete",
         "result_file_count": len(result_paths),
         "total_results": len(combined_results),
@@ -339,6 +344,19 @@ def check_asr_leaderboard_refresh_inputs(
         "seed_manifest_status": seed_validation["status"],
         "page_status": page_validation["status"],
     }
+    if hosted_dir:
+        hosted_validation = check_asr_leaderboard_page(
+            hosted_dir / page.name,
+            summary_path=hosted_dir / summary_out.name,
+            artifact_root=hosted_dir,
+            path_maps=[
+                ("docs/", ""),
+                ("runs/asr-leaderboard/", "asr-leaderboard/"),
+            ],
+            allow_missing_source_results=True,
+        )
+        summary["hosted_page_status"] = hosted_validation["status"]
+    return summary
 
 
 def refresh_asr_leaderboard_artifacts(

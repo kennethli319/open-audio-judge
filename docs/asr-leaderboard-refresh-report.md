@@ -130,6 +130,7 @@ This generated report summarizes the verified ASR leaderboard artifact set.
 - Manifest-based refresh: `.venv/bin/python scripts/refresh_asr_leaderboard_artifacts.py`
 - Page validation: `.venv/bin/python scripts/check_asr_leaderboard_page.py`
 - Hosted artifact sync: `.venv/bin/python scripts/refresh_asr_leaderboard_artifacts.py --hosted-dir-from-env`
+- Hosted mirror validation: `.venv/bin/python scripts/refresh_asr_leaderboard_artifacts.py --check-only --hosted-dir-from-env`
 
 ## Runtime Status
 

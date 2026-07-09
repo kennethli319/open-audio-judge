@@ -195,6 +195,7 @@ def render_generated_sections(
         ("Run refresh shell playbook", ["bash", workflow["refresh_commands_path"]]),
         ("Check generated page", workflow["page_validation_command"]),
         ("Sync hosted artifacts", workflow["hosted_artifact_command"]),
+        ("Check hosted mirror", workflow["hosted_validation_command"]),
     ]
     output_artifacts = build_output_artifact_index(results_path=results_path)
     source_file_summaries = summarize_source_result_files(source_result_paths or [])
@@ -509,6 +510,7 @@ def write_refresh_report(
                 f"- Manifest-based refresh: `{_shell_join(workflow['manifest_refresh_command'])}`",
                 f"- Page validation: `{_shell_join(workflow['page_validation_command'])}`",
                 f"- Hosted artifact sync: `{_shell_join(workflow['hosted_artifact_command'])}`",
+                f"- Hosted mirror validation: `{_shell_join(workflow['hosted_validation_command'])}`",
                 "",
                 "## Runtime Status",
                 "",
@@ -566,6 +568,7 @@ def write_refresh_commands_script(
         'if [[ "${ASR_SYNC_HOSTED:-0}" == "1" ]]; then',
         f'  : "${{{DEFAULT_HOSTED_DIR_ENV}:?Set {DEFAULT_HOSTED_DIR_ENV} to the Pages checkout open-audio-judge directory}}"',
         "  " + _shell_join(workflow["hosted_artifact_command"]),
+        "  " + _shell_join(workflow["hosted_validation_command"]),
         "fi",
         "",
         "# Optional when seed cases change: materialize local audio under ignored runs/.",
@@ -665,6 +668,12 @@ def _refresh_workflow(source_result_paths: list[Path]) -> dict[str, object]:
         "hosted_artifact_command": [
             ".venv/bin/python",
             "scripts/refresh_asr_leaderboard_artifacts.py",
+            "--hosted-dir-from-env",
+        ],
+        "hosted_validation_command": [
+            ".venv/bin/python",
+            "scripts/refresh_asr_leaderboard_artifacts.py",
+            "--check-only",
             "--hosted-dir-from-env",
         ],
         "hosted_artifact_env_var": DEFAULT_HOSTED_DIR_ENV,

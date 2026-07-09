@@ -714,6 +714,7 @@ def _required_page_text(summary: dict[str, Any]) -> list[str]:
                 "manifest_refresh_command",
                 "page_validation_command",
                 "hosted_artifact_command",
+                "hosted_validation_command",
             }
             if isinstance(command, list)
         ]

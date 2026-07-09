@@ -233,6 +233,8 @@ def test_render_generated_sections_summarizes_verified_asr_results(tmp_path: Pat
     assert "scripts/validate_asr_seed_manifest.py" in html
     assert "Check generated page" in html
     assert "scripts/check_asr_leaderboard_page.py" in html
+    assert "Check hosted mirror" in html
+    assert ".venv/bin/python scripts/refresh_asr_leaderboard_artifacts.py --check-only --hosted-dir-from-env" in html
     assert "Run one MLX ASR model" in html
     assert ".venv/bin/oaj autojudge-mlx-asr" in html
     assert "--model &lt;mlx-community/model-id&gt;" in html
@@ -508,6 +510,12 @@ def test_write_summary_artifact_records_models_and_categories(tmp_path: Path) ->
         "scripts/refresh_asr_leaderboard_artifacts.py",
         "--hosted-dir-from-env",
     ]
+    assert summary["refresh_workflow"]["hosted_validation_command"] == [
+        ".venv/bin/python",
+        "scripts/refresh_asr_leaderboard_artifacts.py",
+        "--check-only",
+        "--hosted-dir-from-env",
+    ]
     assert summary["refresh_workflow"]["hosted_artifact_env_var"] == "ASR_LEADERBOARD_HOSTED_DIR"
     assert summary["refresh_workflow"]["local_secret_env_command"] == [
         "source",
@@ -726,6 +734,8 @@ def test_write_refresh_report_records_coverage_and_commands(tmp_path: Path) -> N
     assert "Discover latest complete runs" in text
     assert "--discover-complete-model-runs" in text
     assert "Hosted artifact sync" in text
+    assert "Hosted mirror validation" in text
+    assert ".venv/bin/python scripts/refresh_asr_leaderboard_artifacts.py --check-only --hosted-dir-from-env" in text
     assert "Page validation" in text
     assert "scripts/check_asr_leaderboard_page.py" in text
     assert "## Runtime Status" in text
@@ -929,6 +939,7 @@ def test_refresh_asr_leaderboard_artifacts_combines_report_and_page(tmp_path: Pa
         "to the Pages checkout open-audio-judge directory}\""
     ) in refresh_command_text
     assert "source /Users/wangyauli/.openclaw/secrets/open-audio-judge-gemini.env" in refresh_command_text
+    assert ".venv/bin/python scripts/refresh_asr_leaderboard_artifacts.py --check-only --hosted-dir-from-env" in refresh_command_text
     assert (hosted_dir / "asr-leaderboard-run-manifest.json").exists()
     assert (hosted_dir / "manifest-validation.json").read_text(
         encoding="utf-8"
