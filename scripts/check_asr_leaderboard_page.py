@@ -420,6 +420,8 @@ def _validate_run_manifest_artifact(
         result_count = run.get("result_count")
         ok_count = run.get("ok_count")
         category_counts = run.get("category_counts")
+        declared_bytes = run.get("bytes")
+        declared_sha256 = run.get("sha256")
         if not isinstance(model, str) or not model:
             raise ValueError(f"{path} runs[{index}] has invalid model: {model!r}")
         if summary_models and model not in summary_models:
@@ -438,6 +440,31 @@ def _validate_run_manifest_artifact(
             )
         if sum(category_counts.values()) != result_count:
             raise ValueError(f"{path} runs[{index}] category_counts do not sum to result_count.")
+        if declared_bytes is not None and (
+            not isinstance(declared_bytes, int) or declared_bytes < 0
+        ):
+            raise ValueError(f"{path} runs[{index}] has invalid bytes: {declared_bytes!r}")
+        if declared_sha256 is not None and (
+            not isinstance(declared_sha256, str)
+            or len(declared_sha256) != 64
+            or any(char not in "0123456789abcdef" for char in declared_sha256)
+        ):
+            raise ValueError(f"{path} runs[{index}] has invalid sha256: {declared_sha256!r}")
+
+        resolved_results_path = _resolve_summary_path(
+            results_path,
+            artifact_root=artifact_root,
+            path_maps=path_maps,
+        )
+        if resolved_results_path.exists():
+            if declared_bytes is not None and resolved_results_path.stat().st_size != declared_bytes:
+                raise ValueError(
+                    f"{path} runs[{index}] result bytes are stale: {results_path}"
+                )
+            if declared_sha256 is not None and _sha256_file(resolved_results_path) != declared_sha256:
+                raise ValueError(
+                    f"{path} runs[{index}] result sha256 is stale: {results_path}"
+                )
 
         run_paths.append(results_path)
         counts_by_model[model] = counts_by_model.get(model, 0) + result_count

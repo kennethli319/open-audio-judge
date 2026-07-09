@@ -2625,6 +2625,70 @@ def test_check_asr_leaderboard_page_rejects_stale_run_manifest(tmp_path: Path) -
         )
 
 
+def test_check_asr_leaderboard_page_rejects_stale_run_manifest_digest(
+    tmp_path: Path,
+) -> None:
+    check_module = load_check_module()
+    manifest = tmp_path / "run-manifest.json"
+    summary_path = tmp_path / "summary.json"
+    results_path = tmp_path / "runs" / "asr-leaderboard" / "run-a" / "judge-report" / "results.jsonl"
+    records = [
+        result_record(
+            case_id="asr-a-model-a",
+            model="mlx-community/model-a",
+            category="transcription_accuracy_wer",
+            score=100,
+            label="accurate",
+        ),
+        result_record(
+            case_id="asr-b-model-a",
+            model="mlx-community/model-a",
+            category="numeric_unit_integrity",
+            score=80,
+            label="accurate",
+        ),
+    ]
+    results_path.parent.mkdir(parents=True)
+    results_path.write_text(
+        "".join(json.dumps(record) + "\n" for record in records),
+        encoding="utf-8",
+    )
+    manifest.write_text(
+        json.dumps(
+            run_manifest_record(
+                [(str(results_path), records)],
+                expected_cases_per_model=2,
+            )
+        )
+        + "\n",
+        encoding="utf-8",
+    )
+    results_path.write_text(
+        results_path.read_text(encoding="utf-8") + "\n",
+        encoding="utf-8",
+    )
+    summary = {
+        "run_manifest_path": str(manifest),
+        "source_result_paths": [str(results_path)],
+        "expected_cases_per_model": 2,
+        "models": [
+            {
+                "model": "mlx-community/model-a",
+                "result_count": 2,
+                "ok_count": 2,
+            }
+        ],
+    }
+
+    with pytest.raises(ValueError, match="result bytes are stale"):
+        check_module._validate_run_manifest_artifact(
+            summary,
+            summary_path=summary_path,
+            artifact_root=tmp_path,
+            path_maps=[],
+        )
+
+
 def test_check_asr_leaderboard_page_rejects_incomplete_validation_artifact(
     tmp_path: Path,
 ) -> None:
