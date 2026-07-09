@@ -97,10 +97,32 @@ def _validate_summary(summary: Any, *, summary_path: Path) -> None:
         raise ValueError("ASR leaderboard summary category_count does not match categories.")
 
     _validate_referenced_artifacts(summary, summary_path=summary_path)
+    _validate_status_artifact(
+        summary,
+        key="manifest_validation_path",
+        summary_path=summary_path,
+        expected_fields={
+            "total_results": summary["total_results"],
+            "model_count": summary["model_count"],
+            "category_count": summary["category_count"],
+            "expected_cases_per_model": summary["expected_cases_per_model"],
+        },
+    )
+    _validate_status_artifact(
+        summary,
+        key="seed_manifest_validation_path",
+        summary_path=summary_path,
+    )
 
 
 def _validate_referenced_artifacts(summary: dict[str, Any], *, summary_path: Path) -> None:
-    artifact_keys = ("results_path", "report_path")
+    artifact_keys = (
+        "results_path",
+        "report_path",
+        "run_manifest_path",
+        "manifest_validation_path",
+        "seed_manifest_validation_path",
+    )
     missing = []
     for key in artifact_keys:
         raw_path = summary.get(key)
@@ -123,6 +145,35 @@ def _validate_referenced_artifacts(summary: dict[str, Any], *, summary_path: Pat
     if missing:
         formatted = ", ".join(f"{key}={path}" for key, path in missing)
         raise ValueError(f"{summary_path} references missing ASR artifact(s): {formatted}")
+
+
+def _validate_status_artifact(
+    summary: dict[str, Any],
+    *,
+    key: str,
+    summary_path: Path,
+    expected_fields: dict[str, object] | None = None,
+) -> None:
+    raw_path = summary.get(key)
+    if not isinstance(raw_path, str) or not raw_path:
+        raise ValueError(f"{summary_path} has invalid {key}: {raw_path!r}")
+    path = _resolve_summary_path(raw_path)
+    try:
+        artifact = json.loads(path.read_text(encoding="utf-8"))
+    except json.JSONDecodeError as exc:
+        raise ValueError(f"{path} must contain valid JSON: {exc}") from exc
+
+    if not isinstance(artifact, dict):
+        raise ValueError(f"{path} must contain a JSON object.")
+    if artifact.get("status") != "complete":
+        raise ValueError(f"{path} status must be complete.")
+
+    for field, expected in (expected_fields or {}).items():
+        if artifact.get(field) != expected:
+            raise ValueError(
+                f"{path} {field}={artifact.get(field)!r} does not match "
+                f"{summary_path} {field}={expected!r}."
+            )
 
 
 def _required_page_text(summary: dict[str, Any]) -> list[str]:
