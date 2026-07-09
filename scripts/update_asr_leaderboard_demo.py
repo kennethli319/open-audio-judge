@@ -619,6 +619,8 @@ def write_report_index(
 ) -> None:
     model_summaries = summarize_models(results)
     validate_coverage(results, model_summaries, expected_cases_per_model=expected_cases_per_model)
+    category_columns = category_columns_for_results(results)
+    coverage_matrix = build_model_category_matrix(results)
     source_file_summaries = summarize_source_result_files(source_result_paths or [])
     output_path.parent.mkdir(parents=True, exist_ok=True)
     lines = [
@@ -630,6 +632,8 @@ def write_report_index(
         "",
         f"- Results JSONL: `{_repo_relative(results_path)}`",
         f"- HTML report: `{_repo_relative(results_path.with_name('report.html'))}`",
+        f"- Results SHA-256: `{_sha256_file(results_path) if results_path.exists() else 'missing'}`",
+        f"- Report SHA-256: `{_sha256_file(results_path.with_name('report.html')) if results_path.with_name('report.html').exists() else 'missing'}`",
         f"- Demo page: `{_repo_relative(DEFAULT_PAGE)}`",
         f"- Summary JSON: `{_repo_relative(DEFAULT_SUMMARY)}`",
         f"- Refresh report: `{_repo_relative(DEFAULT_REFRESH_REPORT)}`",
@@ -651,14 +655,23 @@ def write_report_index(
             for summary in model_summaries
         ),
         "",
+        "## Category Matrix",
+        "",
+        "| Model | " + " | ".join(label for _, label in category_columns) + " |",
+        "| --- | " + " | ".join("---:" for _ in category_columns) + " |",
+        *(
+            _model_category_matrix_row(row, category_columns=category_columns)
+            for row in coverage_matrix
+        ),
+        "",
         "## Source Run Reports",
         "",
     ]
     if source_file_summaries:
         lines.extend(
             [
-                "| Results | Report | Model | Cases | Categories |",
-                "| --- | --- | --- | ---: | --- |",
+                "| Results | Report | Model | Cases | Score | Report Status | Categories |",
+                "| --- | --- | --- | ---: | ---: | --- | --- |",
                 *(
                     "| "
                     f"`{_repo_relative(summary.path)}` | "
@@ -666,6 +679,8 @@ def write_report_index(
                     f"{'' if summary.report_exists else ' missing'} | "
                     f"{', '.join(f'`{model}`' for model in summary.models)} | "
                     f"{summary.ok_count}/{summary.result_count} ok | "
+                    f"{summary.average_score:.1f} | "
+                    f"{_format_source_report_status(summary)} | "
                     f"{_format_category_counts(summary.categories)} |"
                     for summary in source_file_summaries
                 ),
@@ -734,6 +749,8 @@ def write_report_links_artifact(
                         "result_sha256": summary.result_sha256,
                         "report_path": _repo_relative(summary.report_path),
                         "report_exists": summary.report_exists,
+                        "report_bytes": summary.report_bytes,
+                        "report_sha256": summary.report_sha256,
                         "models": list(summary.models),
                         "result_count": summary.result_count,
                         "ok_count": summary.ok_count,
@@ -1367,6 +1384,15 @@ def _format_category_counts(categories: Counter[str]) -> str:
     return ", ".join(
         f"`{category}`: {count}"
         for category, count in sorted(categories.items())
+    )
+
+
+def _format_source_report_status(summary: SourceResultFileSummary) -> str:
+    if not summary.report_exists:
+        return "missing"
+    return (
+        f"{summary.report_bytes} bytes, "
+        f"`{summary.report_sha256}`"
     )
 
 

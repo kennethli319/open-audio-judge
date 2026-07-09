@@ -864,6 +864,59 @@ def test_write_refresh_report_records_coverage_and_commands(tmp_path: Path) -> N
     )
 
 
+def test_write_report_index_records_matrix_and_source_report_status(tmp_path: Path) -> None:
+    module = load_script_module()
+    results_path = tmp_path / "combined" / "results.jsonl"
+    source_results_path = tmp_path / "model-a" / "judge-report" / "results.jsonl"
+    source_report_path = source_results_path.with_name("report.html")
+    records = [
+        result_record(
+            case_id="asr-a-model-a",
+            model="mlx-community/model-a",
+            category="transcription_accuracy_wer",
+            score=100,
+            label="accurate",
+        ),
+        result_record(
+            case_id="asr-b-model-a",
+            model="mlx-community/model-a",
+            category="numeric_unit_integrity",
+            score=80,
+            label="accurate",
+        ),
+    ]
+    results_path.parent.mkdir(parents=True)
+    source_results_path.parent.mkdir(parents=True)
+    serialized = "".join(json.dumps(record) + "\n" for record in records)
+    results_path.write_text(serialized, encoding="utf-8")
+    source_results_path.write_text(serialized, encoding="utf-8")
+    results_path.with_name("report.html").write_text("<html>combined</html>\n", encoding="utf-8")
+    source_report_path.write_text("<html>source</html>\n", encoding="utf-8")
+    index_path = tmp_path / "report-index.md"
+    results = module.load_results_jsonl(results_path)
+
+    module.write_report_index(
+        results,
+        index_path,
+        results_path=results_path,
+        expected_cases_per_model=2,
+        source_result_paths=[source_results_path],
+    )
+
+    text = index_path.read_text(encoding="utf-8")
+    assert "## Category Matrix" in text
+    assert (
+        "| Model | WER | Numeric/Unit | Negation/Modality | Temporal | Entity | "
+        "Paraphrase | Acoustic Noise |"
+    ) in text
+    assert "| `mlx-community/model-a` | 1 | 1 | 0 | 0 | 0 | 0 | 0 |" in text
+    assert f"- Results SHA-256: `{file_sha256(results_path)}`" in text
+    assert f"- Report SHA-256: `{file_sha256(results_path.with_name('report.html'))}`" in text
+    assert "| Results | Report | Model | Cases | Score | Report Status | Categories |" in text
+    assert f"{source_report_path.stat().st_size} bytes, `{file_sha256(source_report_path)}`" in text
+    assert "`numeric_unit_integrity`: 1, `transcription_accuracy_wer`: 1" in text
+
+
 def test_render_generated_sections_includes_source_run_reports(tmp_path: Path) -> None:
     module = load_script_module()
     results_path = tmp_path / "combined" / "results.jsonl"

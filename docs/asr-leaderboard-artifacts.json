@@ -50,18 +50,18 @@
       "sha256": "dbb4a7ebd2329df31b91392bb7226f61f8700bf533a057a7df4a66db2ba83567"
     },
     {
-      "bytes": 6436,
+      "bytes": 8642,
       "digest_status": "ok",
       "exists": true,
       "path": "docs/asr-leaderboard-report-index.md",
-      "sha256": "f82530bfe5d57a3b470ef19c87e538e17b03b314faea3f67e0ebef65a437e0a3"
+      "sha256": "eab987e66b2bcd454151677a1f6c9904c72bd310cbc4d2975af7d8d75a6221c6"
     },
     {
-      "bytes": 11620,
+      "bytes": 13780,
       "digest_status": "ok",
       "exists": true,
       "path": "docs/asr-leaderboard-report-links.json",
-      "sha256": "98b7c1cc80a77e64259f4391fdaae023508f97617abad3fdf8e32abd4d1de878"
+      "sha256": "08b0a3735618701173dd820f8e9279b0199488a1157cf8e19485215d02d18b3a"
     },
     {
       "bytes": 10460,
