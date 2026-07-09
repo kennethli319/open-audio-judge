@@ -1,0 +1,86 @@
+{
+  "category_count": 7,
+  "category_counts": {
+    "acoustic_noise_robustness": 15,
+    "entity_factual_integrity": 15,
+    "negation_modality_scope": 15,
+    "numeric_unit_integrity": 15,
+    "semantic_paraphrase_preservation": 15,
+    "temporal_scheduling_accuracy": 15,
+    "transcription_accuracy_wer": 15
+  },
+  "expected_cases_per_category": 5,
+  "expected_cases_per_model": 35,
+  "model_count": 3,
+  "models": [
+    {
+      "category_counts": {
+        "acoustic_noise_robustness": 5,
+        "entity_factual_integrity": 5,
+        "negation_modality_scope": 5,
+        "numeric_unit_integrity": 5,
+        "semantic_paraphrase_preservation": 5,
+        "temporal_scheduling_accuracy": 5,
+        "transcription_accuracy_wer": 5
+      },
+      "complete": true,
+      "model": "mlx-community/Qwen3-ASR-1.7B-8bit",
+      "ok_count": 35,
+      "result_count": 35
+    },
+    {
+      "category_counts": {
+        "acoustic_noise_robustness": 5,
+        "entity_factual_integrity": 5,
+        "negation_modality_scope": 5,
+        "numeric_unit_integrity": 5,
+        "semantic_paraphrase_preservation": 5,
+        "temporal_scheduling_accuracy": 5,
+        "transcription_accuracy_wer": 5
+      },
+      "complete": true,
+      "model": "mlx-community/VibeVoice-ASR-4bit",
+      "ok_count": 35,
+      "result_count": 35
+    },
+    {
+      "category_counts": {
+        "acoustic_noise_robustness": 5,
+        "entity_factual_integrity": 5,
+        "negation_modality_scope": 5,
+        "numeric_unit_integrity": 5,
+        "semantic_paraphrase_preservation": 5,
+        "temporal_scheduling_accuracy": 5,
+        "transcription_accuracy_wer": 5
+      },
+      "complete": true,
+      "model": "mlx-community/whisper-large-v3-turbo-asr-fp16",
+      "ok_count": 35,
+      "result_count": 35
+    }
+  ],
+  "result_file_count": 18,
+  "result_paths": [
+    "runs/asr-leaderboard/whisper-large-v3-turbo-smoke/judge-report/results.jsonl",
+    "runs/asr-leaderboard/whisper-large-v3-turbo-full-gap/judge-report/results.jsonl",
+    "runs/asr-leaderboard/whisper-large-v3-turbo-semantic-smoke/judge-report/results.jsonl",
+    "runs/asr-leaderboard/whisper-large-v3-turbo-entity-smoke/judge-report/results.jsonl",
+    "runs/asr-leaderboard/whisper-large-v3-turbo-paraphrase-smoke/judge-report/results.jsonl",
+    "runs/asr-leaderboard/whisper-large-v3-turbo-noise-smoke/judge-report/results.jsonl",
+    "runs/asr-leaderboard/qwen3-asr-1.7b-smoke/judge-report/results.jsonl",
+    "runs/asr-leaderboard/qwen3-asr-1.7b-full-gap/judge-report/results.jsonl",
+    "runs/asr-leaderboard/qwen3-asr-1.7b-semantic-smoke/judge-report/results.jsonl",
+    "runs/asr-leaderboard/qwen3-asr-1.7b-entity-smoke/judge-report/results.jsonl",
+    "runs/asr-leaderboard/qwen3-asr-1.7b-paraphrase-smoke/judge-report/results.jsonl",
+    "runs/asr-leaderboard/qwen3-asr-1.7b-noise-smoke/judge-report/results.jsonl",
+    "runs/asr-leaderboard/vibevoice-asr-smoke/judge-report/results.jsonl",
+    "runs/asr-leaderboard/vibevoice-asr-full-gap/judge-report/results.jsonl",
+    "runs/asr-leaderboard/vibevoice-asr-semantic-smoke/judge-report/results.jsonl",
+    "runs/asr-leaderboard/vibevoice-asr-entity-smoke/judge-report/results.jsonl",
+    "runs/asr-leaderboard/vibevoice-asr-paraphrase-smoke/judge-report/results.jsonl",
+    "runs/asr-leaderboard/vibevoice-asr-noise-smoke/judge-report/results.jsonl"
+  ],
+  "run_manifest": "docs/asr-leaderboard-run-manifest.json",
+  "status": "complete",
+  "total_results": 105
+}

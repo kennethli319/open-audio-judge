@@ -65,6 +65,7 @@
   ],
   "category_count": 7,
   "expected_cases_per_model": 35,
+  "manifest_validation_path": "docs/asr-leaderboard-manifest-validation.json",
   "model_count": 3,
   "models": [
     {

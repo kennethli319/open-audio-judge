@@ -3,6 +3,8 @@ import json
 import sys
 from pathlib import Path
 
+import pytest
+
 
 SCRIPT = Path("scripts/update_asr_leaderboard_demo.py")
 REFRESH_SCRIPT = Path("scripts/refresh_asr_leaderboard_artifacts.py")
@@ -110,6 +112,7 @@ def test_render_generated_sections_summarizes_verified_asr_results(tmp_path: Pat
     assert "report.html" in html
     assert "docs/asr-leaderboard-summary.json" in html
     assert "docs/asr-leaderboard-run-manifest.json" in html
+    assert "docs/asr-leaderboard-manifest-validation.json" in html
     assert "reproducible refresh workflow" in html
     assert "--hosted-dir /path/to/kennethli319.github.io/open-audio-judge" in html
 
@@ -171,6 +174,7 @@ def test_write_summary_artifact_records_models_and_categories(tmp_path: Path) ->
         str(tmp_path / "model-a" / "judge-report" / "results.jsonl")
     ]
     assert summary["run_manifest_path"] == "docs/asr-leaderboard-run-manifest.json"
+    assert summary["manifest_validation_path"] == "docs/asr-leaderboard-manifest-validation.json"
     assert summary["refresh_workflow"]["audio_materialization_command"] == [
         ".venv/bin/python",
         "scripts/synthesize_tts_cases.py",
@@ -253,6 +257,7 @@ def test_refresh_asr_leaderboard_artifacts_combines_report_and_page(tmp_path: Pa
     out = tmp_path / "combined"
     page = tmp_path / "demo.html"
     summary = tmp_path / "summary.json"
+    manifest_validation = tmp_path / "manifest-validation.json"
     hosted_dir = tmp_path / "hosted" / "open-audio-judge"
     records_a = [
         result_record(
@@ -304,6 +309,8 @@ def test_refresh_asr_leaderboard_artifacts_combines_report_and_page(tmp_path: Pa
         out=out,
         page=page,
         summary_out=summary,
+        manifest_validation_out=manifest_validation,
+        run_manifest=refresh_module.DEFAULT_RUN_MANIFEST,
         hosted_dir=hosted_dir,
         expected_cases_per_model=2,
     )
@@ -322,6 +329,14 @@ def test_refresh_asr_leaderboard_artifacts_combines_report_and_page(tmp_path: Pa
         str(first),
         str(second),
     ]
+    validation = json.loads(manifest_validation.read_text(encoding="utf-8"))
+    assert validation["status"] == "complete"
+    assert validation["result_file_count"] == 2
+    assert validation["expected_cases_per_category"] == 1
+    assert validation["models"][0]["category_counts"] == {
+        "numeric_unit_integrity": 1,
+        "transcription_accuracy_wer": 1,
+    }
     assert (hosted_dir / "demo.html").read_text(encoding="utf-8") == page.read_text(
         encoding="utf-8"
     )
@@ -329,6 +344,9 @@ def test_refresh_asr_leaderboard_artifacts_combines_report_and_page(tmp_path: Pa
         encoding="utf-8"
     )
     assert (hosted_dir / "asr-leaderboard-run-manifest.json").exists()
+    assert (hosted_dir / "manifest-validation.json").read_text(
+        encoding="utf-8"
+    ) == manifest_validation.read_text(encoding="utf-8")
 
 
 def test_refresh_asr_leaderboard_artifacts_reads_run_manifest(tmp_path: Path) -> None:
@@ -355,3 +373,57 @@ def test_refresh_asr_leaderboard_artifacts_reads_run_manifest(tmp_path: Path) ->
     paths = refresh_module._result_paths_from_run_manifest(manifest)
 
     assert paths == [nested, direct]
+
+
+def test_validate_coverage_rejects_uneven_model_category_counts(tmp_path: Path) -> None:
+    module = load_script_module()
+    results = module.load_results_jsonl(
+        _write_results(
+            tmp_path / "results.jsonl",
+            [
+                result_record(
+                    case_id="asr-a-model-a",
+                    model="mlx-community/model-a",
+                    category="transcription_accuracy_wer",
+                    score=100,
+                    label="accurate",
+                ),
+                result_record(
+                    case_id="asr-b-model-a",
+                    model="mlx-community/model-a",
+                    category="transcription_accuracy_wer",
+                    score=90,
+                    label="accurate",
+                ),
+                result_record(
+                    case_id="asr-c-model-b",
+                    model="mlx-community/model-b",
+                    category="numeric_unit_integrity",
+                    score=80,
+                    label="accurate",
+                ),
+                result_record(
+                    case_id="asr-d-model-b",
+                    model="mlx-community/model-b",
+                    category="numeric_unit_integrity",
+                    score=70,
+                    label="accurate",
+                ),
+            ]
+        )
+    )
+
+    with pytest.raises(ValueError, match="uneven category coverage"):
+        module.render_generated_sections(
+            results,
+            results_path=Path("results.jsonl"),
+            expected_cases_per_model=2,
+        )
+
+
+def _write_results(path: Path, records: list[dict]) -> Path:
+    path.write_text(
+        "".join(json.dumps(record) + "\n" for record in records),
+        encoding="utf-8",
+    )
+    return path

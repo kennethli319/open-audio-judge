@@ -22,6 +22,7 @@ from scripts.update_asr_leaderboard_demo import (  # noqa: E402
 
 DEFAULT_COMBINED_OUT = ROOT / "runs" / "asr-leaderboard" / "full-35-combined"
 DEFAULT_RUN_MANIFEST = ROOT / "docs" / "asr-leaderboard-run-manifest.json"
+DEFAULT_MANIFEST_VALIDATION = ROOT / "docs" / "asr-leaderboard-manifest-validation.json"
 FULL_RUN_RESULT_PATHS = [
     ROOT
     / "runs"
@@ -89,6 +90,12 @@ def main() -> None:
     parser.add_argument("--page", type=Path, default=DEFAULT_PAGE)
     parser.add_argument("--summary-out", type=Path, default=DEFAULT_SUMMARY)
     parser.add_argument(
+        "--manifest-validation-out",
+        type=Path,
+        default=DEFAULT_MANIFEST_VALIDATION,
+        help="Write a machine-readable validation summary for the ASR run manifest.",
+    )
+    parser.add_argument(
         "--run-manifest",
         type=Path,
         default=DEFAULT_RUN_MANIFEST,
@@ -126,6 +133,8 @@ def main() -> None:
         out=args.out,
         page=args.page,
         summary_out=args.summary_out,
+        manifest_validation_out=args.manifest_validation_out,
+        run_manifest=args.run_manifest,
         hosted_dir=args.hosted_dir,
         expected_cases_per_model=args.expected_cases_per_model,
     )
@@ -137,6 +146,8 @@ def refresh_asr_leaderboard_artifacts(
     out: Path,
     page: Path,
     summary_out: Path,
+    manifest_validation_out: Path,
+    run_manifest: Path,
     expected_cases_per_model: int,
     hosted_dir: Path | None = None,
 ) -> None:
@@ -172,12 +183,20 @@ def refresh_asr_leaderboard_artifacts(
         expected_cases_per_model=expected_cases_per_model,
         source_result_paths=result_paths,
     )
+    write_manifest_validation_artifact(
+        combined_results,
+        manifest_validation_out,
+        result_paths=result_paths,
+        run_manifest=run_manifest,
+        expected_cases_per_model=expected_cases_per_model,
+    )
     copied_hosted_paths = (
         copy_hosted_asr_artifacts(
             hosted_dir,
             page=page,
             summary_out=summary_out,
-            run_manifest=DEFAULT_RUN_MANIFEST,
+            run_manifest=run_manifest,
+            manifest_validation_out=manifest_validation_out,
         )
         if hosted_dir
         else []
@@ -188,6 +207,7 @@ def refresh_asr_leaderboard_artifacts(
     print(f"Report:  {combined_report_path}")
     print(f"Page:    {page}")
     print(f"Summary: {summary_out}")
+    print(f"Manifest validation: {manifest_validation_out}")
     for copied_path in copied_hosted_paths:
         print(f"Hosted:  {copied_path}")
 
@@ -198,10 +218,11 @@ def copy_hosted_asr_artifacts(
     page: Path = DEFAULT_PAGE,
     summary_out: Path = DEFAULT_SUMMARY,
     run_manifest: Path = DEFAULT_RUN_MANIFEST,
+    manifest_validation_out: Path = DEFAULT_MANIFEST_VALIDATION,
 ) -> list[Path]:
     hosted_dir.mkdir(parents=True, exist_ok=True)
     copied_paths = []
-    for source in (page, summary_out, run_manifest):
+    for source in (page, summary_out, run_manifest, manifest_validation_out):
         if not source.exists():
             raise FileNotFoundError(f"Missing hosted ASR source artifact: {source}")
         destination = hosted_dir / source.name
@@ -290,6 +311,107 @@ def _validate_candidate_paths(paths: list[Path], *, expected_cases_per_model: in
         results_path=DEFAULT_COMBINED_OUT / "results.jsonl",
         expected_cases_per_model=expected_cases_per_model,
     )
+
+
+def write_manifest_validation_artifact(
+    results: list,
+    output_path: Path,
+    *,
+    result_paths: list[Path],
+    run_manifest: Path,
+    expected_cases_per_model: int,
+) -> None:
+    validation = build_manifest_validation(
+        results,
+        result_paths=result_paths,
+        run_manifest=run_manifest,
+        expected_cases_per_model=expected_cases_per_model,
+    )
+    output_path.parent.mkdir(parents=True, exist_ok=True)
+    output_path.write_text(
+        json.dumps(validation, indent=2, sort_keys=True) + "\n",
+        encoding="utf-8",
+    )
+
+
+def build_manifest_validation(
+    results: list,
+    *,
+    result_paths: list[Path],
+    run_manifest: Path,
+    expected_cases_per_model: int,
+) -> dict[str, object]:
+    model_category_counts: dict[str, dict[str, int]] = {}
+    model_counts: dict[str, int] = {}
+    model_ok_counts: dict[str, int] = {}
+    category_counts: dict[str, int] = {}
+
+    for result in results:
+        model = str(result.metadata.get("candidate_model") or "")
+        category = str(result.metadata.get("eval_category") or "")
+        model_counts[model] = model_counts.get(model, 0) + 1
+        if result.status == "ok":
+            model_ok_counts[model] = model_ok_counts.get(model, 0) + 1
+        category_counts[category] = category_counts.get(category, 0) + 1
+        category_map = model_category_counts.setdefault(model, {})
+        category_map[category] = category_map.get(category, 0) + 1
+
+    categories = sorted(category_counts)
+    expected_cases_per_category = (
+        expected_cases_per_model // len(categories)
+        if categories and expected_cases_per_model % len(categories) == 0
+        else None
+    )
+
+    models = []
+    for model in sorted(model_counts):
+        category_map = model_category_counts[model]
+        models.append(
+            {
+                "model": model,
+                "result_count": model_counts[model],
+                "ok_count": model_ok_counts.get(model, 0),
+                "category_counts": {
+                    category: category_map.get(category, 0)
+                    for category in categories
+                },
+                "complete": (
+                    model_counts[model] == expected_cases_per_model
+                    and model_ok_counts.get(model, 0) == model_counts[model]
+                    and (
+                        expected_cases_per_category is None
+                        or all(
+                            category_map.get(category, 0) == expected_cases_per_category
+                            for category in categories
+                        )
+                    )
+                ),
+            }
+        )
+
+    return {
+        "status": "complete" if all(model["complete"] for model in models) else "incomplete",
+        "run_manifest": _repo_relative(run_manifest),
+        "result_file_count": len(result_paths),
+        "result_paths": [_repo_relative(path) for path in result_paths],
+        "total_results": len(results),
+        "model_count": len(models),
+        "category_count": len(categories),
+        "expected_cases_per_model": expected_cases_per_model,
+        "expected_cases_per_category": expected_cases_per_category,
+        "category_counts": {
+            category: category_counts[category]
+            for category in categories
+        },
+        "models": models,
+    }
+
+
+def _repo_relative(path: Path) -> str:
+    try:
+        return path.resolve().relative_to(ROOT).as_posix()
+    except ValueError:
+        return path.as_posix()
 
 
 if __name__ == "__main__":

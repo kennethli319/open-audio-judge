@@ -17,6 +17,7 @@ DEFAULT_RESULTS = ROOT / "runs" / "asr-leaderboard" / "full-35-combined" / "resu
 DEFAULT_PAGE = ROOT / "docs" / "asr-leaderboard-demo.html"
 DEFAULT_SUMMARY = ROOT / "docs" / "asr-leaderboard-summary.json"
 DEFAULT_RUN_MANIFEST = ROOT / "docs" / "asr-leaderboard-run-manifest.json"
+DEFAULT_MANIFEST_VALIDATION = ROOT / "docs" / "asr-leaderboard-manifest-validation.json"
 DEFAULT_AUDIO_CASES = ROOT / "runs" / "asr-research-audio" / "tts_audio_cases.jsonl"
 DEFAULT_SEED_CASES = ROOT / "examples" / "asr_research_cases.jsonl"
 START_MARKER = "<!-- ASR_LEADERBOARD_GENERATED_START -->"
@@ -106,6 +107,7 @@ def render_generated_sections(
     report_label = html.escape(_repo_relative(results_path.with_name("report.html")))
     summary_label = html.escape(_repo_relative(DEFAULT_SUMMARY))
     manifest_label = html.escape(_repo_relative(DEFAULT_RUN_MANIFEST))
+    validation_label = html.escape(_repo_relative(DEFAULT_MANIFEST_VALIDATION))
 
     return "\n".join(
         [
@@ -140,8 +142,9 @@ def render_generated_sections(
                 "after rerunning the verified ASR model jobs. The combined local report is "
                 f"<code>{report_label}</code> and the committed summary artifact is "
                 f"<code>{summary_label}</code>. The committed run manifest is "
-                f"<code>{manifest_label}</code>; together they include the source result files "
-                "and reproducible refresh workflow. Pass "
+                f"<code>{manifest_label}</code>, with coverage validation in "
+                f"<code>{validation_label}</code>; together they include the source result files, "
+                "complete model/category matrix, and reproducible refresh workflow. Pass "
                 "<code>--hosted-dir /path/to/kennethli319.github.io/open-audio-judge</code> "
                 "to copy the same verified artifacts into the hosted Pages checkout.</p>"
             ),
@@ -172,6 +175,7 @@ def write_summary_artifact(
                     for path in source_result_paths or []
                 ],
                 "run_manifest_path": _repo_relative(DEFAULT_RUN_MANIFEST),
+                "manifest_validation_path": _repo_relative(DEFAULT_MANIFEST_VALIDATION),
                 "refresh_workflow": _refresh_workflow(source_result_paths or []),
                 "total_results": len(results),
                 "model_count": len(model_summaries),
@@ -327,6 +331,15 @@ def validate_coverage(
             )
         if summary.ok_count != summary.result_count:
             raise ValueError(f"{summary.model} has {summary.result_count - summary.ok_count} non-ok results.")
+        model_category_counts = Counter(
+            str(result.metadata.get("eval_category") or "")
+            for result in results
+            if result.metadata.get("candidate_model") == summary.model
+        )
+        if set(model_category_counts) != set(category_counts) or len(set(model_category_counts.values())) != 1:
+            raise ValueError(
+                f"{summary.model} has uneven category coverage: {dict(model_category_counts)}"
+            )
 
 
 def replace_generated_block(page: Path, generated: str) -> None:
