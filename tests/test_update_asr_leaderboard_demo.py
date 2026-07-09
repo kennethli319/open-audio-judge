@@ -777,6 +777,12 @@ def test_write_refresh_report_records_coverage_and_commands(tmp_path: Path) -> N
     assert "PYTHONPATH=src .venv/bin/python -m open_audio_judge.cli check-mlx-asr-runtime" in text
     assert "Seed manifest validation: `docs/asr-seed-manifest-validation.json`" in text
     assert "Hosted artifact manifest: `docs/asr-leaderboard-hosted-manifest.json`" in text
+    assert "Hosted demo URL: `https://kennethli319.github.io/open-audio-judge/asr-leaderboard-demo.html`" in text
+    assert (
+        "Hosted combined report URL: "
+        "`https://kennethli319.github.io/open-audio-judge/asr-leaderboard/full-35-combined/report.html`"
+        in text
+    )
     assert "Refresh command playbook: `docs/asr-leaderboard-refresh-commands.sh`" in text
     assert "--summary-out docs/asr-seed-manifest-validation.json" in text
     assert "Load local Gemini secret before model runs" in text
@@ -2071,6 +2077,19 @@ def test_check_asr_leaderboard_page_validates_generated_artifacts(tmp_path: Path
         results_path=results_path,
         expected_cases_per_model=2,
     )
+    report_links_data = json.loads(report_links.read_text(encoding="utf-8"))
+    assert report_links_data["hosted"] == {
+        "base_path": "open-audio-judge",
+        "base_url": "https://kennethli319.github.io/open-audio-judge",
+        "combined_report_path": "open-audio-judge/asr-leaderboard/full-35-combined/report.html",
+        "combined_report_url": (
+            "https://kennethli319.github.io/open-audio-judge/"
+            "asr-leaderboard/full-35-combined/report.html"
+        ),
+        "combined_results_path": "open-audio-judge/asr-leaderboard/full-35-combined/results.jsonl",
+        "demo_page_path": "open-audio-judge/asr-leaderboard-demo.html",
+        "demo_page_url": "https://kennethli319.github.io/open-audio-judge/asr-leaderboard-demo.html",
+    }
 
     unindexed_hosted_source = tmp_path / "unindexed-hosted-source.json"
     unindexed_hosted_source.write_text("{}\n", encoding="utf-8")

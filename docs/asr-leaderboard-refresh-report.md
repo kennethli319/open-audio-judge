@@ -15,6 +15,8 @@ This generated report summarizes the verified ASR leaderboard artifact set.
 - Seed manifest validation: `docs/asr-seed-manifest-validation.json`
 - Next-refresh plan: `docs/asr-leaderboard-next-runs.json`
 - Hosted artifact manifest: `docs/asr-leaderboard-hosted-manifest.json`
+- Hosted demo URL: `https://kennethli319.github.io/open-audio-judge/asr-leaderboard-demo.html`
+- Hosted combined report URL: `https://kennethli319.github.io/open-audio-judge/asr-leaderboard/full-35-combined/report.html`
 - Artifact bundle index: `docs/asr-leaderboard-artifacts.json`
 - Runtime status: `docs/asr-leaderboard-runtime-status.json`
 - Total judged transcripts: 105

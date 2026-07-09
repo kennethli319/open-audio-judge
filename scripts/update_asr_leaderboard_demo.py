@@ -31,6 +31,8 @@ DEFAULT_RUNTIME_STATUS = ROOT / "docs" / "asr-leaderboard-runtime-status.json"
 DEFAULT_AUDIO_CASES = ROOT / "runs" / "asr-research-audio" / "tts_audio_cases.jsonl"
 DEFAULT_SEED_CASES = ROOT / "examples" / "asr_research_cases.jsonl"
 DEFAULT_HOSTED_DIR_ENV = "ASR_LEADERBOARD_HOSTED_DIR"
+HOSTED_BASE_PATH = "open-audio-judge"
+HOSTED_BASE_URL = "https://kennethli319.github.io/open-audio-judge"
 START_MARKER = "<!-- ASR_LEADERBOARD_GENERATED_START -->"
 END_MARKER = "<!-- ASR_LEADERBOARD_GENERATED_END -->"
 
@@ -478,6 +480,8 @@ def write_refresh_report(
                 f"- Seed manifest validation: `{_repo_relative(DEFAULT_SEED_MANIFEST_VALIDATION)}`",
                 f"- Next-refresh plan: `{_repo_relative(DEFAULT_NEXT_RUNS)}`",
                 f"- Hosted artifact manifest: `{_repo_relative(DEFAULT_HOSTED_MANIFEST)}`",
+                f"- Hosted demo URL: `{HOSTED_BASE_URL}/asr-leaderboard-demo.html`",
+                f"- Hosted combined report URL: `{HOSTED_BASE_URL}/asr-leaderboard/full-35-combined/report.html`",
                 f"- Artifact bundle index: `{_repo_relative(DEFAULT_ARTIFACT_INDEX)}`",
                 f"- Runtime status: `{_repo_relative(DEFAULT_RUNTIME_STATUS)}`",
                 f"- Total judged transcripts: {len(results)}",
@@ -624,6 +628,8 @@ def write_report_index(
         f"- Summary JSON: `{_repo_relative(DEFAULT_SUMMARY)}`",
         f"- Refresh report: `{_repo_relative(DEFAULT_REFRESH_REPORT)}`",
         f"- Report links JSON: `{_repo_relative(DEFAULT_REPORT_LINKS)}`",
+        f"- Hosted demo URL: `{HOSTED_BASE_URL}/asr-leaderboard-demo.html`",
+        f"- Hosted combined report URL: `{HOSTED_BASE_URL}/asr-leaderboard/full-35-combined/report.html`",
         "",
         "## Coverage",
         "",
@@ -693,6 +699,21 @@ def write_report_links_artifact(
                 "description": "Machine-readable ASR report links for the hosted demo and refresh automation.",
                 "version": 1,
                 "demo_page": _repo_relative(DEFAULT_PAGE),
+                "hosted": {
+                    "base_path": HOSTED_BASE_PATH,
+                    "base_url": HOSTED_BASE_URL,
+                    "demo_page_path": f"{HOSTED_BASE_PATH}/asr-leaderboard-demo.html",
+                    "demo_page_url": f"{HOSTED_BASE_URL}/asr-leaderboard-demo.html",
+                    "combined_results_path": (
+                        f"{HOSTED_BASE_PATH}/asr-leaderboard/full-35-combined/results.jsonl"
+                    ),
+                    "combined_report_path": (
+                        f"{HOSTED_BASE_PATH}/asr-leaderboard/full-35-combined/report.html"
+                    ),
+                    "combined_report_url": (
+                        f"{HOSTED_BASE_URL}/asr-leaderboard/full-35-combined/report.html"
+                    ),
+                },
                 "combined": {
                     "results_path": _repo_relative(results_path),
                     "report_path": _repo_relative(results_path.with_name("report.html")),

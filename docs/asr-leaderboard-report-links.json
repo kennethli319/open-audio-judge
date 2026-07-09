@@ -8,6 +8,15 @@
   },
   "demo_page": "docs/asr-leaderboard-demo.html",
   "description": "Machine-readable ASR report links for the hosted demo and refresh automation.",
+  "hosted": {
+    "base_path": "open-audio-judge",
+    "base_url": "https://kennethli319.github.io/open-audio-judge",
+    "combined_report_path": "open-audio-judge/asr-leaderboard/full-35-combined/report.html",
+    "combined_report_url": "https://kennethli319.github.io/open-audio-judge/asr-leaderboard/full-35-combined/report.html",
+    "combined_results_path": "open-audio-judge/asr-leaderboard/full-35-combined/results.jsonl",
+    "demo_page_path": "open-audio-judge/asr-leaderboard-demo.html",
+    "demo_page_url": "https://kennethli319.github.io/open-audio-judge/asr-leaderboard-demo.html"
+  },
   "source_reports": [
     {
       "categories": {
