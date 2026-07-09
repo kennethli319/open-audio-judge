@@ -69,6 +69,44 @@ def result_record(
     }
 
 
+def run_manifest_record(
+    path_records: list[tuple[str, list[dict]]],
+    *,
+    expected_cases_per_model: int,
+) -> dict:
+    runs = []
+    for results_path, records in path_records:
+        models = sorted(
+            {
+                str(record["metadata"]["candidate_model"])
+                for record in records
+            }
+        )
+        assert len(models) == 1
+        category_counts = {}
+        for record in records:
+            category = str(record["metadata"]["eval_category"])
+            category_counts[category] = category_counts.get(category, 0) + 1
+        runs.append(
+            {
+                "run_name": Path(results_path).parent.name,
+                "model": models[0],
+                "results_path": results_path,
+                "result_count": len(records),
+                "ok_count": sum(1 for record in records if record["status"] == "ok"),
+                "category_counts": dict(sorted(category_counts.items())),
+            }
+        )
+    return {
+        "description": "Unit-test ASR leaderboard source result manifest.",
+        "version": 2,
+        "expected_cases_per_model": expected_cases_per_model,
+        "generated_audio_manifest": "runs/asr-research-audio/tts_audio_cases.jsonl",
+        "result_paths": [results_path for results_path, _ in path_records],
+        "runs": runs,
+    }
+
+
 def test_render_generated_sections_summarizes_verified_asr_results(tmp_path: Path) -> None:
     module = load_script_module()
     results_path = tmp_path / "results.jsonl"
@@ -673,6 +711,7 @@ def test_refresh_asr_leaderboard_artifacts_combines_report_and_page(tmp_path: Pa
     page = tmp_path / "demo.html"
     summary = tmp_path / "summary.json"
     refresh_report = tmp_path / "refresh-report.md"
+    run_manifest = tmp_path / "run-manifest.json"
     manifest_validation = tmp_path / "manifest-validation.json"
     seed_manifest_validation = tmp_path / "seed-manifest-validation.json"
     hosted_dir = tmp_path / "hosted" / "open-audio-judge"
@@ -728,7 +767,8 @@ def test_refresh_asr_leaderboard_artifacts_combines_report_and_page(tmp_path: Pa
         summary_out=summary,
         refresh_report_out=refresh_report,
         manifest_validation_out=manifest_validation,
-        run_manifest=refresh_module.DEFAULT_RUN_MANIFEST,
+        run_manifest=run_manifest,
+        update_run_manifest=True,
         seed_manifest_validation_out=seed_manifest_validation,
         hosted_dir=hosted_dir,
         expected_cases_per_model=2,
@@ -849,7 +889,21 @@ def test_check_asr_leaderboard_page_validates_generated_artifacts(tmp_path: Path
         results_path=results_path,
         expected_cases_per_model=2,
     )
-    run_manifest.write_text('{"runs": []}\n', encoding="utf-8")
+    model_a_records = [record for record in records if record["metadata"]["candidate_model"] == "mlx-community/model-a"]
+    model_b_records = [record for record in records if record["metadata"]["candidate_model"] == "mlx-community/model-b"]
+    run_manifest.write_text(
+        json.dumps(
+            run_manifest_record(
+                [
+                    ("runs/asr-leaderboard/model-a/judge-report/results.jsonl", model_a_records),
+                    ("runs/asr-leaderboard/model-b/judge-report/results.jsonl", model_b_records),
+                ],
+                expected_cases_per_model=2,
+            )
+        )
+        + "\n",
+        encoding="utf-8",
+    )
     manifest_validation.write_text(
         json.dumps(
             {
@@ -893,8 +947,57 @@ def test_check_asr_leaderboard_page_validates_hosted_artifact_layout(tmp_path: P
     report_path = hosted / "asr-leaderboard" / "full-35-combined" / "report.html"
 
     results_path.parent.mkdir(parents=True)
-    for path in (results_path, report_path, run_manifest):
+    for path in (results_path, report_path):
         path.write_text("{}\n", encoding="utf-8")
+    run_manifest.write_text(
+        json.dumps(
+            run_manifest_record(
+                [
+                    (
+                        "runs/asr-leaderboard/model-a/judge-report/results.jsonl",
+                        [
+                            result_record(
+                                case_id="asr-a-model-a",
+                                model="mlx-community/model-a",
+                                category="transcription_accuracy_wer",
+                                score=100,
+                                label="accurate",
+                            ),
+                            result_record(
+                                case_id="asr-b-model-a",
+                                model="mlx-community/model-a",
+                                category="numeric_unit_integrity",
+                                score=80,
+                                label="accurate",
+                            ),
+                        ],
+                    ),
+                    (
+                        "runs/asr-leaderboard/model-b/judge-report/results.jsonl",
+                        [
+                            result_record(
+                                case_id="asr-a-model-b",
+                                model="mlx-community/model-b",
+                                category="transcription_accuracy_wer",
+                                score=60,
+                                label="needs_review",
+                            ),
+                            result_record(
+                                case_id="asr-b-model-b",
+                                model="mlx-community/model-b",
+                                category="numeric_unit_integrity",
+                                score=40,
+                                label="inaccurate",
+                            ),
+                        ],
+                    ),
+                ],
+                expected_cases_per_model=2,
+            )
+        )
+        + "\n",
+        encoding="utf-8",
+    )
     manifest_validation.write_text(
         json.dumps(
             {
@@ -919,6 +1022,7 @@ def test_check_asr_leaderboard_page_validates_hosted_artifact_layout(tmp_path: P
                 "seed_manifest_validation_path": "docs/asr-seed-manifest-validation.json",
                 "source_result_paths": [
                     "runs/asr-leaderboard/model-a/judge-report/results.jsonl",
+                    "runs/asr-leaderboard/model-b/judge-report/results.jsonl",
                 ],
                 "output_artifacts": [
                     {
@@ -1030,6 +1134,64 @@ def test_check_asr_leaderboard_page_validates_hosted_artifact_layout(tmp_path: P
     assert validation["status"] == "complete"
 
 
+def test_check_asr_leaderboard_page_rejects_stale_run_manifest(tmp_path: Path) -> None:
+    check_module = load_check_module()
+    manifest = tmp_path / "run-manifest.json"
+    summary_path = tmp_path / "summary.json"
+    manifest.write_text(
+        json.dumps(
+            run_manifest_record(
+                [
+                    (
+                        "runs/asr-leaderboard/old-run/judge-report/results.jsonl",
+                        [
+                            result_record(
+                                case_id="asr-a-model-a",
+                                model="mlx-community/model-a",
+                                category="transcription_accuracy_wer",
+                                score=100,
+                                label="accurate",
+                            ),
+                            result_record(
+                                case_id="asr-b-model-a",
+                                model="mlx-community/model-a",
+                                category="numeric_unit_integrity",
+                                score=80,
+                                label="accurate",
+                            ),
+                        ],
+                    ),
+                ],
+                expected_cases_per_model=2,
+            )
+        )
+        + "\n",
+        encoding="utf-8",
+    )
+    summary = {
+        "run_manifest_path": str(manifest),
+        "source_result_paths": [
+            "runs/asr-leaderboard/new-run/judge-report/results.jsonl",
+        ],
+        "expected_cases_per_model": 2,
+        "models": [
+            {
+                "model": "mlx-community/model-a",
+                "result_count": 2,
+                "ok_count": 2,
+            }
+        ],
+    }
+
+    with pytest.raises(ValueError, match="result_paths do not match"):
+        check_module._validate_run_manifest_artifact(
+            summary,
+            summary_path=summary_path,
+            artifact_root=tmp_path,
+            path_maps=[],
+        )
+
+
 def test_check_asr_leaderboard_page_rejects_incomplete_validation_artifact(
     tmp_path: Path,
 ) -> None:
@@ -1100,7 +1262,21 @@ def test_check_asr_leaderboard_page_rejects_incomplete_validation_artifact(
         results_path=results_path,
         expected_cases_per_model=2,
     )
-    run_manifest.write_text('{"runs": []}\n', encoding="utf-8")
+    model_a_records = [record for record in records if record["metadata"]["candidate_model"] == "mlx-community/model-a"]
+    model_b_records = [record for record in records if record["metadata"]["candidate_model"] == "mlx-community/model-b"]
+    run_manifest.write_text(
+        json.dumps(
+            run_manifest_record(
+                [
+                    ("runs/asr-leaderboard/model-a/judge-report/results.jsonl", model_a_records),
+                    ("runs/asr-leaderboard/model-b/judge-report/results.jsonl", model_b_records),
+                ],
+                expected_cases_per_model=2,
+            )
+        )
+        + "\n",
+        encoding="utf-8",
+    )
     manifest_validation.write_text(
         json.dumps(
             {
@@ -1237,7 +1413,18 @@ def test_check_asr_leaderboard_page_rejects_missing_output_artifact(tmp_path: Pa
         results_path=results_path,
         expected_cases_per_model=2,
     )
-    run_manifest.write_text('{"runs": []}\n', encoding="utf-8")
+    run_manifest.write_text(
+        json.dumps(
+            run_manifest_record(
+                [
+                    ("runs/asr-leaderboard/model-a/judge-report/results.jsonl", records),
+                ],
+                expected_cases_per_model=2,
+            )
+        )
+        + "\n",
+        encoding="utf-8",
+    )
     manifest_validation.write_text(
         json.dumps(
             {

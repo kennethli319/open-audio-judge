@@ -151,6 +151,12 @@ def _validate_summary(
         path_maps=path_maps,
         allow_missing_source_results=allow_missing_source_results,
     )
+    _validate_run_manifest_artifact(
+        summary,
+        summary_path=summary_path,
+        artifact_root=artifact_root,
+        path_maps=path_maps,
+    )
     _validate_output_artifacts(
         summary,
         summary_path=summary_path,
@@ -216,6 +222,109 @@ def _validate_referenced_artifacts(
     if missing:
         formatted = ", ".join(f"{key}={path}" for key, path in missing)
         raise ValueError(f"{summary_path} references missing ASR artifact(s): {formatted}")
+
+
+def _validate_run_manifest_artifact(
+    summary: dict[str, Any],
+    *,
+    summary_path: Path,
+    artifact_root: Path,
+    path_maps: list[tuple[str, str]],
+) -> None:
+    raw_path = summary.get("run_manifest_path")
+    if not isinstance(raw_path, str) or not raw_path:
+        raise ValueError(f"{summary_path} has invalid run_manifest_path: {raw_path!r}")
+    path = _resolve_summary_path(raw_path, artifact_root=artifact_root, path_maps=path_maps)
+    try:
+        manifest = json.loads(path.read_text(encoding="utf-8"))
+    except json.JSONDecodeError as exc:
+        raise ValueError(f"{path} must contain valid JSON: {exc}") from exc
+
+    if not isinstance(manifest, dict):
+        raise ValueError(f"{path} must contain a JSON object.")
+    if manifest.get("expected_cases_per_model") != summary["expected_cases_per_model"]:
+        raise ValueError(
+            f"{path} expected_cases_per_model={manifest.get('expected_cases_per_model')!r} "
+            f"does not match {summary_path} expected_cases_per_model="
+            f"{summary['expected_cases_per_model']!r}."
+        )
+
+    result_paths = manifest.get("result_paths")
+    runs = manifest.get("runs")
+    if not isinstance(result_paths, list) or not result_paths:
+        raise ValueError(f"{path} must include a non-empty result_paths list.")
+    if not all(isinstance(result_path, str) and result_path for result_path in result_paths):
+        raise ValueError(f"{path} result_paths entries must be non-empty strings.")
+    if not isinstance(runs, list) or not runs:
+        raise ValueError(f"{path} must include a non-empty runs list.")
+
+    summary_sources = summary.get("source_result_paths", [])
+    if summary_sources:
+        if result_paths != summary_sources:
+            raise ValueError(
+                f"{path} result_paths do not match {summary_path} source_result_paths."
+            )
+
+    summary_models = {
+        str(model["model"])
+        for model in summary.get("models", [])
+        if isinstance(model, dict) and model.get("model")
+    }
+    run_paths = []
+    counts_by_model: dict[str, int] = {}
+    ok_counts_by_model: dict[str, int] = {}
+    for index, run in enumerate(runs):
+        if not isinstance(run, dict):
+            raise ValueError(f"{path} runs[{index}] must be an object.")
+        model = run.get("model")
+        results_path = run.get("results_path")
+        result_count = run.get("result_count")
+        ok_count = run.get("ok_count")
+        category_counts = run.get("category_counts")
+        if not isinstance(model, str) or not model:
+            raise ValueError(f"{path} runs[{index}] has invalid model: {model!r}")
+        if summary_models and model not in summary_models:
+            raise ValueError(f"{path} runs[{index}] model is not present in the summary: {model}")
+        if not isinstance(results_path, str) or not results_path:
+            raise ValueError(f"{path} runs[{index}] has invalid results_path: {results_path!r}")
+        if not isinstance(result_count, int) or result_count < 1:
+            raise ValueError(f"{path} runs[{index}] has invalid result_count: {result_count!r}")
+        if not isinstance(ok_count, int) or ok_count < 0 or ok_count > result_count:
+            raise ValueError(f"{path} runs[{index}] has invalid ok_count: {ok_count!r}")
+        if not isinstance(category_counts, dict) or not category_counts:
+            raise ValueError(f"{path} runs[{index}] must include non-empty category_counts.")
+        if not all(isinstance(count, int) and count >= 0 for count in category_counts.values()):
+            raise ValueError(f"{path} runs[{index}] has invalid category_counts: {category_counts!r}")
+        if sum(category_counts.values()) != result_count:
+            raise ValueError(f"{path} runs[{index}] category_counts do not sum to result_count.")
+
+        run_paths.append(results_path)
+        counts_by_model[model] = counts_by_model.get(model, 0) + result_count
+        ok_counts_by_model[model] = ok_counts_by_model.get(model, 0) + ok_count
+
+    if run_paths != result_paths:
+        raise ValueError(f"{path} runs results_path values do not match result_paths.")
+
+    for model in summary.get("models", []):
+        if not isinstance(model, dict):
+            continue
+        model_name = model.get("model")
+        result_count = model.get("result_count")
+        ok_count = model.get("ok_count")
+        if not isinstance(model_name, str) or not model_name:
+            continue
+        if result_count is not None and counts_by_model.get(model_name) != result_count:
+            raise ValueError(
+                f"{path} aggregated result_count for {model_name}="
+                f"{counts_by_model.get(model_name)!r} does not match summary result_count="
+                f"{result_count!r}."
+            )
+        if ok_count is not None and ok_counts_by_model.get(model_name) != ok_count:
+            raise ValueError(
+                f"{path} aggregated ok_count for {model_name}="
+                f"{ok_counts_by_model.get(model_name)!r} does not match summary ok_count="
+                f"{ok_count!r}."
+            )
 
 
 def _validate_output_artifacts(
