@@ -87,6 +87,18 @@ This generated report summarizes the verified ASR leaderboard artifact set.
 | `runs/asr-leaderboard/vibevoice-asr-paraphrase-smoke/judge-report/results.jsonl` | `mlx-community/VibeVoice-ASR-4bit` | 5/5 ok | `semantic_paraphrase_preservation`: 5 | 15 | 98.4 | 5 accurate |
 | `runs/asr-leaderboard/vibevoice-asr-noise-smoke/judge-report/results.jsonl` | `mlx-community/VibeVoice-ASR-4bit` | 5/5 ok | `acoustic_noise_robustness`: 5 | 15 | 92.8 | 4 accurate, 1 needs_review |
 
+## Generated Artifact Index
+
+| Path | Purpose |
+| --- | --- |
+| `runs/asr-leaderboard/full-35-combined/results.jsonl` | Combined ASR judge results used by the generated page and report. |
+| `runs/asr-leaderboard/full-35-combined/report.html` | Local combined HTML report with per-case judge details. |
+| `docs/asr-leaderboard-summary.json` | Machine-readable leaderboard summary and reproducible refresh workflow. |
+| `docs/asr-leaderboard-refresh-report.md` | Human-readable coverage, score, source-file, and command report. |
+| `docs/asr-leaderboard-run-manifest.json` | Committed source result manifest for manifest-based refreshes. |
+| `docs/asr-leaderboard-manifest-validation.json` | Coverage validation for the model/category result matrix. |
+| `docs/asr-seed-manifest-validation.json` | Seed-manifest validation proving public-safe ASR cases keep exact category coverage. |
+
 ## Refresh Commands
 
 - Seed manifest validation: `.venv/bin/python scripts/validate_asr_seed_manifest.py --summary-out docs/asr-seed-manifest-validation.json`

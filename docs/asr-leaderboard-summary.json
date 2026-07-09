@@ -176,6 +176,36 @@
       "result_count": 35
     }
   ],
+  "output_artifacts": [
+    {
+      "path": "runs/asr-leaderboard/full-35-combined/results.jsonl",
+      "purpose": "Combined ASR judge results used by the generated page and report."
+    },
+    {
+      "path": "runs/asr-leaderboard/full-35-combined/report.html",
+      "purpose": "Local combined HTML report with per-case judge details."
+    },
+    {
+      "path": "docs/asr-leaderboard-summary.json",
+      "purpose": "Machine-readable leaderboard summary and reproducible refresh workflow."
+    },
+    {
+      "path": "docs/asr-leaderboard-refresh-report.md",
+      "purpose": "Human-readable coverage, score, source-file, and command report."
+    },
+    {
+      "path": "docs/asr-leaderboard-run-manifest.json",
+      "purpose": "Committed source result manifest for manifest-based refreshes."
+    },
+    {
+      "path": "docs/asr-leaderboard-manifest-validation.json",
+      "purpose": "Coverage validation for the model/category result matrix."
+    },
+    {
+      "path": "docs/asr-seed-manifest-validation.json",
+      "purpose": "Seed-manifest validation proving public-safe ASR cases keep exact category coverage."
+    }
+  ],
   "refresh_runtime_status": {
     "all_loaded_results_ok": true,
     "gemini_judge": "verified_from_loaded_results",

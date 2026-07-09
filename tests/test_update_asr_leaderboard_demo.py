@@ -219,6 +219,36 @@ def test_write_summary_artifact_records_models_and_categories(tmp_path: Path) ->
     assert summary["run_manifest_path"] == "docs/asr-leaderboard-run-manifest.json"
     assert summary["manifest_validation_path"] == "docs/asr-leaderboard-manifest-validation.json"
     assert summary["seed_manifest_validation_path"] == "docs/asr-seed-manifest-validation.json"
+    assert summary["output_artifacts"] == [
+        {
+            "path": str(results_path),
+            "purpose": "Combined ASR judge results used by the generated page and report.",
+        },
+        {
+            "path": str(results_path.with_name("report.html")),
+            "purpose": "Local combined HTML report with per-case judge details.",
+        },
+        {
+            "path": "docs/asr-leaderboard-summary.json",
+            "purpose": "Machine-readable leaderboard summary and reproducible refresh workflow.",
+        },
+        {
+            "path": "docs/asr-leaderboard-refresh-report.md",
+            "purpose": "Human-readable coverage, score, source-file, and command report.",
+        },
+        {
+            "path": "docs/asr-leaderboard-run-manifest.json",
+            "purpose": "Committed source result manifest for manifest-based refreshes.",
+        },
+        {
+            "path": "docs/asr-leaderboard-manifest-validation.json",
+            "purpose": "Coverage validation for the model/category result matrix.",
+        },
+        {
+            "path": "docs/asr-seed-manifest-validation.json",
+            "purpose": "Seed-manifest validation proving public-safe ASR cases keep exact category coverage.",
+        },
+    ]
     assert summary["refresh_workflow"]["seed_manifest_validation_command"] == [
         ".venv/bin/python",
         "scripts/validate_asr_seed_manifest.py",
@@ -479,6 +509,8 @@ def test_write_refresh_report_records_coverage_and_commands(tmp_path: Path) -> N
     assert "| `mlx-community/model-a` | 1 | 1 | 0 | 0 | 0 | 0 | 0 |" in text
     assert "## Source Result File Coverage" in text
     assert f"| `{source_results_path}` | `mlx-community/model-a` | 2/2 ok |" in text
+    assert "## Generated Artifact Index" in text
+    assert f"| `{results_path}` | Combined ASR judge results used by the generated page and report. |" in text
 
 
 def test_replace_generated_block_only_updates_marked_section(tmp_path: Path) -> None:

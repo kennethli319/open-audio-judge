@@ -148,18 +148,7 @@ def render_generated_sections(
         ("Check generated page", workflow["page_validation_command"]),
         ("Sync hosted artifacts", workflow["hosted_artifact_command"]),
     ]
-    output_artifacts = [
-        (results_label, "Combined ASR judge results used by the generated page and report."),
-        (report_label, "Local combined HTML report with per-case judge details."),
-        (summary_label, "Machine-readable leaderboard summary and reproducible refresh workflow."),
-        (refresh_report_label, "Human-readable coverage, score, source-file, and command report."),
-        (manifest_label, "Committed source result manifest for manifest-based refreshes."),
-        (validation_label, "Coverage validation for the model/category result matrix."),
-        (
-            seed_validation_label,
-            "Seed-manifest validation proving public-safe ASR cases keep exact category coverage.",
-        ),
-    ]
+    output_artifacts = build_output_artifact_index(results_path=results_path)
 
     return "\n".join(
         [
@@ -199,8 +188,9 @@ def render_generated_sections(
                 f"<code>{summary_label}</code>. The generated refresh report is "
                 f"<code>{refresh_report_label}</code>. The committed run manifest is "
                 f"<code>{manifest_label}</code>, with coverage validation in "
-                f"<code>{validation_label}</code>; together they include the source result files, "
-                "complete model/category matrix, seed-manifest validation, and reproducible refresh workflow. Pass "
+                f"<code>{validation_label}</code> and seed-manifest validation in "
+                f"<code>{seed_validation_label}</code>; together they include the source result files, "
+                "complete model/category matrix, and reproducible refresh workflow. Pass "
                 "<code>--hosted-dir /path/to/kennethli319.github.io/open-audio-judge</code> "
                 "to copy the same verified artifacts into the hosted Pages checkout.</p>"
             ),
@@ -227,10 +217,10 @@ def render_generated_sections(
             "      <tbody>",
             *(
                 "        <tr>"
-                f"<td><code>{path}</code></td>"
-                f"<td>{html.escape(purpose)}</td>"
+                f"<td><code>{html.escape(artifact['path'])}</code></td>"
+                f"<td>{html.escape(artifact['purpose'])}</td>"
                 "</tr>"
-                for path, purpose in output_artifacts
+                for artifact in output_artifacts
             ),
             "      </tbody>",
             "    </table>",
@@ -254,6 +244,7 @@ def write_summary_artifact(
     coverage_matrix = build_model_category_matrix(results)
     category_columns = category_columns_for_results(results)
     source_file_summaries = summarize_source_result_files(source_result_paths or [])
+    output_artifacts = build_output_artifact_index(results_path=results_path)
     output_path.parent.mkdir(parents=True, exist_ok=True)
     output_path.write_text(
         json.dumps(
@@ -271,6 +262,7 @@ def write_summary_artifact(
                 "run_manifest_path": _repo_relative(DEFAULT_RUN_MANIFEST),
                 "manifest_validation_path": _repo_relative(DEFAULT_MANIFEST_VALIDATION),
                 "seed_manifest_validation_path": _repo_relative(DEFAULT_SEED_MANIFEST_VALIDATION),
+                "output_artifacts": output_artifacts,
                 "refresh_workflow": _refresh_workflow(source_result_paths or []),
                 "refresh_runtime_status": runtime_status,
                 "total_results": len(results),
@@ -328,6 +320,7 @@ def write_refresh_report(
     coverage_matrix = build_model_category_matrix(results)
     category_columns = category_columns_for_results(results)
     source_file_summaries = summarize_source_result_files(source_result_paths or [])
+    output_artifacts = build_output_artifact_index(results_path=results_path)
     output_path.parent.mkdir(parents=True, exist_ok=True)
     output_path.write_text(
         "\n".join(
@@ -384,6 +377,15 @@ def write_refresh_report(
                 *(
                     _source_file_markdown_row(summary)
                     for summary in source_file_summaries
+                ),
+                "",
+                "## Generated Artifact Index",
+                "",
+                "| Path | Purpose |",
+                "| --- | --- |",
+                *(
+                    f"| `{artifact['path']}` | {artifact['purpose']} |"
+                    for artifact in output_artifacts
                 ),
                 "",
                 "## Refresh Commands",
@@ -475,6 +477,39 @@ def _refresh_workflow(source_result_paths: list[Path]) -> dict[str, object]:
             "do not commit or print secrets."
         ),
     }
+
+
+def build_output_artifact_index(*, results_path: Path) -> list[dict[str, str]]:
+    return [
+        {
+            "path": _repo_relative(results_path),
+            "purpose": "Combined ASR judge results used by the generated page and report.",
+        },
+        {
+            "path": _repo_relative(results_path.with_name("report.html")),
+            "purpose": "Local combined HTML report with per-case judge details.",
+        },
+        {
+            "path": _repo_relative(DEFAULT_SUMMARY),
+            "purpose": "Machine-readable leaderboard summary and reproducible refresh workflow.",
+        },
+        {
+            "path": _repo_relative(DEFAULT_REFRESH_REPORT),
+            "purpose": "Human-readable coverage, score, source-file, and command report.",
+        },
+        {
+            "path": _repo_relative(DEFAULT_RUN_MANIFEST),
+            "purpose": "Committed source result manifest for manifest-based refreshes.",
+        },
+        {
+            "path": _repo_relative(DEFAULT_MANIFEST_VALIDATION),
+            "purpose": "Coverage validation for the model/category result matrix.",
+        },
+        {
+            "path": _repo_relative(DEFAULT_SEED_MANIFEST_VALIDATION),
+            "purpose": "Seed-manifest validation proving public-safe ASR cases keep exact category coverage.",
+        },
+    ]
 
 
 def build_refresh_runtime_status(results: list[EvaluationResult]) -> dict[str, object]:
