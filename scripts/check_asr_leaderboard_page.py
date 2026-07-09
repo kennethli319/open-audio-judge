@@ -1071,6 +1071,7 @@ def _validate_refresh_commands_script(
 
     command_keys = (
         "refresh_check_command",
+        "preflight_summary_command",
         "audio_ready_check_command",
         "seed_manifest_validation_command",
         "freshness_check_command",

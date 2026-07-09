@@ -454,6 +454,14 @@
       ".venv/bin/python",
       "scripts/check_asr_leaderboard_page.py"
     ],
+    "preflight_summary_command": [
+      ".venv/bin/python",
+      "scripts/refresh_asr_leaderboard_artifacts.py",
+      "--check-only",
+      "--require-generated-fresh",
+      "--check-summary-out",
+      "runs/asr-leaderboard/preflight-summary.json"
+    ],
     "refresh_check_command": [
       ".venv/bin/python",
       "scripts/refresh_asr_leaderboard_artifacts.py",

@@ -227,6 +227,7 @@ def render_generated_sections(
     workflow = _refresh_workflow([])
     workflow_commands = [
         ("Preflight refresh inputs", workflow["refresh_check_command"]),
+        ("Write preflight summary", workflow["preflight_summary_command"]),
         ("Require audio manifest readiness", workflow["audio_ready_check_command"]),
         ("Validate seed manifest", workflow["seed_manifest_validation_command"]),
         ("Materialize audio", workflow["audio_materialization_command"]),
@@ -562,6 +563,7 @@ def write_refresh_report(
                 + ", ".join(f"`{model}`" for model in workflow["fallback_model_ids"]),
                 f"- Fallback handling: {workflow['fallback_handling']}",
                 f"- Preflight refresh inputs: `{_shell_join(workflow['refresh_check_command'])}`",
+                f"- Write preflight summary: `{_shell_join(workflow['preflight_summary_command'])}`",
                 f"- Require audio manifest readiness: `{_shell_join(workflow['audio_ready_check_command'])}`",
                 f"- Refresh runtime status artifact: `{_shell_join(workflow['runtime_status_check_command'])}`",
                 f"- Combine and refresh committed artifacts: `{_shell_join(workflow['combine_refresh_command'])}`",
@@ -764,6 +766,7 @@ def write_refresh_commands_script(
         "# Live model runs require the local Gemini secret and are listed below as opt-in commands.",
         "",
         _shell_join(workflow["refresh_check_command"]),
+        _shell_join(workflow["preflight_summary_command"]),
         _shell_join(workflow["audio_ready_check_command"]),
         _shell_join(workflow["runtime_status_check_command"]),
         _shell_join(workflow["seed_manifest_validation_command"]),
@@ -876,6 +879,14 @@ def _refresh_workflow(source_result_paths: list[Path]) -> dict[str, object]:
             ".venv/bin/python",
             "scripts/refresh_asr_leaderboard_artifacts.py",
             "--check-only",
+        ],
+        "preflight_summary_command": [
+            ".venv/bin/python",
+            "scripts/refresh_asr_leaderboard_artifacts.py",
+            "--check-only",
+            "--require-generated-fresh",
+            "--check-summary-out",
+            "runs/asr-leaderboard/preflight-summary.json",
         ],
         "audio_ready_check_command": [
             ".venv/bin/python",

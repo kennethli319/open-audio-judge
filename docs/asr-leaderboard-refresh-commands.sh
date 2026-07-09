@@ -6,6 +6,7 @@ set -euo pipefail
 # Live model runs require the local Gemini secret and are listed below as opt-in commands.
 
 .venv/bin/python scripts/refresh_asr_leaderboard_artifacts.py --check-only
+.venv/bin/python scripts/refresh_asr_leaderboard_artifacts.py --check-only --require-generated-fresh --check-summary-out runs/asr-leaderboard/preflight-summary.json
 .venv/bin/python scripts/refresh_asr_leaderboard_artifacts.py --check-only --require-audio-ready
 .venv/bin/python scripts/refresh_asr_leaderboard_artifacts.py --check-only --check-mlx-runtime
 .venv/bin/python scripts/validate_asr_seed_manifest.py --summary-out docs/asr-seed-manifest-validation.json

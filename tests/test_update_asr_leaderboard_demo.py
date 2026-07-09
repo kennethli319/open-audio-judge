@@ -232,6 +232,9 @@ def test_render_generated_sections_summarizes_verified_asr_results(tmp_path: Pat
     assert "Generated Refresh Workflow" in html
     assert "Preflight refresh inputs" in html
     assert "--check-only" in html
+    assert "Write preflight summary" in html
+    assert "--check-summary-out" in html
+    assert "runs/asr-leaderboard/preflight-summary.json" in html
     assert "Require audio manifest readiness" in html
     assert "--require-audio-ready" in html
     assert "Refresh runtime status" in html
@@ -541,6 +544,14 @@ def test_write_summary_artifact_records_models_and_categories(tmp_path: Path) ->
         "scripts/refresh_asr_leaderboard_artifacts.py",
         "--check-only",
     ]
+    assert summary["refresh_workflow"]["preflight_summary_command"] == [
+        ".venv/bin/python",
+        "scripts/refresh_asr_leaderboard_artifacts.py",
+        "--check-only",
+        "--require-generated-fresh",
+        "--check-summary-out",
+        "runs/asr-leaderboard/preflight-summary.json",
+    ]
     assert summary["refresh_workflow"]["audio_ready_check_command"] == [
         ".venv/bin/python",
         "scripts/refresh_asr_leaderboard_artifacts.py",
@@ -801,6 +812,8 @@ def test_write_refresh_report_records_coverage_and_commands(tmp_path: Path) -> N
     assert "mlx-community/parakeet-rnnt-0.6b" in text
     assert "Preflight refresh inputs" in text
     assert "--check-only" in text
+    assert "Write preflight summary" in text
+    assert "--check-summary-out runs/asr-leaderboard/preflight-summary.json" in text
     assert "Require audio manifest readiness" in text
     assert "--require-audio-ready" in text
     assert "Refresh runtime status artifact" in text
@@ -1034,6 +1047,10 @@ def test_refresh_asr_leaderboard_artifacts_combines_report_and_page(tmp_path: Pa
     )
     assert (
         ".venv/bin/python scripts/refresh_asr_leaderboard_artifacts.py --check-only --require-generated-fresh"
+        in refresh_command_text
+    )
+    assert (
+        ".venv/bin/python scripts/refresh_asr_leaderboard_artifacts.py --check-only --require-generated-fresh --check-summary-out runs/asr-leaderboard/preflight-summary.json"
         in refresh_command_text
     )
     assert (
