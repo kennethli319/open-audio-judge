@@ -173,17 +173,21 @@ def autojudge_mlx_asr_command(
     if limit is not None:
         loaded_cases = loaded_cases[:limit]
 
-    candidate_cases = transcribe_cases_with_mlx_asr(
-        loaded_cases,
-        config=MlxAsrConfig(
-            model=model,
-            python_bin=python_bin,
-            module=mlx_module,
-            timeout_seconds=timeout_seconds,
-            extra_args=tuple(mlx_extra_arg or ()),
-        ),
-        base_dir=cases.parent,
-    )
+    try:
+        candidate_cases = transcribe_cases_with_mlx_asr(
+            loaded_cases,
+            config=MlxAsrConfig(
+                model=model,
+                python_bin=python_bin,
+                module=mlx_module,
+                timeout_seconds=timeout_seconds,
+                extra_args=tuple(mlx_extra_arg or ()),
+            ),
+            base_dir=cases.parent,
+        )
+    except (FileNotFoundError, RuntimeError, TimeoutError, ValueError) as exc:
+        console.print(f"[bold red]MLX ASR failed:[/bold red] {exc}")
+        raise typer.Exit(1) from exc
     candidate_path = out / "candidate_cases.jsonl"
     summary_path = out / "model_summary.json"
     judge_out = out / "judge-report"

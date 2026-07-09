@@ -82,13 +82,25 @@ def transcribe_case_with_mlx_asr(
         raise ValueError("MLX ASR timeout_seconds must be greater than zero.")
 
     command = _mlx_asr_command(config, audio_path)
-    completed = runner(
-        command,
-        check=True,
-        capture_output=True,
-        text=True,
-        timeout=config.timeout_seconds,
-    )
+    try:
+        completed = runner(
+            command,
+            check=True,
+            capture_output=True,
+            text=True,
+            timeout=config.timeout_seconds,
+        )
+    except subprocess.TimeoutExpired as exc:
+        raise TimeoutError(
+            f"MLX ASR timed out after {config.timeout_seconds} seconds for case {case.id} "
+            f"with model {config.model}."
+        ) from exc
+    except subprocess.CalledProcessError as exc:
+        details = _command_failure_details(exc.stdout, exc.stderr)
+        raise RuntimeError(
+            f"MLX ASR command failed for case {case.id} with model {config.model} "
+            f"(exit code {exc.returncode}).{details}"
+        ) from exc
     text = _extract_mlx_transcript_text(completed.stdout)
     if not text:
         raise ValueError(f"MLX ASR returned no transcript text for case {case.id}.")
@@ -180,6 +192,22 @@ def _find_text_field(data: Any) -> str:
         joined = " ".join(_find_text_field(item) for item in data)
         return " ".join(joined.split())
     return ""
+
+
+def _command_failure_details(stdout: str | None, stderr: str | None) -> str:
+    parts = []
+    if stderr and stderr.strip():
+        parts.append(f"stderr: {_short_output(stderr)}")
+    if stdout and stdout.strip():
+        parts.append(f"stdout: {_short_output(stdout)}")
+    return " " + " ".join(parts) if parts else ""
+
+
+def _short_output(value: str, *, limit: int = 500) -> str:
+    compact = " ".join(value.split())
+    if len(compact) <= limit:
+        return compact
+    return compact[: limit - 3] + "..."
 
 
 def _resolve_audio_path(audio_path: str, *, base_dir: Path | None) -> Path:

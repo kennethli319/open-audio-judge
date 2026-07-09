@@ -112,8 +112,8 @@
   </header>
   <main>
     <section class="grid" aria-label="Summary metrics">
-      <div class="metric"><span>Seed eval cases</span><strong>30</strong></div>
-      <div class="metric"><span>Research categories</span><strong>6</strong></div>
+      <div class="metric"><span>Seed eval cases</span><strong>35</strong></div>
+      <div class="metric"><span>Research categories</span><strong>7</strong></div>
       <div class="metric"><span>MLX ASR models</span><strong>3</strong></div>
       <div class="metric"><span>Judge samples</span><strong>3x Gemini</strong></div>
     </section>
@@ -144,27 +144,28 @@
       <div class="panel"><h3>negation_modality_scope</h3><p>Negation, permission, prohibition, modality, only-scope, and exception boundaries.</p></div>
       <div class="panel"><h3>temporal_scheduling_accuracy</h3><p>Dates, times, durations, AM/PM, relative ordering, and deadlines.</p></div>
       <div class="panel"><h3>semantic_paraphrase_preservation</h3><p>Events, causal relations, metric tradeoffs, coreference, and conditional instructions.</p></div>
+      <div class="panel"><h3>acoustic_noise_robustness</h3><p>Cafe noise, vehicle noise, industrial background noise, reverberant rooms, and overlapping speech.</p></div>
     </div>
 
     <h2>Command Flow</h2>
     <pre><code>source /Users/wangyauli/.openclaw/secrets/open-audio-judge-gemini.env
 
 oaj autojudge-mlx-asr \
-  --cases runs/asr-research-audio/asr_audio_cases.jsonl \
+  --cases runs/asr-research-audio/tts_audio_cases.jsonl \
   --model mlx-community/whisper-large-v3-turbo-asr-fp16 \
   --judge-provider gemini \
   --judge-samples 3 \
   --out runs/asr-leaderboard/whisper-large-v3-turbo
 
 oaj autojudge-mlx-asr \
-  --cases runs/asr-research-audio/asr_audio_cases.jsonl \
+  --cases runs/asr-research-audio/tts_audio_cases.jsonl \
   --model mlx-community/Qwen3-ASR-1.7B-8bit \
   --judge-provider gemini \
   --judge-samples 3 \
   --out runs/asr-leaderboard/qwen3-asr-1.7b
 
 oaj autojudge-mlx-asr \
-  --cases runs/asr-research-audio/asr_audio_cases.jsonl \
+  --cases runs/asr-research-audio/tts_audio_cases.jsonl \
   --model mlx-community/VibeVoice-ASR-4bit \
   --judge-provider gemini \
   --judge-samples 3 \

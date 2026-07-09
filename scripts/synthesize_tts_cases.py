@@ -12,6 +12,7 @@ import contextlib
 import hashlib
 import json
 import subprocess
+import time
 import wave
 from collections import Counter
 from collections.abc import Iterable
@@ -702,6 +703,8 @@ def _run_tts(
     lang_code: str,
     audio_format: str,
 ) -> Path:
+    existing_outputs = set(audio_dir.glob(f"{output_stem}*.{audio_format}"))
+    started_at_ns = time.time_ns()
     completed = subprocess.run(
         [
             str(tts_bin),
@@ -726,8 +729,50 @@ def _run_tts(
         capture_output=True,
         text=True,
     )
-    result = json.loads(completed.stdout)
-    return Path(result["output"]).resolve()
+    stdout = completed.stdout.strip()
+    if stdout:
+        output_path = _reported_tts_output_path(stdout)
+        if output_path is not None:
+            return output_path
+
+    new_outputs = sorted(
+        (
+            path
+            for path in set(audio_dir.glob(f"{output_stem}*.{audio_format}")) - existing_outputs
+            if path.stat().st_mtime_ns >= started_at_ns
+        ),
+        key=lambda path: path.stat().st_mtime_ns,
+        reverse=True,
+    )
+    if new_outputs:
+        return new_outputs[0].resolve()
+    refreshed_outputs = sorted(
+        (
+            path
+            for path in existing_outputs
+            if path.exists() and path.stat().st_mtime_ns >= started_at_ns
+        ),
+        key=lambda path: path.stat().st_mtime_ns,
+        reverse=True,
+    )
+    if refreshed_outputs:
+        return refreshed_outputs[0].resolve()
+    raise ValueError(
+        "local TTS command returned no parseable JSON output and no generated audio "
+        f"matching {output_stem}*.{audio_format} under {audio_dir}"
+    )
+
+
+def _reported_tts_output_path(stdout: str) -> Path | None:
+    for candidate in (stdout, *reversed(stdout.splitlines())):
+        try:
+            result = json.loads(candidate)
+        except json.JSONDecodeError:
+            continue
+        output = result.get("output") if isinstance(result, dict) else None
+        if isinstance(output, str) and output.strip():
+            return Path(output).resolve()
+    return None
 
 
 def _summary_case_dict(case: EvaluationCase | dict[str, Any]) -> dict[str, Any]:

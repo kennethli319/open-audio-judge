@@ -134,6 +134,49 @@ def test_autojudge_mlx_asr_cli_writes_candidate_cases_and_report(
     assert "AutoJudged 1 MLX ASR cases" in result.output
 
 
+def test_autojudge_mlx_asr_cli_reports_transcription_failure(
+    tmp_path: Path,
+    monkeypatch,
+) -> None:
+    audio = tmp_path / "sample.wav"
+    audio.write_bytes(b"RIFF")
+    cases = tmp_path / "cases.jsonl"
+    cases.write_text(
+        json.dumps(
+            {
+                "id": "amount-case",
+                "task": "asr_error",
+                "audio_path": str(audio),
+                "reference_text": "Transfer fifteen dollars.",
+            }
+        )
+        + "\n",
+        encoding="utf-8",
+    )
+
+    def fail_transcription(*args, **kwargs):
+        raise RuntimeError("MLX ASR command failed: No module named 'mlx_audio'")
+
+    monkeypatch.setattr(cli, "transcribe_cases_with_mlx_asr", fail_transcription)
+
+    result = CliRunner().invoke(
+        app,
+        [
+            "autojudge-mlx-asr",
+            "--cases",
+            str(cases),
+            "--model",
+            "mlx-community/whisper-large-v3-turbo-asr-fp16",
+            "--judge-provider",
+            "mock",
+        ],
+    )
+
+    assert result.exit_code != 0
+    assert "No module named 'mlx_audio'" in result.output
+    assert "Traceback" not in result.output
+
+
 def test_autojudge_local_tts_cli_writes_synthesized_cases_and_report(
     tmp_path: Path,
     monkeypatch,

@@ -152,6 +152,8 @@ def test_asr_leaderboard_demo_page_documents_workflow() -> None:
         "negation_modality_scope",
         "temporal_scheduling_accuracy",
         "semantic_paraphrase_preservation",
+        "acoustic_noise_robustness",
+        "runs/asr-research-audio/tts_audio_cases.jsonl",
         "mlx-community/whisper-large-v3-turbo-asr-fp16",
         "mlx-community/Qwen3-ASR-1.7B-8bit",
         "mlx-community/VibeVoice-ASR-4bit",

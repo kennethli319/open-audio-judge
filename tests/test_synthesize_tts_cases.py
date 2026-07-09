@@ -1093,6 +1093,56 @@ def test_synthesize_cases_uses_reported_tts_output_path(
     }
 
 
+def test_synthesize_cases_can_fallback_to_generated_file_when_json_stdout_empty(
+    tmp_path: Path, monkeypatch
+) -> None:
+    cases_path = tmp_path / "tts_cases.jsonl"
+    cases_path.write_text(
+        json.dumps(
+            {
+                "id": "tts-empty-json",
+                "task": "tts_naturalness",
+                "reference_text": "Synthetic sample.",
+            }
+        )
+        + "\n",
+        encoding="utf-8",
+    )
+    generated = tmp_path / "out" / "audio" / "tts-empty-json_000.wav"
+    tts_bin = tmp_path / "bin" / "local-tts-speak"
+    tts_bin.parent.mkdir()
+    tts_bin.write_text("#!/bin/sh\n", encoding="utf-8")
+
+    def fake_run(*args, **kwargs):
+        generated.parent.mkdir(parents=True, exist_ok=True)
+        with wave.open(str(generated), "wb") as handle:
+            handle.setnchannels(1)
+            handle.setsampwidth(2)
+            handle.setframerate(16000)
+            handle.writeframes(b"\x00\x00" * 8000)
+        return subprocess.CompletedProcess(args[0], 0, stdout="Loading local model...\n")
+
+    monkeypatch.setattr("scripts.synthesize_tts_cases.subprocess.run", fake_run)
+
+    synthesize_cases(
+        cases_path=cases_path,
+        out_dir=tmp_path / "out",
+        tts_bin=tts_bin,
+        model="mlx-community/chatterbox-turbo-6bit",
+        voice="af_heart",
+        lang_code="en",
+        audio_format="wav",
+    )
+
+    written = [
+        json.loads(line)
+        for line in (tmp_path / "out" / "tts_audio_cases.jsonl").read_text(encoding="utf-8").splitlines()
+    ]
+
+    assert written[0]["audio_path"] == "audio/tts-empty-json_000.wav"
+    assert written[0]["metadata"]["audio_duration_seconds"] == 0.5
+
+
 def test_synthesize_cases_can_delete_text_sidecars_after_synthesis(
     tmp_path: Path, monkeypatch
 ) -> None:

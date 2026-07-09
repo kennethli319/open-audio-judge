@@ -25,6 +25,7 @@ ASR_RESEARCH_CATEGORIES = {
     "negation_modality_scope",
     "temporal_scheduling_accuracy",
     "semantic_paraphrase_preservation",
+    "acoustic_noise_robustness",
 }
 ASR_REQUIRED_METADATA = {
     "language",
@@ -196,7 +197,7 @@ def test_tts_multiturn_manifest_has_research_metadata_contract() -> None:
 def test_asr_research_manifest_has_category_metadata_contract() -> None:
     cases = load_cases(ASR_RESEARCH_MANIFEST)
 
-    assert len(cases) == 30
+    assert len(cases) == 35
     assert len({case.id for case in cases}) == len(cases)
     assert {case.metadata["eval_category"] for case in cases} == ASR_RESEARCH_CATEGORIES
 

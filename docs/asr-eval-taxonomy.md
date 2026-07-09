@@ -8,8 +8,8 @@ meaning preservation and downstream task risk.
 
 Manifest: `examples/asr_research_cases.jsonl`
 
-- 30 public-safe seed cases.
-- 6 categories with exactly 5 cases each.
+- 35 public-safe seed cases.
+- 7 categories with exactly 5 cases each.
 - Cases are text/reference seeds with `metadata.requires_audio_materialization=true`.
 - Cron runs should materialize local audio under ignored `runs/`, transcribe it
   with MLX ASR models, judge candidate transcripts with Gemini, and publish only
@@ -53,6 +53,13 @@ Meaning preservation under paraphrase: events, causal relations, metric
 tradeoffs, coreference, and conditional instructions. This category is designed
 for LLM-as-judge review rather than pure token matching.
 
+### acoustic_noise_robustness
+
+Recognition under adverse listening conditions: cafe noise, vehicle noise,
+industrial background noise, reverberant meeting rooms, and overlapping speech.
+These cases keep the seed text public-safe while preparing the manifest for
+local audio materialization and future noise/reverberation augmentation.
+
 ## Source Signals
 
 - WER/edit distance remains the standard ASR baseline and should stay visible in
@@ -61,6 +68,8 @@ for LLM-as-judge review rather than pure token matching.
   especially for negation, numbers, dates, entities, and downstream task impact.
 - Entity recall/custom vocabulary analysis is a practical production slice for
   assistants, medical, support, and meeting transcripts.
+- CHiME-style noisy-speech, far-field, and meeting ASR benchmarks motivate
+  separate robustness slices for noise, reverberation, and overlap.
 - Semantic transcript evaluation should separate harmless paraphrase from
   meaning-changing errors.
 

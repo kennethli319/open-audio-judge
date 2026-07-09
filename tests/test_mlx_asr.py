@@ -80,6 +80,26 @@ def test_transcribe_case_with_mlx_asr_requires_audio_path() -> None:
         )
 
 
+def test_transcribe_case_with_mlx_asr_reports_command_failure(tmp_path: Path) -> None:
+    audio = tmp_path / "sample.wav"
+    audio.write_bytes(b"RIFF")
+    case = EvaluationCase(id="case-1", task="asr_error", audio_path=str(audio))
+
+    def fake_runner(command, **kwargs):
+        raise subprocess.CalledProcessError(
+            1,
+            command,
+            stderr="ModuleNotFoundError: No module named 'mlx_audio'",
+        )
+
+    with pytest.raises(RuntimeError, match="No module named 'mlx_audio'"):
+        transcribe_case_with_mlx_asr(
+            case,
+            config=MlxAsrConfig(model="model"),
+            runner=fake_runner,
+        )
+
+
 def test_write_mlx_asr_summary_json_counts_categories(tmp_path: Path) -> None:
     summary = tmp_path / "summary.json"
     case = EvaluationCase(
