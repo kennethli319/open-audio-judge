@@ -67,6 +67,7 @@ def check_asr_leaderboard_page(page: Path, *, summary_path: Path) -> dict[str, A
         "total_results": summary["total_results"],
         "model_count": summary["model_count"],
         "category_count": summary["category_count"],
+        "output_artifact_count": len(summary["output_artifacts"]),
     }
 
 
@@ -97,6 +98,7 @@ def _validate_summary(summary: Any, *, summary_path: Path) -> None:
         raise ValueError("ASR leaderboard summary category_count does not match categories.")
 
     _validate_referenced_artifacts(summary, summary_path=summary_path)
+    _validate_output_artifacts(summary, summary_path=summary_path)
     _validate_status_artifact(
         summary,
         key="manifest_validation_path",
@@ -145,6 +147,29 @@ def _validate_referenced_artifacts(summary: dict[str, Any], *, summary_path: Pat
     if missing:
         formatted = ", ".join(f"{key}={path}" for key, path in missing)
         raise ValueError(f"{summary_path} references missing ASR artifact(s): {formatted}")
+
+
+def _validate_output_artifacts(summary: dict[str, Any], *, summary_path: Path) -> None:
+    artifacts = summary.get("output_artifacts")
+    if not isinstance(artifacts, list) or not artifacts:
+        raise ValueError(f"{summary_path} must include a non-empty output_artifacts list.")
+
+    missing = []
+    for index, artifact in enumerate(artifacts):
+        if not isinstance(artifact, dict):
+            raise ValueError(f"{summary_path} output_artifacts[{index}] must be an object.")
+        raw_path = artifact.get("path")
+        purpose = artifact.get("purpose")
+        if not isinstance(raw_path, str) or not raw_path:
+            raise ValueError(f"{summary_path} output_artifacts[{index}] has invalid path: {raw_path!r}")
+        if not isinstance(purpose, str) or not purpose:
+            raise ValueError(f"{summary_path} output_artifacts[{index}] has invalid purpose: {purpose!r}")
+        if not _resolve_summary_path(raw_path).exists():
+            missing.append(raw_path)
+
+    if missing:
+        formatted = ", ".join(missing)
+        raise ValueError(f"{summary_path} output_artifacts reference missing ASR artifact(s): {formatted}")
 
 
 def _validate_status_artifact(
@@ -204,6 +229,17 @@ def _required_page_text(summary: dict[str, Any]) -> list[str]:
             }
             if isinstance(command, list)
         ]
+    artifacts = summary.get("output_artifacts", [])
+    artifact_text = []
+    if isinstance(artifacts, list):
+        for artifact in artifacts:
+            if isinstance(artifact, dict):
+                raw_path = artifact.get("path")
+                purpose = artifact.get("purpose")
+                if isinstance(raw_path, str) and raw_path:
+                    artifact_text.append(raw_path)
+                if isinstance(purpose, str) and purpose:
+                    artifact_text.append(purpose)
 
     return [
         "Open Audio Judge ASR Leaderboard",
@@ -215,6 +251,7 @@ def _required_page_text(summary: dict[str, Any]) -> list[str]:
         *model_names,
         *category_names,
         *commands,
+        *artifact_text,
     ]
 
 

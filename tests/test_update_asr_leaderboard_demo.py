@@ -823,6 +823,7 @@ def test_check_asr_leaderboard_page_validates_generated_artifacts(tmp_path: Path
     assert validation["status"] == "complete"
     assert validation["total_results"] == 4
     assert validation["model_count"] == 2
+    assert validation["output_artifact_count"] == len(summary_data["output_artifacts"])
 
 
 def test_check_asr_leaderboard_page_rejects_incomplete_validation_artifact(
@@ -975,6 +976,94 @@ def test_check_asr_leaderboard_page_rejects_missing_summary_artifacts(tmp_path: 
     )
 
     with pytest.raises(ValueError, match="references missing ASR artifact"):
+        check_module.check_asr_leaderboard_page(page, summary_path=summary)
+
+
+def test_check_asr_leaderboard_page_rejects_missing_output_artifact(tmp_path: Path) -> None:
+    update_module = load_script_module()
+    check_module = load_check_module()
+    page = tmp_path / "demo.html"
+    summary = tmp_path / "summary.json"
+    results_path = tmp_path / "results.jsonl"
+    run_manifest = tmp_path / "run-manifest.json"
+    manifest_validation = tmp_path / "manifest-validation.json"
+    seed_manifest_validation = tmp_path / "seed-manifest-validation.json"
+    records = [
+        result_record(
+            case_id="asr-a-model-a",
+            model="mlx-community/model-a",
+            category="transcription_accuracy_wer",
+            score=100,
+            label="accurate",
+        ),
+        result_record(
+            case_id="asr-b-model-a",
+            model="mlx-community/model-a",
+            category="numeric_unit_integrity",
+            score=80,
+            label="accurate",
+        ),
+    ]
+    results_path.write_text(
+        "".join(json.dumps(record) + "\n" for record in records),
+        encoding="utf-8",
+    )
+    results_path.with_name("report.html").write_text("<html></html>\n", encoding="utf-8")
+    results = update_module.load_results_jsonl(results_path)
+    page.write_text(
+        "<!doctype html><html lang=\"en\"><body>\n"
+        "<h1>Open Audio Judge ASR Leaderboard</h1>\n"
+        f"{update_module.START_MARKER}\n"
+        "old generated content\n"
+        f"{update_module.END_MARKER}\n"
+        "</body></html>\n",
+        encoding="utf-8",
+    )
+    update_module.replace_generated_block(
+        page,
+        update_module.render_generated_sections(
+            results,
+            results_path=results_path,
+            expected_cases_per_model=2,
+        ),
+    )
+    update_module.write_summary_artifact(
+        results,
+        summary,
+        results_path=results_path,
+        expected_cases_per_model=2,
+    )
+    run_manifest.write_text('{"runs": []}\n', encoding="utf-8")
+    manifest_validation.write_text(
+        json.dumps(
+            {
+                "status": "complete",
+                "total_results": 2,
+                "model_count": 1,
+                "category_count": 2,
+                "expected_cases_per_model": 2,
+            }
+        )
+        + "\n",
+        encoding="utf-8",
+    )
+    seed_manifest_validation.write_text(
+        json.dumps({"status": "complete"}) + "\n",
+        encoding="utf-8",
+    )
+    summary_data = json.loads(summary.read_text(encoding="utf-8"))
+    summary_data["run_manifest_path"] = str(run_manifest)
+    summary_data["manifest_validation_path"] = str(manifest_validation)
+    summary_data["seed_manifest_validation_path"] = str(seed_manifest_validation)
+    summary_data["output_artifacts"].append(
+        {
+            "path": str(tmp_path / "missing-output.json"),
+            "purpose": "Regression-test missing generated artifact.",
+        }
+    )
+    summary.write_text(json.dumps(summary_data), encoding="utf-8")
+
+    with pytest.raises(ValueError, match="output_artifacts reference missing ASR artifact"):
         check_module.check_asr_leaderboard_page(page, summary_path=summary)
 
 
