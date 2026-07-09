@@ -44,10 +44,7 @@
       "--model",
       "mlx-community/whisper-large-v3-turbo-asr-fp16"
     ],
-    "returncode": 0,
-    "status": "ok",
-    "stderr": "",
-    "stdout": "MLX ASR runtime OK\nPython: .venv/bin/python\nModule: mlx_audio.stt.generate\nModel:  mlx-community/whisper-large-v3-turbo-asr-fp16"
+    "status": "not_checked"
   },
   "result_bundle": {
     "categories": [

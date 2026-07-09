@@ -304,6 +304,58 @@ def _validate_source_result_file_reports(
     for index, source_file in enumerate(source_files):
         if not isinstance(source_file, dict):
             raise ValueError(f"{summary_path} source_result_files[{index}] must be an object.")
+        raw_result_path = source_file.get("path")
+        if not isinstance(raw_result_path, str) or not raw_result_path:
+            raise ValueError(
+                f"{summary_path} source_result_files[{index}] has invalid path: "
+                f"{raw_result_path!r}"
+            )
+        result_path = _resolve_summary_path(
+            raw_result_path,
+            artifact_root=artifact_root,
+            path_maps=path_maps,
+        )
+        result_exists = result_path.exists()
+        if not result_exists and not allow_missing_source_results:
+            raise ValueError(
+                f"{summary_path} source_result_files[{index}] references missing "
+                f"source result file: {raw_result_path}"
+            )
+
+        expected_result_bytes = source_file.get("result_bytes")
+        expected_result_sha256 = source_file.get("result_sha256")
+        has_result_digest_fields = (
+            "result_bytes" in source_file
+            or "result_sha256" in source_file
+        )
+        if has_result_digest_fields:
+            if not isinstance(expected_result_bytes, int) or expected_result_bytes < 0:
+                raise ValueError(
+                    f"{summary_path} source_result_files[{index}] has invalid result_bytes: "
+                    f"{expected_result_bytes!r}"
+                )
+            if (
+                not isinstance(expected_result_sha256, str)
+                or len(expected_result_sha256) != 64
+                or any(char not in "0123456789abcdef" for char in expected_result_sha256)
+            ):
+                raise ValueError(
+                    f"{summary_path} source_result_files[{index}] has invalid result_sha256: "
+                    f"{expected_result_sha256!r}"
+                )
+            if result_exists:
+                if result_path.stat().st_size != expected_result_bytes:
+                    raise ValueError(
+                        f"{summary_path} source_result_files[{index}] result byte size is stale: "
+                        f"{raw_result_path}"
+                    )
+                actual_result_sha256 = _sha256_file(result_path)
+                if actual_result_sha256 != expected_result_sha256:
+                    raise ValueError(
+                        f"{summary_path} source_result_files[{index}] result sha256 is stale: "
+                        f"{raw_result_path}"
+                    )
+
         raw_report_path = source_file.get("report_path")
         if not isinstance(raw_report_path, str) or not raw_report_path:
             raise ValueError(

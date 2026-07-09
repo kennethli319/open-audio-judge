@@ -495,7 +495,9 @@
       "report_exists": true,
       "report_path": "runs/asr-leaderboard/whisper-large-v3-turbo-smoke/judge-report/report.html",
       "report_sha256": "b2c8783dc22204ce4ea1db6ea14cb1039f8e0eee36ff77f579778bdf3f39432f",
-      "result_count": 3
+      "result_bytes": 12081,
+      "result_count": 3,
+      "result_sha256": "bbd88190b8993e094468890b9821d0805984b43d5219bc1fd6601ff9c32bbd82"
     },
     {
       "average_score": 92.583,
@@ -520,7 +522,9 @@
       "report_exists": true,
       "report_path": "runs/asr-leaderboard/whisper-large-v3-turbo-full-gap/judge-report/report.html",
       "report_sha256": "9ac46fcbbc4e0ab2702e9e9b0033999b1065a4f2482b6f6334ddda63118cedc6",
-      "result_count": 12
+      "result_bytes": 47155,
+      "result_count": 12,
+      "result_sha256": "29514fa7ac55d1add005080261b6f6efc3b8249c76112689ca74d47907385302"
     },
     {
       "average_score": 93.4,
@@ -543,7 +547,9 @@
       "report_exists": true,
       "report_path": "runs/asr-leaderboard/whisper-large-v3-turbo-semantic-smoke/judge-report/report.html",
       "report_sha256": "15e588b5b78495d008231f1c8dc8b0efefc1f919f40c83c5ea0da79863dd8e84",
-      "result_count": 5
+      "result_bytes": 19260,
+      "result_count": 5,
+      "result_sha256": "1731a6bef87dee5500efdc5fdccd60c68cc2813696ae5d58126f889349118451"
     },
     {
       "average_score": 88.6,
@@ -564,7 +570,9 @@
       "report_exists": true,
       "report_path": "runs/asr-leaderboard/whisper-large-v3-turbo-entity-smoke/judge-report/report.html",
       "report_sha256": "a2749dd85b93f462ba9ea39a217bf49d832b23bb0629be23bce71dabcf7349a6",
-      "result_count": 5
+      "result_bytes": 19449,
+      "result_count": 5,
+      "result_sha256": "68a3bd82f09c109a7e623c594ff639a36f467877a39943e859729d5d16bb776d"
     },
     {
       "average_score": 97.6,
@@ -584,7 +592,9 @@
       "report_exists": true,
       "report_path": "runs/asr-leaderboard/whisper-large-v3-turbo-paraphrase-smoke/judge-report/report.html",
       "report_sha256": "667ec7f9ef23cccda1712650a1c5d85bda7c2251920dc70d940673c958552a81",
-      "result_count": 5
+      "result_bytes": 18953,
+      "result_count": 5,
+      "result_sha256": "29c1777225f052e42f0d2028e30c9f14530259ebea2cf4ac5299bbd997239b4d"
     },
     {
       "average_score": 96.6,
@@ -604,7 +614,9 @@
       "report_exists": true,
       "report_path": "runs/asr-leaderboard/whisper-large-v3-turbo-noise-smoke/judge-report/report.html",
       "report_sha256": "959a2192e14927b8fde329ebf3a05ee5e836f9aed50a80e22172f575614a5300",
-      "result_count": 5
+      "result_bytes": 18758,
+      "result_count": 5,
+      "result_sha256": "ef1ecb77514c22e38c0efc097df7f5c4151749ebb7b99156d74ad976047b5ebb"
     },
     {
       "average_score": 88,
@@ -625,7 +637,9 @@
       "report_exists": true,
       "report_path": "runs/asr-leaderboard/qwen3-asr-1.7b-smoke/judge-report/report.html",
       "report_sha256": "1d112998b833ec8ec2a33d3dad408658c34818f2c87d714d64726559fb1ac69e",
-      "result_count": 3
+      "result_bytes": 12269,
+      "result_count": 3,
+      "result_sha256": "c1b68dbc36a7025f0060bcc85f173a113d37841fb4c03b8308a62727274fff4c"
     },
     {
       "average_score": 96.667,
@@ -649,7 +663,9 @@
       "report_exists": true,
       "report_path": "runs/asr-leaderboard/qwen3-asr-1.7b-full-gap/judge-report/report.html",
       "report_sha256": "9aabf21100b2de38d86619ac79e5fe0a4cb5b96ea868ed9469b22a7c5087c051",
-      "result_count": 12
+      "result_bytes": 46978,
+      "result_count": 12,
+      "result_sha256": "4fe693498472d0071b3cd2e24d6cf2c04f616f973f05f978d742d2eb5f935a25"
     },
     {
       "average_score": 100,
@@ -671,7 +687,9 @@
       "report_exists": true,
       "report_path": "runs/asr-leaderboard/qwen3-asr-1.7b-semantic-smoke/judge-report/report.html",
       "report_sha256": "13c93e81662c83445a5097354af2a9416ca39e4b3ad7ddaf535d9c8bdd00e852",
-      "result_count": 5
+      "result_bytes": 17782,
+      "result_count": 5,
+      "result_sha256": "13cf26a6451d2ecc5e53af0bf7719d8ad328d6b1608f179b9351ea1edcccc0dd"
     },
     {
       "average_score": 89,
@@ -692,7 +710,9 @@
       "report_exists": true,
       "report_path": "runs/asr-leaderboard/qwen3-asr-1.7b-entity-smoke/judge-report/report.html",
       "report_sha256": "8ee58dc1f78837ff66a168e9e7317504793ba3fd1fa5f956fd69c59633ad7b53",
-      "result_count": 5
+      "result_bytes": 19955,
+      "result_count": 5,
+      "result_sha256": "fe06d5f677f8eb271a8f98e599d1063dfac4cf3bac6e7a5a6e9be4a50bb3bca8"
     },
     {
       "average_score": 100,
@@ -712,7 +732,9 @@
       "report_exists": true,
       "report_path": "runs/asr-leaderboard/qwen3-asr-1.7b-paraphrase-smoke/judge-report/report.html",
       "report_sha256": "643c4825f4b554c1fe1e460d839bf65fa8a627a676d511caf7bf29864b2e1a2a",
-      "result_count": 5
+      "result_bytes": 17661,
+      "result_count": 5,
+      "result_sha256": "31e3f291ff565d63a3d361bda80930ed9722bb6b5d9b7262c5996be547cfc125"
     },
     {
       "average_score": 92.4,
@@ -733,7 +755,9 @@
       "report_exists": true,
       "report_path": "runs/asr-leaderboard/qwen3-asr-1.7b-noise-smoke/judge-report/report.html",
       "report_sha256": "eed8a650d0038098bac0464db1a7d9d21bf023a91bfa03bf9f26abb33767bfd3",
-      "result_count": 5
+      "result_bytes": 19038,
+      "result_count": 5,
+      "result_sha256": "984f75e7a808b20f619805ecfa0405ea0d84787cb5fde7af62b8667bf313a0c5"
     },
     {
       "average_score": 94.333,
@@ -753,7 +777,9 @@
       "report_exists": true,
       "report_path": "runs/asr-leaderboard/vibevoice-asr-smoke/judge-report/report.html",
       "report_sha256": "e4d426984afa425e292f08ee79719f243178d02e89ddc12e9cbcc0e6a5608907",
-      "result_count": 3
+      "result_bytes": 11196,
+      "result_count": 3,
+      "result_sha256": "ecfb6e2cade45368ba7320cf5e2e08e1b8a70015604f59506817ea5cd34018c0"
     },
     {
       "average_score": 99.333,
@@ -776,7 +802,9 @@
       "report_exists": true,
       "report_path": "runs/asr-leaderboard/vibevoice-asr-full-gap/judge-report/report.html",
       "report_sha256": "7e9f94596faa19805ecf3eb6aaca459fdaf0e1d082b099b7f0e6356282ed0538",
-      "result_count": 12
+      "result_bytes": 45543,
+      "result_count": 12,
+      "result_sha256": "19a0905ab13fce72d669d5d0c8fc075963bd23a578a2f8c072f6f328998f041e"
     },
     {
       "average_score": 98.8,
@@ -798,7 +826,9 @@
       "report_exists": true,
       "report_path": "runs/asr-leaderboard/vibevoice-asr-semantic-smoke/judge-report/report.html",
       "report_sha256": "cfd7a4dafb899d9102025096cda2b511a12cdade373ebd72b78352cea611a526",
-      "result_count": 5
+      "result_bytes": 18984,
+      "result_count": 5,
+      "result_sha256": "40e11be673f96ad4cf2cb57d7fbb51be3e02443a2d4fbc291971cd1d80a943ee"
     },
     {
       "average_score": 90.2,
@@ -819,7 +849,9 @@
       "report_exists": true,
       "report_path": "runs/asr-leaderboard/vibevoice-asr-entity-smoke/judge-report/report.html",
       "report_sha256": "7719f0881d29f9602a68dd4c5f90923e281e6046b1001ffe8372c93197724802",
-      "result_count": 5
+      "result_bytes": 19752,
+      "result_count": 5,
+      "result_sha256": "0b30d9564cbc330e44d1994765412fadd65b2c5849d77d849bc4babd69a7a7c9"
     },
     {
       "average_score": 98.4,
@@ -839,7 +871,9 @@
       "report_exists": true,
       "report_path": "runs/asr-leaderboard/vibevoice-asr-paraphrase-smoke/judge-report/report.html",
       "report_sha256": "9847426ce105299b8395c2d0c4d1b3382676e561f4e19395b745609876f7d139",
-      "result_count": 5
+      "result_bytes": 19869,
+      "result_count": 5,
+      "result_sha256": "427cb36f67fc2f8fb468b66d3d56197fa5899c8318be9752dac76bf34b1313f7"
     },
     {
       "average_score": 92.8,
@@ -860,7 +894,9 @@
       "report_exists": true,
       "report_path": "runs/asr-leaderboard/vibevoice-asr-noise-smoke/judge-report/report.html",
       "report_sha256": "3a5db2b26d710b9970feb3fb0358b660835ab65d6eb60fb053724198b677a226",
-      "result_count": 5
+      "result_bytes": 19543,
+      "result_count": 5,
+      "result_sha256": "dea03c102fae8b37591eed82519ed54c489dfcff589b292c8eba50213bd5ab3f"
     }
   ],
   "source_result_paths": [

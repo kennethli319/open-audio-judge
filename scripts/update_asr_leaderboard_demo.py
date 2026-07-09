@@ -78,6 +78,8 @@ class CategorySummary:
 @dataclass(frozen=True)
 class SourceResultFileSummary:
     path: Path
+    result_bytes: int
+    result_sha256: str
     report_path: Path
     report_exists: bool
     report_bytes: int | None
@@ -701,6 +703,8 @@ def write_report_links_artifact(
                 "source_reports": [
                     {
                         "results_path": _repo_relative(summary.path),
+                        "result_bytes": summary.result_bytes,
+                        "result_sha256": summary.result_sha256,
                         "report_path": _repo_relative(summary.report_path),
                         "report_exists": summary.report_exists,
                         "models": list(summary.models),
@@ -1155,6 +1159,8 @@ def summarize_source_result_files(result_paths: list[Path]) -> list[SourceResult
         summaries.append(
             SourceResultFileSummary(
                 path=path,
+                result_bytes=path.stat().st_size,
+                result_sha256=_sha256_file(path),
                 report_path=path.with_name("report.html"),
                 report_exists=path.with_name("report.html").exists(),
                 report_bytes=path.with_name("report.html").stat().st_size
@@ -1330,6 +1336,8 @@ def _model_category_matrix_row(
 def _source_file_summary_json(summary: SourceResultFileSummary) -> dict[str, object]:
     return {
         "path": _repo_relative(summary.path),
+        "result_bytes": summary.result_bytes,
+        "result_sha256": summary.result_sha256,
         "report_path": _repo_relative(summary.report_path),
         "report_exists": summary.report_exists,
         "report_bytes": summary.report_bytes,

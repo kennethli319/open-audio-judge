@@ -324,6 +324,8 @@ def test_write_summary_artifact_records_models_and_categories(tmp_path: Path) ->
     assert summary["source_result_files"] == [
         {
             "path": str(source_results_path),
+            "result_bytes": source_results_path.stat().st_size,
+            "result_sha256": file_sha256(source_results_path),
             "report_path": str(source_results_path.with_name("report.html")),
             "report_exists": False,
             "report_bytes": None,
@@ -2166,12 +2168,16 @@ def test_check_asr_leaderboard_page_rejects_stale_runtime_result_bundle(tmp_path
 def test_check_asr_leaderboard_page_rejects_stale_source_run_report(tmp_path: Path) -> None:
     check_module = load_check_module()
     source_report = tmp_path / "model-a" / "judge-report" / "report.html"
+    source_results = source_report.with_name("results.jsonl")
     source_report.parent.mkdir(parents=True)
+    source_results.write_text('{"status": "ok"}\n', encoding="utf-8")
     source_report.write_text("<html>fresh report</html>\n", encoding="utf-8")
     summary = {
         "source_result_files": [
             {
-                "path": str(source_report.with_name("results.jsonl")),
+                "path": str(source_results),
+                "result_bytes": source_results.stat().st_size,
+                "result_sha256": file_sha256(source_results),
                 "report_path": str(source_report),
                 "report_exists": True,
                 "report_bytes": source_report.stat().st_size,
@@ -2191,6 +2197,45 @@ def test_check_asr_leaderboard_page_rejects_stale_source_run_report(tmp_path: Pa
     source_report.write_text("<html>stale report</html>\n", encoding="utf-8")
 
     with pytest.raises(ValueError, match="report sha256 is stale"):
+        check_module._validate_source_result_file_reports(
+            summary,
+            summary_path=tmp_path / "summary.json",
+            artifact_root=tmp_path,
+            path_maps=[],
+            allow_missing_source_results=False,
+        )
+
+
+def test_check_asr_leaderboard_page_rejects_stale_source_result_file(tmp_path: Path) -> None:
+    check_module = load_check_module()
+    source_results = tmp_path / "model-a" / "judge-report" / "results.jsonl"
+    source_results.parent.mkdir(parents=True)
+    source_results.write_text('{"status": "ok"}\n', encoding="utf-8")
+    summary = {
+        "source_result_files": [
+            {
+                "path": str(source_results),
+                "result_bytes": source_results.stat().st_size,
+                "result_sha256": file_sha256(source_results),
+                "report_path": str(source_results.with_name("report.html")),
+                "report_exists": False,
+                "report_bytes": None,
+                "report_sha256": None,
+            }
+        ]
+    }
+
+    check_module._validate_source_result_file_reports(
+        summary,
+        summary_path=tmp_path / "summary.json",
+        artifact_root=tmp_path,
+        path_maps=[],
+        allow_missing_source_results=False,
+    )
+
+    source_results.write_text('{"status": "stale"}\n', encoding="utf-8")
+
+    with pytest.raises(ValueError, match="result byte size is stale"):
         check_module._validate_source_result_file_reports(
             summary,
             summary_path=tmp_path / "summary.json",
