@@ -30,7 +30,7 @@ fi
 # Optional live refresh: check the MLX ASR runtime before model jobs.
 # PYTHONPATH=src .venv/bin/python -m open_audio_judge.cli check-mlx-asr-runtime --python-bin .venv/bin/python --model mlx-community/whisper-large-v3-turbo-asr-fp16
 # .venv/bin/python scripts/refresh_asr_leaderboard_artifacts.py --check-only --check-mlx-runtime
-# .venv/bin/python scripts/refresh_asr_leaderboard_artifacts.py --check-only --require-runtime-ready
+# .venv/bin/python scripts/refresh_asr_leaderboard_artifacts.py --check-only --check-mlx-runtime --require-runtime-ready
 
 # Optional live refresh: run primary MLX ASR model jobs when the local runtime is ready.
 # .venv/bin/oaj autojudge-mlx-asr --python-bin .venv/bin/python --cases runs/asr-research-audio/tts_audio_cases.jsonl --model mlx-community/whisper-large-v3-turbo-asr-fp16 --judge-provider gemini --judge-samples 3 --out runs/asr-leaderboard/whisper-large-v3-turbo-refresh

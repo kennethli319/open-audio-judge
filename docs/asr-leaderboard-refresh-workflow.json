@@ -265,6 +265,7 @@
       ".venv/bin/python",
       "scripts/refresh_asr_leaderboard_artifacts.py",
       "--check-only",
+      "--check-mlx-runtime",
       "--require-runtime-ready"
     ],
     "runtime_status_check_command": [

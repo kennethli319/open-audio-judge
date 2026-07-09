@@ -600,6 +600,7 @@ def test_write_summary_artifact_records_models_and_categories(tmp_path: Path) ->
         ".venv/bin/python",
         "scripts/refresh_asr_leaderboard_artifacts.py",
         "--check-only",
+        "--check-mlx-runtime",
         "--require-runtime-ready",
     ]
     assert summary["refresh_workflow"]["full_preflight_command"] == [
@@ -1353,7 +1354,7 @@ def test_refresh_asr_leaderboard_artifacts_combines_report_and_page(tmp_path: Pa
         not in refresh_command_text
     )
     assert (
-        "\n.venv/bin/python scripts/refresh_asr_leaderboard_artifacts.py --check-only --require-runtime-ready"
+        "\n.venv/bin/python scripts/refresh_asr_leaderboard_artifacts.py --check-only --check-mlx-runtime --require-runtime-ready"
         not in refresh_command_text
     )
     assert (
@@ -1361,7 +1362,7 @@ def test_refresh_asr_leaderboard_artifacts_combines_report_and_page(tmp_path: Pa
         in refresh_command_text
     )
     assert (
-        "# .venv/bin/python scripts/refresh_asr_leaderboard_artifacts.py --check-only --require-runtime-ready"
+        "# .venv/bin/python scripts/refresh_asr_leaderboard_artifacts.py --check-only --check-mlx-runtime --require-runtime-ready"
         in refresh_command_text
     )
     assert (

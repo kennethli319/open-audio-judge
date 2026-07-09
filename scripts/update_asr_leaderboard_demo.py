@@ -1143,6 +1143,7 @@ def _refresh_workflow(source_result_paths: list[Path]) -> dict[str, object]:
             ".venv/bin/python",
             "scripts/refresh_asr_leaderboard_artifacts.py",
             "--check-only",
+            "--check-mlx-runtime",
             "--require-runtime-ready",
         ],
         "full_preflight_command": [
