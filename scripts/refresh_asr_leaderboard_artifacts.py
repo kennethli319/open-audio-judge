@@ -241,6 +241,14 @@ def main() -> None:
         ),
     )
     parser.add_argument(
+        "--require-audio-ready",
+        action="store_true",
+        help=(
+            "With --check-only, fail if the materialized ASR audio manifest is missing, "
+            "stale, or references missing local audio files."
+        ),
+    )
+    parser.add_argument(
         "--expected-cases-per-model",
         type=int,
         default=35,
@@ -276,6 +284,7 @@ def main() -> None:
             expected_cases_per_model=args.expected_cases_per_model,
             hosted_dir=hosted_dir,
             require_generated_fresh=args.require_generated_fresh,
+            require_audio_ready=args.require_audio_ready,
         )
         if args.check_summary_out:
             args.check_summary_out.parent.mkdir(parents=True, exist_ok=True)
@@ -346,6 +355,7 @@ def check_asr_leaderboard_refresh_inputs(
     path_maps: list[tuple[str, str]] | None = None,
     hosted_dir: Path | None = None,
     require_generated_fresh: bool = False,
+    require_audio_ready: bool = False,
 ) -> dict[str, object]:
     result_paths = [_normalize_results_path(path) for path in result_paths]
     _validate_unique_result_paths(result_paths, context="ASR refresh preflight result sources")
@@ -392,6 +402,15 @@ def check_asr_leaderboard_refresh_inputs(
             generated=generated,
             expected_cases_per_model=expected_cases_per_model,
         )
+    audio_manifest = build_audio_manifest_status(
+        seed_cases_path=seed_cases,
+        audio_cases_path=DEFAULT_AUDIO_CASES,
+    )
+    if require_audio_ready and audio_manifest.get("status") != "complete":
+        raise ValueError(
+            "ASR audio manifest is not ready for live MLX ASR refresh: "
+            + json.dumps(audio_manifest, sort_keys=True)
+        )
     summary: dict[str, object] = {
         "status": "complete",
         "result_file_count": len(result_paths),
@@ -409,6 +428,8 @@ def check_asr_leaderboard_refresh_inputs(
             }
         ),
         "seed_manifest_status": seed_validation["status"],
+        "audio_manifest_status": audio_manifest["status"],
+        "audio_cases_path": audio_manifest["audio_cases_path"],
         "page_status": page_validation["status"],
         "source_result_paths": [_repo_relative(path) for path in result_paths],
     }

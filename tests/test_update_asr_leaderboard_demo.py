@@ -235,6 +235,8 @@ def test_render_generated_sections_summarizes_verified_asr_results(tmp_path: Pat
     assert "Generated Refresh Workflow" in html
     assert "Preflight refresh inputs" in html
     assert "--check-only" in html
+    assert "Require audio manifest readiness" in html
+    assert "--require-audio-ready" in html
     assert "Run refresh shell playbook" in html
     assert "Generated Artifacts" in html
     assert "Validate seed manifest" in html
@@ -527,6 +529,12 @@ def test_write_summary_artifact_records_models_and_categories(tmp_path: Path) ->
         "scripts/refresh_asr_leaderboard_artifacts.py",
         "--check-only",
     ]
+    assert summary["refresh_workflow"]["audio_ready_check_command"] == [
+        ".venv/bin/python",
+        "scripts/refresh_asr_leaderboard_artifacts.py",
+        "--check-only",
+        "--require-audio-ready",
+    ]
     assert summary["refresh_workflow"]["freshness_check_command"] == [
         ".venv/bin/python",
         "scripts/refresh_asr_leaderboard_artifacts.py",
@@ -769,6 +777,8 @@ def test_write_refresh_report_records_coverage_and_commands(tmp_path: Path) -> N
     assert "mlx-community/parakeet-rnnt-0.6b" in text
     assert "Preflight refresh inputs" in text
     assert "--check-only" in text
+    assert "Require audio manifest readiness" in text
+    assert "--require-audio-ready" in text
     assert "Generated artifact freshness check" in text
     assert "--require-generated-fresh" in text
     assert "--results " + str(source_results_path) in text
@@ -996,6 +1006,10 @@ def test_refresh_asr_leaderboard_artifacts_combines_report_and_page(tmp_path: Pa
         ".venv/bin/python scripts/refresh_asr_leaderboard_artifacts.py --check-only --require-generated-fresh"
         in refresh_command_text
     )
+    assert (
+        ".venv/bin/python scripts/refresh_asr_leaderboard_artifacts.py --check-only --require-audio-ready"
+        in refresh_command_text
+    )
     assert ".venv/bin/python scripts/refresh_asr_leaderboard_artifacts.py --check-only --hosted-dir-from-env" in refresh_command_text
     assert (hosted_dir / "asr-leaderboard-run-manifest.json").exists()
     assert (hosted_dir / "manifest-validation.json").read_text(
@@ -1094,6 +1108,8 @@ def test_check_asr_leaderboard_refresh_inputs_validates_default_artifacts() -> N
         "model_count": 3,
         "category_count": 7,
         "seed_manifest_status": "complete",
+        "audio_manifest_status": "complete",
+        "audio_cases_path": "runs/asr-research-audio/tts_audio_cases.jsonl",
         "page_status": "complete",
         "source_result_paths": [
             "runs/asr-leaderboard/whisper-large-v3-turbo-smoke/judge-report/results.jsonl",
@@ -1149,6 +1165,41 @@ def test_check_only_can_write_machine_readable_preflight_summary(
         for path in result_paths
     ]
     assert written["total_results"] == 105
+    assert written["audio_manifest_status"] == "complete"
+
+
+def test_check_only_can_require_audio_manifest_readiness(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    refresh_module = load_refresh_module()
+    result_paths = refresh_module._default_result_paths(
+        35,
+        run_manifest=refresh_module.DEFAULT_RUN_MANIFEST,
+    )
+    monkeypatch.setattr(
+        refresh_module,
+        "DEFAULT_AUDIO_CASES",
+        tmp_path / "missing-audio" / "tts_audio_cases.jsonl",
+    )
+    refresh_module.check_asr_leaderboard_refresh_inputs(
+        result_paths,
+        page=refresh_module.DEFAULT_PAGE,
+        summary_out=refresh_module.DEFAULT_SUMMARY,
+        seed_cases=refresh_module.DEFAULT_CASES,
+        expected_cases_per_model=35,
+        require_audio_ready=False,
+    )
+
+    with pytest.raises(ValueError, match="audio manifest is not ready"):
+        refresh_module.check_asr_leaderboard_refresh_inputs(
+            result_paths,
+            page=refresh_module.DEFAULT_PAGE,
+            summary_out=refresh_module.DEFAULT_SUMMARY,
+            seed_cases=refresh_module.DEFAULT_CASES,
+            expected_cases_per_model=35,
+            require_audio_ready=True,
+        )
 
 
 def test_require_generated_fresh_rejects_stale_page_block(tmp_path: Path) -> None:

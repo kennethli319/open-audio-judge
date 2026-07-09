@@ -177,6 +177,7 @@
       <thead><tr><th>Step</th><th>Command</th></tr></thead>
       <tbody>
         <tr><td>Preflight refresh inputs</td><td><code>.venv/bin/python scripts/refresh_asr_leaderboard_artifacts.py --check-only</code></td></tr>
+        <tr><td>Require audio manifest readiness</td><td><code>.venv/bin/python scripts/refresh_asr_leaderboard_artifacts.py --check-only --require-audio-ready</code></td></tr>
         <tr><td>Validate seed manifest</td><td><code>.venv/bin/python scripts/validate_asr_seed_manifest.py --summary-out docs/asr-seed-manifest-validation.json</code></td></tr>
         <tr><td>Materialize audio</td><td><code>.venv/bin/python scripts/synthesize_tts_cases.py --cases examples/asr_research_cases.jsonl --out runs/asr-research-audio --discard-text-sidecars --summary-out runs/asr-research-audio/summary.json</code></td></tr>
         <tr><td>Check MLX ASR runtime</td><td><code>PYTHONPATH=src .venv/bin/python -m open_audio_judge.cli check-mlx-asr-runtime --python-bin .venv/bin/python --model mlx-community/whisper-large-v3-turbo-asr-fp16</code></td></tr>
