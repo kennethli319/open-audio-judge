@@ -159,6 +159,7 @@ def test_asr_leaderboard_demo_page_documents_workflow() -> None:
         "mlx-community/VibeVoice-ASR-4bit",
         "examples/asr_research_cases.jsonl",
         "docs/asr-eval-taxonomy.md",
+        "docs/asr-leaderboard-run-manifest.json",
         "Representative Result JSON",
     ]
     for text in required_text:

@@ -156,6 +156,10 @@
       "--results",
       "runs/asr-leaderboard/vibevoice-asr-noise-smoke/judge-report/results.jsonl"
     ],
+    "manifest_refresh_command": [
+      ".venv/bin/python",
+      "scripts/refresh_asr_leaderboard_artifacts.py"
+    ],
     "model_run_template": [
       "oaj",
       "autojudge-mlx-asr",
@@ -176,6 +180,7 @@
   },
   "report_path": "runs/asr-leaderboard/full-35-combined/report.html",
   "results_path": "runs/asr-leaderboard/full-35-combined/results.jsonl",
+  "run_manifest_path": "docs/asr-leaderboard-run-manifest.json",
   "source_result_paths": [
     "runs/asr-leaderboard/whisper-large-v3-turbo-smoke/judge-report/results.jsonl",
     "runs/asr-leaderboard/whisper-large-v3-turbo-full-gap/judge-report/results.jsonl",

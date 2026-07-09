@@ -109,6 +109,7 @@ def test_render_generated_sections_summarizes_verified_asr_results(tmp_path: Pat
     assert "numeric_unit_integrity" in html
     assert "report.html" in html
     assert "docs/asr-leaderboard-summary.json" in html
+    assert "docs/asr-leaderboard-run-manifest.json" in html
     assert "reproducible refresh workflow" in html
 
 
@@ -168,6 +169,7 @@ def test_write_summary_artifact_records_models_and_categories(tmp_path: Path) ->
     assert summary["source_result_paths"] == [
         str(tmp_path / "model-a" / "judge-report" / "results.jsonl")
     ]
+    assert summary["run_manifest_path"] == "docs/asr-leaderboard-run-manifest.json"
     assert summary["refresh_workflow"]["audio_materialization_command"] == [
         ".venv/bin/python",
         "scripts/synthesize_tts_cases.py",
@@ -200,6 +202,10 @@ def test_write_summary_artifact_records_models_and_categories(tmp_path: Path) ->
         "scripts/refresh_asr_leaderboard_artifacts.py",
         "--results",
         str(tmp_path / "model-a" / "judge-report" / "results.jsonl"),
+    ]
+    assert summary["refresh_workflow"]["manifest_refresh_command"] == [
+        ".venv/bin/python",
+        "scripts/refresh_asr_leaderboard_artifacts.py",
     ]
     assert "secret" in summary["refresh_workflow"]["secret_handling"].lower()
     assert summary["models"][0]["model"] == "mlx-community/model-a"
@@ -307,3 +313,29 @@ def test_refresh_asr_leaderboard_artifacts_combines_report_and_page(tmp_path: Pa
         str(first),
         str(second),
     ]
+
+
+def test_refresh_asr_leaderboard_artifacts_reads_run_manifest(tmp_path: Path) -> None:
+    refresh_module = load_refresh_module()
+    nested = tmp_path / "run-a" / "judge-report" / "results.jsonl"
+    direct = tmp_path / "run-b" / "results.jsonl"
+    manifest = tmp_path / "manifest.json"
+    nested.parent.mkdir(parents=True)
+    direct.parent.mkdir(parents=True)
+    nested.write_text("", encoding="utf-8")
+    direct.write_text("", encoding="utf-8")
+    manifest.write_text(
+        json.dumps(
+            {
+                "runs": [
+                    {"run_name": "run-a", "results_path": str(tmp_path / "run-a")},
+                    {"run_name": "run-b", "results_path": str(direct)},
+                ]
+            }
+        ),
+        encoding="utf-8",
+    )
+
+    paths = refresh_module._result_paths_from_run_manifest(manifest)
+
+    assert paths == [nested, direct]

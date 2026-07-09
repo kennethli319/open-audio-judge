@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import argparse
+import json
 import sys
 from pathlib import Path
 
@@ -19,6 +20,7 @@ from scripts.update_asr_leaderboard_demo import (  # noqa: E402
 
 
 DEFAULT_COMBINED_OUT = ROOT / "runs" / "asr-leaderboard" / "full-35-combined"
+DEFAULT_RUN_MANIFEST = ROOT / "docs" / "asr-leaderboard-run-manifest.json"
 FULL_RUN_RESULT_PATHS = [
     ROOT
     / "runs"
@@ -86,6 +88,15 @@ def main() -> None:
     parser.add_argument("--page", type=Path, default=DEFAULT_PAGE)
     parser.add_argument("--summary-out", type=Path, default=DEFAULT_SUMMARY)
     parser.add_argument(
+        "--run-manifest",
+        type=Path,
+        default=DEFAULT_RUN_MANIFEST,
+        help=(
+            "JSON manifest listing verified ASR result files. Used when --results is omitted; "
+            "set to a missing path to fall back to built-in historical run names."
+        ),
+    )
+    parser.add_argument(
         "--expected-cases-per-model",
         type=int,
         default=35,
@@ -96,7 +107,10 @@ def main() -> None:
     result_paths = (
         [_normalize_results_path(path) for path in args.results]
         if args.results
-        else _default_result_paths(args.expected_cases_per_model)
+        else _default_result_paths(
+            args.expected_cases_per_model,
+            run_manifest=args.run_manifest,
+        )
     )
     refresh_asr_leaderboard_artifacts(
         result_paths,
@@ -163,8 +177,17 @@ def _normalize_results_path(path: Path) -> Path:
     return path
 
 
-def _default_result_paths(expected_cases_per_model: int) -> list[Path]:
+def _default_result_paths(expected_cases_per_model: int, *, run_manifest: Path) -> list[Path]:
     errors = []
+    if run_manifest.exists():
+        try:
+            paths = _result_paths_from_run_manifest(run_manifest)
+            _validate_candidate_paths(paths, expected_cases_per_model=expected_cases_per_model)
+        except Exception as exc:
+            errors.append(f"manifest {run_manifest}: {exc}")
+        else:
+            return paths
+
     for label, paths in (
         ("full-run", FULL_RUN_RESULT_PATHS),
         ("segmented", SEGMENTED_RESULT_PATHS),
@@ -180,6 +203,36 @@ def _default_result_paths(expected_cases_per_model: int) -> list[Path]:
         + " ".join(errors)
         + " Pass --results for each verified model result file or run directory."
     )
+
+
+def _result_paths_from_run_manifest(manifest_path: Path) -> list[Path]:
+    data = json.loads(manifest_path.read_text(encoding="utf-8"))
+    if not isinstance(data, dict):
+        raise ValueError("Run manifest must be a JSON object.")
+
+    raw_paths = data.get("result_paths")
+    if raw_paths is None:
+        runs = data.get("runs")
+        if not isinstance(runs, list):
+            raise ValueError("Run manifest must include result_paths or runs.")
+        raw_paths = [
+            run.get("results_path")
+            for run in runs
+            if isinstance(run, dict)
+        ]
+
+    if not isinstance(raw_paths, list) or not raw_paths:
+        raise ValueError("Run manifest did not list any result paths.")
+
+    paths = []
+    for raw_path in raw_paths:
+        if not isinstance(raw_path, str) or not raw_path:
+            raise ValueError(f"Invalid result path in run manifest: {raw_path!r}")
+        path = Path(raw_path)
+        if not path.is_absolute():
+            path = ROOT / path
+        paths.append(_normalize_results_path(path))
+    return paths
 
 
 def _validate_candidate_paths(paths: list[Path], *, expected_cases_per_model: int) -> None:

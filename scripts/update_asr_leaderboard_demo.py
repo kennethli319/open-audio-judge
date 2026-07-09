@@ -16,6 +16,7 @@ ROOT = Path(__file__).resolve().parents[1]
 DEFAULT_RESULTS = ROOT / "runs" / "asr-leaderboard" / "full-35-combined" / "results.jsonl"
 DEFAULT_PAGE = ROOT / "docs" / "asr-leaderboard-demo.html"
 DEFAULT_SUMMARY = ROOT / "docs" / "asr-leaderboard-summary.json"
+DEFAULT_RUN_MANIFEST = ROOT / "docs" / "asr-leaderboard-run-manifest.json"
 DEFAULT_AUDIO_CASES = ROOT / "runs" / "asr-research-audio" / "tts_audio_cases.jsonl"
 DEFAULT_SEED_CASES = ROOT / "examples" / "asr_research_cases.jsonl"
 START_MARKER = "<!-- ASR_LEADERBOARD_GENERATED_START -->"
@@ -104,6 +105,7 @@ def render_generated_sections(
     results_label = html.escape(_repo_relative(results_path))
     report_label = html.escape(_repo_relative(results_path.with_name("report.html")))
     summary_label = html.escape(_repo_relative(DEFAULT_SUMMARY))
+    manifest_label = html.escape(_repo_relative(DEFAULT_RUN_MANIFEST))
 
     return "\n".join(
         [
@@ -137,7 +139,8 @@ def render_generated_sections(
                 '<code>.venv/bin/python scripts/refresh_asr_leaderboard_artifacts.py</code> '
                 "after rerunning the verified ASR model jobs. The combined local report is "
                 f"<code>{report_label}</code> and the committed summary artifact is "
-                f"<code>{summary_label}</code>; that summary includes the source result files "
+                f"<code>{summary_label}</code>. The committed run manifest is "
+                f"<code>{manifest_label}</code>; together they include the source result files "
                 "and reproducible refresh workflow.</p>"
             ),
             END_MARKER,
@@ -166,6 +169,7 @@ def write_summary_artifact(
                     _repo_relative(path)
                     for path in source_result_paths or []
                 ],
+                "run_manifest_path": _repo_relative(DEFAULT_RUN_MANIFEST),
                 "refresh_workflow": _refresh_workflow(source_result_paths or []),
                 "total_results": len(results),
                 "model_count": len(model_summaries),
@@ -238,6 +242,10 @@ def _refresh_workflow(source_result_paths: list[Path]) -> dict[str, object]:
             "runs/asr-leaderboard/<run-name>",
         ],
         "combine_refresh_command": refresh_command,
+        "manifest_refresh_command": [
+            ".venv/bin/python",
+            "scripts/refresh_asr_leaderboard_artifacts.py",
+        ],
         "secret_handling": (
             "Load the Gemini API key from the local secret file only at runtime; "
             "do not commit or print secrets."

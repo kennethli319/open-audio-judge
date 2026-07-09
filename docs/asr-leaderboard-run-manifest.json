@@ -1,0 +1,98 @@
+{
+  "description": "Verified ASR leaderboard source result files for the full 35-case MLX ASR demo.",
+  "expected_cases_per_model": 35,
+  "generated_audio_manifest": "runs/asr-research-audio/tts_audio_cases.jsonl",
+  "runs": [
+    {
+      "model": "mlx-community/whisper-large-v3-turbo-asr-fp16",
+      "results_path": "runs/asr-leaderboard/whisper-large-v3-turbo-smoke/judge-report/results.jsonl",
+      "run_name": "whisper-large-v3-turbo-smoke"
+    },
+    {
+      "model": "mlx-community/whisper-large-v3-turbo-asr-fp16",
+      "results_path": "runs/asr-leaderboard/whisper-large-v3-turbo-full-gap/judge-report/results.jsonl",
+      "run_name": "whisper-large-v3-turbo-full-gap"
+    },
+    {
+      "model": "mlx-community/whisper-large-v3-turbo-asr-fp16",
+      "results_path": "runs/asr-leaderboard/whisper-large-v3-turbo-semantic-smoke/judge-report/results.jsonl",
+      "run_name": "whisper-large-v3-turbo-semantic-smoke"
+    },
+    {
+      "model": "mlx-community/whisper-large-v3-turbo-asr-fp16",
+      "results_path": "runs/asr-leaderboard/whisper-large-v3-turbo-entity-smoke/judge-report/results.jsonl",
+      "run_name": "whisper-large-v3-turbo-entity-smoke"
+    },
+    {
+      "model": "mlx-community/whisper-large-v3-turbo-asr-fp16",
+      "results_path": "runs/asr-leaderboard/whisper-large-v3-turbo-paraphrase-smoke/judge-report/results.jsonl",
+      "run_name": "whisper-large-v3-turbo-paraphrase-smoke"
+    },
+    {
+      "model": "mlx-community/whisper-large-v3-turbo-asr-fp16",
+      "results_path": "runs/asr-leaderboard/whisper-large-v3-turbo-noise-smoke/judge-report/results.jsonl",
+      "run_name": "whisper-large-v3-turbo-noise-smoke"
+    },
+    {
+      "model": "mlx-community/Qwen3-ASR-1.7B-8bit",
+      "results_path": "runs/asr-leaderboard/qwen3-asr-1.7b-smoke/judge-report/results.jsonl",
+      "run_name": "qwen3-asr-1.7b-smoke"
+    },
+    {
+      "model": "mlx-community/Qwen3-ASR-1.7B-8bit",
+      "results_path": "runs/asr-leaderboard/qwen3-asr-1.7b-full-gap/judge-report/results.jsonl",
+      "run_name": "qwen3-asr-1.7b-full-gap"
+    },
+    {
+      "model": "mlx-community/Qwen3-ASR-1.7B-8bit",
+      "results_path": "runs/asr-leaderboard/qwen3-asr-1.7b-semantic-smoke/judge-report/results.jsonl",
+      "run_name": "qwen3-asr-1.7b-semantic-smoke"
+    },
+    {
+      "model": "mlx-community/Qwen3-ASR-1.7B-8bit",
+      "results_path": "runs/asr-leaderboard/qwen3-asr-1.7b-entity-smoke/judge-report/results.jsonl",
+      "run_name": "qwen3-asr-1.7b-entity-smoke"
+    },
+    {
+      "model": "mlx-community/Qwen3-ASR-1.7B-8bit",
+      "results_path": "runs/asr-leaderboard/qwen3-asr-1.7b-paraphrase-smoke/judge-report/results.jsonl",
+      "run_name": "qwen3-asr-1.7b-paraphrase-smoke"
+    },
+    {
+      "model": "mlx-community/Qwen3-ASR-1.7B-8bit",
+      "results_path": "runs/asr-leaderboard/qwen3-asr-1.7b-noise-smoke/judge-report/results.jsonl",
+      "run_name": "qwen3-asr-1.7b-noise-smoke"
+    },
+    {
+      "model": "mlx-community/VibeVoice-ASR-4bit",
+      "results_path": "runs/asr-leaderboard/vibevoice-asr-smoke/judge-report/results.jsonl",
+      "run_name": "vibevoice-asr-smoke"
+    },
+    {
+      "model": "mlx-community/VibeVoice-ASR-4bit",
+      "results_path": "runs/asr-leaderboard/vibevoice-asr-full-gap/judge-report/results.jsonl",
+      "run_name": "vibevoice-asr-full-gap"
+    },
+    {
+      "model": "mlx-community/VibeVoice-ASR-4bit",
+      "results_path": "runs/asr-leaderboard/vibevoice-asr-semantic-smoke/judge-report/results.jsonl",
+      "run_name": "vibevoice-asr-semantic-smoke"
+    },
+    {
+      "model": "mlx-community/VibeVoice-ASR-4bit",
+      "results_path": "runs/asr-leaderboard/vibevoice-asr-entity-smoke/judge-report/results.jsonl",
+      "run_name": "vibevoice-asr-entity-smoke"
+    },
+    {
+      "model": "mlx-community/VibeVoice-ASR-4bit",
+      "results_path": "runs/asr-leaderboard/vibevoice-asr-paraphrase-smoke/judge-report/results.jsonl",
+      "run_name": "vibevoice-asr-paraphrase-smoke"
+    },
+    {
+      "model": "mlx-community/VibeVoice-ASR-4bit",
+      "results_path": "runs/asr-leaderboard/vibevoice-asr-noise-smoke/judge-report/results.jsonl",
+      "run_name": "vibevoice-asr-noise-smoke"
+    }
+  ],
+  "version": 1
+}
