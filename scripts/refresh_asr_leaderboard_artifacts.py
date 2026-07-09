@@ -200,6 +200,14 @@ def main() -> None:
         ),
     )
     parser.add_argument(
+        "--check-only",
+        action="store_true",
+        help=(
+            "Validate selected ASR result sources, seed manifest, and existing demo artifacts "
+            "without rewriting files or running live MLX/Gemini calls."
+        ),
+    )
+    parser.add_argument(
         "--expected-cases-per-model",
         type=int,
         default=35,
@@ -223,6 +231,22 @@ def main() -> None:
             args.expected_cases_per_model,
             run_manifest=args.run_manifest,
         )
+    if args.check_only:
+        check_summary = check_asr_leaderboard_refresh_inputs(
+            result_paths,
+            page=args.page,
+            summary_out=args.summary_out,
+            seed_cases=args.seed_cases,
+            expected_cases_per_model=args.expected_cases_per_model,
+        )
+        print(
+            "ASR refresh preflight OK: "
+            f"{check_summary['total_results']} results, "
+            f"{check_summary['model_count']} models, "
+            f"{check_summary['category_count']} categories, "
+            f"{check_summary['result_file_count']} source files."
+        )
+        return
     refresh_asr_leaderboard_artifacts(
         result_paths,
         out=args.out,
@@ -251,6 +275,70 @@ def _hosted_dir_from_env(env_var: str) -> Path:
             "kennethli319.github.io/open-audio-judge checkout."
         )
     return Path(raw_value).expanduser()
+
+
+def check_asr_leaderboard_refresh_inputs(
+    result_paths: list[Path],
+    *,
+    page: Path,
+    summary_out: Path,
+    seed_cases: Path,
+    expected_cases_per_model: int,
+    artifact_root: Path = ROOT,
+    path_maps: list[tuple[str, str]] | None = None,
+) -> dict[str, object]:
+    result_paths = [_normalize_results_path(path) for path in result_paths]
+    _validate_unique_result_paths(result_paths, context="ASR refresh preflight result sources")
+    for path in result_paths:
+        if not path.exists():
+            raise FileNotFoundError(f"Missing ASR result file: {path}")
+
+    combined_results = [
+        result
+        for path in result_paths
+        for result in load_results_jsonl(path)
+    ]
+    if not combined_results:
+        raise ValueError("No ASR evaluation results were loaded.")
+    render_generated_sections(
+        combined_results,
+        results_path=DEFAULT_COMBINED_OUT / "results.jsonl",
+        expected_cases_per_model=expected_cases_per_model,
+        source_result_paths=result_paths,
+    )
+    seed_cases_data = load_cases(seed_cases)
+    seed_validation = validate_asr_seed_manifest(
+        seed_cases_data,
+        cases_path=seed_cases,
+        expected_cases_per_category=5,
+    )
+    if seed_validation.get("status") != "complete":
+        raise ValueError(f"ASR seed manifest preflight is incomplete: {seed_validation}")
+    page_validation = check_asr_leaderboard_page(
+        page,
+        summary_path=summary_out,
+        artifact_root=artifact_root,
+        path_maps=path_maps or [],
+    )
+    return {
+        "status": "complete",
+        "result_file_count": len(result_paths),
+        "total_results": len(combined_results),
+        "model_count": len(
+            {
+                str(result.metadata.get("candidate_model") or "")
+                for result in combined_results
+            }
+        ),
+        "category_count": len(
+            {
+                str(result.metadata.get("eval_category") or "")
+                for result in combined_results
+            }
+        ),
+        "seed_manifest_status": seed_validation["status"],
+        "page_status": page_validation["status"],
+    }
 
 
 def refresh_asr_leaderboard_artifacts(

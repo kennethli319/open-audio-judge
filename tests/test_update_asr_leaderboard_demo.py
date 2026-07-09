@@ -200,6 +200,8 @@ def test_render_generated_sections_summarizes_verified_asr_results(tmp_path: Pat
     assert "ASR_LEADERBOARD_HOSTED_DIR" in html
     assert "--hosted-dir-from-env" in html
     assert "Generated Refresh Workflow" in html
+    assert "Preflight refresh inputs" in html
+    assert "--check-only" in html
     assert "Run refresh shell playbook" in html
     assert "Generated Artifacts" in html
     assert "Validate seed manifest" in html
@@ -462,6 +464,11 @@ def test_write_summary_artifact_records_models_and_categories(tmp_path: Path) ->
         "--discover-complete-model-runs",
         "--update-run-manifest",
     ]
+    assert summary["refresh_workflow"]["refresh_check_command"] == [
+        ".venv/bin/python",
+        "scripts/refresh_asr_leaderboard_artifacts.py",
+        "--check-only",
+    ]
     assert summary["refresh_workflow"]["manifest_refresh_command"] == [
         ".venv/bin/python",
         "scripts/refresh_asr_leaderboard_artifacts.py",
@@ -689,6 +696,8 @@ def test_write_refresh_report_records_coverage_and_commands(tmp_path: Path) -> N
     assert "runs/asr-leaderboard/vibevoice-asr-refresh" in text
     assert "Fallback models if a primary model is blocked" in text
     assert "mlx-community/parakeet-rnnt-0.6b" in text
+    assert "Preflight refresh inputs" in text
+    assert "--check-only" in text
     assert "--results " + str(source_results_path) in text
     assert "--update-run-manifest" in text
     assert "Discover latest complete runs" in text
@@ -955,6 +964,32 @@ def test_refresh_asr_leaderboard_artifacts_requires_hosted_dir_env(
 
     with pytest.raises(ValueError, match="ASR_LEADERBOARD_HOSTED_DIR"):
         refresh_module._hosted_dir_from_env("ASR_LEADERBOARD_HOSTED_DIR")
+
+
+def test_check_asr_leaderboard_refresh_inputs_validates_default_artifacts() -> None:
+    refresh_module = load_refresh_module()
+    result_paths = refresh_module._default_result_paths(
+        35,
+        run_manifest=refresh_module.DEFAULT_RUN_MANIFEST,
+    )
+
+    check_summary = refresh_module.check_asr_leaderboard_refresh_inputs(
+        result_paths,
+        page=refresh_module.DEFAULT_PAGE,
+        summary_out=refresh_module.DEFAULT_SUMMARY,
+        seed_cases=refresh_module.DEFAULT_CASES,
+        expected_cases_per_model=35,
+    )
+
+    assert check_summary == {
+        "status": "complete",
+        "result_file_count": 18,
+        "total_results": 105,
+        "model_count": 3,
+        "category_count": 7,
+        "seed_manifest_status": "complete",
+        "page_status": "complete",
+    }
 
 
 def test_discover_complete_model_result_paths_selects_newest_complete_runs(tmp_path: Path) -> None:

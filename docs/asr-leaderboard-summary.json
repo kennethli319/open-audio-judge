@@ -413,6 +413,11 @@
       ".venv/bin/python",
       "scripts/check_asr_leaderboard_page.py"
     ],
+    "refresh_check_command": [
+      ".venv/bin/python",
+      "scripts/refresh_asr_leaderboard_artifacts.py",
+      "--check-only"
+    ],
     "refresh_commands_path": "docs/asr-leaderboard-refresh-commands.sh",
     "secret_handling": "Load the Gemini API key from the local secret file only at runtime; do not commit or print secrets.",
     "seed_manifest_validation_command": [

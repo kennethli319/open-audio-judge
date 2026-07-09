@@ -186,6 +186,7 @@ def render_generated_sections(
     artifact_index_label = html.escape(_repo_relative(DEFAULT_ARTIFACT_INDEX))
     workflow = _refresh_workflow([])
     workflow_commands = [
+        ("Preflight refresh inputs", workflow["refresh_check_command"]),
         ("Validate seed manifest", workflow["seed_manifest_validation_command"]),
         ("Materialize audio", workflow["audio_materialization_command"]),
         ("Run one MLX ASR model", workflow["model_run_template"]),
@@ -502,6 +503,7 @@ def write_refresh_report(
                 "- Fallback models if a primary model is blocked: "
                 + ", ".join(f"`{model}`" for model in workflow["fallback_model_ids"]),
                 f"- Fallback handling: {workflow['fallback_handling']}",
+                f"- Preflight refresh inputs: `{_shell_join(workflow['refresh_check_command'])}`",
                 f"- Combine and refresh committed artifacts: `{_shell_join(workflow['combine_refresh_command'])}`",
                 f"- Discover latest complete runs: `{_shell_join(workflow['discover_refresh_command'])}`",
                 f"- Manifest-based refresh: `{_shell_join(workflow['manifest_refresh_command'])}`",
@@ -555,6 +557,7 @@ def write_refresh_commands_script(
         "# By default this refreshes committed artifacts from verified result files.",
         "# Live model runs require the local Gemini secret and are listed below as opt-in commands.",
         "",
+        _shell_join(workflow["refresh_check_command"]),
         _shell_join(workflow["seed_manifest_validation_command"]),
         _shell_join(workflow["combine_refresh_command"]),
         _shell_join(workflow["page_validation_command"]),
@@ -641,6 +644,11 @@ def _refresh_workflow(source_result_paths: list[Path]) -> dict[str, object]:
             "scripts/refresh_asr_leaderboard_artifacts.py",
             "--discover-complete-model-runs",
             "--update-run-manifest",
+        ],
+        "refresh_check_command": [
+            ".venv/bin/python",
+            "scripts/refresh_asr_leaderboard_artifacts.py",
+            "--check-only",
         ],
         "manifest_refresh_command": [
             ".venv/bin/python",
