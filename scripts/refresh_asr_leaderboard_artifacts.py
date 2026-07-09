@@ -178,19 +178,19 @@ def main() -> None:
     )
     args = parser.parse_args()
 
-    result_paths = (
-        [_normalize_results_path(path) for path in args.results]
-        if args.results
-        else discover_complete_model_result_paths(
+    if args.results:
+        result_paths = [_normalize_results_path(path) for path in args.results]
+    elif args.discover_complete_model_runs:
+        result_paths = _discover_or_default_result_paths(
             args.runs_root,
             expected_cases_per_model=args.expected_cases_per_model,
+            run_manifest=args.run_manifest,
         )
-        if args.discover_complete_model_runs
-        else _default_result_paths(
+    else:
+        result_paths = _default_result_paths(
             args.expected_cases_per_model,
             run_manifest=args.run_manifest,
         )
-    )
     refresh_asr_leaderboard_artifacts(
         result_paths,
         out=args.out,
@@ -634,6 +634,31 @@ def discover_complete_model_result_paths(
         expected_cases_per_model=expected_cases_per_model,
     )
     return discovered_paths
+
+
+def _discover_or_default_result_paths(
+    runs_root: Path,
+    *,
+    expected_cases_per_model: int,
+    run_manifest: Path,
+) -> list[Path]:
+    try:
+        return discover_complete_model_result_paths(
+            runs_root,
+            expected_cases_per_model=expected_cases_per_model,
+        )
+    except ValueError as exc:
+        fallback_paths = _default_result_paths(
+            expected_cases_per_model,
+            run_manifest=run_manifest,
+        )
+        print(
+            "No single complete ASR result file was discovered for every primary model; "
+            "using the committed run manifest/segmented sources instead. "
+            f"Discovery detail: {exc}",
+            file=sys.stderr,
+        )
+        return fallback_paths
 
 
 def _complete_result_file_model(

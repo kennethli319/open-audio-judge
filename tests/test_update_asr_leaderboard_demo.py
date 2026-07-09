@@ -972,6 +972,74 @@ def test_discover_complete_model_result_paths_selects_newest_complete_runs(tmp_p
     ) == [newer, model_b]
 
 
+def test_discover_or_default_result_paths_falls_back_to_run_manifest(
+    tmp_path: Path,
+    capsys: pytest.CaptureFixture[str],
+) -> None:
+    refresh_module = load_refresh_module()
+    runs_root = tmp_path / "runs" / "asr-leaderboard"
+    runs_root.mkdir(parents=True)
+    model_a = runs_root / "model-a-segmented" / "judge-report" / "results.jsonl"
+    model_b = runs_root / "model-b-segmented" / "judge-report" / "results.jsonl"
+    manifest = tmp_path / "run-manifest.json"
+    records_a = [
+        result_record(
+            case_id="asr-a-model-a",
+            model="mlx-community/model-a",
+            category="transcription_accuracy_wer",
+            score=100,
+            label="accurate",
+        ),
+        result_record(
+            case_id="asr-b-model-a",
+            model="mlx-community/model-a",
+            category="numeric_unit_integrity",
+            score=80,
+            label="accurate",
+        ),
+    ]
+    records_b = [
+        result_record(
+            case_id="asr-a-model-b",
+            model="mlx-community/model-b",
+            category="transcription_accuracy_wer",
+            score=60,
+            label="needs_review",
+        ),
+        result_record(
+            case_id="asr-b-model-b",
+            model="mlx-community/model-b",
+            category="numeric_unit_integrity",
+            score=40,
+            label="inaccurate",
+        ),
+    ]
+    for path, records in ((model_a, records_a), (model_b, records_b)):
+        path.parent.mkdir(parents=True)
+        path.write_text("".join(json.dumps(record) + "\n" for record in records), encoding="utf-8")
+    manifest.write_text(
+        json.dumps(
+            run_manifest_record(
+                [
+                    (str(model_a), records_a),
+                    (str(model_b), records_b),
+                ],
+                expected_cases_per_model=2,
+            )
+        ),
+        encoding="utf-8",
+    )
+
+    paths = refresh_module._discover_or_default_result_paths(
+        runs_root,
+        expected_cases_per_model=2,
+        run_manifest=manifest,
+    )
+
+    assert paths == [model_a, model_b]
+    assert "using the committed run manifest/segmented sources instead" in capsys.readouterr().err
+
+
 def test_check_asr_leaderboard_page_validates_generated_artifacts(tmp_path: Path) -> None:
     update_module = load_script_module()
     check_module = load_check_module()
