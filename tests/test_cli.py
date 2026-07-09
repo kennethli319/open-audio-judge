@@ -239,6 +239,57 @@ def test_autojudge_mlx_asr_cli_preflights_runtime_before_writing_outputs(
     assert not out.exists()
 
 
+def test_check_mlx_asr_runtime_cli_reports_ready_runtime(monkeypatch) -> None:
+    seen = {}
+
+    def fake_check(config):
+        seen["model"] = config.model
+        seen["python_bin"] = config.python_bin
+        seen["module"] = config.module
+
+    monkeypatch.setattr(cli, "check_mlx_asr_runtime", fake_check)
+
+    result = CliRunner().invoke(
+        app,
+        [
+            "check-mlx-asr-runtime",
+            "--python-bin",
+            ".venv/bin/python",
+            "--model",
+            "mlx-community/whisper-large-v3-turbo-asr-fp16",
+        ],
+    )
+
+    assert result.exit_code == 0
+    assert seen == {
+        "model": "mlx-community/whisper-large-v3-turbo-asr-fp16",
+        "python_bin": ".venv/bin/python",
+        "module": "mlx_audio.stt.generate",
+    }
+    assert "MLX ASR runtime OK" in result.output
+
+
+def test_check_mlx_asr_runtime_cli_reports_unavailable_runtime(monkeypatch) -> None:
+    def fail_check(config):
+        raise RuntimeError("cannot import 'mlx_audio.stt.generate'")
+
+    monkeypatch.setattr(cli, "check_mlx_asr_runtime", fail_check)
+
+    result = CliRunner().invoke(
+        app,
+        [
+            "check-mlx-asr-runtime",
+            "--python-bin",
+            ".venv/bin/python",
+        ],
+    )
+
+    assert result.exit_code != 0
+    assert "MLX ASR runtime unavailable" in result.output
+    assert "cannot import" in result.output
+    assert "Traceback" not in result.output
+
+
 def test_autojudge_local_tts_cli_writes_synthesized_cases_and_report(
     tmp_path: Path,
     monkeypatch,

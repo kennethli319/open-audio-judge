@@ -214,6 +214,33 @@ def autojudge_mlx_asr_command(
     console.print(f"Report:  {judge_out / 'report.html'}")
 
 
+@app.command("check-mlx-asr-runtime")
+def check_mlx_asr_runtime_command(
+    model: Annotated[
+        str,
+        typer.Option("--model", "-m", help="MLX ASR model id used for the runtime check context."),
+    ] = DEFAULT_MLX_ASR_MODELS[0],
+    python_bin: Annotated[
+        str,
+        typer.Option("--python-bin", help="Python executable that has mlx-audio installed."),
+    ] = "python3",
+    mlx_module: Annotated[
+        str,
+        typer.Option("--mlx-module", help="MLX audio STT module to import."),
+    ] = "mlx_audio.stt.generate",
+) -> None:
+    try:
+        config = MlxAsrConfig(model=model, python_bin=python_bin, module=mlx_module)
+        check_mlx_asr_runtime(config)
+    except (FileNotFoundError, RuntimeError) as exc:
+        console.print(f"[bold red]MLX ASR runtime unavailable:[/bold red] {exc}")
+        raise typer.Exit(1) from exc
+    console.print("[bold]MLX ASR runtime OK[/bold]")
+    console.print(f"Python: {python_bin}")
+    console.print(f"Module: {mlx_module}")
+    console.print(f"Model:  {model}")
+
+
 @app.command("autojudge-local-tts")
 def autojudge_local_tts_command(
     cases: Annotated[

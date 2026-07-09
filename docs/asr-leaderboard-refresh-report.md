@@ -118,6 +118,7 @@ This generated report summarizes the verified ASR leaderboard artifact set.
 - Generated shell playbook: `docs/asr-leaderboard-refresh-commands.sh`
 - Seed manifest validation: `.venv/bin/python scripts/validate_asr_seed_manifest.py --summary-out docs/asr-seed-manifest-validation.json`
 - Audio materialization: `.venv/bin/python scripts/synthesize_tts_cases.py --cases examples/asr_research_cases.jsonl --out runs/asr-research-audio --discard-text-sidecars --summary-out runs/asr-research-audio/summary.json`
+- MLX ASR runtime check: `PYTHONPATH=src .venv/bin/python -m open_audio_judge.cli check-mlx-asr-runtime --python-bin .venv/bin/python --model mlx-community/whisper-large-v3-turbo-asr-fp16`
 - Load local Gemini secret before model runs: `source /Users/wangyauli/.openclaw/secrets/open-audio-judge-gemini.env`
 - Run mlx-community/whisper-large-v3-turbo-asr-fp16: `.venv/bin/oaj autojudge-mlx-asr --python-bin .venv/bin/python --cases runs/asr-research-audio/tts_audio_cases.jsonl --model mlx-community/whisper-large-v3-turbo-asr-fp16 --judge-provider gemini --judge-samples 3 --out runs/asr-leaderboard/whisper-large-v3-turbo-refresh`
 - Run mlx-community/Qwen3-ASR-1.7B-8bit: `.venv/bin/oaj autojudge-mlx-asr --python-bin .venv/bin/python --cases runs/asr-research-audio/tts_audio_cases.jsonl --model mlx-community/Qwen3-ASR-1.7B-8bit --judge-provider gemini --judge-samples 3 --out runs/asr-leaderboard/qwen3-asr-1.7b-refresh`

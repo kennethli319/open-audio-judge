@@ -23,6 +23,9 @@ fi
 # Optional live refresh: load the Gemini key only in your local shell before judge calls.
 # source /Users/wangyauli/.openclaw/secrets/open-audio-judge-gemini.env
 
+# Optional live refresh: check the MLX ASR runtime before model jobs.
+# PYTHONPATH=src .venv/bin/python -m open_audio_judge.cli check-mlx-asr-runtime --python-bin .venv/bin/python --model mlx-community/whisper-large-v3-turbo-asr-fp16
+
 # Optional live refresh: run primary MLX ASR model jobs when the local runtime is ready.
 # .venv/bin/oaj autojudge-mlx-asr --python-bin .venv/bin/python --cases runs/asr-research-audio/tts_audio_cases.jsonl --model mlx-community/whisper-large-v3-turbo-asr-fp16 --judge-provider gemini --judge-samples 3 --out runs/asr-leaderboard/whisper-large-v3-turbo-refresh
 # .venv/bin/oaj autojudge-mlx-asr --python-bin .venv/bin/python --cases runs/asr-research-audio/tts_audio_cases.jsonl --model mlx-community/Qwen3-ASR-1.7B-8bit --judge-provider gemini --judge-samples 3 --out runs/asr-leaderboard/qwen3-asr-1.7b-refresh

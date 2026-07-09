@@ -236,6 +236,8 @@ def test_render_generated_sections_summarizes_verified_asr_results(tmp_path: Pat
     assert "Check hosted mirror" in html
     assert ".venv/bin/python scripts/refresh_asr_leaderboard_artifacts.py --check-only --hosted-dir-from-env" in html
     assert "Run one MLX ASR model" in html
+    assert "Check MLX ASR runtime" in html
+    assert "PYTHONPATH=src .venv/bin/python -m open_audio_judge.cli check-mlx-asr-runtime" in html
     assert ".venv/bin/oaj autojudge-mlx-asr" in html
     assert "--model &lt;mlx-community/model-id&gt;" in html
     assert "Generated Model Refresh Commands" in html
@@ -413,6 +415,17 @@ def test_write_summary_artifact_records_models_and_categories(tmp_path: Path) ->
         "3",
         "--out",
         "runs/asr-leaderboard/<run-name>",
+    ]
+    assert summary["refresh_workflow"]["mlx_runtime_check_command"] == [
+        "PYTHONPATH=src",
+        ".venv/bin/python",
+        "-m",
+        "open_audio_judge.cli",
+        "check-mlx-asr-runtime",
+        "--python-bin",
+        ".venv/bin/python",
+        "--model",
+        "mlx-community/whisper-large-v3-turbo-asr-fp16",
     ]
     assert summary["refresh_workflow"]["model_run_commands"] == [
         {
@@ -717,6 +730,7 @@ def test_write_refresh_report_records_coverage_and_commands(tmp_path: Path) -> N
     assert "`transcription_accuracy_wer`" in text
     assert ".venv/bin/python scripts/refresh_asr_leaderboard_artifacts.py" in text
     assert ".venv/bin/python scripts/validate_asr_seed_manifest.py" in text
+    assert "PYTHONPATH=src .venv/bin/python -m open_audio_judge.cli check-mlx-asr-runtime" in text
     assert "Seed manifest validation: `docs/asr-seed-manifest-validation.json`" in text
     assert "Hosted artifact manifest: `docs/asr-leaderboard-hosted-manifest.json`" in text
     assert "Refresh command playbook: `docs/asr-leaderboard-refresh-commands.sh`" in text
@@ -939,6 +953,10 @@ def test_refresh_asr_leaderboard_artifacts_combines_report_and_page(tmp_path: Pa
         "to the Pages checkout open-audio-judge directory}\""
     ) in refresh_command_text
     assert "source /Users/wangyauli/.openclaw/secrets/open-audio-judge-gemini.env" in refresh_command_text
+    assert (
+        "PYTHONPATH=src .venv/bin/python -m open_audio_judge.cli check-mlx-asr-runtime"
+        in refresh_command_text
+    )
     assert ".venv/bin/python scripts/refresh_asr_leaderboard_artifacts.py --check-only --hosted-dir-from-env" in refresh_command_text
     assert (hosted_dir / "asr-leaderboard-run-manifest.json").exists()
     assert (hosted_dir / "manifest-validation.json").read_text(

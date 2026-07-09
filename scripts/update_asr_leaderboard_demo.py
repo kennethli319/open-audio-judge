@@ -189,6 +189,7 @@ def render_generated_sections(
         ("Preflight refresh inputs", workflow["refresh_check_command"]),
         ("Validate seed manifest", workflow["seed_manifest_validation_command"]),
         ("Materialize audio", workflow["audio_materialization_command"]),
+        ("Check MLX ASR runtime", workflow["mlx_runtime_check_command"]),
         ("Run one MLX ASR model", workflow["model_run_template"]),
         ("Discover latest complete runs", workflow["discover_refresh_command"]),
         ("Refresh committed artifacts", workflow["manifest_refresh_command"]),
@@ -496,6 +497,7 @@ def write_refresh_report(
                 f"- Generated shell playbook: `{_repo_relative(DEFAULT_REFRESH_COMMANDS)}`",
                 f"- Seed manifest validation: `{_shell_join(workflow['seed_manifest_validation_command'])}`",
                 f"- Audio materialization: `{_shell_join(workflow['audio_materialization_command'])}`",
+                f"- MLX ASR runtime check: `{_shell_join(workflow['mlx_runtime_check_command'])}`",
                 f"- Load local Gemini secret before model runs: `{_shell_join(workflow['local_secret_env_command'])}`",
                 *(
                     f"- Run {command['model']}: `{_shell_join(command['command'])}`"
@@ -577,6 +579,9 @@ def write_refresh_commands_script(
         "# Optional live refresh: load the Gemini key only in your local shell before judge calls.",
         "# " + _shell_join(workflow["local_secret_env_command"]),
         "",
+        "# Optional live refresh: check the MLX ASR runtime before model jobs.",
+        "# " + _shell_join(workflow["mlx_runtime_check_command"]),
+        "",
         "# Optional live refresh: run primary MLX ASR model jobs when the local runtime is ready.",
         *(
             "# " + _shell_join(command["command"])
@@ -637,6 +642,17 @@ def _refresh_workflow(source_result_paths: list[Path]) -> dict[str, object]:
             "3",
             "--out",
             "runs/asr-leaderboard/<run-name>",
+        ],
+        "mlx_runtime_check_command": [
+            "PYTHONPATH=src",
+            ".venv/bin/python",
+            "-m",
+            "open_audio_judge.cli",
+            "check-mlx-asr-runtime",
+            "--python-bin",
+            ".venv/bin/python",
+            "--model",
+            ASR_LEADERBOARD_MODELS[0][0],
         ],
         "model_run_commands": _model_run_commands(),
         "fallback_model_ids": ASR_FALLBACK_MODELS,

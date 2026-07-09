@@ -337,6 +337,17 @@
       ".venv/bin/python",
       "scripts/refresh_asr_leaderboard_artifacts.py"
     ],
+    "mlx_runtime_check_command": [
+      "PYTHONPATH=src",
+      ".venv/bin/python",
+      "-m",
+      "open_audio_judge.cli",
+      "check-mlx-asr-runtime",
+      "--python-bin",
+      ".venv/bin/python",
+      "--model",
+      "mlx-community/whisper-large-v3-turbo-asr-fp16"
+    ],
     "model_run_commands": [
       {
         "command": [
