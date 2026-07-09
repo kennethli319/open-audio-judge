@@ -1673,6 +1673,7 @@ def _required_page_text(summary: dict[str, Any]) -> list[str]:
                 "model_run_template",
                 "manifest_refresh_command",
                 "page_validation_command",
+                "commit_verification_command",
                 "hosted_artifact_command",
                 "hosted_validation_command",
             }
@@ -1753,9 +1754,7 @@ def _sha256_file(path: Path) -> str:
 
 def _rendered_command_text(command: list[object]) -> str:
     text = " ".join(str(part) for part in command)
-    if "<" in text or ">" in text:
-        return html.escape(text)
-    return text
+    return html.escape(text)
 
 
 if __name__ == "__main__":

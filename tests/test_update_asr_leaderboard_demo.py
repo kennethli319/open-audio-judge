@@ -263,6 +263,8 @@ def test_render_generated_sections_summarizes_verified_asr_results(tmp_path: Pat
     assert "scripts/check_asr_leaderboard_page.py" in html
     assert "Verify generated artifacts are fresh" in html
     assert "--require-generated-fresh" in html
+    assert "Run commit verification" in html
+    assert ".venv/bin/ruff check ." in html
     assert "Check hosted mirror" in html
     assert (
         ".venv/bin/python scripts/refresh_asr_leaderboard_artifacts.py --check-only --hosted-dir-from-env --require-hosted-current"
@@ -612,6 +614,18 @@ def test_write_summary_artifact_records_models_and_categories(tmp_path: Path) ->
         "--check-only",
         "--require-generated-fresh",
     ]
+    assert summary["refresh_workflow"]["commit_verification_command"] == [
+        "bash",
+        "-lc",
+        (
+            "'.venv/bin/ruff check . && "
+            ".venv/bin/python -m pytest && "
+            ".venv/bin/python scripts/check_asr_leaderboard_page.py && "
+            ".venv/bin/python scripts/refresh_asr_leaderboard_artifacts.py "
+            "--check-only --require-generated-fresh && "
+            "git diff --check'"
+        ),
+    ]
     assert summary["refresh_workflow"]["manifest_refresh_command"] == [
         ".venv/bin/python",
         "scripts/refresh_asr_leaderboard_artifacts.py",
@@ -944,6 +958,8 @@ def test_write_refresh_report_records_coverage_and_commands(tmp_path: Path) -> N
     assert "Full refresh readiness check" in text
     assert "Generated artifact freshness check" in text
     assert "--require-generated-fresh" in text
+    assert "Commit verification" in text
+    assert ".venv/bin/python -m pytest" in text
     assert "--results " + str(source_results_path) in text
     assert "--update-run-manifest" in text
     assert "Discover latest complete runs" in text
@@ -3292,6 +3308,7 @@ def test_check_asr_leaderboard_page_validates_hosted_artifact_layout(tmp_path: P
                 ".venv/bin/oaj autojudge-mlx-asr --python-bin .venv/bin/python --cases runs/asr-research-audio/tts_audio_cases.jsonl --model &lt;mlx-community/model-id&gt; --judge-provider gemini --judge-samples 3 --out runs/asr-leaderboard/&lt;run-name&gt;",
                 ".venv/bin/python scripts/refresh_asr_leaderboard_artifacts.py",
                 ".venv/bin/python scripts/check_asr_leaderboard_page.py",
+                "bash -lc &#x27;.venv/bin/ruff check . &amp;&amp; .venv/bin/python -m pytest &amp;&amp; .venv/bin/python scripts/check_asr_leaderboard_page.py &amp;&amp; .venv/bin/python scripts/refresh_asr_leaderboard_artifacts.py --check-only --require-generated-fresh &amp;&amp; git diff --check&#x27;",
                 ".venv/bin/python scripts/refresh_asr_leaderboard_artifacts.py --hosted-dir-from-env",
                 ".venv/bin/python scripts/refresh_asr_leaderboard_artifacts.py --check-only --hosted-dir-from-env --require-hosted-current",
                 "runs/asr-leaderboard/full-35-combined/results.jsonl",

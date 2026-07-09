@@ -313,6 +313,7 @@ def render_generated_sections(
         ("Review blocked model log", workflow["blocked_model_log_command"]),
         ("Check generated page", workflow["page_validation_command"]),
         ("Verify generated artifacts are fresh", workflow["freshness_check_command"]),
+        ("Run commit verification", workflow["commit_verification_command"]),
         ("Sync hosted artifacts", workflow["hosted_artifact_command"]),
         ("Check hosted mirror", workflow["hosted_validation_command"]),
     ]
@@ -656,6 +657,7 @@ def write_refresh_report(
                 f"- Manifest-based refresh: `{_shell_join(workflow['manifest_refresh_command'])}`",
                 f"- Page validation: `{_shell_join(workflow['page_validation_command'])}`",
                 f"- Generated artifact freshness check: `{_shell_join(workflow['freshness_check_command'])}`",
+                f"- Commit verification: `{_shell_join(workflow['commit_verification_command'])}`",
                 f"- Hosted artifact sync: `{_shell_join(workflow['hosted_artifact_command'])}`",
                 f"- Hosted mirror validation: `{_shell_join(workflow['hosted_validation_command'])}`",
                 f"- Live model refresh script: `bash {workflow['live_refresh_script_path']}`",
@@ -924,6 +926,9 @@ def write_refresh_commands_script(
         "# Alternative: discover the newest complete primary-model runs.",
         "# " + _shell_join(workflow["discover_refresh_command"]),
         "",
+        "# Final non-secret verification before committing generated ASR artifacts.",
+        _shell_join(workflow["commit_verification_command"]),
+        "",
     ]
     output_path.parent.mkdir(parents=True, exist_ok=True)
     output_path.write_text("\n".join(lines), encoding="utf-8")
@@ -1152,6 +1157,18 @@ def _refresh_workflow(source_result_paths: list[Path]) -> dict[str, object]:
             "scripts/refresh_asr_leaderboard_artifacts.py",
             "--check-only",
             "--require-generated-fresh",
+        ],
+        "commit_verification_command": [
+            "bash",
+            "-lc",
+            (
+                "'.venv/bin/ruff check . && "
+                ".venv/bin/python -m pytest && "
+                ".venv/bin/python scripts/check_asr_leaderboard_page.py && "
+                ".venv/bin/python scripts/refresh_asr_leaderboard_artifacts.py "
+                "--check-only --require-generated-fresh && "
+                "git diff --check'"
+            ),
         ],
         "manifest_refresh_command": [
             ".venv/bin/python",

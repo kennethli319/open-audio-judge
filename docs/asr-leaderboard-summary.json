@@ -339,6 +339,11 @@
       "runs/asr-leaderboard/vibevoice-asr-noise-smoke/judge-report/results.jsonl",
       "--update-run-manifest"
     ],
+    "commit_verification_command": [
+      "bash",
+      "-lc",
+      "'.venv/bin/ruff check . && .venv/bin/python -m pytest && .venv/bin/python scripts/check_asr_leaderboard_page.py && .venv/bin/python scripts/refresh_asr_leaderboard_artifacts.py --check-only --require-generated-fresh && git diff --check'"
+    ],
     "discover_refresh_command": [
       ".venv/bin/python",
       "scripts/refresh_asr_leaderboard_artifacts.py",

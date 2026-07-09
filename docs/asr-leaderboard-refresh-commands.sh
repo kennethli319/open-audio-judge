@@ -42,3 +42,6 @@ fi
 
 # Alternative: discover the newest complete primary-model runs.
 # .venv/bin/python scripts/refresh_asr_leaderboard_artifacts.py --discover-complete-model-runs --update-run-manifest
+
+# Final non-secret verification before committing generated ASR artifacts.
+bash -lc '.venv/bin/ruff check . && .venv/bin/python -m pytest && .venv/bin/python scripts/check_asr_leaderboard_page.py && .venv/bin/python scripts/refresh_asr_leaderboard_artifacts.py --check-only --require-generated-fresh && git diff --check'
