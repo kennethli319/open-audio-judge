@@ -258,22 +258,66 @@ preservation, and acoustic-noise robustness. These seeds intentionally require
 local audio materialization before ASR transcription; keep generated audio under
 ignored `runs/`.
 After the three model runs finish, refresh the combined report, committed JSON
-summary, and generated demo-page leaderboard block with:
+artifacts, and generated demo-page leaderboard block with:
 
 ```bash
 .venv/bin/python scripts/refresh_asr_leaderboard_artifacts.py
 ```
 
+The refresh script reads the committed run manifest by default, combines the
+verified result files, validates the full model/category matrix, validates the
+35-case seed manifest, and rewrites the generated artifact bundle:
+
+- `runs/asr-leaderboard/full-35-combined/results.jsonl`
+- `runs/asr-leaderboard/full-35-combined/report.html`
+- `docs/asr-leaderboard-summary.json`
+- `docs/asr-leaderboard-refresh-report.md`
+- `docs/asr-leaderboard-run-manifest.json`
+- `docs/asr-leaderboard-manifest-validation.json`
+- `docs/asr-seed-manifest-validation.json`
+- `docs/asr-leaderboard-next-runs.json`
+- `docs/asr-leaderboard-hosted-manifest.json`
+- `docs/asr-leaderboard-artifacts.json`
+
+When a new complete run should replace the committed source manifest, discover
+the latest complete run for each primary model and update the manifest in the
+same pass:
+
+```bash
+.venv/bin/python scripts/refresh_asr_leaderboard_artifacts.py \
+  --discover-complete-model-runs \
+  --update-run-manifest
+```
+
+Before committing refreshed ASR artifacts, run the lightweight page and artifact
+checks:
+
+```bash
+.venv/bin/python scripts/check_asr_leaderboard_page.py
+.venv/bin/python scripts/validate_asr_seed_manifest.py \
+  --summary-out docs/asr-seed-manifest-validation.json
+```
+
 To refresh the same committed artifacts and copy them into the hosted Pages
-checkout in one verified step, pass the Pages destination:
+checkout in one verified step, either pass the Pages destination directly:
 
 ```bash
 .venv/bin/python scripts/refresh_asr_leaderboard_artifacts.py \
   --hosted-dir /path/to/kennethli319.github.io/open-audio-judge
 ```
 
+or set `ASR_LEADERBOARD_HOSTED_DIR` and use the env-based command embedded in the
+generated summary and refresh report:
+
+```bash
+ASR_LEADERBOARD_HOSTED_DIR=/path/to/kennethli319.github.io/open-audio-judge \
+  .venv/bin/python scripts/refresh_asr_leaderboard_artifacts.py \
+  --hosted-dir-from-env
+```
+
 See [docs/asr-leaderboard-demo.html](docs/asr-leaderboard-demo.html) for the
-full command flow.
+full command flow and [docs/asr-leaderboard-refresh-report.md](docs/asr-leaderboard-refresh-report.md)
+for the current verified source result files, runtime status, and next-run plan.
 
 ## AutoJudge A Local Chatterbox TTS Model
 
