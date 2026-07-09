@@ -63,6 +63,36 @@
       "result_count": 15
     }
   ],
+  "category_columns": [
+    {
+      "category": "transcription_accuracy_wer",
+      "label": "WER"
+    },
+    {
+      "category": "numeric_unit_integrity",
+      "label": "Numeric/Unit"
+    },
+    {
+      "category": "negation_modality_scope",
+      "label": "Negation/Modality"
+    },
+    {
+      "category": "temporal_scheduling_accuracy",
+      "label": "Temporal"
+    },
+    {
+      "category": "entity_factual_integrity",
+      "label": "Entity"
+    },
+    {
+      "category": "semantic_paraphrase_preservation",
+      "label": "Paraphrase"
+    },
+    {
+      "category": "acoustic_noise_robustness",
+      "label": "Acoustic Noise"
+    }
+  ],
   "category_count": 7,
   "expected_cases_per_model": 35,
   "manifest_validation_path": "docs/asr-leaderboard-manifest-validation.json",

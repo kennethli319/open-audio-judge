@@ -34,6 +34,7 @@ CATEGORY_COLUMNS = [
     ("semantic_paraphrase_preservation", "Paraphrase"),
     ("acoustic_noise_robustness", "Acoustic Noise"),
 ]
+CATEGORY_LABELS = dict(CATEGORY_COLUMNS)
 
 
 @dataclass(frozen=True)
@@ -130,6 +131,7 @@ def render_generated_sections(
     total_judge_samples = sum(summary.judge_samples for summary in model_summaries)
     categories = sorted({str(result.metadata.get("eval_category", "")) for result in results})
     category_list = ", ".join(f"<code>{html.escape(category)}</code>" for category in categories)
+    category_columns = category_columns_for_results(results)
     results_label = html.escape(_repo_relative(results_path))
     report_label = html.escape(_repo_relative(results_path.with_name("report.html")))
     summary_label = html.escape(_repo_relative(DEFAULT_SUMMARY))
@@ -178,10 +180,13 @@ def render_generated_sections(
             "    <h2>Category Breakdown</h2>",
             "    <table>",
             "      <thead><tr><th>Model</th>"
-            + "".join(f"<th>{html.escape(label)}</th>" for _, label in CATEGORY_COLUMNS)
+            + "".join(f"<th>{html.escape(label)}</th>" for _, label in category_columns)
             + "</tr></thead>",
             "      <tbody>",
-            *(_render_category_row(model, results) for model in [summary.model for summary in model_summaries]),
+            *(
+                _render_category_row(model, results, category_columns=category_columns)
+                for model in [summary.model for summary in model_summaries]
+            ),
             "      </tbody>",
             "    </table>",
             (
@@ -246,6 +251,7 @@ def write_summary_artifact(
     category_summaries = summarize_categories(results)
     runtime_status = build_refresh_runtime_status(results)
     coverage_matrix = build_model_category_matrix(results)
+    category_columns = category_columns_for_results(results)
     source_file_summaries = summarize_source_result_files(source_result_paths or [])
     output_path.parent.mkdir(parents=True, exist_ok=True)
     output_path.write_text(
@@ -270,6 +276,10 @@ def write_summary_artifact(
                 "model_count": len(model_summaries),
                 "category_count": len(category_summaries),
                 "expected_cases_per_model": expected_cases_per_model,
+                "category_columns": [
+                    {"category": category, "label": label}
+                    for category, label in category_columns
+                ],
                 "total_gemini_judge_samples": sum(summary.judge_samples for summary in model_summaries),
                 "model_category_matrix": coverage_matrix,
                 "models": [
@@ -315,6 +325,7 @@ def write_refresh_report(
     workflow = _refresh_workflow(source_result_paths or [])
     runtime_status = build_refresh_runtime_status(results)
     coverage_matrix = build_model_category_matrix(results)
+    category_columns = category_columns_for_results(results)
     source_file_summaries = summarize_source_result_files(source_result_paths or [])
     output_path.parent.mkdir(parents=True, exist_ok=True)
     output_path.write_text(
@@ -351,9 +362,12 @@ def write_refresh_report(
                 "",
                 "## Model Category Matrix",
                 "",
-                "| Model | " + " | ".join(label for _, label in CATEGORY_COLUMNS) + " |",
-                "| --- | " + " | ".join("---:" for _ in CATEGORY_COLUMNS) + " |",
-                *(_model_category_matrix_row(row) for row in coverage_matrix),
+                "| Model | " + " | ".join(label for _, label in category_columns) + " |",
+                "| --- | " + " | ".join("---:" for _ in category_columns) + " |",
+                *(
+                    _model_category_matrix_row(row, category_columns=category_columns)
+                    for row in coverage_matrix
+                ),
                 "",
                 "## Source Result Files",
                 "",
@@ -474,7 +488,7 @@ def build_refresh_runtime_status(results: list[EvaluationResult]) -> dict[str, o
 
 def build_model_category_matrix(results: list[EvaluationResult]) -> list[dict[str, object]]:
     model_summaries = summarize_models(results)
-    category_order = [category for category, _ in CATEGORY_COLUMNS]
+    category_order = [category for category, _ in category_columns_for_results(results)]
     matrix = []
     for summary in model_summaries:
         model_results = [
@@ -494,6 +508,27 @@ def build_model_category_matrix(results: list[EvaluationResult]) -> list[dict[st
             }
         )
     return matrix
+
+
+def category_columns_for_results(results: list[EvaluationResult]) -> list[tuple[str, str]]:
+    observed_categories = {
+        str(result.metadata.get("eval_category") or "")
+        for result in results
+    }
+    if "" in observed_categories:
+        raise ValueError("Every result must include metadata.eval_category.")
+
+    columns = [
+        (category, label)
+        for category, label in CATEGORY_COLUMNS
+        if category in observed_categories or len(observed_categories) <= len(CATEGORY_COLUMNS)
+    ]
+    known_categories = {category for category, _ in CATEGORY_COLUMNS}
+    columns.extend(
+        (category, CATEGORY_LABELS.get(category, _titleize_category(category)))
+        for category in sorted(observed_categories - known_categories)
+    )
+    return columns
 
 
 def summarize_source_result_files(result_paths: list[Path]) -> list[SourceResultFileSummary]:
@@ -662,11 +697,16 @@ def _category_markdown_row(summary: CategorySummary) -> str:
     return f"| `{summary.category}` | {summary.result_count} | {summary.average_score:.1f} | {labels} |"
 
 
-def _model_category_matrix_row(row: dict[str, object]) -> str:
+def _model_category_matrix_row(
+    row: dict[str, object],
+    *,
+    category_columns: list[tuple[str, str]] | None = None,
+) -> str:
     counts = row["category_counts"]
     if not isinstance(counts, dict):
         raise TypeError("category_counts must be a dictionary")
-    cells = " | ".join(str(counts[category]) for category, _ in CATEGORY_COLUMNS)
+    columns = category_columns or CATEGORY_COLUMNS
+    cells = " | ".join(str(counts.get(category, 0)) for category, _ in columns)
     return f"| `{row['model']}` | {cells} |"
 
 
@@ -710,14 +750,19 @@ def _shell_join(command: object) -> str:
     return " ".join(str(part) for part in command)
 
 
-def _render_category_row(model: str, results: list[EvaluationResult]) -> str:
+def _render_category_row(
+    model: str,
+    results: list[EvaluationResult],
+    *,
+    category_columns: list[tuple[str, str]] | None = None,
+) -> str:
     model_results = [result for result in results if result.metadata.get("candidate_model") == model]
     by_category: dict[str, list[EvaluationResult]] = defaultdict(list)
     for result in model_results:
         by_category[str(result.metadata["eval_category"])].append(result)
 
     cells = []
-    for category, _ in CATEGORY_COLUMNS:
+    for category, _ in category_columns or CATEGORY_COLUMNS:
         category_results = by_category[category]
         if not category_results:
             cells.append("<td>0 cases</td>")
@@ -737,6 +782,10 @@ def _render_category_row(model: str, results: list[EvaluationResult]) -> str:
         + "".join(cells)
         + "</tr>"
     )
+
+
+def _titleize_category(category: str) -> str:
+    return " ".join(word.capitalize() for word in category.split("_") if word)
 
 
 def _repo_relative(path: Path) -> str:

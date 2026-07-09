@@ -299,6 +299,92 @@ def test_write_summary_artifact_records_models_and_categories(tmp_path: Path) ->
     assert summary["categories"][1]["category"] == "numeric_unit_integrity"
 
 
+def test_generated_artifacts_include_new_observed_category_columns(tmp_path: Path) -> None:
+    module = load_script_module()
+    results_path = tmp_path / "results.jsonl"
+    summary_path = tmp_path / "summary.json"
+    report_path = tmp_path / "refresh-report.md"
+    categories = [
+        "transcription_accuracy_wer",
+        "numeric_unit_integrity",
+        "negation_modality_scope",
+        "temporal_scheduling_accuracy",
+        "entity_factual_integrity",
+        "semantic_paraphrase_preservation",
+        "acoustic_noise_robustness",
+        "speaker_attribution_consistency",
+    ]
+    records = []
+    for model in ("mlx-community/model-a", "mlx-community/model-b"):
+        records.extend(
+            [
+                result_record(
+                    case_id=f"asr-{category}-{model[-1]}",
+                    model=model,
+                    category=category,
+                    score=90,
+                    label="accurate",
+                )
+                for category in categories
+            ]
+        )
+    results_path.write_text(
+        "".join(json.dumps(record) + "\n" for record in records),
+        encoding="utf-8",
+    )
+    results = module.load_results_jsonl(results_path)
+
+    html = module.render_generated_sections(
+        results,
+        results_path=results_path,
+        expected_cases_per_model=8,
+    )
+    module.write_summary_artifact(
+        results,
+        summary_path,
+        results_path=results_path,
+        expected_cases_per_model=8,
+    )
+    module.write_refresh_report(
+        results,
+        report_path,
+        results_path=results_path,
+        expected_cases_per_model=8,
+    )
+
+    summary = json.loads(summary_path.read_text(encoding="utf-8"))
+    report = report_path.read_text(encoding="utf-8")
+    assert "Speaker Attribution Consistency" in html
+    assert summary["category_columns"] == [
+        {"category": "transcription_accuracy_wer", "label": "WER"},
+        {"category": "numeric_unit_integrity", "label": "Numeric/Unit"},
+        {"category": "negation_modality_scope", "label": "Negation/Modality"},
+        {"category": "temporal_scheduling_accuracy", "label": "Temporal"},
+        {"category": "entity_factual_integrity", "label": "Entity"},
+        {"category": "semantic_paraphrase_preservation", "label": "Paraphrase"},
+        {"category": "acoustic_noise_robustness", "label": "Acoustic Noise"},
+        {
+            "category": "speaker_attribution_consistency",
+            "label": "Speaker Attribution Consistency",
+        },
+    ]
+    assert summary["model_category_matrix"][0]["category_counts"] == {
+        "transcription_accuracy_wer": 1,
+        "numeric_unit_integrity": 1,
+        "negation_modality_scope": 1,
+        "temporal_scheduling_accuracy": 1,
+        "entity_factual_integrity": 1,
+        "semantic_paraphrase_preservation": 1,
+        "acoustic_noise_robustness": 1,
+        "speaker_attribution_consistency": 1,
+    }
+    assert (
+        "| Model | WER | Numeric/Unit | Negation/Modality | Temporal | Entity | "
+        "Paraphrase | Acoustic Noise | Speaker Attribution Consistency |"
+    ) in report
+    assert "| `mlx-community/model-a` | 1 | 1 | 1 | 1 | 1 | 1 | 1 | 1 |" in report
+
+
 def test_write_refresh_report_records_coverage_and_commands(tmp_path: Path) -> None:
     module = load_script_module()
     results_path = tmp_path / "results.jsonl"
