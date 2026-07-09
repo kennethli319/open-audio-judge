@@ -244,11 +244,12 @@ The first three scheduled MLX ASR candidates are:
 - `mlx-community/Qwen3-ASR-1.7B-8bit`
 - `mlx-community/VibeVoice-ASR-4bit`
 
-The research-guided ASR seed set is `examples/asr_research_cases.jsonl`: 30
+The research-guided ASR seed set is `examples/asr_research_cases.jsonl`: 35
 public-safe text/reference cases across WER, entity integrity, numeric/unit
-integrity, negation/modality scope, temporal accuracy, and semantic paraphrase
-preservation. These seeds intentionally require local audio materialization
-before ASR transcription; keep generated audio under ignored `runs/`.
+integrity, negation/modality scope, temporal accuracy, semantic paraphrase
+preservation, and acoustic-noise robustness. These seeds intentionally require
+local audio materialization before ASR transcription; keep generated audio under
+ignored `runs/`.
 See [docs/asr-leaderboard-demo.html](docs/asr-leaderboard-demo.html) for the
 full command flow.
 
