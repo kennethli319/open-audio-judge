@@ -17,12 +17,14 @@ from scripts.check_asr_leaderboard_page import check_asr_leaderboard_page  # noq
 from scripts.update_asr_leaderboard_demo import (  # noqa: E402
     ASR_LEADERBOARD_MODELS,
     DEFAULT_PAGE,
+    DEFAULT_ARTIFACT_INDEX,
     DEFAULT_REFRESH_REPORT,
     DEFAULT_SEED_MANIFEST_VALIDATION,
     DEFAULT_SUMMARY,
     DEFAULT_HOSTED_MANIFEST,
     DEFAULT_NEXT_RUNS,
     build_next_run_plan,
+    build_output_artifact_index,
     render_generated_sections,
     replace_generated_block,
     write_refresh_report,
@@ -135,6 +137,12 @@ def main() -> None:
         help="Write a machine-readable manifest of ASR demo artifacts mirrored to Pages.",
     )
     parser.add_argument(
+        "--artifact-index-out",
+        type=Path,
+        default=DEFAULT_ARTIFACT_INDEX,
+        help="Write a machine-readable index of the ASR leaderboard artifact bundle.",
+    )
+    parser.add_argument(
         "--run-manifest",
         type=Path,
         default=DEFAULT_RUN_MANIFEST,
@@ -202,6 +210,7 @@ def main() -> None:
         seed_manifest_validation_out=args.seed_manifest_validation_out,
         next_runs_out=args.next_runs_out,
         hosted_manifest_out=args.hosted_manifest_out,
+        artifact_index_out=args.artifact_index_out,
         run_manifest=args.run_manifest,
         update_run_manifest=args.update_run_manifest,
         hosted_dir=args.hosted_dir,
@@ -224,6 +233,7 @@ def refresh_asr_leaderboard_artifacts(
     seed_manifest_validation_out: Path = DEFAULT_SEED_MANIFEST_VALIDATION,
     next_runs_out: Path = DEFAULT_NEXT_RUNS,
     hosted_manifest_out: Path = DEFAULT_HOSTED_MANIFEST,
+    artifact_index_out: Path = DEFAULT_ARTIFACT_INDEX,
     hosted_dir: Path | None = None,
 ) -> None:
     result_paths = [_normalize_results_path(path) for path in result_paths]
@@ -289,6 +299,21 @@ def refresh_asr_leaderboard_artifacts(
         next_runs_out,
         expected_cases_per_model=expected_cases_per_model,
     )
+    write_artifact_index(
+        artifact_index_out,
+        results=combined_results,
+        results_path=combined_results_path,
+        report_path=combined_report_path,
+        page=page,
+        summary_out=summary_out,
+        refresh_report_out=refresh_report_out,
+        run_manifest=run_manifest,
+        manifest_validation_out=manifest_validation_out,
+        seed_manifest_validation_out=seed_manifest_validation_out,
+        next_runs_out=next_runs_out,
+        hosted_manifest_out=hosted_manifest_out,
+        expected_cases_per_model=expected_cases_per_model,
+    )
     write_hosted_manifest_artifact(
         hosted_manifest_out,
         page=page,
@@ -298,6 +323,7 @@ def refresh_asr_leaderboard_artifacts(
         manifest_validation_out=manifest_validation_out,
         seed_manifest_validation_out=seed_manifest_validation_out,
         next_runs_out=next_runs_out,
+        artifact_index_out=artifact_index_out,
         combined_results_path=combined_results_path,
         combined_report_path=combined_report_path,
     )
@@ -312,6 +338,7 @@ def refresh_asr_leaderboard_artifacts(
             seed_manifest_validation_out=seed_manifest_validation_out,
             next_runs_out=next_runs_out,
             hosted_manifest_out=hosted_manifest_out,
+            artifact_index_out=artifact_index_out,
             combined_results_path=combined_results_path,
             combined_report_path=combined_report_path,
         )
@@ -340,6 +367,7 @@ def refresh_asr_leaderboard_artifacts(
     print(f"Seed manifest validation: {seed_manifest_validation_out}")
     print(f"Next-refresh plan: {next_runs_out}")
     print(f"Hosted manifest: {hosted_manifest_out}")
+    print(f"Artifact index: {artifact_index_out}")
     for copied_path in copied_hosted_paths:
         print(f"Hosted:  {copied_path}")
 
@@ -419,6 +447,7 @@ def copy_hosted_asr_artifacts(
     seed_manifest_validation_out: Path = DEFAULT_SEED_MANIFEST_VALIDATION,
     next_runs_out: Path = DEFAULT_NEXT_RUNS,
     hosted_manifest_out: Path = DEFAULT_HOSTED_MANIFEST,
+    artifact_index_out: Path = DEFAULT_ARTIFACT_INDEX,
     combined_results_path: Path | None = None,
     combined_report_path: Path | None = None,
 ) -> list[Path]:
@@ -433,6 +462,7 @@ def copy_hosted_asr_artifacts(
         (seed_manifest_validation_out, {seed_manifest_validation_out.name, DEFAULT_SEED_MANIFEST_VALIDATION.name}),
         (next_runs_out, {next_runs_out.name, DEFAULT_NEXT_RUNS.name}),
         (hosted_manifest_out, {hosted_manifest_out.name, DEFAULT_HOSTED_MANIFEST.name}),
+        (artifact_index_out, {artifact_index_out.name, DEFAULT_ARTIFACT_INDEX.name}),
     )
     for source, destination_names in source_destinations:
         if not source.exists():
@@ -466,6 +496,7 @@ def write_hosted_manifest_artifact(
     manifest_validation_out: Path = DEFAULT_MANIFEST_VALIDATION,
     seed_manifest_validation_out: Path = DEFAULT_SEED_MANIFEST_VALIDATION,
     next_runs_out: Path = DEFAULT_NEXT_RUNS,
+    artifact_index_out: Path = DEFAULT_ARTIFACT_INDEX,
     combined_results_path: Path,
     combined_report_path: Path,
 ) -> None:
@@ -478,6 +509,7 @@ def write_hosted_manifest_artifact(
         (manifest_validation_out, {manifest_validation_out.name, DEFAULT_MANIFEST_VALIDATION.name}),
         (seed_manifest_validation_out, {seed_manifest_validation_out.name, DEFAULT_SEED_MANIFEST_VALIDATION.name}),
         (next_runs_out, {next_runs_out.name, DEFAULT_NEXT_RUNS.name}),
+        (artifact_index_out, {artifact_index_out.name, DEFAULT_ARTIFACT_INDEX.name}),
         (output_path, {output_path.name, DEFAULT_HOSTED_MANIFEST.name}),
         (combined_results_path, {"asr-leaderboard/full-35-combined/results.jsonl"}),
         (combined_report_path, {"asr-leaderboard/full-35-combined/report.html"}),
@@ -505,6 +537,98 @@ def write_hosted_manifest_artifact(
                 "hosted_base_path": "open-audio-judge",
                 "artifact_count": len(artifacts),
                 "artifacts": artifacts,
+            },
+            indent=2,
+            sort_keys=True,
+        )
+        + "\n",
+        encoding="utf-8",
+    )
+
+
+def write_artifact_index(
+    output_path: Path,
+    *,
+    results: list,
+    results_path: Path,
+    report_path: Path,
+    page: Path,
+    summary_out: Path,
+    refresh_report_out: Path,
+    run_manifest: Path,
+    manifest_validation_out: Path,
+    seed_manifest_validation_out: Path,
+    next_runs_out: Path,
+    hosted_manifest_out: Path,
+    expected_cases_per_model: int,
+) -> None:
+    artifact_paths = {
+        _repo_relative(results_path): results_path,
+        _repo_relative(report_path): report_path,
+        _repo_relative(page): page,
+        _repo_relative(summary_out): summary_out,
+        _repo_relative(refresh_report_out): refresh_report_out,
+        _repo_relative(run_manifest): run_manifest,
+        _repo_relative(manifest_validation_out): manifest_validation_out,
+        _repo_relative(seed_manifest_validation_out): seed_manifest_validation_out,
+        _repo_relative(next_runs_out): next_runs_out,
+        _repo_relative(hosted_manifest_out): hosted_manifest_out,
+        _repo_relative(output_path): output_path,
+        _repo_relative(DEFAULT_SUMMARY): summary_out,
+        _repo_relative(DEFAULT_REFRESH_REPORT): refresh_report_out,
+        _repo_relative(DEFAULT_RUN_MANIFEST): run_manifest,
+        _repo_relative(DEFAULT_MANIFEST_VALIDATION): manifest_validation_out,
+        _repo_relative(DEFAULT_SEED_MANIFEST_VALIDATION): seed_manifest_validation_out,
+        _repo_relative(DEFAULT_NEXT_RUNS): next_runs_out,
+        _repo_relative(DEFAULT_HOSTED_MANIFEST): hosted_manifest_out,
+        _repo_relative(DEFAULT_ARTIFACT_INDEX): output_path,
+    }
+    artifact_index = build_output_artifact_index(results_path=results_path)
+    indexed_paths = {artifact["path"] for artifact in artifact_index}
+    indexed_paths.update({_repo_relative(page), _repo_relative(refresh_report_out)})
+    indexed_paths.update(artifact_paths)
+    records = []
+    for raw_path in sorted(indexed_paths):
+        path = artifact_paths.get(raw_path, ROOT / raw_path)
+        is_generated_after_index = path in {output_path, hosted_manifest_out}
+        is_stable_alias = raw_path != _repo_relative(path)
+        records.append(
+            {
+                "path": raw_path,
+                "exists": True if is_generated_after_index else path.exists(),
+                "bytes": None
+                if is_generated_after_index or is_stable_alias or not path.exists()
+                else path.stat().st_size,
+                "sha256": None
+                if is_generated_after_index or is_stable_alias or not path.exists()
+                else _sha256_file(path),
+            }
+        )
+
+    models = sorted(
+        {
+            str(result.metadata.get("candidate_model") or "")
+            for result in results
+        }
+    )
+    categories = sorted(
+        {
+            str(result.metadata.get("eval_category") or "")
+            for result in results
+        }
+    )
+    output_path.parent.mkdir(parents=True, exist_ok=True)
+    output_path.write_text(
+        json.dumps(
+            {
+                "description": "Generated index for the ASR leaderboard demo artifact bundle.",
+                "version": 1,
+                "status": "complete" if all(record["exists"] for record in records) else "incomplete",
+                "total_results": len(results),
+                "model_count": len(models),
+                "category_count": len(categories),
+                "expected_cases_per_model": expected_cases_per_model,
+                "artifacts": records,
             },
             indent=2,
             sort_keys=True,

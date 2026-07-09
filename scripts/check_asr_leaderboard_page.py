@@ -134,6 +134,7 @@ def _validate_summary(
         "categories",
         "refresh_workflow",
         "hosted_manifest_path",
+        "artifact_index_path",
     )
     missing_keys = [key for key in required_keys if key not in summary]
     if missing_keys:
@@ -197,6 +198,12 @@ def _validate_summary(
         artifact_root=artifact_root,
         path_maps=path_maps,
     )
+    _validate_artifact_index(
+        summary,
+        summary_path=summary_path,
+        artifact_root=artifact_root,
+        path_maps=path_maps,
+    )
 
 
 def _validate_referenced_artifacts(
@@ -215,6 +222,7 @@ def _validate_referenced_artifacts(
         "seed_manifest_validation_path",
         "next_runs_path",
         "hosted_manifest_path",
+        "artifact_index_path",
     )
     missing = []
     for key in artifact_keys:
@@ -516,6 +524,81 @@ def _validate_hosted_manifest_artifact(
                     f"{path} artifacts[{index}] sha256 for {candidate}={actual_sha256} "
                     f"does not match manifest sha256={expected_sha256}."
                 )
+
+
+def _validate_artifact_index(
+    summary: dict[str, Any],
+    *,
+    summary_path: Path,
+    artifact_root: Path,
+    path_maps: list[tuple[str, str]],
+) -> None:
+    raw_path = summary.get("artifact_index_path")
+    if not isinstance(raw_path, str) or not raw_path:
+        raise ValueError(f"{summary_path} has invalid artifact_index_path: {raw_path!r}")
+    path = _resolve_summary_path(raw_path, artifact_root=artifact_root, path_maps=path_maps)
+    try:
+        index = json.loads(path.read_text(encoding="utf-8"))
+    except json.JSONDecodeError as exc:
+        raise ValueError(f"{path} must contain valid JSON: {exc}") from exc
+
+    if not isinstance(index, dict):
+        raise ValueError(f"{path} must contain a JSON object.")
+    if index.get("status") != "complete":
+        raise ValueError(f"{path} status must be complete.")
+
+    expected_fields = {
+        "total_results": summary["total_results"],
+        "model_count": summary["model_count"],
+        "category_count": summary["category_count"],
+        "expected_cases_per_model": summary["expected_cases_per_model"],
+    }
+    for field, expected in expected_fields.items():
+        if index.get(field) != expected:
+            raise ValueError(
+                f"{path} {field}={index.get(field)!r} does not match "
+                f"{summary_path} {field}={expected!r}."
+            )
+
+    artifacts = index.get("artifacts")
+    if not isinstance(artifacts, list) or not artifacts:
+        raise ValueError(f"{path} must include a non-empty artifacts list.")
+    artifact_paths = set()
+    for artifact in artifacts:
+        if not isinstance(artifact, dict):
+            raise ValueError(f"{path} artifacts entries must be objects.")
+        raw_artifact_path = artifact.get("path")
+        if not isinstance(raw_artifact_path, str) or not raw_artifact_path:
+            raise ValueError(f"{path} has invalid artifact path: {raw_artifact_path!r}")
+        resolved = _resolve_summary_path(raw_artifact_path, artifact_root=artifact_root, path_maps=path_maps)
+        artifact_paths.add(resolved.resolve())
+        if not resolved.exists():
+            raise ValueError(f"{path} references missing artifact: {raw_artifact_path}")
+        expected_bytes = artifact.get("bytes")
+        expected_sha256 = artifact.get("sha256")
+        if expected_bytes is not None and resolved.stat().st_size != expected_bytes:
+            raise ValueError(f"{path} byte size for {raw_artifact_path} does not match.")
+        if expected_sha256 is not None and _sha256_file(resolved) != expected_sha256:
+            raise ValueError(f"{path} sha256 for {raw_artifact_path} does not match.")
+
+    required_paths = [
+        summary["results_path"],
+        summary["report_path"],
+        summary["run_manifest_path"],
+        summary["manifest_validation_path"],
+        summary["seed_manifest_validation_path"],
+        summary["next_runs_path"],
+        summary["hosted_manifest_path"],
+        summary["artifact_index_path"],
+    ]
+    missing = [
+        raw_path
+        for raw_path in required_paths
+        if _resolve_summary_path(raw_path, artifact_root=artifact_root, path_maps=path_maps).resolve()
+        not in artifact_paths
+    ]
+    if missing:
+        raise ValueError(f"{path} is missing required artifact path(s): {missing}")
 
 
 def _required_page_text(summary: dict[str, Any]) -> list[str]:

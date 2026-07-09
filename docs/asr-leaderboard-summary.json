@@ -1,4 +1,5 @@
 {
+  "artifact_index_path": "docs/asr-leaderboard-artifacts.json",
   "categories": [
     {
       "average_score": 94.6,
@@ -231,6 +232,10 @@
     {
       "path": "docs/asr-leaderboard-hosted-manifest.json",
       "purpose": "Machine-readable manifest of ASR demo artifacts mirrored to the hosted Pages checkout."
+    },
+    {
+      "path": "docs/asr-leaderboard-artifacts.json",
+      "purpose": "Single machine-readable index for the ASR leaderboard artifact bundle."
     }
   ],
   "refresh_runtime_status": {

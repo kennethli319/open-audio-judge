@@ -1,0 +1,77 @@
+{
+  "artifacts": [
+    {
+      "bytes": null,
+      "exists": true,
+      "path": "docs/asr-leaderboard-artifacts.json",
+      "sha256": null
+    },
+    {
+      "bytes": 23969,
+      "exists": true,
+      "path": "docs/asr-leaderboard-demo.html",
+      "sha256": "86d5f7c329e7865c842e08c2c4d7c98a1e568c8cca240b7450bd7bba9fc5b806"
+    },
+    {
+      "bytes": null,
+      "exists": true,
+      "path": "docs/asr-leaderboard-hosted-manifest.json",
+      "sha256": null
+    },
+    {
+      "bytes": 8545,
+      "exists": true,
+      "path": "docs/asr-leaderboard-manifest-validation.json",
+      "sha256": "13e9d7787d9122bc7aac0ce2a8eaa8a6f45002ac870f2075b181f42401f82553"
+    },
+    {
+      "bytes": 546,
+      "exists": true,
+      "path": "docs/asr-leaderboard-next-runs.json",
+      "sha256": "cc918bbaa552b7099e89e2084aff8590d960456dee407eb318d26442488f93e7"
+    },
+    {
+      "bytes": 15065,
+      "exists": true,
+      "path": "docs/asr-leaderboard-refresh-report.md",
+      "sha256": "2847d37f0d808f43036583577df843c9fb27ea3dbecc9b71e2eb29cb260c502d"
+    },
+    {
+      "bytes": 8552,
+      "exists": true,
+      "path": "docs/asr-leaderboard-run-manifest.json",
+      "sha256": "d2b6675a68f760ad69c1658cc3c5cee16975eab32137d1771e13a91bd26e9b3a"
+    },
+    {
+      "bytes": 24873,
+      "exists": true,
+      "path": "docs/asr-leaderboard-summary.json",
+      "sha256": "e75ecaae446b16378cc56062a6ae877a7baa6c7c7bdf83fca8fc1f385971982d"
+    },
+    {
+      "bytes": 1634,
+      "exists": true,
+      "path": "docs/asr-seed-manifest-validation.json",
+      "sha256": "abbc54c696de3f52693ab26213e19f16eb01014034724e2b87a58a25a4ab2f24"
+    },
+    {
+      "bytes": 434978,
+      "exists": true,
+      "path": "runs/asr-leaderboard/full-35-combined/report.html",
+      "sha256": "21246cd2be336e37d0c5da76ab7edfd7944e4bb38c509a0c3ccce9dc5fd45cf7"
+    },
+    {
+      "bytes": 404226,
+      "exists": true,
+      "path": "runs/asr-leaderboard/full-35-combined/results.jsonl",
+      "sha256": "381ea5a536fed20456887b2bb171b64618f51ba5b22cb0b23a625189cfa61976"
+    }
+  ],
+  "category_count": 7,
+  "description": "Generated index for the ASR leaderboard demo artifact bundle.",
+  "expected_cases_per_model": 35,
+  "model_count": 3,
+  "status": "complete",
+  "total_results": 105,
+  "version": 1
+}
