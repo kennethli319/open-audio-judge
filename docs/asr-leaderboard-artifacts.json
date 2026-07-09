@@ -8,11 +8,11 @@
       "sha256": null
     },
     {
-      "bytes": 26443,
+      "bytes": 26615,
       "digest_status": "ok",
       "exists": true,
       "path": "docs/asr-leaderboard-demo.html",
-      "sha256": "b0f9911ad22e5bedce141b0eedb8262c1924469d3a60e9bd6e691c8f16c60434"
+      "sha256": "4e447db979d6c8d312b4616e2e61a245a96b612b2be156d5b721dff1f2c3b023"
     },
     {
       "bytes": null,
@@ -36,18 +36,18 @@
       "sha256": "cc918bbaa552b7099e89e2084aff8590d960456dee407eb318d26442488f93e7"
     },
     {
-      "bytes": 4990,
+      "bytes": 5089,
       "digest_status": "ok",
       "exists": true,
       "path": "docs/asr-leaderboard-refresh-commands.sh",
-      "sha256": "ad4b19ee79110d3a255784d37bb90a89f0bb4decbbf4037052de8dd1b1229675"
+      "sha256": "c8c3d27aef7702bed7cdec826f2275b74d37ecc0644656e12a6808dd2f1b1dd2"
     },
     {
-      "bytes": 17086,
+      "bytes": 17221,
       "digest_status": "ok",
       "exists": true,
       "path": "docs/asr-leaderboard-refresh-report.md",
-      "sha256": "5e223558ac8782dcd7196602d8e2762038c1897cb96a62004003948da7f3f1f7"
+      "sha256": "dbb4a7ebd2329df31b91392bb7226f61f8700bf533a057a7df4a66db2ba83567"
     },
     {
       "bytes": 6436,
@@ -78,11 +78,11 @@
       "sha256": "e8e830755dfbce3545e74384a29286f7fcfdc852ac9c07b20867649eba9963a0"
     },
     {
-      "bytes": 32112,
+      "bytes": 32290,
       "digest_status": "ok",
       "exists": true,
       "path": "docs/asr-leaderboard-summary.json",
-      "sha256": "ee4aa21abfd407aedcdbbe0bc290b0db587591501a39e5639f50a7201754836d"
+      "sha256": "74311da7dab1010155613fc218d8ab0b9148d3ebb725272bac8fc7f3fcc72738"
     },
     {
       "bytes": 1634,

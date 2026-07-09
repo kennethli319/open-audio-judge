@@ -174,6 +174,14 @@ def main() -> None:
         help="Run the bounded MLX ASR runtime preflight and include the result in runtime status.",
     )
     parser.add_argument(
+        "--require-runtime-ready",
+        action="store_true",
+        help=(
+            "With --check-only, fail unless local audio is ready, the Gemini secret file is "
+            "present, and the bounded MLX ASR runtime preflight passes."
+        ),
+    )
+    parser.add_argument(
         "--run-manifest",
         type=Path,
         default=DEFAULT_RUN_MANIFEST,
@@ -300,13 +308,16 @@ def main() -> None:
                 json.dumps(check_summary, indent=2, sort_keys=True) + "\n",
                 encoding="utf-8",
             )
-        if args.check_mlx_runtime:
-            write_runtime_status_artifact(
-                args.runtime_status_out,
+        if args.check_mlx_runtime or args.require_runtime_ready:
+            runtime_status = build_runtime_status_artifact_data(
                 results=combined_results_from_paths(result_paths),
+                results_path=DEFAULT_COMBINED_OUT / "results.jsonl",
                 source_result_paths=result_paths,
                 check_mlx_runtime=True,
             )
+            write_runtime_status_data(args.runtime_status_out, runtime_status)
+            if args.require_runtime_ready:
+                _validate_runtime_ready(runtime_status)
         message = (
             "ASR refresh preflight OK: "
             f"{check_summary['total_results']} results, "
@@ -1561,6 +1572,22 @@ def write_runtime_status_artifact(
     source_result_paths: list[Path] | None = None,
     check_mlx_runtime: bool = False,
 ) -> None:
+    status = build_runtime_status_artifact_data(
+        results=results,
+        results_path=results_path,
+        source_result_paths=source_result_paths,
+        check_mlx_runtime=check_mlx_runtime,
+    )
+    write_runtime_status_data(output_path, status)
+
+
+def build_runtime_status_artifact_data(
+    *,
+    results: list,
+    results_path: Path | None = None,
+    source_result_paths: list[Path] | None = None,
+    check_mlx_runtime: bool = False,
+) -> dict[str, object]:
     status = build_refresh_runtime_status(results)
     status["status"] = "complete"
     status["result_bundle"] = build_runtime_result_bundle_status(
@@ -1582,11 +1609,33 @@ def write_runtime_status_artifact(
         "Gemini secrets are checked only for file presence; secret values are never "
         "printed or written into artifacts."
     )
+    return status
+
+
+def write_runtime_status_data(output_path: Path, status: dict[str, object]) -> None:
     output_path.parent.mkdir(parents=True, exist_ok=True)
     output_path.write_text(
         json.dumps(status, indent=2, sort_keys=True) + "\n",
         encoding="utf-8",
     )
+
+
+def _validate_runtime_ready(status: dict[str, object]) -> None:
+    failures = []
+    audio_manifest = status.get("audio_manifest")
+    if not isinstance(audio_manifest, dict) or audio_manifest.get("status") != "complete":
+        failures.append("audio_manifest")
+    gemini_secret = status.get("gemini_secret")
+    if not isinstance(gemini_secret, dict) or gemini_secret.get("status") != "present":
+        failures.append("gemini_secret")
+    mlx_preflight = status.get("mlx_runtime_preflight")
+    if not isinstance(mlx_preflight, dict) or mlx_preflight.get("status") != "ok":
+        failures.append("mlx_runtime_preflight")
+    if failures:
+        raise ValueError(
+            "ASR runtime is not ready for live MLX/Gemini refresh: "
+            + ", ".join(failures)
+        )
 
 
 def build_runtime_result_bundle_status(

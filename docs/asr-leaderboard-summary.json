@@ -468,6 +468,12 @@
       "--check-only"
     ],
     "refresh_commands_path": "docs/asr-leaderboard-refresh-commands.sh",
+    "runtime_ready_check_command": [
+      ".venv/bin/python",
+      "scripts/refresh_asr_leaderboard_artifacts.py",
+      "--check-only",
+      "--require-runtime-ready"
+    ],
     "runtime_status_check_command": [
       ".venv/bin/python",
       "scripts/refresh_asr_leaderboard_artifacts.py",

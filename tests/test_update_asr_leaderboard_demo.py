@@ -239,6 +239,8 @@ def test_render_generated_sections_summarizes_verified_asr_results(tmp_path: Pat
     assert "--require-audio-ready" in html
     assert "Refresh runtime status" in html
     assert "--check-mlx-runtime" in html
+    assert "Require runtime readiness" in html
+    assert "--require-runtime-ready" in html
     assert "Run refresh shell playbook" in html
     assert "Generated Artifacts" in html
     assert "Validate seed manifest" in html
@@ -564,6 +566,12 @@ def test_write_summary_artifact_records_models_and_categories(tmp_path: Path) ->
         "--check-only",
         "--check-mlx-runtime",
     ]
+    assert summary["refresh_workflow"]["runtime_ready_check_command"] == [
+        ".venv/bin/python",
+        "scripts/refresh_asr_leaderboard_artifacts.py",
+        "--check-only",
+        "--require-runtime-ready",
+    ]
     assert summary["refresh_workflow"]["freshness_check_command"] == [
         ".venv/bin/python",
         "scripts/refresh_asr_leaderboard_artifacts.py",
@@ -818,6 +826,8 @@ def test_write_refresh_report_records_coverage_and_commands(tmp_path: Path) -> N
     assert "--require-audio-ready" in text
     assert "Refresh runtime status artifact" in text
     assert "--check-mlx-runtime" in text
+    assert "Require live runtime readiness" in text
+    assert "--require-runtime-ready" in text
     assert "Generated artifact freshness check" in text
     assert "--require-generated-fresh" in text
     assert "--results " + str(source_results_path) in text
@@ -1630,6 +1640,32 @@ def test_runtime_status_freshness_allows_live_preflight_output(tmp_path: Path) -
     )
     with pytest.raises(ValueError, match="runtime-status.json.*stale"):
         refresh_module._compare_runtime_status_artifact(actual, expected)
+
+
+def test_validate_runtime_ready_requires_audio_secret_and_mlx_preflight() -> None:
+    refresh_module = load_refresh_module()
+    status = {
+        "audio_manifest": {"status": "complete"},
+        "gemini_secret": {"status": "present"},
+        "mlx_runtime_preflight": {"status": "ok"},
+    }
+
+    refresh_module._validate_runtime_ready(status)
+
+    with pytest.raises(ValueError, match="gemini_secret"):
+        refresh_module._validate_runtime_ready(
+            {
+                **status,
+                "gemini_secret": {"status": "missing"},
+            }
+        )
+    with pytest.raises(ValueError, match="mlx_runtime_preflight"):
+        refresh_module._validate_runtime_ready(
+            {
+                **status,
+                "mlx_runtime_preflight": {"status": "blocked"},
+            }
+        )
 
 
 def test_discover_complete_model_result_paths_selects_newest_complete_runs(tmp_path: Path) -> None:
