@@ -2074,6 +2074,47 @@ def test_enrich_check_summary_with_runtime_status_records_readiness(tmp_path: Pa
     assert "mlx_runtime_preflight" in blocked["runtime_ready_issue"]
 
 
+def test_format_check_summary_message_reports_runtime_readiness() -> None:
+    refresh_module = load_refresh_module()
+    summary = {
+        "total_results": 105,
+        "model_count": 3,
+        "category_count": 7,
+        "result_file_count": 18,
+        "runtime_ready": True,
+    }
+
+    message = refresh_module.format_check_summary_message(summary)
+
+    assert message == (
+        "ASR refresh preflight OK: 105 results, 3 models, 7 categories, "
+        "18 source files. Runtime: ready."
+    )
+
+
+def test_format_check_summary_message_reports_blocked_runtime_issue() -> None:
+    refresh_module = load_refresh_module()
+    summary = {
+        "total_results": 105,
+        "model_count": 3,
+        "category_count": 7,
+        "result_file_count": 18,
+        "hosted_page_status": "complete",
+        "hosted_artifact_count": 16,
+        "hosted_path_count": 18,
+        "runtime_ready": False,
+        "runtime_ready_issue": "mlx_runtime_preflight status is blocked",
+    }
+
+    message = refresh_module.format_check_summary_message(summary)
+
+    assert message == (
+        "ASR refresh preflight OK: 105 results, 3 models, 7 categories, "
+        "18 source files. Hosted mirror: complete. Hosted artifacts: 16 sources, "
+        "18 paths. Runtime: blocked. Runtime issue: mlx_runtime_preflight status is blocked"
+    )
+
+
 def test_discover_complete_model_result_paths_selects_newest_complete_runs(tmp_path: Path) -> None:
     refresh_module = load_refresh_module()
     runs_root = tmp_path / "runs" / "asr-leaderboard"

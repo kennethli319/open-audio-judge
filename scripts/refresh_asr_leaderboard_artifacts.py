@@ -343,20 +343,7 @@ def main() -> None:
                 json.dumps(check_summary, indent=2, sort_keys=True) + "\n",
                 encoding="utf-8",
             )
-        message = (
-            "ASR refresh preflight OK: "
-            f"{check_summary['total_results']} results, "
-            f"{check_summary['model_count']} models, "
-            f"{check_summary['category_count']} categories, "
-            f"{check_summary['result_file_count']} source files."
-        )
-        if check_summary.get("hosted_page_status"):
-            message += f" Hosted mirror: {check_summary['hosted_page_status']}."
-            message += (
-                f" Hosted artifacts: {check_summary['hosted_artifact_count']} sources, "
-                f"{check_summary['hosted_path_count']} paths."
-            )
-        print(message)
+        print(format_check_summary_message(check_summary))
         return
     refresh_asr_leaderboard_artifacts(
         result_paths,
@@ -545,6 +532,28 @@ def enrich_check_summary_with_runtime_status(
     else:
         summary["runtime_ready"] = True
     return summary
+
+
+def format_check_summary_message(summary: dict[str, object]) -> str:
+    message = (
+        "ASR refresh preflight OK: "
+        f"{summary['total_results']} results, "
+        f"{summary['model_count']} models, "
+        f"{summary['category_count']} categories, "
+        f"{summary['result_file_count']} source files."
+    )
+    if summary.get("hosted_page_status"):
+        message += f" Hosted mirror: {summary['hosted_page_status']}."
+        message += (
+            f" Hosted artifacts: {summary['hosted_artifact_count']} sources, "
+            f"{summary['hosted_path_count']} paths."
+        )
+    if "runtime_ready" in summary:
+        runtime_label = "ready" if summary["runtime_ready"] else "blocked"
+        message += f" Runtime: {runtime_label}."
+        if not summary["runtime_ready"] and summary.get("runtime_ready_issue"):
+            message += f" Runtime issue: {summary['runtime_ready_issue']}"
+    return message
 
 
 def validate_hosted_artifacts_current(
