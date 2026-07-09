@@ -922,9 +922,13 @@ def test_refresh_asr_leaderboard_artifacts_combines_report_and_page(tmp_path: Pa
     assert (hosted_dir / "refresh-commands.sh").read_text(
         encoding="utf-8"
     ) == refresh_commands.read_text(encoding="utf-8")
-    assert "source /Users/wangyauli/.openclaw/secrets/open-audio-judge-gemini.env" in (
-        refresh_commands.read_text(encoding="utf-8")
-    )
+    refresh_command_text = refresh_commands.read_text(encoding="utf-8")
+    assert "ASR_SYNC_HOSTED=1" in refresh_command_text
+    assert (
+        ": \"${ASR_LEADERBOARD_HOSTED_DIR:?Set ASR_LEADERBOARD_HOSTED_DIR "
+        "to the Pages checkout open-audio-judge directory}\""
+    ) in refresh_command_text
+    assert "source /Users/wangyauli/.openclaw/secrets/open-audio-judge-gemini.env" in refresh_command_text
     assert (hosted_dir / "asr-leaderboard-run-manifest.json").exists()
     assert (hosted_dir / "manifest-validation.json").read_text(
         encoding="utf-8"

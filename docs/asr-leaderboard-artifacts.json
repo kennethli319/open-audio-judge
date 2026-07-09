@@ -36,11 +36,11 @@
       "sha256": "cc918bbaa552b7099e89e2084aff8590d960456dee407eb318d26442488f93e7"
     },
     {
-      "bytes": 4030,
+      "bytes": 4198,
       "digest_status": "ok",
       "exists": true,
       "path": "docs/asr-leaderboard-refresh-commands.sh",
-      "sha256": "8cd4bc5c115f1887d990e742c379bf0e4bd5d7d34300abeba0e9fb0b74289815"
+      "sha256": "a9141829aebe801573ca0bbd7576d10ab1644741e2a9cd911dfef508a643e399"
     },
     {
       "bytes": 15388,

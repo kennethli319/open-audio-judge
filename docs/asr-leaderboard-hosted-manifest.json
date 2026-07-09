@@ -26,11 +26,11 @@
       "source_path": "docs/asr-leaderboard-refresh-report.md"
     },
     {
-      "bytes": 4030,
+      "bytes": 4198,
       "hosted_paths": [
         "asr-leaderboard-refresh-commands.sh"
       ],
-      "sha256": "8cd4bc5c115f1887d990e742c379bf0e4bd5d7d34300abeba0e9fb0b74289815",
+      "sha256": "a9141829aebe801573ca0bbd7576d10ab1644741e2a9cd911dfef508a643e399",
       "source_path": "docs/asr-leaderboard-refresh-commands.sh"
     },
     {
@@ -70,7 +70,7 @@
       "hosted_paths": [
         "asr-leaderboard-artifacts.json"
       ],
-      "sha256": "f0647068928042c8e361926472c4ad929856224ceaa69442abc601820de486a0",
+      "sha256": "254d3ad17513066e7feba21491dfccb1d0bfbcd757a5ad93add5d5a072d77a56",
       "source_path": "docs/asr-leaderboard-artifacts.json"
     },
     {

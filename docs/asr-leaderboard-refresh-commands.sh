@@ -10,8 +10,11 @@ set -euo pipefail
 .venv/bin/python scripts/refresh_asr_leaderboard_artifacts.py --results runs/asr-leaderboard/whisper-large-v3-turbo-smoke/judge-report/results.jsonl --results runs/asr-leaderboard/whisper-large-v3-turbo-full-gap/judge-report/results.jsonl --results runs/asr-leaderboard/whisper-large-v3-turbo-semantic-smoke/judge-report/results.jsonl --results runs/asr-leaderboard/whisper-large-v3-turbo-entity-smoke/judge-report/results.jsonl --results runs/asr-leaderboard/whisper-large-v3-turbo-paraphrase-smoke/judge-report/results.jsonl --results runs/asr-leaderboard/whisper-large-v3-turbo-noise-smoke/judge-report/results.jsonl --results runs/asr-leaderboard/qwen3-asr-1.7b-smoke/judge-report/results.jsonl --results runs/asr-leaderboard/qwen3-asr-1.7b-full-gap/judge-report/results.jsonl --results runs/asr-leaderboard/qwen3-asr-1.7b-semantic-smoke/judge-report/results.jsonl --results runs/asr-leaderboard/qwen3-asr-1.7b-entity-smoke/judge-report/results.jsonl --results runs/asr-leaderboard/qwen3-asr-1.7b-paraphrase-smoke/judge-report/results.jsonl --results runs/asr-leaderboard/qwen3-asr-1.7b-noise-smoke/judge-report/results.jsonl --results runs/asr-leaderboard/vibevoice-asr-smoke/judge-report/results.jsonl --results runs/asr-leaderboard/vibevoice-asr-full-gap/judge-report/results.jsonl --results runs/asr-leaderboard/vibevoice-asr-semantic-smoke/judge-report/results.jsonl --results runs/asr-leaderboard/vibevoice-asr-entity-smoke/judge-report/results.jsonl --results runs/asr-leaderboard/vibevoice-asr-paraphrase-smoke/judge-report/results.jsonl --results runs/asr-leaderboard/vibevoice-asr-noise-smoke/judge-report/results.jsonl --update-run-manifest
 .venv/bin/python scripts/check_asr_leaderboard_page.py
 
-# Optional hosted sync; set ASR_LEADERBOARD_HOSTED_DIR to the Pages checkout path first.
-# .venv/bin/python scripts/refresh_asr_leaderboard_artifacts.py --hosted-dir-from-env
+# Optional hosted sync; export ASR_SYNC_HOSTED=1 and set ASR_LEADERBOARD_HOSTED_DIR first.
+if [[ "${ASR_SYNC_HOSTED:-0}" == "1" ]]; then
+  : "${ASR_LEADERBOARD_HOSTED_DIR:?Set ASR_LEADERBOARD_HOSTED_DIR to the Pages checkout open-audio-judge directory}"
+  .venv/bin/python scripts/refresh_asr_leaderboard_artifacts.py --hosted-dir-from-env
+fi
 
 # Optional when seed cases change: materialize local audio under ignored runs/.
 # .venv/bin/python scripts/synthesize_tts_cases.py --cases examples/asr_research_cases.jsonl --out runs/asr-research-audio --discard-text-sidecars --summary-out runs/asr-research-audio/summary.json
