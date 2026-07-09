@@ -9,6 +9,7 @@ This generated report summarizes the verified ASR leaderboard artifact set.
 - Summary JSON: `docs/asr-leaderboard-summary.json`
 - Run manifest: `docs/asr-leaderboard-run-manifest.json`
 - Refresh command playbook: `docs/asr-leaderboard-refresh-commands.sh`
+- Report index: `docs/asr-leaderboard-report-index.md`
 - Manifest validation: `docs/asr-leaderboard-manifest-validation.json`
 - Seed manifest validation: `docs/asr-seed-manifest-validation.json`
 - Next-refresh plan: `docs/asr-leaderboard-next-runs.json`
@@ -106,6 +107,7 @@ This generated report summarizes the verified ASR leaderboard artifact set.
 | `runs/asr-leaderboard/full-35-combined/report.html` | Local combined HTML report with per-case judge details. |
 | `docs/asr-leaderboard-summary.json` | Machine-readable leaderboard summary and reproducible refresh workflow. |
 | `docs/asr-leaderboard-refresh-report.md` | Human-readable coverage, score, source-file, and command report. |
+| `docs/asr-leaderboard-report-index.md` | Human-readable index linking the demo page, combined report, and source run reports. |
 | `docs/asr-leaderboard-refresh-commands.sh` | Generated shell playbook for repeatable ASR leaderboard refreshes. |
 | `docs/asr-leaderboard-run-manifest.json` | Committed source result manifest for manifest-based refreshes. |
 | `docs/asr-leaderboard-manifest-validation.json` | Coverage validation for the model/category result matrix. |

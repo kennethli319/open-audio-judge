@@ -22,6 +22,7 @@ from scripts.update_asr_leaderboard_demo import (  # noqa: E402
     DEFAULT_PAGE,
     DEFAULT_ARTIFACT_INDEX,
     DEFAULT_AUDIO_CASES,
+    DEFAULT_REPORT_INDEX,
     DEFAULT_REFRESH_COMMANDS,
     DEFAULT_REFRESH_REPORT,
     DEFAULT_SEED_MANIFEST_VALIDATION,
@@ -39,6 +40,7 @@ from scripts.update_asr_leaderboard_demo import (  # noqa: E402
     replace_generated_block,
     write_next_run_plan_artifact,
     write_refresh_report,
+    write_report_index,
     write_refresh_commands_script,
     write_summary_artifact,
 )
@@ -119,6 +121,7 @@ def main() -> None:
     parser.add_argument("--page", type=Path, default=DEFAULT_PAGE)
     parser.add_argument("--summary-out", type=Path, default=DEFAULT_SUMMARY)
     parser.add_argument("--refresh-report-out", type=Path, default=DEFAULT_REFRESH_REPORT)
+    parser.add_argument("--report-index-out", type=Path, default=DEFAULT_REPORT_INDEX)
     parser.add_argument("--refresh-commands-out", type=Path, default=DEFAULT_REFRESH_COMMANDS)
     parser.add_argument(
         "--manifest-validation-out",
@@ -278,6 +281,7 @@ def main() -> None:
             page=args.page,
             summary_out=args.summary_out,
             refresh_report_out=args.refresh_report_out,
+            report_index_out=args.report_index_out,
             refresh_commands_out=args.refresh_commands_out,
             next_runs_out=args.next_runs_out,
             seed_cases=args.seed_cases,
@@ -315,6 +319,7 @@ def main() -> None:
         page=args.page,
         summary_out=args.summary_out,
         refresh_report_out=args.refresh_report_out,
+        report_index_out=args.report_index_out,
         refresh_commands_out=args.refresh_commands_out,
         manifest_validation_out=args.manifest_validation_out,
         seed_cases=args.seed_cases,
@@ -349,6 +354,7 @@ def check_asr_leaderboard_refresh_inputs(
     seed_cases: Path,
     expected_cases_per_model: int,
     refresh_report_out: Path = DEFAULT_REFRESH_REPORT,
+    report_index_out: Path = DEFAULT_REPORT_INDEX,
     refresh_commands_out: Path = DEFAULT_REFRESH_COMMANDS,
     next_runs_out: Path = DEFAULT_NEXT_RUNS,
     artifact_root: Path = ROOT,
@@ -397,6 +403,7 @@ def check_asr_leaderboard_refresh_inputs(
             page=page,
             summary_out=summary_out,
             refresh_report_out=refresh_report_out,
+            report_index_out=report_index_out,
             refresh_commands_out=refresh_commands_out,
             next_runs_out=next_runs_out,
             generated=generated,
@@ -455,6 +462,7 @@ def _validate_generated_artifacts_fresh(
     page: Path,
     summary_out: Path,
     refresh_report_out: Path | None = None,
+    report_index_out: Path | None = None,
     refresh_commands_out: Path | None = None,
     next_runs_out: Path | None = None,
     generated: str,
@@ -516,6 +524,16 @@ def _validate_generated_artifacts_fresh(
                 source_result_paths=result_paths,
             )
             _compare_generated_text_artifact(refresh_commands_out, expected_refresh_commands)
+        if report_index_out is not None:
+            expected_report_index = tmp_dir / report_index_out.name
+            write_report_index(
+                combined_results,
+                expected_report_index,
+                results_path=DEFAULT_COMBINED_OUT / "results.jsonl",
+                expected_cases_per_model=expected_cases_per_model,
+                source_result_paths=result_paths,
+            )
+            _compare_generated_text_artifact(report_index_out, expected_report_index)
         if next_runs_out is not None:
             expected_next_runs = tmp_dir / next_runs_out.name
             write_next_run_plan_artifact(
@@ -558,6 +576,7 @@ def refresh_asr_leaderboard_artifacts(
     manifest_validation_out: Path,
     run_manifest: Path,
     expected_cases_per_model: int,
+    report_index_out: Path | None = None,
     update_run_manifest: bool = False,
     seed_cases: Path = DEFAULT_CASES,
     seed_manifest_validation_out: Path = DEFAULT_SEED_MANIFEST_VALIDATION,
@@ -568,6 +587,7 @@ def refresh_asr_leaderboard_artifacts(
     hosted_dir: Path | None = None,
     check_mlx_runtime: bool = False,
 ) -> None:
+    report_index_out = report_index_out or refresh_report_out.with_name(DEFAULT_REPORT_INDEX.name)
     runtime_status_out = runtime_status_out or artifact_index_out.with_name(DEFAULT_RUNTIME_STATUS.name)
     result_paths = [_normalize_results_path(path) for path in result_paths]
     _validate_unique_result_paths(result_paths, context="ASR refresh result sources")
@@ -616,6 +636,13 @@ def refresh_asr_leaderboard_artifacts(
         expected_cases_per_model=expected_cases_per_model,
         source_result_paths=result_paths,
     )
+    write_report_index(
+        combined_results,
+        report_index_out,
+        results_path=combined_results_path,
+        expected_cases_per_model=expected_cases_per_model,
+        source_result_paths=result_paths,
+    )
     write_refresh_commands_script(
         refresh_commands_out,
         source_result_paths=result_paths,
@@ -649,6 +676,7 @@ def refresh_asr_leaderboard_artifacts(
         page=page,
         summary_out=summary_out,
         refresh_report_out=refresh_report_out,
+        report_index_out=report_index_out,
         refresh_commands_out=refresh_commands_out,
         run_manifest=run_manifest,
         manifest_validation_out=manifest_validation_out,
@@ -663,6 +691,7 @@ def refresh_asr_leaderboard_artifacts(
         page=page,
         summary_out=summary_out,
         refresh_report_out=refresh_report_out,
+        report_index_out=report_index_out,
         refresh_commands_out=refresh_commands_out,
         run_manifest=run_manifest,
         manifest_validation_out=manifest_validation_out,
@@ -679,6 +708,7 @@ def refresh_asr_leaderboard_artifacts(
             page=page,
             summary_out=summary_out,
             refresh_report_out=refresh_report_out,
+            report_index_out=report_index_out,
             refresh_commands_out=refresh_commands_out,
             run_manifest=run_manifest,
             manifest_validation_out=manifest_validation_out,
@@ -711,6 +741,7 @@ def refresh_asr_leaderboard_artifacts(
     print(f"Page:    {page}")
     print(f"Summary: {summary_out}")
     print(f"Refresh report: {refresh_report_out}")
+    print(f"Report index: {report_index_out}")
     print(f"Refresh commands: {refresh_commands_out}")
     print(f"Manifest validation: {manifest_validation_out}")
     print(f"Seed manifest validation: {seed_manifest_validation_out}")
@@ -794,6 +825,7 @@ def copy_hosted_asr_artifacts(
     page: Path = DEFAULT_PAGE,
     summary_out: Path = DEFAULT_SUMMARY,
     refresh_report_out: Path = DEFAULT_REFRESH_REPORT,
+    report_index_out: Path = DEFAULT_REPORT_INDEX,
     refresh_commands_out: Path = DEFAULT_REFRESH_COMMANDS,
     run_manifest: Path = DEFAULT_RUN_MANIFEST,
     manifest_validation_out: Path = DEFAULT_MANIFEST_VALIDATION,
@@ -811,6 +843,7 @@ def copy_hosted_asr_artifacts(
         (page, {page.name, DEFAULT_PAGE.name}),
         (summary_out, {summary_out.name, DEFAULT_SUMMARY.name}),
         (refresh_report_out, {refresh_report_out.name, DEFAULT_REFRESH_REPORT.name}),
+        (report_index_out, {report_index_out.name, DEFAULT_REPORT_INDEX.name}),
         (refresh_commands_out, {refresh_commands_out.name, DEFAULT_REFRESH_COMMANDS.name}),
         (run_manifest, {run_manifest.name, DEFAULT_RUN_MANIFEST.name}),
         (manifest_validation_out, {manifest_validation_out.name, DEFAULT_MANIFEST_VALIDATION.name}),
@@ -848,6 +881,7 @@ def write_hosted_manifest_artifact(
     page: Path = DEFAULT_PAGE,
     summary_out: Path = DEFAULT_SUMMARY,
     refresh_report_out: Path = DEFAULT_REFRESH_REPORT,
+    report_index_out: Path = DEFAULT_REPORT_INDEX,
     refresh_commands_out: Path = DEFAULT_REFRESH_COMMANDS,
     run_manifest: Path = DEFAULT_RUN_MANIFEST,
     manifest_validation_out: Path = DEFAULT_MANIFEST_VALIDATION,
@@ -863,6 +897,7 @@ def write_hosted_manifest_artifact(
         (page, {page.name, DEFAULT_PAGE.name}),
         (summary_out, {summary_out.name, DEFAULT_SUMMARY.name}),
         (refresh_report_out, {refresh_report_out.name, DEFAULT_REFRESH_REPORT.name}),
+        (report_index_out, {report_index_out.name, DEFAULT_REPORT_INDEX.name}),
         (refresh_commands_out, {refresh_commands_out.name, DEFAULT_REFRESH_COMMANDS.name}),
         (run_manifest, {run_manifest.name, DEFAULT_RUN_MANIFEST.name}),
         (manifest_validation_out, {manifest_validation_out.name, DEFAULT_MANIFEST_VALIDATION.name}),
@@ -921,9 +956,11 @@ def write_artifact_index(
     seed_manifest_validation_out: Path,
     next_runs_out: Path,
     hosted_manifest_out: Path,
-    runtime_status_out: Path | None = None,
     expected_cases_per_model: int,
+    report_index_out: Path | None = None,
+    runtime_status_out: Path | None = None,
 ) -> None:
+    report_index_out = report_index_out or refresh_report_out.with_name(DEFAULT_REPORT_INDEX.name)
     runtime_status_out = runtime_status_out or output_path.with_name(DEFAULT_RUNTIME_STATUS.name)
     artifact_paths = {
         _repo_relative(results_path): results_path,
@@ -931,6 +968,7 @@ def write_artifact_index(
         _repo_relative(page): page,
         _repo_relative(summary_out): summary_out,
         _repo_relative(refresh_report_out): refresh_report_out,
+        _repo_relative(report_index_out): report_index_out,
         _repo_relative(refresh_commands_out): refresh_commands_out,
         _repo_relative(run_manifest): run_manifest,
         _repo_relative(manifest_validation_out): manifest_validation_out,
@@ -941,6 +979,7 @@ def write_artifact_index(
         _repo_relative(output_path): output_path,
         _repo_relative(DEFAULT_SUMMARY): summary_out,
         _repo_relative(DEFAULT_REFRESH_REPORT): refresh_report_out,
+        _repo_relative(DEFAULT_REPORT_INDEX): report_index_out,
         _repo_relative(DEFAULT_REFRESH_COMMANDS): refresh_commands_out,
         _repo_relative(DEFAULT_RUN_MANIFEST): run_manifest,
         _repo_relative(DEFAULT_MANIFEST_VALIDATION): manifest_validation_out,

@@ -214,6 +214,10 @@
       "purpose": "Human-readable coverage, score, source-file, and command report."
     },
     {
+      "path": "docs/asr-leaderboard-report-index.md",
+      "purpose": "Human-readable index linking the demo page, combined report, and source run reports."
+    },
+    {
       "path": "docs/asr-leaderboard-refresh-commands.sh",
       "purpose": "Generated shell playbook for repeatable ASR leaderboard refreshes."
     },
@@ -460,6 +464,7 @@
       "docs/asr-seed-manifest-validation.json"
     ]
   },
+  "report_index_path": "docs/asr-leaderboard-report-index.md",
   "report_path": "runs/asr-leaderboard/full-35-combined/report.html",
   "results_path": "runs/asr-leaderboard/full-35-combined/results.jsonl",
   "run_manifest_path": "docs/asr-leaderboard-run-manifest.json",

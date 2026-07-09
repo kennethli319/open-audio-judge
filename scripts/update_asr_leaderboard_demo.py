@@ -18,6 +18,7 @@ DEFAULT_RESULTS = ROOT / "runs" / "asr-leaderboard" / "full-35-combined" / "resu
 DEFAULT_PAGE = ROOT / "docs" / "asr-leaderboard-demo.html"
 DEFAULT_SUMMARY = ROOT / "docs" / "asr-leaderboard-summary.json"
 DEFAULT_REFRESH_REPORT = ROOT / "docs" / "asr-leaderboard-refresh-report.md"
+DEFAULT_REPORT_INDEX = ROOT / "docs" / "asr-leaderboard-report-index.md"
 DEFAULT_REFRESH_COMMANDS = ROOT / "docs" / "asr-leaderboard-refresh-commands.sh"
 DEFAULT_RUN_MANIFEST = ROOT / "docs" / "asr-leaderboard-run-manifest.json"
 DEFAULT_MANIFEST_VALIDATION = ROOT / "docs" / "asr-leaderboard-manifest-validation.json"
@@ -114,6 +115,12 @@ def main() -> None:
         help="Write a shell playbook with the generated ASR leaderboard refresh commands.",
     )
     parser.add_argument(
+        "--report-index-out",
+        type=Path,
+        default=DEFAULT_REPORT_INDEX,
+        help="Write a human-readable index of the combined and source ASR reports.",
+    )
+    parser.add_argument(
         "--next-runs-out",
         type=Path,
         default=DEFAULT_NEXT_RUNS,
@@ -146,6 +153,12 @@ def main() -> None:
         results_path=args.results,
         expected_cases_per_model=args.expected_cases_per_model,
     )
+    write_report_index(
+        results,
+        args.report_index_out,
+        results_path=args.results,
+        expected_cases_per_model=args.expected_cases_per_model,
+    )
     write_refresh_commands_script(
         args.refresh_commands_out,
         source_result_paths=[],
@@ -158,6 +171,7 @@ def main() -> None:
     print(f"Updated {args.page} from {args.results} ({len(results)} results)")
     print(f"Summary: {args.summary_out}")
     print(f"Refresh report: {args.refresh_report_out}")
+    print(f"Report index: {args.report_index_out}")
     print(f"Refresh commands: {args.refresh_commands_out}")
     print(f"Next-refresh plan: {args.next_runs_out}")
 
@@ -182,6 +196,7 @@ def render_generated_sections(
     report_label = html.escape(_repo_relative(results_path.with_name("report.html")))
     summary_label = html.escape(_repo_relative(DEFAULT_SUMMARY))
     refresh_report_label = html.escape(_repo_relative(DEFAULT_REFRESH_REPORT))
+    report_index_label = html.escape(_repo_relative(DEFAULT_REPORT_INDEX))
     refresh_commands_label = html.escape(_repo_relative(DEFAULT_REFRESH_COMMANDS))
     manifest_label = html.escape(_repo_relative(DEFAULT_RUN_MANIFEST))
     validation_label = html.escape(_repo_relative(DEFAULT_MANIFEST_VALIDATION))
@@ -257,7 +272,9 @@ def render_generated_sections(
                 f"<code>{runtime_status_label}</code>; together they include the source result files, "
                 "complete model/category matrix, missing-cell guidance, hosted copy map, and reproducible refresh workflow. Pass "
                 f"<code>{DEFAULT_HOSTED_DIR_ENV}</code> with "
-                "<code>--hosted-dir-from-env</code> to copy the same verified artifacts into the hosted Pages checkout.</p>"
+                "<code>--hosted-dir-from-env</code> to copy the same verified artifacts into the hosted Pages checkout. "
+                f"Use <code>{report_index_label}</code> as the generated map from the demo page to the combined full-35 report "
+                "and per-source run reports.</p>"
             ),
             "",
             "    <h2>Generated Refresh Workflow</h2>",
@@ -353,6 +370,7 @@ def write_summary_artifact(
                 ],
                 "run_manifest_path": _repo_relative(DEFAULT_RUN_MANIFEST),
                 "refresh_commands_path": _repo_relative(DEFAULT_REFRESH_COMMANDS),
+                "report_index_path": _repo_relative(DEFAULT_REPORT_INDEX),
                 "manifest_validation_path": _repo_relative(DEFAULT_MANIFEST_VALIDATION),
                 "seed_manifest_validation_path": _repo_relative(DEFAULT_SEED_MANIFEST_VALIDATION),
                 "next_runs_path": _repo_relative(DEFAULT_NEXT_RUNS),
@@ -435,6 +453,7 @@ def write_refresh_report(
                 f"- Summary JSON: `{_repo_relative(DEFAULT_SUMMARY)}`",
                 f"- Run manifest: `{_repo_relative(DEFAULT_RUN_MANIFEST)}`",
                 f"- Refresh command playbook: `{_repo_relative(DEFAULT_REFRESH_COMMANDS)}`",
+                f"- Report index: `{_repo_relative(DEFAULT_REPORT_INDEX)}`",
                 f"- Manifest validation: `{_repo_relative(DEFAULT_MANIFEST_VALIDATION)}`",
                 f"- Seed manifest validation: `{_repo_relative(DEFAULT_SEED_MANIFEST_VALIDATION)}`",
                 f"- Next-refresh plan: `{_repo_relative(DEFAULT_NEXT_RUNS)}`",
@@ -558,6 +577,81 @@ def write_next_run_plan_artifact(
         json.dumps(next_runs, indent=2, sort_keys=True) + "\n",
         encoding="utf-8",
     )
+
+
+def write_report_index(
+    results: list[EvaluationResult],
+    output_path: Path,
+    *,
+    results_path: Path,
+    expected_cases_per_model: int,
+    source_result_paths: list[Path] | None = None,
+) -> None:
+    model_summaries = summarize_models(results)
+    validate_coverage(results, model_summaries, expected_cases_per_model=expected_cases_per_model)
+    source_file_summaries = summarize_source_result_files(source_result_paths or [])
+    output_path.parent.mkdir(parents=True, exist_ok=True)
+    lines = [
+        "# ASR Leaderboard Report Index",
+        "",
+        "This generated index maps the hosted ASR demo to the full combined report and source run reports.",
+        "",
+        "## Combined Full-35 Report",
+        "",
+        f"- Results JSONL: `{_repo_relative(results_path)}`",
+        f"- HTML report: `{_repo_relative(results_path.with_name('report.html'))}`",
+        f"- Demo page: `{_repo_relative(DEFAULT_PAGE)}`",
+        f"- Summary JSON: `{_repo_relative(DEFAULT_SUMMARY)}`",
+        f"- Refresh report: `{_repo_relative(DEFAULT_REFRESH_REPORT)}`",
+        "",
+        "## Coverage",
+        "",
+        f"- Total judged transcripts: {len(results)}",
+        f"- Models: {len(model_summaries)}",
+        f"- Expected cases per model: {expected_cases_per_model}",
+        "",
+        "| Model | Cases | Gemini Samples | Average Score |",
+        "| --- | ---: | ---: | ---: |",
+        *(
+            f"| `{summary.model}` | {summary.ok_count}/{summary.result_count} ok | "
+            f"{summary.judge_samples} | {summary.average_score:.1f} |"
+            for summary in model_summaries
+        ),
+        "",
+        "## Source Run Reports",
+        "",
+    ]
+    if source_file_summaries:
+        lines.extend(
+            [
+                "| Results | Report | Model | Cases | Categories |",
+                "| --- | --- | --- | ---: | --- |",
+                *(
+                    "| "
+                    f"`{_repo_relative(summary.path)}` | "
+                    f"`{_repo_relative(summary.report_path)}`"
+                    f"{'' if summary.report_exists else ' missing'} | "
+                    f"{', '.join(f'`{model}`' for model in summary.models)} | "
+                    f"{summary.ok_count}/{summary.result_count} ok | "
+                    f"{_format_category_counts(summary.categories)} |"
+                    for summary in source_file_summaries
+                ),
+                "",
+            ]
+        )
+    else:
+        lines.extend(["- No separate source result files were provided.", ""])
+    lines.extend(
+        [
+            "## Hosted Layout",
+            "",
+            "- The demo page and generated docs are copied to `open-audio-judge/`.",
+            "- The combined full-35 results and report are copied to `open-audio-judge/asr-leaderboard/full-35-combined/`.",
+            "- Source run reports remain local unless their run directories are explicitly published.",
+            "",
+        ]
+    )
+    output_path.write_text("\n".join(lines), encoding="utf-8")
 
 
 def write_refresh_commands_script(
@@ -783,6 +877,10 @@ def build_output_artifact_index(*, results_path: Path) -> list[dict[str, str]]:
         {
             "path": _repo_relative(DEFAULT_REFRESH_REPORT),
             "purpose": "Human-readable coverage, score, source-file, and command report.",
+        },
+        {
+            "path": _repo_relative(DEFAULT_REPORT_INDEX),
+            "purpose": "Human-readable index linking the demo page, combined report, and source run reports.",
         },
         {
             "path": _repo_relative(DEFAULT_REFRESH_COMMANDS),
@@ -1135,6 +1233,13 @@ def _category_markdown_row(summary: CategorySummary) -> str:
         if summary.labels[label]
     )
     return f"| `{summary.category}` | {summary.result_count} | {summary.average_score:.1f} | {labels} |"
+
+
+def _format_category_counts(categories: Counter[str]) -> str:
+    return ", ".join(
+        f"`{category}`: {count}"
+        for category, count in sorted(categories.items())
+    )
 
 
 def _model_category_matrix_row(
