@@ -4,111 +4,177 @@
       "bytes": null,
       "digest_status": "deferred_circular_reference",
       "exists": true,
+      "hosted_paths": [
+        "asr-leaderboard-artifacts.json"
+      ],
       "path": "docs/asr-leaderboard-artifacts.json",
+      "purpose": "Single machine-readable index for the ASR leaderboard artifact bundle.",
       "sha256": null
     },
     {
       "bytes": 26615,
       "digest_status": "ok",
       "exists": true,
+      "hosted_paths": [
+        "asr-leaderboard-demo.html"
+      ],
       "path": "docs/asr-leaderboard-demo.html",
+      "purpose": "Generated ASR leaderboard demo HTML page.",
       "sha256": "4e447db979d6c8d312b4616e2e61a245a96b612b2be156d5b721dff1f2c3b023"
     },
     {
       "bytes": null,
       "digest_status": "deferred_circular_reference",
       "exists": true,
+      "hosted_paths": [
+        "asr-leaderboard-hosted-manifest.json"
+      ],
       "path": "docs/asr-leaderboard-hosted-manifest.json",
+      "purpose": "Machine-readable manifest of ASR demo artifacts mirrored to the hosted Pages checkout.",
       "sha256": null
     },
     {
       "bytes": 13441,
       "digest_status": "ok",
       "exists": true,
+      "hosted_paths": [
+        "asr-leaderboard-manifest-validation.json"
+      ],
       "path": "docs/asr-leaderboard-manifest-validation.json",
+      "purpose": "Coverage validation for the model/category result matrix.",
       "sha256": "3a015832118f91558b9b3664c0c97470476cd43fc282d9268aafad1ca9328a0a"
     },
     {
       "bytes": 546,
       "digest_status": "ok",
       "exists": true,
+      "hosted_paths": [
+        "asr-leaderboard-next-runs.json"
+      ],
       "path": "docs/asr-leaderboard-next-runs.json",
+      "purpose": "Machine-readable next-refresh plan for missing ASR model/category cells.",
       "sha256": "cc918bbaa552b7099e89e2084aff8590d960456dee407eb318d26442488f93e7"
     },
     {
       "bytes": 5089,
       "digest_status": "ok",
       "exists": true,
+      "hosted_paths": [
+        "asr-leaderboard-refresh-commands.sh"
+      ],
       "path": "docs/asr-leaderboard-refresh-commands.sh",
+      "purpose": "Generated shell playbook for repeatable ASR leaderboard refreshes.",
       "sha256": "c8c3d27aef7702bed7cdec826f2275b74d37ecc0644656e12a6808dd2f1b1dd2"
     },
     {
       "bytes": 17221,
       "digest_status": "ok",
       "exists": true,
+      "hosted_paths": [
+        "asr-leaderboard-refresh-report.md"
+      ],
       "path": "docs/asr-leaderboard-refresh-report.md",
+      "purpose": "Human-readable coverage, score, source-file, and command report.",
       "sha256": "dbb4a7ebd2329df31b91392bb7226f61f8700bf533a057a7df4a66db2ba83567"
     },
     {
       "bytes": 8642,
       "digest_status": "ok",
       "exists": true,
+      "hosted_paths": [
+        "asr-leaderboard-report-index.md"
+      ],
       "path": "docs/asr-leaderboard-report-index.md",
+      "purpose": "Human-readable index linking the demo page, combined report, and source run reports.",
       "sha256": "eab987e66b2bcd454151677a1f6c9904c72bd310cbc4d2975af7d8d75a6221c6"
     },
     {
       "bytes": 13780,
       "digest_status": "ok",
       "exists": true,
+      "hosted_paths": [
+        "asr-leaderboard-report-links.json"
+      ],
       "path": "docs/asr-leaderboard-report-links.json",
+      "purpose": "Machine-readable map linking the demo page to combined and source ASR reports.",
       "sha256": "08b0a3735618701173dd820f8e9279b0199488a1157cf8e19485215d02d18b3a"
     },
     {
       "bytes": 10460,
       "digest_status": "ok",
       "exists": true,
+      "hosted_paths": [
+        "asr-leaderboard-run-manifest.json"
+      ],
       "path": "docs/asr-leaderboard-run-manifest.json",
+      "purpose": "Committed source result manifest for manifest-based refreshes.",
       "sha256": "af02532d0b8837c14c34b0fd71a6def65e5afa5e3baa187acdbf56c82e611ea4"
     },
     {
       "bytes": 6909,
       "digest_status": "ok",
       "exists": true,
+      "hosted_paths": [
+        "asr-leaderboard-runtime-status.json"
+      ],
       "path": "docs/asr-leaderboard-runtime-status.json",
+      "purpose": "Machine-readable MLX ASR and Gemini readiness status for refresh automation.",
       "sha256": "e8e830755dfbce3545e74384a29286f7fcfdc852ac9c07b20867649eba9963a0"
     },
     {
       "bytes": 32290,
       "digest_status": "ok",
       "exists": true,
+      "hosted_paths": [
+        "asr-leaderboard-summary.json"
+      ],
       "path": "docs/asr-leaderboard-summary.json",
+      "purpose": "Machine-readable leaderboard summary and reproducible refresh workflow.",
       "sha256": "74311da7dab1010155613fc218d8ab0b9148d3ebb725272bac8fc7f3fcc72738"
     },
     {
       "bytes": 1634,
       "digest_status": "ok",
       "exists": true,
+      "hosted_paths": [
+        "asr-seed-manifest-validation.json"
+      ],
       "path": "docs/asr-seed-manifest-validation.json",
+      "purpose": "Seed-manifest validation proving public-safe ASR cases keep exact category coverage.",
       "sha256": "abbc54c696de3f52693ab26213e19f16eb01014034724e2b87a58a25a4ab2f24"
     },
     {
       "bytes": 434978,
       "digest_status": "ok",
       "exists": true,
+      "hosted_paths": [
+        "asr-leaderboard/full-35-combined/report.html"
+      ],
       "path": "runs/asr-leaderboard/full-35-combined/report.html",
+      "purpose": "Local combined HTML report with per-case judge details.",
       "sha256": "21246cd2be336e37d0c5da76ab7edfd7944e4bb38c509a0c3ccce9dc5fd45cf7"
     },
     {
       "bytes": 404226,
       "digest_status": "ok",
       "exists": true,
+      "hosted_paths": [
+        "asr-leaderboard/full-35-combined/results.jsonl"
+      ],
       "path": "runs/asr-leaderboard/full-35-combined/results.jsonl",
+      "purpose": "Combined ASR judge results used by the generated page and report.",
       "sha256": "381ea5a536fed20456887b2bb171b64618f51ba5b22cb0b23a625189cfa61976"
     }
   ],
   "category_count": 7,
   "description": "Generated index for the ASR leaderboard demo artifact bundle.",
   "expected_cases_per_model": 35,
+  "hosted": {
+    "base_path": "open-audio-judge",
+    "base_url": "https://kennethli319.github.io/open-audio-judge",
+    "combined_report_url": "https://kennethli319.github.io/open-audio-judge/asr-leaderboard/full-35-combined/report.html",
+    "demo_page_url": "https://kennethli319.github.io/open-audio-judge/asr-leaderboard-demo.html"
+  },
   "model_count": 3,
   "result_bundle": {
     "bytes": 404226,
@@ -136,5 +202,5 @@
   },
   "status": "complete",
   "total_results": 105,
-  "version": 1
+  "version": 2
 }

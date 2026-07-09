@@ -82,11 +82,11 @@
       "source_path": "docs/asr-leaderboard-next-runs.json"
     },
     {
-      "bytes": 4329,
+      "bytes": 7190,
       "hosted_paths": [
         "asr-leaderboard-artifacts.json"
       ],
-      "sha256": "392ab9a3204ac82bc138a8017014a65e058d802c3b12c4397541bcd1b8dd3aa1",
+      "sha256": "627aaa48c725f7386770fca82591364323eb012884dadac4f1b9cbe31c0ba157",
       "source_path": "docs/asr-leaderboard-artifacts.json"
     },
     {

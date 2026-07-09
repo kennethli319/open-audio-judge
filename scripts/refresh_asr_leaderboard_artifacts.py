@@ -33,6 +33,8 @@ from scripts.update_asr_leaderboard_demo import (  # noqa: E402
     DEFAULT_NEXT_RUNS,
     END_MARKER,
     GEMINI_SECRET_ENV,
+    HOSTED_BASE_PATH,
+    HOSTED_BASE_URL,
     START_MARKER,
     build_next_run_plan,
     build_output_artifact_index,
@@ -1230,7 +1232,12 @@ def build_artifact_index_data(
         _repo_relative(DEFAULT_RUNTIME_STATUS): runtime_status_out,
     }
     artifact_index = build_output_artifact_index(results_path=results_path)
-    indexed_paths = {artifact["path"] for artifact in artifact_index}
+    artifact_purposes = {artifact["path"]: artifact["purpose"] for artifact in artifact_index}
+    artifact_purposes[_repo_relative(page)] = "Generated ASR leaderboard demo HTML page."
+    artifact_purposes[_repo_relative(refresh_report_out)] = (
+        "Human-readable coverage, score, source-file, and command report."
+    )
+    indexed_paths = set(artifact_purposes)
     indexed_paths.update({_repo_relative(page), _repo_relative(refresh_report_out)})
     indexed_paths.update(artifact_paths)
     records = []
@@ -1248,6 +1255,10 @@ def build_artifact_index_data(
         records.append(
             {
                 "path": raw_path,
+                "purpose": artifact_purposes.get(
+                    raw_path,
+                    "Generated ASR leaderboard support artifact.",
+                ),
                 "exists": True if is_generated_after_index else path.exists(),
                 "bytes": None
                 if is_generated_after_index or is_stable_alias or not path.exists()
@@ -1256,6 +1267,11 @@ def build_artifact_index_data(
                 if is_generated_after_index or is_stable_alias or not path.exists()
                 else _sha256_file(path),
                 "digest_status": digest_status,
+                "hosted_paths": _hosted_paths_for_artifact(
+                    raw_path,
+                    results_path=results_path,
+                    report_path=report_path,
+                ),
             }
         )
 
@@ -1285,7 +1301,13 @@ def build_artifact_index_data(
     }
     return {
         "description": "Generated index for the ASR leaderboard demo artifact bundle.",
-        "version": 1,
+        "version": 2,
+        "hosted": {
+            "base_path": HOSTED_BASE_PATH,
+            "base_url": HOSTED_BASE_URL,
+            "demo_page_url": f"{HOSTED_BASE_URL}/asr-leaderboard-demo.html",
+            "combined_report_url": f"{HOSTED_BASE_URL}/asr-leaderboard/full-35-combined/report.html",
+        },
         "status": "complete" if all(record["exists"] for record in records) else "incomplete",
         "result_bundle": result_bundle,
         "total_results": len(results),
@@ -1294,6 +1316,36 @@ def build_artifact_index_data(
         "expected_cases_per_model": expected_cases_per_model,
         "artifacts": records,
     }
+
+
+def _hosted_paths_for_artifact(
+    raw_path: str,
+    *,
+    results_path: Path,
+    report_path: Path,
+) -> list[str]:
+    hosted_names = {
+        "docs/asr-leaderboard-demo.html": ["asr-leaderboard-demo.html"],
+        "docs/asr-leaderboard-summary.json": ["asr-leaderboard-summary.json"],
+        "docs/asr-leaderboard-refresh-report.md": ["asr-leaderboard-refresh-report.md"],
+        "docs/asr-leaderboard-report-index.md": ["asr-leaderboard-report-index.md"],
+        "docs/asr-leaderboard-report-links.json": ["asr-leaderboard-report-links.json"],
+        "docs/asr-leaderboard-refresh-commands.sh": ["asr-leaderboard-refresh-commands.sh"],
+        "docs/asr-leaderboard-run-manifest.json": ["asr-leaderboard-run-manifest.json"],
+        "docs/asr-leaderboard-manifest-validation.json": [
+            "asr-leaderboard-manifest-validation.json"
+        ],
+        "docs/asr-seed-manifest-validation.json": ["asr-seed-manifest-validation.json"],
+        "docs/asr-leaderboard-next-runs.json": ["asr-leaderboard-next-runs.json"],
+        "docs/asr-leaderboard-hosted-manifest.json": [
+            "asr-leaderboard-hosted-manifest.json"
+        ],
+        "docs/asr-leaderboard-artifacts.json": ["asr-leaderboard-artifacts.json"],
+        "docs/asr-leaderboard-runtime-status.json": ["asr-leaderboard-runtime-status.json"],
+        _repo_relative(results_path): ["asr-leaderboard/full-35-combined/results.jsonl"],
+        _repo_relative(report_path): ["asr-leaderboard/full-35-combined/report.html"],
+    }
+    return hosted_names.get(raw_path, [])
 
 
 def _sha256_file(path: Path) -> str:

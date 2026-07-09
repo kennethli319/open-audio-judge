@@ -149,21 +149,27 @@ def artifact_index_record(
     actual_path: Path,
     *,
     digest_status: str = "ok",
+    hosted_paths: list[str] | None = None,
+    purpose: str = "Generated ASR leaderboard support artifact.",
 ) -> dict:
     if digest_status == "ok":
         return {
             "path": raw_path,
+            "purpose": purpose,
             "exists": actual_path.exists(),
             "bytes": actual_path.stat().st_size,
             "sha256": file_sha256(actual_path),
             "digest_status": "ok",
+            "hosted_paths": hosted_paths or [],
         }
     return {
         "path": raw_path,
+        "purpose": purpose,
         "exists": True,
         "bytes": None,
         "sha256": None,
         "digest_status": digest_status,
+        "hosted_paths": hosted_paths or [],
     }
 
 
