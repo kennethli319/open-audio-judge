@@ -34,7 +34,7 @@
       "sha256": null
     },
     {
-      "bytes": 2325,
+      "bytes": 3601,
       "digest_status": "ok",
       "exists": true,
       "hosted_paths": [
@@ -42,7 +42,7 @@
       ],
       "path": "docs/asr-leaderboard-live-refresh.sh",
       "purpose": "Opt-in generated shell script for live MLX ASR/Gemini refreshes.",
-      "sha256": "d6b433d169a0d39dd2653c55676c11d280931a85880e1c6f493a7309185be441"
+      "sha256": "c2455986c08956a6f84f1d80e02acab9db94c2e9ff625eaaab80fee0c0d9b35d"
     },
     {
       "bytes": 13441,

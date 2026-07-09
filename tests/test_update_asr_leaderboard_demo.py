@@ -1140,6 +1140,9 @@ def test_refresh_asr_leaderboard_artifacts_combines_report_and_page(tmp_path: Pa
     assert "Generated opt-in live ASR leaderboard refresh script." in live_refresh_text
     assert ".venv/bin/oaj autojudge-mlx-asr" in live_refresh_text
     assert "never printed" in live_refresh_text
+    assert "runs/asr-leaderboard/blocked-models.jsonl" in live_refresh_text
+    assert "run_primary_model" in live_refresh_text
+    assert "record before fallback; do not silently substitute" in live_refresh_text
     assert (
         ".venv/bin/python scripts/refresh_asr_leaderboard_artifacts.py --check-only --require-generated-fresh --check-summary-out runs/asr-leaderboard/preflight-summary.json"
         in refresh_command_text

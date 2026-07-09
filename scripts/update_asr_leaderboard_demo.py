@@ -855,6 +855,16 @@ def write_refresh_commands_script(
 
 def write_live_refresh_script(output_path: Path) -> None:
     workflow = _refresh_workflow([])
+    model_run_lines: list[str] = []
+    for command in workflow["model_run_commands"]:
+        model = str(command["model"])
+        run_name = str(command["run_name"])
+        model_run_lines.extend(
+            [
+                f'run_primary_model "{model}" "{run_name}" \\',
+                "  " + _shell_join(command["command"]),
+            ]
+        )
     lines = [
         "#!/usr/bin/env bash",
         "set -euo pipefail",
@@ -862,6 +872,7 @@ def write_live_refresh_script(output_path: Path) -> None:
         "# Generated opt-in live ASR leaderboard refresh script.",
         "# Runs local MLX ASR jobs and Gemini judging only after runtime preflights pass.",
         "# Gemini secrets are sourced at runtime and are never printed by this script.",
+        "# Blocked primary model runs are recorded under ignored runs/ before the script exits.",
         "",
         _shell_join(workflow["refresh_check_command"]),
         _shell_join(workflow["audio_ready_check_command"]),
@@ -874,8 +885,34 @@ def write_live_refresh_script(output_path: Path) -> None:
         "fi",
         _shell_join(workflow["local_secret_env_command"]),
         "",
+        'BLOCKED_MODEL_LOG="runs/asr-leaderboard/blocked-models.jsonl"',
+        "blocked_model_count=0",
+        "",
+        "run_primary_model() {",
+        '  local model="$1"',
+        '  local run_name="$2"',
+        "  shift 2",
+        '  echo "Running ${model}"',
+        "  set +e",
+        '  "$@"',
+        "  local exit_code=$?",
+        "  set -e",
+        "  if [[ ${exit_code} -ne 0 ]]; then",
+        '    mkdir -p "$(dirname "${BLOCKED_MODEL_LOG}")"',
+        "    blocked_model_count=$((blocked_model_count + 1))",
+        "    printf '{\"model\":\"%s\",\"run_name\":\"%s\",\"status\":\"blocked\",\"exit_code\":%s,\"recorded_at_utc\":\"%s\",\"fallback_policy\":\"record before fallback; do not silently substitute\"}\\n' \\",
+        '      "${model}" "${run_name}" "${exit_code}" "$(date -u +%Y-%m-%dT%H:%M:%SZ)" >> "${BLOCKED_MODEL_LOG}"',
+        '    echo "Recorded blocked primary ASR model in ${BLOCKED_MODEL_LOG}: ${model}" >&2',
+        "  fi",
+        "}",
+        "",
         "# Primary model refreshes.",
-        *(_shell_join(command["command"]) for command in workflow["model_run_commands"]),
+        *model_run_lines,
+        "",
+        "if [[ ${blocked_model_count} -ne 0 ]]; then",
+        '  echo "${blocked_model_count} primary model run(s) were blocked. Review ${BLOCKED_MODEL_LOG} before trying fallbacks." >&2',
+        "  exit 1",
+        "fi",
         "",
         "# Rebuild committed artifacts from the newest complete primary-model runs.",
         _shell_join(workflow["discover_refresh_command"]),

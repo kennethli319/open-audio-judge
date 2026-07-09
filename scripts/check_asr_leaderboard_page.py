@@ -1149,6 +1149,8 @@ def _validate_live_refresh_script(
         raise ValueError(f"{path} must use strict shell settings.")
     if "never printed" not in text:
         raise ValueError(f"{path} must document secret handling.")
+    if "blocked-models.jsonl" not in text or "record before fallback" not in text:
+        raise ValueError(f"{path} must record blocked primary model runs before fallbacks.")
 
     workflow = summary.get("refresh_workflow")
     if not isinstance(workflow, dict):
