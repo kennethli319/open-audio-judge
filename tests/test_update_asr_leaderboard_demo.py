@@ -1252,6 +1252,28 @@ def test_refresh_asr_leaderboard_artifacts_reads_run_manifest(tmp_path: Path) ->
     assert paths == [nested, direct]
 
 
+def test_refresh_asr_leaderboard_artifacts_rejects_duplicate_run_manifest_paths(tmp_path: Path) -> None:
+    refresh_module = load_refresh_module()
+    results_path = tmp_path / "run-a" / "judge-report" / "results.jsonl"
+    manifest = tmp_path / "manifest.json"
+    results_path.parent.mkdir(parents=True)
+    results_path.write_text("", encoding="utf-8")
+    manifest.write_text(
+        json.dumps(
+            {
+                "runs": [
+                    {"run_name": "run-a", "results_path": str(tmp_path / "run-a")},
+                    {"run_name": "run-a-copy", "results_path": str(results_path)},
+                ]
+            }
+        ),
+        encoding="utf-8",
+    )
+
+    with pytest.raises(ValueError, match="duplicate result path"):
+        refresh_module._result_paths_from_run_manifest(manifest)
+
+
 def test_write_run_manifest_artifact_records_verified_result_sources(tmp_path: Path) -> None:
     refresh_module = load_refresh_module()
     results_path = tmp_path / "run-a" / "judge-report" / "results.jsonl"
@@ -1301,6 +1323,33 @@ def test_write_run_manifest_artifact_records_verified_result_sources(tmp_path: P
             },
         }
     ]
+
+
+def test_write_run_manifest_artifact_rejects_duplicate_sources(tmp_path: Path) -> None:
+    refresh_module = load_refresh_module()
+    results_path = tmp_path / "run-a" / "judge-report" / "results.jsonl"
+    manifest = tmp_path / "manifest.json"
+    records = [
+        result_record(
+            case_id="asr-a-model-a",
+            model="mlx-community/model-a",
+            category="transcription_accuracy_wer",
+            score=100,
+            label="accurate",
+        ),
+    ]
+    results_path.parent.mkdir(parents=True)
+    results_path.write_text(
+        "".join(json.dumps(record) + "\n" for record in records),
+        encoding="utf-8",
+    )
+
+    with pytest.raises(ValueError, match="duplicate result path"):
+        refresh_module.write_run_manifest_artifact(
+            [tmp_path / "run-a", results_path],
+            manifest,
+            expected_cases_per_model=1,
+        )
 
 
 def test_manifest_validation_checks_declared_models(tmp_path: Path) -> None:

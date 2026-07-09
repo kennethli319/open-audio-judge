@@ -187,6 +187,7 @@ def refresh_asr_leaderboard_artifacts(
     hosted_dir: Path | None = None,
 ) -> None:
     result_paths = [_normalize_results_path(path) for path in result_paths]
+    _validate_unique_result_paths(result_paths, context="ASR refresh result sources")
     for path in result_paths:
         if not path.exists():
             raise FileNotFoundError(f"Missing ASR result file: {path}")
@@ -287,6 +288,8 @@ def write_run_manifest_artifact(
     *,
     expected_cases_per_model: int,
 ) -> None:
+    result_paths = [_normalize_results_path(path) for path in result_paths]
+    _validate_unique_result_paths(result_paths, context="ASR run manifest sources")
     runs = []
     for path in result_paths:
         results = load_results_jsonl(path)
@@ -450,10 +453,12 @@ def _result_paths_from_run_manifest(manifest_path: Path) -> list[Path]:
         if not path.is_absolute():
             path = ROOT / path
         paths.append(_normalize_results_path(path))
+    _validate_unique_result_paths(paths, context=f"ASR run manifest {manifest_path}")
     return paths
 
 
 def _validate_candidate_paths(paths: list[Path], *, expected_cases_per_model: int) -> None:
+    _validate_unique_result_paths(paths, context="ASR result discovery")
     for path in paths:
         if not path.exists():
             raise FileNotFoundError(path)
@@ -467,6 +472,22 @@ def _validate_candidate_paths(paths: list[Path], *, expected_cases_per_model: in
         results_path=DEFAULT_COMBINED_OUT / "results.jsonl",
         expected_cases_per_model=expected_cases_per_model,
     )
+
+
+def _validate_unique_result_paths(paths: list[Path], *, context: str) -> None:
+    seen: set[Path] = set()
+    duplicates = []
+    for path in paths:
+        resolved = _normalize_results_path(path).resolve()
+        if resolved in seen:
+            duplicates.append(_repo_relative(path))
+        else:
+            seen.add(resolved)
+    if duplicates:
+        raise ValueError(
+            f"{context} contains duplicate result path(s): "
+            + ", ".join(sorted(duplicates))
+        )
 
 
 def write_manifest_validation_artifact(
