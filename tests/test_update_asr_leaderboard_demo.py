@@ -1102,6 +1102,65 @@ def test_refresh_asr_leaderboard_artifacts_combines_report_and_page(tmp_path: Pa
         hosted_dir / "asr-leaderboard" / "full-35-combined" / "report.html"
     ).read_text(encoding="utf-8") == (out / "report.html").read_text(encoding="utf-8")
 
+    combined_results = update_module.load_results_jsonl(out / "results.jsonl")
+    generated = update_module.render_generated_sections(
+        combined_results,
+        results_path=out / "results.jsonl",
+        expected_cases_per_model=2,
+        source_result_paths=[first, second],
+    )
+    report_index = refresh_report.with_name("asr-leaderboard-report-index.md")
+    report_links = refresh_report.with_name("asr-leaderboard-report-links.json")
+    refresh_module._validate_generated_artifacts_fresh(
+        combined_results,
+        result_paths=[first, second],
+        page=page,
+        summary_out=summary,
+        refresh_report_out=refresh_report,
+        report_index_out=report_index,
+        report_links_out=report_links,
+        refresh_commands_out=refresh_commands,
+        run_manifest=run_manifest,
+        manifest_validation_out=manifest_validation,
+        seed_manifest_validation_out=seed_manifest_validation,
+        next_runs_out=next_runs,
+        hosted_manifest_out=hosted_manifest,
+        artifact_index_out=artifact_index,
+        runtime_status_out=runtime_status,
+        generated=generated,
+        expected_cases_per_model=2,
+        combined_results_path=out / "results.jsonl",
+    )
+
+    hosted_manifest.write_text(
+        hosted_manifest.read_text(encoding="utf-8").replace(
+            '"artifact_count": 14',
+            '"artifact_count": 99',
+        ),
+        encoding="utf-8",
+    )
+    with pytest.raises(ValueError, match="hosted-manifest.json.*stale"):
+        refresh_module._validate_generated_artifacts_fresh(
+            combined_results,
+            result_paths=[first, second],
+            page=page,
+            summary_out=summary,
+            refresh_report_out=refresh_report,
+            report_index_out=report_index,
+            report_links_out=report_links,
+            refresh_commands_out=refresh_commands,
+            run_manifest=run_manifest,
+            manifest_validation_out=manifest_validation,
+            seed_manifest_validation_out=seed_manifest_validation,
+            next_runs_out=next_runs,
+            hosted_manifest_out=hosted_manifest,
+            artifact_index_out=artifact_index,
+            runtime_status_out=runtime_status,
+            generated=generated,
+            expected_cases_per_model=2,
+            combined_results_path=out / "results.jsonl",
+        )
+
 
 def test_refresh_asr_leaderboard_artifacts_reads_hosted_dir_from_env(
     tmp_path: Path,

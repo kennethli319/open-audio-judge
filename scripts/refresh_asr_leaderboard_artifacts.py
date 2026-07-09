@@ -422,8 +422,11 @@ def check_asr_leaderboard_refresh_inputs(
             seed_cases=seed_cases,
             seed_manifest_validation_out=DEFAULT_SEED_MANIFEST_VALIDATION,
             next_runs_out=next_runs_out,
+            hosted_manifest_out=DEFAULT_HOSTED_MANIFEST,
+            artifact_index_out=DEFAULT_ARTIFACT_INDEX,
             runtime_status_out=DEFAULT_RUNTIME_STATUS,
             generated=generated,
+            combined_results_path=DEFAULT_COMBINED_OUT / "results.jsonl",
             expected_cases_per_model=expected_cases_per_model,
         )
     audio_manifest = build_audio_manifest_status(
@@ -489,9 +492,12 @@ def _validate_generated_artifacts_fresh(
     seed_cases: Path | None = None,
     seed_manifest_validation_out: Path | None = None,
     next_runs_out: Path | None = None,
+    hosted_manifest_out: Path | None = None,
+    artifact_index_out: Path | None = None,
     runtime_status_out: Path | None = None,
     generated: str,
     expected_cases_per_model: int,
+    combined_results_path: Path = DEFAULT_COMBINED_OUT / "results.jsonl",
 ) -> None:
     existing_generated = _extract_generated_block(page)
     if existing_generated != generated:
@@ -537,7 +543,7 @@ def _validate_generated_artifacts_fresh(
             write_refresh_report(
                 combined_results,
                 expected_refresh_report,
-                results_path=DEFAULT_COMBINED_OUT / "results.jsonl",
+                results_path=combined_results_path,
                 expected_cases_per_model=expected_cases_per_model,
                 source_result_paths=result_paths,
             )
@@ -554,7 +560,7 @@ def _validate_generated_artifacts_fresh(
             write_report_index(
                 combined_results,
                 expected_report_index,
-                results_path=DEFAULT_COMBINED_OUT / "results.jsonl",
+                results_path=combined_results_path,
                 expected_cases_per_model=expected_cases_per_model,
                 source_result_paths=result_paths,
             )
@@ -564,7 +570,7 @@ def _validate_generated_artifacts_fresh(
             write_report_links_artifact(
                 combined_results,
                 expected_report_links,
-                results_path=DEFAULT_COMBINED_OUT / "results.jsonl",
+                results_path=combined_results_path,
                 expected_cases_per_model=expected_cases_per_model,
                 source_result_paths=result_paths,
             )
@@ -577,6 +583,28 @@ def _validate_generated_artifacts_fresh(
                 expected_cases_per_model=expected_cases_per_model,
             )
             _compare_generated_text_artifact(next_runs_out, expected_next_runs)
+        if hosted_manifest_out is not None and runtime_status_out is not None:
+            expected_hosted_manifest = tmp_dir / hosted_manifest_out.name
+            write_hosted_manifest_artifact(
+                expected_hosted_manifest,
+                page=page,
+                summary_out=summary_out,
+                refresh_report_out=refresh_report_out or DEFAULT_REFRESH_REPORT,
+                report_index_out=report_index_out or DEFAULT_REPORT_INDEX,
+                report_links_out=report_links_out or DEFAULT_REPORT_LINKS,
+                refresh_commands_out=refresh_commands_out or DEFAULT_REFRESH_COMMANDS,
+                run_manifest=run_manifest or DEFAULT_RUN_MANIFEST,
+                manifest_validation_out=manifest_validation_out or DEFAULT_MANIFEST_VALIDATION,
+                seed_manifest_validation_out=(
+                    seed_manifest_validation_out or DEFAULT_SEED_MANIFEST_VALIDATION
+                ),
+                next_runs_out=next_runs_out or DEFAULT_NEXT_RUNS,
+                artifact_index_out=artifact_index_out or DEFAULT_ARTIFACT_INDEX,
+                runtime_status_out=runtime_status_out,
+                combined_results_path=combined_results_path,
+                combined_report_path=combined_results_path.with_name("report.html"),
+            )
+            _compare_generated_text_artifact(hosted_manifest_out, expected_hosted_manifest)
         if run_manifest is not None:
             expected_run_manifest = tmp_dir / run_manifest.name
             write_run_manifest_artifact(
@@ -607,7 +635,7 @@ def _validate_generated_artifacts_fresh(
             write_runtime_status_artifact(
                 expected_runtime_status,
                 results=combined_results,
-                results_path=DEFAULT_COMBINED_OUT / "results.jsonl",
+                results_path=combined_results_path,
                 source_result_paths=result_paths,
             )
             _compare_runtime_status_artifact(runtime_status_out, expected_runtime_status)
