@@ -136,6 +136,7 @@ def _validate_summary(
         "refresh_commands_path",
         "hosted_manifest_path",
         "artifact_index_path",
+        "runtime_status_path",
     )
     missing_keys = [key for key in required_keys if key not in summary]
     if missing_keys:
@@ -205,6 +206,12 @@ def _validate_summary(
         artifact_root=artifact_root,
         path_maps=path_maps,
     )
+    _validate_runtime_status_artifact(
+        summary,
+        summary_path=summary_path,
+        artifact_root=artifact_root,
+        path_maps=path_maps,
+    )
     _validate_hosted_manifest_matches_artifact_index(
         summary,
         summary_path=summary_path,
@@ -237,6 +244,7 @@ def _validate_referenced_artifacts(
         "refresh_commands_path",
         "hosted_manifest_path",
         "artifact_index_path",
+        "runtime_status_path",
     )
     missing = []
     for key in artifact_keys:
@@ -621,6 +629,7 @@ def _validate_artifact_index(
         summary["refresh_commands_path"],
         summary["hosted_manifest_path"],
         summary["artifact_index_path"],
+        summary["runtime_status_path"],
     ]
     missing = [
         raw_path
@@ -693,6 +702,38 @@ def _validate_hosted_manifest_matches_artifact_index(
                     f"{hosted_path} artifacts[{index}] {key}={hosted_value!r} "
                     f"does not match {index_path} {source_path} {key}={indexed_value!r}."
                 )
+
+
+def _validate_runtime_status_artifact(
+    summary: dict[str, Any],
+    *,
+    summary_path: Path,
+    artifact_root: Path,
+    path_maps: list[tuple[str, str]],
+) -> None:
+    raw_path = summary.get("runtime_status_path")
+    if not isinstance(raw_path, str) or not raw_path:
+        raise ValueError(f"{summary_path} has invalid runtime_status_path: {raw_path!r}")
+    path = _resolve_summary_path(raw_path, artifact_root=artifact_root, path_maps=path_maps)
+    try:
+        status = json.loads(path.read_text(encoding="utf-8"))
+    except json.JSONDecodeError as exc:
+        raise ValueError(f"{path} must contain valid JSON: {exc}") from exc
+
+    if not isinstance(status, dict):
+        raise ValueError(f"{path} must contain a JSON object.")
+    if status.get("status") != "complete":
+        raise ValueError(f"{path} status must be complete.")
+    preflight = status.get("mlx_runtime_preflight")
+    if not isinstance(preflight, dict):
+        raise ValueError(f"{path} must include mlx_runtime_preflight.")
+    if preflight.get("status") not in {"ok", "blocked", "not_checked"}:
+        raise ValueError(f"{path} has invalid mlx_runtime_preflight.status.")
+    secret = status.get("gemini_secret")
+    if not isinstance(secret, dict) or secret.get("status") not in {"present", "missing"}:
+        raise ValueError(f"{path} must include gemini_secret status.")
+    if "secret_handling" not in status:
+        raise ValueError(f"{path} must document secret_handling.")
 
 
 def _validate_refresh_commands_script(

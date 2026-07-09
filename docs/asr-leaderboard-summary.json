@@ -240,6 +240,10 @@
     {
       "path": "docs/asr-leaderboard-artifacts.json",
       "purpose": "Single machine-readable index for the ASR leaderboard artifact bundle."
+    },
+    {
+      "path": "docs/asr-leaderboard-runtime-status.json",
+      "purpose": "Machine-readable MLX ASR and Gemini readiness status for refresh automation."
     }
   ],
   "refresh_commands_path": "docs/asr-leaderboard-refresh-commands.sh",
@@ -447,6 +451,7 @@
   "report_path": "runs/asr-leaderboard/full-35-combined/report.html",
   "results_path": "runs/asr-leaderboard/full-35-combined/results.jsonl",
   "run_manifest_path": "docs/asr-leaderboard-run-manifest.json",
+  "runtime_status_path": "docs/asr-leaderboard-runtime-status.json",
   "seed_manifest_validation_path": "docs/asr-seed-manifest-validation.json",
   "source_result_files": [
     {

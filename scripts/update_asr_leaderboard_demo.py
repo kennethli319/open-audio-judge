@@ -24,6 +24,7 @@ DEFAULT_SEED_MANIFEST_VALIDATION = ROOT / "docs" / "asr-seed-manifest-validation
 DEFAULT_NEXT_RUNS = ROOT / "docs" / "asr-leaderboard-next-runs.json"
 DEFAULT_HOSTED_MANIFEST = ROOT / "docs" / "asr-leaderboard-hosted-manifest.json"
 DEFAULT_ARTIFACT_INDEX = ROOT / "docs" / "asr-leaderboard-artifacts.json"
+DEFAULT_RUNTIME_STATUS = ROOT / "docs" / "asr-leaderboard-runtime-status.json"
 DEFAULT_AUDIO_CASES = ROOT / "runs" / "asr-research-audio" / "tts_audio_cases.jsonl"
 DEFAULT_SEED_CASES = ROOT / "examples" / "asr_research_cases.jsonl"
 DEFAULT_HOSTED_DIR_ENV = "ASR_LEADERBOARD_HOSTED_DIR"
@@ -184,6 +185,7 @@ def render_generated_sections(
     next_runs_label = html.escape(_repo_relative(DEFAULT_NEXT_RUNS))
     hosted_manifest_label = html.escape(_repo_relative(DEFAULT_HOSTED_MANIFEST))
     artifact_index_label = html.escape(_repo_relative(DEFAULT_ARTIFACT_INDEX))
+    runtime_status_label = html.escape(_repo_relative(DEFAULT_RUNTIME_STATUS))
     workflow = _refresh_workflow([])
     workflow_commands = [
         ("Preflight refresh inputs", workflow["refresh_check_command"]),
@@ -245,7 +247,8 @@ def render_generated_sections(
                 f"<code>{seed_validation_label}</code>. The next-refresh plan is "
                 f"<code>{next_runs_label}</code>, and the hosted artifact manifest is "
                 f"<code>{hosted_manifest_label}</code>. The artifact bundle index is "
-                f"<code>{artifact_index_label}</code>; together they include the source result files, "
+                f"<code>{artifact_index_label}</code>. Runtime readiness is tracked in "
+                f"<code>{runtime_status_label}</code>; together they include the source result files, "
                 "complete model/category matrix, missing-cell guidance, hosted copy map, and reproducible refresh workflow. Pass "
                 f"<code>{DEFAULT_HOSTED_DIR_ENV}</code> with "
                 "<code>--hosted-dir-from-env</code> to copy the same verified artifacts into the hosted Pages checkout.</p>"
@@ -349,6 +352,7 @@ def write_summary_artifact(
                 "next_runs_path": _repo_relative(DEFAULT_NEXT_RUNS),
                 "hosted_manifest_path": _repo_relative(DEFAULT_HOSTED_MANIFEST),
                 "artifact_index_path": _repo_relative(DEFAULT_ARTIFACT_INDEX),
+                "runtime_status_path": _repo_relative(DEFAULT_RUNTIME_STATUS),
                 "output_artifacts": output_artifacts,
                 "refresh_workflow": _refresh_workflow(source_result_paths or []),
                 "refresh_runtime_status": runtime_status,
@@ -430,6 +434,7 @@ def write_refresh_report(
                 f"- Next-refresh plan: `{_repo_relative(DEFAULT_NEXT_RUNS)}`",
                 f"- Hosted artifact manifest: `{_repo_relative(DEFAULT_HOSTED_MANIFEST)}`",
                 f"- Artifact bundle index: `{_repo_relative(DEFAULT_ARTIFACT_INDEX)}`",
+                f"- Runtime status: `{_repo_relative(DEFAULT_RUNTIME_STATUS)}`",
                 f"- Total judged transcripts: {len(results)}",
                 f"- Models: {len(model_summaries)}",
                 f"- Categories: {len(category_summaries)}",
@@ -784,6 +789,10 @@ def build_output_artifact_index(*, results_path: Path) -> list[dict[str, str]]:
         {
             "path": _repo_relative(DEFAULT_ARTIFACT_INDEX),
             "purpose": "Single machine-readable index for the ASR leaderboard artifact bundle.",
+        },
+        {
+            "path": _repo_relative(DEFAULT_RUNTIME_STATUS),
+            "purpose": "Machine-readable MLX ASR and Gemini readiness status for refresh automation.",
         },
     ]
 

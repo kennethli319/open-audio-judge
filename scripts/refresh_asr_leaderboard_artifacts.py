@@ -5,6 +5,7 @@ import hashlib
 import json
 import os
 import shutil
+import subprocess
 import sys
 from collections import Counter
 from pathlib import Path
@@ -24,9 +25,12 @@ from scripts.update_asr_leaderboard_demo import (  # noqa: E402
     DEFAULT_SEED_MANIFEST_VALIDATION,
     DEFAULT_SUMMARY,
     DEFAULT_HOSTED_MANIFEST,
+    DEFAULT_RUNTIME_STATUS,
     DEFAULT_NEXT_RUNS,
+    GEMINI_SECRET_ENV,
     build_next_run_plan,
     build_output_artifact_index,
+    build_refresh_runtime_status,
     render_generated_sections,
     replace_generated_block,
     write_refresh_report,
@@ -148,6 +152,17 @@ def main() -> None:
         help="Write a machine-readable index of the ASR leaderboard artifact bundle.",
     )
     parser.add_argument(
+        "--runtime-status-out",
+        type=Path,
+        default=DEFAULT_RUNTIME_STATUS,
+        help="Write MLX ASR and Gemini readiness status for refresh automation.",
+    )
+    parser.add_argument(
+        "--check-mlx-runtime",
+        action="store_true",
+        help="Run the bounded MLX ASR runtime preflight and include the result in runtime status.",
+    )
+    parser.add_argument(
         "--run-manifest",
         type=Path,
         default=DEFAULT_RUN_MANIFEST,
@@ -240,6 +255,12 @@ def main() -> None:
             expected_cases_per_model=args.expected_cases_per_model,
             hosted_dir=hosted_dir,
         )
+        if args.check_mlx_runtime:
+            write_runtime_status_artifact(
+                args.runtime_status_out,
+                results=combined_results_from_paths(result_paths),
+                check_mlx_runtime=True,
+            )
         message = (
             "ASR refresh preflight OK: "
             f"{check_summary['total_results']} results, "
@@ -264,9 +285,11 @@ def main() -> None:
         next_runs_out=args.next_runs_out,
         hosted_manifest_out=args.hosted_manifest_out,
         artifact_index_out=args.artifact_index_out,
+        runtime_status_out=args.runtime_status_out,
         run_manifest=args.run_manifest,
         update_run_manifest=args.update_run_manifest,
         hosted_dir=hosted_dir,
+        check_mlx_runtime=args.check_mlx_runtime,
         expected_cases_per_model=args.expected_cases_per_model,
     )
 
@@ -376,8 +399,11 @@ def refresh_asr_leaderboard_artifacts(
     next_runs_out: Path = DEFAULT_NEXT_RUNS,
     hosted_manifest_out: Path = DEFAULT_HOSTED_MANIFEST,
     artifact_index_out: Path = DEFAULT_ARTIFACT_INDEX,
+    runtime_status_out: Path | None = None,
     hosted_dir: Path | None = None,
+    check_mlx_runtime: bool = False,
 ) -> None:
+    runtime_status_out = runtime_status_out or artifact_index_out.with_name(DEFAULT_RUNTIME_STATUS.name)
     result_paths = [_normalize_results_path(path) for path in result_paths]
     _validate_unique_result_paths(result_paths, context="ASR refresh result sources")
     for path in result_paths:
@@ -445,6 +471,11 @@ def refresh_asr_leaderboard_artifacts(
         next_runs_out,
         expected_cases_per_model=expected_cases_per_model,
     )
+    write_runtime_status_artifact(
+        runtime_status_out,
+        results=combined_results,
+        check_mlx_runtime=check_mlx_runtime,
+    )
     write_artifact_index(
         artifact_index_out,
         results=combined_results,
@@ -459,6 +490,7 @@ def refresh_asr_leaderboard_artifacts(
         seed_manifest_validation_out=seed_manifest_validation_out,
         next_runs_out=next_runs_out,
         hosted_manifest_out=hosted_manifest_out,
+        runtime_status_out=runtime_status_out,
         expected_cases_per_model=expected_cases_per_model,
     )
     write_hosted_manifest_artifact(
@@ -472,6 +504,7 @@ def refresh_asr_leaderboard_artifacts(
         seed_manifest_validation_out=seed_manifest_validation_out,
         next_runs_out=next_runs_out,
         artifact_index_out=artifact_index_out,
+        runtime_status_out=runtime_status_out,
         combined_results_path=combined_results_path,
         combined_report_path=combined_report_path,
     )
@@ -488,6 +521,7 @@ def refresh_asr_leaderboard_artifacts(
             next_runs_out=next_runs_out,
             hosted_manifest_out=hosted_manifest_out,
             artifact_index_out=artifact_index_out,
+            runtime_status_out=runtime_status_out,
             combined_results_path=combined_results_path,
             combined_report_path=combined_report_path,
         )
@@ -518,6 +552,7 @@ def refresh_asr_leaderboard_artifacts(
     print(f"Next-refresh plan: {next_runs_out}")
     print(f"Hosted manifest: {hosted_manifest_out}")
     print(f"Artifact index: {artifact_index_out}")
+    print(f"Runtime status: {runtime_status_out}")
     for copied_path in copied_hosted_paths:
         print(f"Hosted:  {copied_path}")
 
@@ -599,6 +634,7 @@ def copy_hosted_asr_artifacts(
     next_runs_out: Path = DEFAULT_NEXT_RUNS,
     hosted_manifest_out: Path = DEFAULT_HOSTED_MANIFEST,
     artifact_index_out: Path = DEFAULT_ARTIFACT_INDEX,
+    runtime_status_out: Path = DEFAULT_RUNTIME_STATUS,
     combined_results_path: Path | None = None,
     combined_report_path: Path | None = None,
 ) -> list[Path]:
@@ -615,6 +651,7 @@ def copy_hosted_asr_artifacts(
         (next_runs_out, {next_runs_out.name, DEFAULT_NEXT_RUNS.name}),
         (hosted_manifest_out, {hosted_manifest_out.name, DEFAULT_HOSTED_MANIFEST.name}),
         (artifact_index_out, {artifact_index_out.name, DEFAULT_ARTIFACT_INDEX.name}),
+        (runtime_status_out, {runtime_status_out.name, DEFAULT_RUNTIME_STATUS.name}),
     )
     for source, destination_names in source_destinations:
         if not source.exists():
@@ -650,6 +687,7 @@ def write_hosted_manifest_artifact(
     seed_manifest_validation_out: Path = DEFAULT_SEED_MANIFEST_VALIDATION,
     next_runs_out: Path = DEFAULT_NEXT_RUNS,
     artifact_index_out: Path = DEFAULT_ARTIFACT_INDEX,
+    runtime_status_out: Path = DEFAULT_RUNTIME_STATUS,
     combined_results_path: Path,
     combined_report_path: Path,
 ) -> None:
@@ -664,6 +702,7 @@ def write_hosted_manifest_artifact(
         (seed_manifest_validation_out, {seed_manifest_validation_out.name, DEFAULT_SEED_MANIFEST_VALIDATION.name}),
         (next_runs_out, {next_runs_out.name, DEFAULT_NEXT_RUNS.name}),
         (artifact_index_out, {artifact_index_out.name, DEFAULT_ARTIFACT_INDEX.name}),
+        (runtime_status_out, {runtime_status_out.name, DEFAULT_RUNTIME_STATUS.name}),
         (output_path, {output_path.name, DEFAULT_HOSTED_MANIFEST.name}),
         (combined_results_path, {"asr-leaderboard/full-35-combined/results.jsonl"}),
         (combined_report_path, {"asr-leaderboard/full-35-combined/report.html"}),
@@ -715,8 +754,10 @@ def write_artifact_index(
     seed_manifest_validation_out: Path,
     next_runs_out: Path,
     hosted_manifest_out: Path,
+    runtime_status_out: Path | None = None,
     expected_cases_per_model: int,
 ) -> None:
+    runtime_status_out = runtime_status_out or output_path.with_name(DEFAULT_RUNTIME_STATUS.name)
     artifact_paths = {
         _repo_relative(results_path): results_path,
         _repo_relative(report_path): report_path,
@@ -729,6 +770,7 @@ def write_artifact_index(
         _repo_relative(seed_manifest_validation_out): seed_manifest_validation_out,
         _repo_relative(next_runs_out): next_runs_out,
         _repo_relative(hosted_manifest_out): hosted_manifest_out,
+        _repo_relative(runtime_status_out): runtime_status_out,
         _repo_relative(output_path): output_path,
         _repo_relative(DEFAULT_SUMMARY): summary_out,
         _repo_relative(DEFAULT_REFRESH_REPORT): refresh_report_out,
@@ -739,6 +781,7 @@ def write_artifact_index(
         _repo_relative(DEFAULT_NEXT_RUNS): next_runs_out,
         _repo_relative(DEFAULT_HOSTED_MANIFEST): hosted_manifest_out,
         _repo_relative(DEFAULT_ARTIFACT_INDEX): output_path,
+        _repo_relative(DEFAULT_RUNTIME_STATUS): runtime_status_out,
     }
     artifact_index = build_output_artifact_index(results_path=results_path)
     indexed_paths = {artifact["path"] for artifact in artifact_index}
@@ -1061,6 +1104,93 @@ def write_next_runs_artifact(
         json.dumps(next_runs, indent=2, sort_keys=True) + "\n",
         encoding="utf-8",
     )
+
+
+def combined_results_from_paths(result_paths: list[Path]) -> list:
+    return [
+        result
+        for path in result_paths
+        for result in load_results_jsonl(path)
+    ]
+
+
+def write_runtime_status_artifact(
+    output_path: Path,
+    *,
+    results: list,
+    check_mlx_runtime: bool = False,
+) -> None:
+    status = build_refresh_runtime_status(results)
+    status["status"] = "complete"
+    status["mlx_runtime_preflight"] = (
+        _run_mlx_runtime_preflight()
+        if check_mlx_runtime
+        else {
+            "status": "not_checked",
+            "command": _mlx_runtime_preflight_command(),
+        }
+    )
+    status["gemini_secret"] = _gemini_secret_status()
+    status["secret_handling"] = (
+        "Gemini secrets are checked only for file presence; secret values are never "
+        "printed or written into artifacts."
+    )
+    output_path.parent.mkdir(parents=True, exist_ok=True)
+    output_path.write_text(
+        json.dumps(status, indent=2, sort_keys=True) + "\n",
+        encoding="utf-8",
+    )
+
+
+def _run_mlx_runtime_preflight() -> dict[str, object]:
+    command = _mlx_runtime_preflight_command()
+    env = os.environ.copy()
+    env["PYTHONPATH"] = "src"
+    completed = subprocess.run(
+        command[1:],
+        cwd=ROOT,
+        env=env,
+        text=True,
+        stdout=subprocess.PIPE,
+        stderr=subprocess.PIPE,
+        check=False,
+    )
+    return {
+        "status": "ok" if completed.returncode == 0 else "blocked",
+        "command": command,
+        "returncode": completed.returncode,
+        "stdout": _bounded_output(completed.stdout),
+        "stderr": _bounded_output(completed.stderr),
+    }
+
+
+def _mlx_runtime_preflight_command() -> list[str]:
+    return [
+        "PYTHONPATH=src",
+        ".venv/bin/python",
+        "-m",
+        "open_audio_judge.cli",
+        "check-mlx-asr-runtime",
+        "--python-bin",
+        ".venv/bin/python",
+        "--model",
+        ASR_LEADERBOARD_MODELS[0][0],
+    ]
+
+
+def _gemini_secret_status() -> dict[str, object]:
+    secret_path = Path(GEMINI_SECRET_ENV)
+    return {
+        "status": "present" if secret_path.exists() and secret_path.stat().st_size > 0 else "missing",
+        "path": GEMINI_SECRET_ENV,
+    }
+
+
+def _bounded_output(value: str, *, limit: int = 2000) -> str:
+    value = value.strip()
+    if len(value) <= limit:
+        return value
+    return value[:limit] + "\n[truncated]"
 
 
 def build_manifest_validation(

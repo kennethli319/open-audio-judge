@@ -1,0 +1,32 @@
+{
+  "all_loaded_results_ok": true,
+  "gemini_judge": "verified_from_loaded_results",
+  "gemini_secret": {
+    "path": "/Users/wangyauli/.openclaw/secrets/open-audio-judge-gemini.env",
+    "status": "present"
+  },
+  "live_model_calls": "none",
+  "loaded_result_providers": [
+    "gemini"
+  ],
+  "mlx_asr": "not_executed_by_refresh; transcripts loaded from verified result artifacts",
+  "mlx_runtime_preflight": {
+    "command": [
+      "PYTHONPATH=src",
+      ".venv/bin/python",
+      "-m",
+      "open_audio_judge.cli",
+      "check-mlx-asr-runtime",
+      "--python-bin",
+      ".venv/bin/python",
+      "--model",
+      "mlx-community/whisper-large-v3-turbo-asr-fp16"
+    ],
+    "returncode": 0,
+    "status": "ok",
+    "stderr": "",
+    "stdout": "MLX ASR runtime OK\nPython: .venv/bin/python\nModule: mlx_audio.stt.generate\nModel:  mlx-community/whisper-large-v3-turbo-asr-fp16"
+  },
+  "secret_handling": "Gemini secrets are checked only for file presence; secret values are never printed or written into artifacts.",
+  "status": "complete"
+}

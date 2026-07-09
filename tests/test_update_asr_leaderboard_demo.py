@@ -332,6 +332,7 @@ def test_write_summary_artifact_records_models_and_categories(tmp_path: Path) ->
     assert summary["next_runs_path"] == "docs/asr-leaderboard-next-runs.json"
     assert summary["hosted_manifest_path"] == "docs/asr-leaderboard-hosted-manifest.json"
     assert summary["artifact_index_path"] == "docs/asr-leaderboard-artifacts.json"
+    assert summary["runtime_status_path"] == "docs/asr-leaderboard-runtime-status.json"
     assert summary["next_run_plan"]["status"] == "complete"
     assert summary["next_run_plan"]["missing_cell_count"] == 0
     assert summary["output_artifacts"] == [
@@ -381,6 +382,10 @@ def test_write_summary_artifact_records_models_and_categories(tmp_path: Path) ->
         {
             "path": "docs/asr-leaderboard-artifacts.json",
             "purpose": "Single machine-readable index for the ASR leaderboard artifact bundle.",
+        },
+        {
+            "path": "docs/asr-leaderboard-runtime-status.json",
+            "purpose": "Machine-readable MLX ASR and Gemini readiness status for refresh automation.",
         },
     ]
     assert summary["refresh_workflow"]["seed_manifest_validation_command"] == [
@@ -848,6 +853,7 @@ def test_refresh_asr_leaderboard_artifacts_combines_report_and_page(tmp_path: Pa
     next_runs = tmp_path / "next-runs.json"
     hosted_manifest = tmp_path / "hosted-manifest.json"
     artifact_index = tmp_path / "artifact-index.json"
+    runtime_status = tmp_path / "runtime-status.json"
     hosted_dir = tmp_path / "hosted" / "open-audio-judge"
     records_a = [
         result_record(
@@ -908,6 +914,7 @@ def test_refresh_asr_leaderboard_artifacts_combines_report_and_page(tmp_path: Pa
         next_runs_out=next_runs,
         hosted_manifest_out=hosted_manifest,
         artifact_index_out=artifact_index,
+        runtime_status_out=runtime_status,
         hosted_dir=hosted_dir,
         expected_cases_per_model=2,
     )
@@ -970,6 +977,10 @@ def test_refresh_asr_leaderboard_artifacts_combines_report_and_page(tmp_path: Pa
     assert (hosted_dir / "asr-leaderboard-next-runs.json").read_text(
         encoding="utf-8"
     ) == next_runs.read_text(encoding="utf-8")
+    assert json.loads(runtime_status.read_text(encoding="utf-8"))["status"] == "complete"
+    assert (hosted_dir / "asr-leaderboard-runtime-status.json").read_text(
+        encoding="utf-8"
+    ) == runtime_status.read_text(encoding="utf-8")
     artifact_index_data = json.loads(artifact_index.read_text(encoding="utf-8"))
     assert artifact_index_data["status"] == "complete"
     assert artifact_index_data["total_results"] == 4
@@ -988,7 +999,7 @@ def test_refresh_asr_leaderboard_artifacts_combines_report_and_page(tmp_path: Pa
     assert digest_statuses[str(hosted_manifest)] == "deferred_circular_reference"
     assert digest_statuses[str(out / "results.jsonl")] == "ok"
     hosted_manifest_data = json.loads(hosted_manifest.read_text(encoding="utf-8"))
-    assert hosted_manifest_data["artifact_count"] == 11
+    assert hosted_manifest_data["artifact_count"] == 12
     assert {
         "asr-leaderboard/full-35-combined/results.jsonl"
     } in [set(artifact["hosted_paths"]) for artifact in hosted_manifest_data["artifacts"]]
@@ -1213,6 +1224,7 @@ def test_check_asr_leaderboard_page_validates_generated_artifacts(tmp_path: Path
     next_runs = tmp_path / "next-runs.json"
     hosted_manifest = tmp_path / "hosted-manifest.json"
     artifact_index = tmp_path / "artifact-index.json"
+    runtime_status = tmp_path / "runtime-status.json"
     records = [
         result_record(
             case_id="asr-a-model-a",
@@ -1330,6 +1342,8 @@ def test_check_asr_leaderboard_page_validates_generated_artifacts(tmp_path: Path
         + "\n",
         encoding="utf-8",
     )
+    refresh_module = load_refresh_module()
+    refresh_module.write_runtime_status_artifact(runtime_status, results=results)
     summary_data = json.loads(summary.read_text(encoding="utf-8"))
     summary_data["run_manifest_path"] = str(run_manifest)
     summary_data["manifest_validation_path"] = str(manifest_validation)
@@ -1337,8 +1351,8 @@ def test_check_asr_leaderboard_page_validates_generated_artifacts(tmp_path: Path
     summary_data["next_runs_path"] = str(next_runs)
     summary_data["hosted_manifest_path"] = str(hosted_manifest)
     summary_data["artifact_index_path"] = str(artifact_index)
+    summary_data["runtime_status_path"] = str(runtime_status)
     summary.write_text(json.dumps(summary_data), encoding="utf-8")
-    refresh_module = load_refresh_module()
     refresh_report = tmp_path / "refresh-report.md"
     refresh_report.write_text("# report\n", encoding="utf-8")
     refresh_commands = tmp_path / "refresh-commands.sh"
@@ -1360,6 +1374,7 @@ def test_check_asr_leaderboard_page_validates_generated_artifacts(tmp_path: Path
         seed_manifest_validation_out=seed_manifest_validation,
         next_runs_out=next_runs,
         hosted_manifest_out=hosted_manifest,
+        runtime_status_out=runtime_status,
         expected_cases_per_model=2,
     )
 
@@ -1425,6 +1440,7 @@ def test_check_asr_leaderboard_page_validates_hosted_artifact_layout(tmp_path: P
     refresh_commands = hosted / "asr-leaderboard-refresh-commands.sh"
     hosted_manifest = hosted / "asr-leaderboard-hosted-manifest.json"
     artifact_index = hosted / "asr-leaderboard-artifacts.json"
+    runtime_status = hosted / "asr-leaderboard-runtime-status.json"
     results_path = hosted / "asr-leaderboard" / "full-35-combined" / "results.jsonl"
     report_path = hosted / "asr-leaderboard" / "full-35-combined" / "report.html"
 
@@ -1509,6 +1525,18 @@ def test_check_asr_leaderboard_page_validates_hosted_artifact_layout(tmp_path: P
         + "\n",
         encoding="utf-8",
     )
+    runtime_status.write_text(
+        json.dumps(
+            {
+                "status": "complete",
+                "mlx_runtime_preflight": {"status": "not_checked"},
+                "gemini_secret": {"status": "present"},
+                "secret_handling": "test fixture",
+            }
+        )
+        + "\n",
+        encoding="utf-8",
+    )
     hosted_manifest.write_text(
         json.dumps(
             hosted_manifest_record(
@@ -1517,6 +1545,7 @@ def test_check_asr_leaderboard_page_validates_hosted_artifact_layout(tmp_path: P
                     ("asr-leaderboard/full-35-combined/report.html", report_path),
                     ("asr-leaderboard-run-manifest.json", run_manifest),
                     ("asr-leaderboard-refresh-commands.sh", refresh_commands),
+                    ("asr-leaderboard-runtime-status.json", runtime_status),
                 ]
             )
         )
@@ -1561,6 +1590,10 @@ def test_check_asr_leaderboard_page_validates_hosted_artifact_layout(tmp_path: P
                         refresh_commands,
                     ),
                     artifact_index_record(
+                        "docs/asr-leaderboard-runtime-status.json",
+                        runtime_status,
+                    ),
+                    artifact_index_record(
                         "docs/asr-leaderboard-hosted-manifest.json",
                         hosted_manifest,
                         digest_status="deferred_circular_reference",
@@ -1588,6 +1621,7 @@ def test_check_asr_leaderboard_page_validates_hosted_artifact_layout(tmp_path: P
                 "next_runs_path": "docs/asr-leaderboard-next-runs.json",
                 "hosted_manifest_path": "docs/asr-leaderboard-hosted-manifest.json",
                 "artifact_index_path": "docs/asr-leaderboard-artifacts.json",
+                "runtime_status_path": "docs/asr-leaderboard-runtime-status.json",
                 "source_result_paths": [
                     "runs/asr-leaderboard/model-a/judge-report/results.jsonl",
                     "runs/asr-leaderboard/model-b/judge-report/results.jsonl",
@@ -1620,6 +1654,10 @@ def test_check_asr_leaderboard_page_validates_hosted_artifact_layout(tmp_path: P
                         {
                             "path": "docs/asr-leaderboard-artifacts.json",
                             "purpose": "Single machine-readable index for the ASR leaderboard artifact bundle.",
+                        },
+                        {
+                            "path": "docs/asr-leaderboard-runtime-status.json",
+                            "purpose": "Machine-readable MLX ASR and Gemini readiness status for refresh automation.",
                         },
                     ],
                 "refresh_workflow": update_module._refresh_workflow([]),
@@ -1676,6 +1714,8 @@ def test_check_asr_leaderboard_page_validates_hosted_artifact_layout(tmp_path: P
                 "Machine-readable next-refresh plan for missing ASR model/category cells.",
                 "docs/asr-leaderboard-artifacts.json",
                 "Single machine-readable index for the ASR leaderboard artifact bundle.",
+                "docs/asr-leaderboard-runtime-status.json",
+                "Machine-readable MLX ASR and Gemini readiness status for refresh automation.",
                 "<!-- ASR_LEADERBOARD_GENERATED_END -->",
                 "</body></html>",
             ]

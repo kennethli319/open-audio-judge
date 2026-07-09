@@ -14,6 +14,7 @@ This generated report summarizes the verified ASR leaderboard artifact set.
 - Next-refresh plan: `docs/asr-leaderboard-next-runs.json`
 - Hosted artifact manifest: `docs/asr-leaderboard-hosted-manifest.json`
 - Artifact bundle index: `docs/asr-leaderboard-artifacts.json`
+- Runtime status: `docs/asr-leaderboard-runtime-status.json`
 - Total judged transcripts: 105
 - Models: 3
 - Categories: 7
@@ -112,6 +113,7 @@ This generated report summarizes the verified ASR leaderboard artifact set.
 | `docs/asr-leaderboard-next-runs.json` | Machine-readable next-refresh plan for missing ASR model/category cells. |
 | `docs/asr-leaderboard-hosted-manifest.json` | Machine-readable manifest of ASR demo artifacts mirrored to the hosted Pages checkout. |
 | `docs/asr-leaderboard-artifacts.json` | Single machine-readable index for the ASR leaderboard artifact bundle. |
+| `docs/asr-leaderboard-runtime-status.json` | Machine-readable MLX ASR and Gemini readiness status for refresh automation. |
 
 ## Refresh Commands
 
