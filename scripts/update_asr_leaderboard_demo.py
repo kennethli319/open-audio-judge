@@ -132,8 +132,8 @@ def render_generated_sections(
             (
                 '    <p class="muted">Total Gemini judge samples: '
                 f"{total_judge_samples}. Refresh this block with "
-                '<code>.venv/bin/python scripts/update_asr_leaderboard_demo.py</code> after rerunning '
-                "<code>oaj report</code> with verified ASR result files. The combined local report is "
+                '<code>.venv/bin/python scripts/refresh_asr_leaderboard_artifacts.py</code> '
+                "after rerunning the verified ASR model jobs. The combined local report is "
                 f"<code>{report_label}</code> and the committed summary artifact is "
                 f"<code>{summary_label}</code>.</p>"
             ),

@@ -5,10 +5,21 @@ from pathlib import Path
 
 
 SCRIPT = Path("scripts/update_asr_leaderboard_demo.py")
+REFRESH_SCRIPT = Path("scripts/refresh_asr_leaderboard_artifacts.py")
 
 
 def load_script_module():
     spec = importlib.util.spec_from_file_location("update_asr_leaderboard_demo", SCRIPT)
+    assert spec is not None
+    assert spec.loader is not None
+    module = importlib.util.module_from_spec(spec)
+    sys.modules[spec.name] = module
+    spec.loader.exec_module(module)
+    return module
+
+
+def load_refresh_module():
+    spec = importlib.util.spec_from_file_location("refresh_asr_leaderboard_artifacts", REFRESH_SCRIPT)
     assert spec is not None
     assert spec.loader is not None
     module = importlib.util.module_from_spec(spec)
@@ -180,3 +191,76 @@ def test_replace_generated_block_only_updates_marked_section(tmp_path: Path) -> 
         f"{module.END_MARKER}\n"
         "after\n"
     )
+
+
+def test_refresh_asr_leaderboard_artifacts_combines_report_and_page(tmp_path: Path) -> None:
+    update_module = load_script_module()
+    refresh_module = load_refresh_module()
+    first = tmp_path / "model-a" / "judge-report" / "results.jsonl"
+    second = tmp_path / "model-b" / "results.jsonl"
+    out = tmp_path / "combined"
+    page = tmp_path / "demo.html"
+    summary = tmp_path / "summary.json"
+    records_a = [
+        result_record(
+            case_id="asr-a-model-a",
+            model="mlx-community/model-a",
+            category="transcription_accuracy_wer",
+            score=100,
+            label="accurate",
+        ),
+        result_record(
+            case_id="asr-b-model-a",
+            model="mlx-community/model-a",
+            category="numeric_unit_integrity",
+            score=80,
+            label="accurate",
+        ),
+    ]
+    records_b = [
+        result_record(
+            case_id="asr-a-model-b",
+            model="mlx-community/model-b",
+            category="transcription_accuracy_wer",
+            score=60,
+            label="needs_review",
+        ),
+        result_record(
+            case_id="asr-b-model-b",
+            model="mlx-community/model-b",
+            category="numeric_unit_integrity",
+            score=40,
+            label="inaccurate",
+        ),
+    ]
+    first.parent.mkdir(parents=True)
+    second.parent.mkdir(parents=True)
+    first.write_text("".join(json.dumps(record) + "\n" for record in records_a), encoding="utf-8")
+    second.write_text("".join(json.dumps(record) + "\n" for record in records_b), encoding="utf-8")
+    page.write_text(
+        "before\n"
+        f"{update_module.START_MARKER}\n"
+        "old generated content\n"
+        f"{update_module.END_MARKER}\n"
+        "after\n",
+        encoding="utf-8",
+    )
+
+    refresh_module.refresh_asr_leaderboard_artifacts(
+        [tmp_path / "model-a", second],
+        out=out,
+        page=page,
+        summary_out=summary,
+        expected_cases_per_model=2,
+    )
+
+    assert (out / "results.jsonl").exists()
+    assert (out / "report.html").exists()
+    assert len((out / "results.jsonl").read_text(encoding="utf-8").splitlines()) == 4
+    html = page.read_text(encoding="utf-8")
+    assert "Verified Leaderboard Results" in html
+    assert "mlx-community/model-a" in html
+    assert "mlx-community/model-b" in html
+    written_summary = json.loads(summary.read_text(encoding="utf-8"))
+    assert written_summary["total_results"] == 4
+    assert written_summary["model_count"] == 2

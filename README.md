@@ -250,6 +250,13 @@ integrity, negation/modality scope, temporal accuracy, semantic paraphrase
 preservation, and acoustic-noise robustness. These seeds intentionally require
 local audio materialization before ASR transcription; keep generated audio under
 ignored `runs/`.
+After the three model runs finish, refresh the combined report, committed JSON
+summary, and generated demo-page leaderboard block with:
+
+```bash
+.venv/bin/python scripts/refresh_asr_leaderboard_artifacts.py
+```
+
 See [docs/asr-leaderboard-demo.html](docs/asr-leaderboard-demo.html) for the
 full command flow.
 
