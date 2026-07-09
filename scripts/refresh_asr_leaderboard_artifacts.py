@@ -4,6 +4,7 @@ import argparse
 import json
 import shutil
 import sys
+from collections import Counter
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -125,6 +126,11 @@ def main() -> None:
         ),
     )
     parser.add_argument(
+        "--update-run-manifest",
+        action="store_true",
+        help="Rewrite --run-manifest from the verified result files before validation and hosted sync.",
+    )
+    parser.add_argument(
         "--hosted-dir",
         type=Path,
         help=(
@@ -158,6 +164,7 @@ def main() -> None:
         seed_cases=args.seed_cases,
         seed_manifest_validation_out=args.seed_manifest_validation_out,
         run_manifest=args.run_manifest,
+        update_run_manifest=args.update_run_manifest,
         hosted_dir=args.hosted_dir,
         expected_cases_per_model=args.expected_cases_per_model,
     )
@@ -173,6 +180,7 @@ def refresh_asr_leaderboard_artifacts(
     manifest_validation_out: Path,
     run_manifest: Path,
     expected_cases_per_model: int,
+    update_run_manifest: bool = False,
     seed_cases: Path = DEFAULT_CASES,
     seed_manifest_validation_out: Path = DEFAULT_SEED_MANIFEST_VALIDATION,
     hosted_dir: Path | None = None,
@@ -201,6 +209,12 @@ def refresh_asr_leaderboard_artifacts(
     combined_report_path = out / "report.html"
     write_results_jsonl(combined_results, combined_results_path)
     write_html_report(combined_results, combined_report_path)
+    if update_run_manifest:
+        write_run_manifest_artifact(
+            result_paths,
+            run_manifest,
+            expected_cases_per_model=expected_cases_per_model,
+        )
     replace_generated_block(page, generated)
     write_summary_artifact(
         combined_results,
@@ -251,6 +265,68 @@ def refresh_asr_leaderboard_artifacts(
     print(f"Seed manifest validation: {seed_manifest_validation_out}")
     for copied_path in copied_hosted_paths:
         print(f"Hosted:  {copied_path}")
+
+
+def write_run_manifest_artifact(
+    result_paths: list[Path],
+    output_path: Path,
+    *,
+    expected_cases_per_model: int,
+) -> None:
+    runs = []
+    for path in result_paths:
+        results = load_results_jsonl(path)
+        if not results:
+            raise ValueError(f"Cannot add empty result file to run manifest: {path}")
+        models = sorted(
+            {
+                str(result.metadata.get("candidate_model") or "")
+                for result in results
+            }
+        )
+        if len(models) != 1 or not models[0]:
+            raise ValueError(
+                f"Run manifest source must contain exactly one model with metadata.candidate_model: {path}"
+            )
+        categories = Counter(str(result.metadata.get("eval_category") or "") for result in results)
+        if any(not category for category in categories):
+            raise ValueError(f"Run manifest source has missing metadata.eval_category: {path}")
+        runs.append(
+            {
+                "run_name": _run_name_from_results_path(path),
+                "model": models[0],
+                "results_path": _repo_relative(path),
+                "result_count": len(results),
+                "ok_count": sum(1 for result in results if result.status == "ok"),
+                "category_counts": dict(sorted(categories.items())),
+            }
+        )
+
+    output_path.parent.mkdir(parents=True, exist_ok=True)
+    output_path.write_text(
+        json.dumps(
+            {
+                "description": "Verified ASR leaderboard source result files for the full 35-case MLX ASR demo.",
+                "version": 2,
+                "expected_cases_per_model": expected_cases_per_model,
+                "generated_audio_manifest": "runs/asr-research-audio/tts_audio_cases.jsonl",
+                "result_paths": [run["results_path"] for run in runs],
+                "runs": runs,
+            },
+            indent=2,
+            sort_keys=True,
+        )
+        + "\n",
+        encoding="utf-8",
+    )
+
+
+def _run_name_from_results_path(path: Path) -> str:
+    if path.name == "results.jsonl" and path.parent.name == "judge-report":
+        return path.parent.parent.name
+    if path.name == "results.jsonl":
+        return path.parent.name
+    return path.stem
 
 
 def copy_hosted_asr_artifacts(

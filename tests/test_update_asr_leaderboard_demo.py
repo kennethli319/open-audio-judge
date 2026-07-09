@@ -244,6 +244,7 @@ def test_write_summary_artifact_records_models_and_categories(tmp_path: Path) ->
         "scripts/refresh_asr_leaderboard_artifacts.py",
         "--results",
         str(source_results_path),
+        "--update-run-manifest",
     ]
     assert summary["refresh_workflow"]["manifest_refresh_command"] == [
         ".venv/bin/python",
@@ -362,6 +363,7 @@ def test_write_refresh_report_records_coverage_and_commands(tmp_path: Path) -> N
     assert "Seed manifest validation: `docs/asr-seed-manifest-validation.json`" in text
     assert "--summary-out docs/asr-seed-manifest-validation.json" in text
     assert "--results " + str(source_results_path) in text
+    assert "--update-run-manifest" in text
     assert "Hosted artifact sync" in text
     assert "## Runtime Status" in text
     assert "MLX ASR: not_executed_by_refresh" in text
@@ -532,6 +534,57 @@ def test_refresh_asr_leaderboard_artifacts_reads_run_manifest(tmp_path: Path) ->
     paths = refresh_module._result_paths_from_run_manifest(manifest)
 
     assert paths == [nested, direct]
+
+
+def test_write_run_manifest_artifact_records_verified_result_sources(tmp_path: Path) -> None:
+    refresh_module = load_refresh_module()
+    results_path = tmp_path / "run-a" / "judge-report" / "results.jsonl"
+    manifest = tmp_path / "manifest.json"
+    records = [
+        result_record(
+            case_id="asr-a-model-a",
+            model="mlx-community/model-a",
+            category="transcription_accuracy_wer",
+            score=100,
+            label="accurate",
+        ),
+        result_record(
+            case_id="asr-b-model-a",
+            model="mlx-community/model-a",
+            category="numeric_unit_integrity",
+            score=80,
+            label="accurate",
+        ),
+    ]
+    results_path.parent.mkdir(parents=True)
+    results_path.write_text(
+        "".join(json.dumps(record) + "\n" for record in records),
+        encoding="utf-8",
+    )
+
+    refresh_module.write_run_manifest_artifact(
+        [results_path],
+        manifest,
+        expected_cases_per_model=2,
+    )
+
+    data = json.loads(manifest.read_text(encoding="utf-8"))
+    assert data["version"] == 2
+    assert data["expected_cases_per_model"] == 2
+    assert data["result_paths"] == [str(results_path)]
+    assert data["runs"] == [
+        {
+            "run_name": "run-a",
+            "model": "mlx-community/model-a",
+            "results_path": str(results_path),
+            "result_count": 2,
+            "ok_count": 2,
+            "category_counts": {
+                "numeric_unit_integrity": 1,
+                "transcription_accuracy_wer": 1,
+            },
+        }
+    ]
 
 
 def test_manifest_validation_checks_declared_models(tmp_path: Path) -> None:

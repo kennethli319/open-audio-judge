@@ -205,7 +205,8 @@
       "--results",
       "runs/asr-leaderboard/vibevoice-asr-paraphrase-smoke/judge-report/results.jsonl",
       "--results",
-      "runs/asr-leaderboard/vibevoice-asr-noise-smoke/judge-report/results.jsonl"
+      "runs/asr-leaderboard/vibevoice-asr-noise-smoke/judge-report/results.jsonl",
+      "--update-run-manifest"
     ],
     "hosted_artifact_command": [
       ".venv/bin/python",

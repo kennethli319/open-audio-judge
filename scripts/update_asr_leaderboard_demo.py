@@ -402,6 +402,8 @@ def _refresh_workflow(source_result_paths: list[Path]) -> dict[str, object]:
     ]
     for path in source_result_paths:
         refresh_command.extend(["--results", _repo_relative(path)])
+    if source_result_paths:
+        refresh_command.append("--update-run-manifest")
 
     return {
         "seed_manifest_validation_command": [
