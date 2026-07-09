@@ -414,6 +414,7 @@ def build_manifest_validation(
     model_counts: dict[str, int] = {}
     model_ok_counts: dict[str, int] = {}
     category_counts: dict[str, int] = {}
+    manifest_models_by_path = _manifest_declared_models_by_result_path(run_manifest)
 
     for result in results:
         model = str(result.metadata.get("candidate_model") or "")
@@ -458,11 +459,20 @@ def build_manifest_validation(
             }
         )
 
+    result_file_checks = [
+        _result_file_manifest_check(path, manifest_models_by_path)
+        for path in result_paths
+    ]
+    complete = all(model["complete"] for model in models) and all(
+        check["model_match"] for check in result_file_checks
+    )
+
     return {
-        "status": "complete" if all(model["complete"] for model in models) else "incomplete",
+        "status": "complete" if complete else "incomplete",
         "run_manifest": _repo_relative(run_manifest),
         "result_file_count": len(result_paths),
         "result_paths": [_repo_relative(path) for path in result_paths],
+        "result_file_checks": result_file_checks,
         "total_results": len(results),
         "model_count": len(models),
         "category_count": len(categories),
@@ -473,6 +483,52 @@ def build_manifest_validation(
             for category in categories
         },
         "models": models,
+    }
+
+
+def _manifest_declared_models_by_result_path(manifest_path: Path) -> dict[Path, str]:
+    if not manifest_path.exists():
+        return {}
+    data = json.loads(manifest_path.read_text(encoding="utf-8"))
+    runs = data.get("runs") if isinstance(data, dict) else None
+    if not isinstance(runs, list):
+        return {}
+
+    models_by_path = {}
+    for run in runs:
+        if not isinstance(run, dict):
+            continue
+        raw_path = run.get("results_path")
+        model = run.get("model")
+        if not isinstance(raw_path, str) or not raw_path:
+            continue
+        if not isinstance(model, str) or not model:
+            continue
+        path = Path(raw_path)
+        if not path.is_absolute():
+            path = ROOT / path
+        models_by_path[_normalize_results_path(path).resolve()] = model
+    return models_by_path
+
+
+def _result_file_manifest_check(path: Path, manifest_models_by_path: dict[Path, str]) -> dict[str, object]:
+    file_results = load_results_jsonl(path)
+    actual_models = sorted(
+        {
+            str(result.metadata.get("candidate_model") or "")
+            for result in file_results
+        }
+    )
+    declared_model = manifest_models_by_path.get(path.resolve())
+    model_match = (
+        declared_model is None
+        or actual_models == [declared_model]
+    )
+    return {
+        "path": _repo_relative(path),
+        "declared_model": declared_model,
+        "actual_models": actual_models,
+        "model_match": model_match,
     }
 
 

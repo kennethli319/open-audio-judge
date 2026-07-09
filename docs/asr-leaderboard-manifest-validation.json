@@ -59,6 +59,152 @@
       "result_count": 35
     }
   ],
+  "result_file_checks": [
+    {
+      "actual_models": [
+        "mlx-community/whisper-large-v3-turbo-asr-fp16"
+      ],
+      "declared_model": "mlx-community/whisper-large-v3-turbo-asr-fp16",
+      "model_match": true,
+      "path": "runs/asr-leaderboard/whisper-large-v3-turbo-smoke/judge-report/results.jsonl"
+    },
+    {
+      "actual_models": [
+        "mlx-community/whisper-large-v3-turbo-asr-fp16"
+      ],
+      "declared_model": "mlx-community/whisper-large-v3-turbo-asr-fp16",
+      "model_match": true,
+      "path": "runs/asr-leaderboard/whisper-large-v3-turbo-full-gap/judge-report/results.jsonl"
+    },
+    {
+      "actual_models": [
+        "mlx-community/whisper-large-v3-turbo-asr-fp16"
+      ],
+      "declared_model": "mlx-community/whisper-large-v3-turbo-asr-fp16",
+      "model_match": true,
+      "path": "runs/asr-leaderboard/whisper-large-v3-turbo-semantic-smoke/judge-report/results.jsonl"
+    },
+    {
+      "actual_models": [
+        "mlx-community/whisper-large-v3-turbo-asr-fp16"
+      ],
+      "declared_model": "mlx-community/whisper-large-v3-turbo-asr-fp16",
+      "model_match": true,
+      "path": "runs/asr-leaderboard/whisper-large-v3-turbo-entity-smoke/judge-report/results.jsonl"
+    },
+    {
+      "actual_models": [
+        "mlx-community/whisper-large-v3-turbo-asr-fp16"
+      ],
+      "declared_model": "mlx-community/whisper-large-v3-turbo-asr-fp16",
+      "model_match": true,
+      "path": "runs/asr-leaderboard/whisper-large-v3-turbo-paraphrase-smoke/judge-report/results.jsonl"
+    },
+    {
+      "actual_models": [
+        "mlx-community/whisper-large-v3-turbo-asr-fp16"
+      ],
+      "declared_model": "mlx-community/whisper-large-v3-turbo-asr-fp16",
+      "model_match": true,
+      "path": "runs/asr-leaderboard/whisper-large-v3-turbo-noise-smoke/judge-report/results.jsonl"
+    },
+    {
+      "actual_models": [
+        "mlx-community/Qwen3-ASR-1.7B-8bit"
+      ],
+      "declared_model": "mlx-community/Qwen3-ASR-1.7B-8bit",
+      "model_match": true,
+      "path": "runs/asr-leaderboard/qwen3-asr-1.7b-smoke/judge-report/results.jsonl"
+    },
+    {
+      "actual_models": [
+        "mlx-community/Qwen3-ASR-1.7B-8bit"
+      ],
+      "declared_model": "mlx-community/Qwen3-ASR-1.7B-8bit",
+      "model_match": true,
+      "path": "runs/asr-leaderboard/qwen3-asr-1.7b-full-gap/judge-report/results.jsonl"
+    },
+    {
+      "actual_models": [
+        "mlx-community/Qwen3-ASR-1.7B-8bit"
+      ],
+      "declared_model": "mlx-community/Qwen3-ASR-1.7B-8bit",
+      "model_match": true,
+      "path": "runs/asr-leaderboard/qwen3-asr-1.7b-semantic-smoke/judge-report/results.jsonl"
+    },
+    {
+      "actual_models": [
+        "mlx-community/Qwen3-ASR-1.7B-8bit"
+      ],
+      "declared_model": "mlx-community/Qwen3-ASR-1.7B-8bit",
+      "model_match": true,
+      "path": "runs/asr-leaderboard/qwen3-asr-1.7b-entity-smoke/judge-report/results.jsonl"
+    },
+    {
+      "actual_models": [
+        "mlx-community/Qwen3-ASR-1.7B-8bit"
+      ],
+      "declared_model": "mlx-community/Qwen3-ASR-1.7B-8bit",
+      "model_match": true,
+      "path": "runs/asr-leaderboard/qwen3-asr-1.7b-paraphrase-smoke/judge-report/results.jsonl"
+    },
+    {
+      "actual_models": [
+        "mlx-community/Qwen3-ASR-1.7B-8bit"
+      ],
+      "declared_model": "mlx-community/Qwen3-ASR-1.7B-8bit",
+      "model_match": true,
+      "path": "runs/asr-leaderboard/qwen3-asr-1.7b-noise-smoke/judge-report/results.jsonl"
+    },
+    {
+      "actual_models": [
+        "mlx-community/VibeVoice-ASR-4bit"
+      ],
+      "declared_model": "mlx-community/VibeVoice-ASR-4bit",
+      "model_match": true,
+      "path": "runs/asr-leaderboard/vibevoice-asr-smoke/judge-report/results.jsonl"
+    },
+    {
+      "actual_models": [
+        "mlx-community/VibeVoice-ASR-4bit"
+      ],
+      "declared_model": "mlx-community/VibeVoice-ASR-4bit",
+      "model_match": true,
+      "path": "runs/asr-leaderboard/vibevoice-asr-full-gap/judge-report/results.jsonl"
+    },
+    {
+      "actual_models": [
+        "mlx-community/VibeVoice-ASR-4bit"
+      ],
+      "declared_model": "mlx-community/VibeVoice-ASR-4bit",
+      "model_match": true,
+      "path": "runs/asr-leaderboard/vibevoice-asr-semantic-smoke/judge-report/results.jsonl"
+    },
+    {
+      "actual_models": [
+        "mlx-community/VibeVoice-ASR-4bit"
+      ],
+      "declared_model": "mlx-community/VibeVoice-ASR-4bit",
+      "model_match": true,
+      "path": "runs/asr-leaderboard/vibevoice-asr-entity-smoke/judge-report/results.jsonl"
+    },
+    {
+      "actual_models": [
+        "mlx-community/VibeVoice-ASR-4bit"
+      ],
+      "declared_model": "mlx-community/VibeVoice-ASR-4bit",
+      "model_match": true,
+      "path": "runs/asr-leaderboard/vibevoice-asr-paraphrase-smoke/judge-report/results.jsonl"
+    },
+    {
+      "actual_models": [
+        "mlx-community/VibeVoice-ASR-4bit"
+      ],
+      "declared_model": "mlx-community/VibeVoice-ASR-4bit",
+      "model_match": true,
+      "path": "runs/asr-leaderboard/vibevoice-asr-noise-smoke/judge-report/results.jsonl"
+    }
+  ],
   "result_file_count": 18,
   "result_paths": [
     "runs/asr-leaderboard/whisper-large-v3-turbo-smoke/judge-report/results.jsonl",
