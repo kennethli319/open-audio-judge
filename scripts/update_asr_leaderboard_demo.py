@@ -787,8 +787,6 @@ def write_refresh_commands_script(
         _shell_join(workflow["refresh_check_command"]),
         _shell_join(workflow["preflight_summary_command"]),
         _shell_join(workflow["audio_ready_check_command"]),
-        _shell_join(workflow["runtime_status_check_command"]),
-        _shell_join(workflow["runtime_ready_check_command"]),
         _shell_join(workflow["seed_manifest_validation_command"]),
         _shell_join(workflow["combine_refresh_command"]),
         _shell_join(workflow["page_validation_command"]),
@@ -809,6 +807,8 @@ def write_refresh_commands_script(
         "",
         "# Optional live refresh: check the MLX ASR runtime before model jobs.",
         "# " + _shell_join(workflow["mlx_runtime_check_command"]),
+        "# " + _shell_join(workflow["runtime_status_check_command"]),
+        "# " + _shell_join(workflow["runtime_ready_check_command"]),
         "",
         "# Optional live refresh: run primary MLX ASR model jobs when the local runtime is ready.",
         *(

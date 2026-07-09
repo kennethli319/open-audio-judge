@@ -1131,6 +1131,22 @@ def test_refresh_asr_leaderboard_artifacts_combines_report_and_page(tmp_path: Pa
         in refresh_command_text
     )
     assert (
+        "\n.venv/bin/python scripts/refresh_asr_leaderboard_artifacts.py --check-only --check-mlx-runtime"
+        not in refresh_command_text
+    )
+    assert (
+        "\n.venv/bin/python scripts/refresh_asr_leaderboard_artifacts.py --check-only --require-runtime-ready"
+        not in refresh_command_text
+    )
+    assert (
+        "# .venv/bin/python scripts/refresh_asr_leaderboard_artifacts.py --check-only --check-mlx-runtime"
+        in refresh_command_text
+    )
+    assert (
+        "# .venv/bin/python scripts/refresh_asr_leaderboard_artifacts.py --check-only --require-runtime-ready"
+        in refresh_command_text
+    )
+    assert (
         ".venv/bin/python scripts/refresh_asr_leaderboard_artifacts.py --check-only --hosted-dir-from-env"
         in refresh_command_text
     )

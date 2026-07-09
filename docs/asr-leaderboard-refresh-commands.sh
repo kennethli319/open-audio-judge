@@ -8,8 +8,6 @@ set -euo pipefail
 .venv/bin/python scripts/refresh_asr_leaderboard_artifacts.py --check-only
 .venv/bin/python scripts/refresh_asr_leaderboard_artifacts.py --check-only --require-generated-fresh --check-summary-out runs/asr-leaderboard/preflight-summary.json
 .venv/bin/python scripts/refresh_asr_leaderboard_artifacts.py --check-only --require-audio-ready
-.venv/bin/python scripts/refresh_asr_leaderboard_artifacts.py --check-only --check-mlx-runtime
-.venv/bin/python scripts/refresh_asr_leaderboard_artifacts.py --check-only --require-runtime-ready
 .venv/bin/python scripts/validate_asr_seed_manifest.py --summary-out docs/asr-seed-manifest-validation.json
 .venv/bin/python scripts/refresh_asr_leaderboard_artifacts.py --results runs/asr-leaderboard/whisper-large-v3-turbo-smoke/judge-report/results.jsonl --results runs/asr-leaderboard/whisper-large-v3-turbo-full-gap/judge-report/results.jsonl --results runs/asr-leaderboard/whisper-large-v3-turbo-semantic-smoke/judge-report/results.jsonl --results runs/asr-leaderboard/whisper-large-v3-turbo-entity-smoke/judge-report/results.jsonl --results runs/asr-leaderboard/whisper-large-v3-turbo-paraphrase-smoke/judge-report/results.jsonl --results runs/asr-leaderboard/whisper-large-v3-turbo-noise-smoke/judge-report/results.jsonl --results runs/asr-leaderboard/qwen3-asr-1.7b-smoke/judge-report/results.jsonl --results runs/asr-leaderboard/qwen3-asr-1.7b-full-gap/judge-report/results.jsonl --results runs/asr-leaderboard/qwen3-asr-1.7b-semantic-smoke/judge-report/results.jsonl --results runs/asr-leaderboard/qwen3-asr-1.7b-entity-smoke/judge-report/results.jsonl --results runs/asr-leaderboard/qwen3-asr-1.7b-paraphrase-smoke/judge-report/results.jsonl --results runs/asr-leaderboard/qwen3-asr-1.7b-noise-smoke/judge-report/results.jsonl --results runs/asr-leaderboard/vibevoice-asr-smoke/judge-report/results.jsonl --results runs/asr-leaderboard/vibevoice-asr-full-gap/judge-report/results.jsonl --results runs/asr-leaderboard/vibevoice-asr-semantic-smoke/judge-report/results.jsonl --results runs/asr-leaderboard/vibevoice-asr-entity-smoke/judge-report/results.jsonl --results runs/asr-leaderboard/vibevoice-asr-paraphrase-smoke/judge-report/results.jsonl --results runs/asr-leaderboard/vibevoice-asr-noise-smoke/judge-report/results.jsonl --update-run-manifest
 .venv/bin/python scripts/check_asr_leaderboard_page.py
@@ -30,6 +28,8 @@ fi
 
 # Optional live refresh: check the MLX ASR runtime before model jobs.
 # PYTHONPATH=src .venv/bin/python -m open_audio_judge.cli check-mlx-asr-runtime --python-bin .venv/bin/python --model mlx-community/whisper-large-v3-turbo-asr-fp16
+# .venv/bin/python scripts/refresh_asr_leaderboard_artifacts.py --check-only --check-mlx-runtime
+# .venv/bin/python scripts/refresh_asr_leaderboard_artifacts.py --check-only --require-runtime-ready
 
 # Optional live refresh: run primary MLX ASR model jobs when the local runtime is ready.
 # .venv/bin/oaj autojudge-mlx-asr --python-bin .venv/bin/python --cases runs/asr-research-audio/tts_audio_cases.jsonl --model mlx-community/whisper-large-v3-turbo-asr-fp16 --judge-provider gemini --judge-samples 3 --out runs/asr-leaderboard/whisper-large-v3-turbo-refresh

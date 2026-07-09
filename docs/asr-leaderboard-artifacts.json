@@ -56,7 +56,7 @@
       "sha256": "cc918bbaa552b7099e89e2084aff8590d960456dee407eb318d26442488f93e7"
     },
     {
-      "bytes": 5089,
+      "bytes": 5093,
       "digest_status": "ok",
       "exists": true,
       "hosted_paths": [
@@ -64,7 +64,7 @@
       ],
       "path": "docs/asr-leaderboard-refresh-commands.sh",
       "purpose": "Generated shell playbook for repeatable ASR leaderboard refreshes.",
-      "sha256": "c8c3d27aef7702bed7cdec826f2275b74d37ecc0644656e12a6808dd2f1b1dd2"
+      "sha256": "6827f32d1a5a9fe72a422021d48bd23ce01b04191f910f8fe75a92407484eb9b"
     },
     {
       "bytes": 17221,
