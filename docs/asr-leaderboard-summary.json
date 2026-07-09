@@ -105,6 +105,15 @@
       "result_count": 35
     }
   ],
+  "refresh_runtime_status": {
+    "all_loaded_results_ok": true,
+    "gemini_judge": "verified_from_loaded_results",
+    "live_model_calls": "none",
+    "loaded_result_providers": [
+      "gemini"
+    ],
+    "mlx_asr": "not_executed_by_refresh; transcripts loaded from verified result artifacts"
+  },
   "refresh_workflow": {
     "audio_materialization_command": [
       ".venv/bin/python",

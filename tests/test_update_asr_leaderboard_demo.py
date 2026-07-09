@@ -225,6 +225,13 @@ def test_write_summary_artifact_records_models_and_categories(tmp_path: Path) ->
         "/path/to/kennethli319.github.io/open-audio-judge",
     ]
     assert "secret" in summary["refresh_workflow"]["secret_handling"].lower()
+    assert summary["refresh_runtime_status"] == {
+        "all_loaded_results_ok": True,
+        "gemini_judge": "verified_from_loaded_results",
+        "live_model_calls": "none",
+        "loaded_result_providers": ["gemini"],
+        "mlx_asr": "not_executed_by_refresh; transcripts loaded from verified result artifacts",
+    }
     assert summary["models"][0]["model"] == "mlx-community/model-a"
     assert summary["models"][0]["average_score"] == 90
     assert summary["models"][0]["labels"] == {"accurate": 2}
@@ -288,6 +295,10 @@ def test_write_refresh_report_records_coverage_and_commands(tmp_path: Path) -> N
     assert ".venv/bin/python scripts/refresh_asr_leaderboard_artifacts.py" in text
     assert "--results " + str(tmp_path / "model-a" / "judge-report" / "results.jsonl") in text
     assert "Hosted artifact sync" in text
+    assert "## Runtime Status" in text
+    assert "MLX ASR: not_executed_by_refresh" in text
+    assert "Gemini judge: verified_from_loaded_results" in text
+    assert "Live model calls during refresh: none" in text
 
 
 def test_replace_generated_block_only_updates_marked_section(tmp_path: Path) -> None:

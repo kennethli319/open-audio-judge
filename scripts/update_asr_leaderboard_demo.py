@@ -225,6 +225,7 @@ def write_summary_artifact(
     model_summaries = summarize_models(results)
     validate_coverage(results, model_summaries, expected_cases_per_model=expected_cases_per_model)
     category_summaries = summarize_categories(results)
+    runtime_status = build_refresh_runtime_status(results)
     output_path.parent.mkdir(parents=True, exist_ok=True)
     output_path.write_text(
         json.dumps(
@@ -238,6 +239,7 @@ def write_summary_artifact(
                 "run_manifest_path": _repo_relative(DEFAULT_RUN_MANIFEST),
                 "manifest_validation_path": _repo_relative(DEFAULT_MANIFEST_VALIDATION),
                 "refresh_workflow": _refresh_workflow(source_result_paths or []),
+                "refresh_runtime_status": runtime_status,
                 "total_results": len(results),
                 "model_count": len(model_summaries),
                 "category_count": len(category_summaries),
@@ -284,6 +286,7 @@ def write_refresh_report(
     validate_coverage(results, model_summaries, expected_cases_per_model=expected_cases_per_model)
     category_summaries = summarize_categories(results)
     workflow = _refresh_workflow(source_result_paths or [])
+    runtime_status = build_refresh_runtime_status(results)
     output_path.parent.mkdir(parents=True, exist_ok=True)
     output_path.write_text(
         "\n".join(
@@ -329,6 +332,14 @@ def write_refresh_report(
                 f"- Combine and refresh committed artifacts: `{_shell_join(workflow['combine_refresh_command'])}`",
                 f"- Manifest-based refresh: `{_shell_join(workflow['manifest_refresh_command'])}`",
                 f"- Hosted artifact sync: `{_shell_join(workflow['hosted_artifact_command'])}`",
+                "",
+                "## Runtime Status",
+                "",
+                f"- MLX ASR: {runtime_status['mlx_asr']}",
+                f"- Gemini judge: {runtime_status['gemini_judge']}",
+                f"- Live model calls during refresh: {runtime_status['live_model_calls']}",
+                f"- Loaded result providers: {', '.join(runtime_status['loaded_result_providers'])}",
+                f"- All loaded results ok: {runtime_status['all_loaded_results_ok']}",
                 "",
                 "Gemini secrets must be loaded only at runtime from the local secret file.",
                 "",
@@ -389,6 +400,21 @@ def _refresh_workflow(source_result_paths: list[Path]) -> dict[str, object]:
             "Load the Gemini API key from the local secret file only at runtime; "
             "do not commit or print secrets."
         ),
+    }
+
+
+def build_refresh_runtime_status(results: list[EvaluationResult]) -> dict[str, object]:
+    providers = sorted({result.provider for result in results if result.provider})
+    return {
+        "mlx_asr": "not_executed_by_refresh; transcripts loaded from verified result artifacts",
+        "gemini_judge": (
+            "verified_from_loaded_results"
+            if "gemini" in providers
+            else "not_detected_in_loaded_results"
+        ),
+        "live_model_calls": "none",
+        "loaded_result_providers": providers,
+        "all_loaded_results_ok": all(result.status == "ok" for result in results),
     }
 
 

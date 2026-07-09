@@ -230,8 +230,15 @@ writes candidate transcripts, then judges them with Gemini or another Open Audio
 Judge provider.
 
 ```bash
+.venv/bin/python scripts/synthesize_tts_cases.py \
+  --cases examples/asr_research_cases.jsonl \
+  --out runs/asr-research-audio \
+  --discard-text-sidecars \
+  --summary-out runs/asr-research-audio/summary.json
+
 oaj autojudge-mlx-asr \
-  --cases runs/asr-research-audio/asr_audio_cases.jsonl \
+  --python-bin .venv/bin/python \
+  --cases runs/asr-research-audio/tts_audio_cases.jsonl \
   --model mlx-community/whisper-large-v3-turbo-asr-fp16 \
   --judge-provider gemini \
   --judge-samples 3 \

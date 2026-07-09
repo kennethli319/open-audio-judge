@@ -62,4 +62,12 @@ This generated report summarizes the verified ASR leaderboard artifact set.
 - Manifest-based refresh: `.venv/bin/python scripts/refresh_asr_leaderboard_artifacts.py`
 - Hosted artifact sync: `.venv/bin/python scripts/refresh_asr_leaderboard_artifacts.py --hosted-dir /path/to/kennethli319.github.io/open-audio-judge`
 
+## Runtime Status
+
+- MLX ASR: not_executed_by_refresh; transcripts loaded from verified result artifacts
+- Gemini judge: verified_from_loaded_results
+- Live model calls during refresh: none
+- Loaded result providers: gemini
+- All loaded results ok: True
+
 Gemini secrets must be loaded only at runtime from the local secret file.
