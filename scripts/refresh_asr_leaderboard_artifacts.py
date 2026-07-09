@@ -42,6 +42,7 @@ from scripts.update_asr_leaderboard_demo import (  # noqa: E402
     build_refresh_runtime_status,
     render_generated_sections,
     replace_generated_block,
+    summarize_source_result_files,
     write_next_run_plan_artifact,
     write_refresh_report,
     write_report_index,
@@ -1322,6 +1323,15 @@ def build_artifact_index_data(
             artifact_purposes[_repo_relative(source_report)] = (
                 "Hosted source run HTML report linked from the ASR report index."
             )
+    source_report_hosted_paths = {
+        _repo_relative(_normalize_results_path(source_result_path).with_name("report.html")): [
+            _hosted_report_path_for_source_report(
+                _normalize_results_path(source_result_path).with_name("report.html")
+            )
+        ]
+        for source_result_path in source_result_paths or []
+        if _normalize_results_path(source_result_path).with_name("report.html").exists()
+    }
     indexed_paths = set(artifact_purposes)
     indexed_paths.update({_repo_relative(page), _repo_relative(refresh_report_out)})
     indexed_paths.update(artifact_paths)
@@ -1352,7 +1362,8 @@ def build_artifact_index_data(
                 if is_generated_after_index or is_stable_alias or not path.exists()
                 else _sha256_file(path),
                 "digest_status": digest_status,
-                "hosted_paths": _hosted_paths_for_artifact(
+                "hosted_paths": source_report_hosted_paths.get(raw_path)
+                or _hosted_paths_for_artifact(
                     raw_path,
                     results_path=results_path,
                     report_path=report_path,
@@ -1383,6 +1394,30 @@ def build_artifact_index_data(
         "expected_cases_per_model": expected_cases_per_model,
         "models": models,
         "categories": categories,
+        "source_result_file_count": len(source_result_paths or []),
+        "source_result_files": [
+            {
+                "path": _repo_relative(summary.path),
+                "result_bytes": summary.result_bytes,
+                "result_sha256": summary.result_sha256,
+                "report_path": _repo_relative(summary.report_path),
+                "report_exists": summary.report_exists,
+                "report_bytes": summary.report_bytes,
+                "report_sha256": summary.report_sha256,
+                "hosted_report_paths": source_report_hosted_paths.get(
+                    _repo_relative(summary.report_path),
+                    [],
+                ),
+                "models": list(summary.models),
+                "result_count": summary.result_count,
+                "ok_count": summary.ok_count,
+                "judge_samples": summary.judge_samples,
+                "average_score": summary.average_score,
+                "labels": dict(sorted(summary.labels.items())),
+                "categories": dict(sorted(summary.categories.items())),
+            }
+            for summary in summarize_source_result_files(source_result_paths or [])
+        ],
     }
     return {
         "description": "Generated index for the ASR leaderboard demo artifact bundle.",

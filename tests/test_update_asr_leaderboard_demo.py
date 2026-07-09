@@ -1225,6 +1225,51 @@ def test_refresh_asr_leaderboard_artifacts_combines_report_and_page(tmp_path: Pa
         "expected_cases_per_model": 2,
         "models": ["mlx-community/model-a", "mlx-community/model-b"],
         "categories": ["numeric_unit_integrity", "transcription_accuracy_wer"],
+        "source_result_file_count": 2,
+        "source_result_files": [
+            {
+                "path": str(first),
+                "result_bytes": first.stat().st_size,
+                "result_sha256": file_sha256(first),
+                "report_path": str(first.with_name("report.html")),
+                "report_exists": True,
+                "report_bytes": first.with_name("report.html").stat().st_size,
+                "report_sha256": file_sha256(first.with_name("report.html")),
+                "hosted_report_paths": ["asr-leaderboard/source-reports/model-a/report.html"],
+                "models": ["mlx-community/model-a"],
+                "result_count": 2,
+                "ok_count": 2,
+                "judge_samples": 6,
+                "average_score": 90,
+                "labels": {"accurate": 2},
+                "categories": {
+                    "numeric_unit_integrity": 1,
+                    "transcription_accuracy_wer": 1,
+                },
+            },
+            {
+                "path": str(second),
+                "result_bytes": second.stat().st_size,
+                "result_sha256": file_sha256(second),
+                "report_path": str(second.with_name("report.html")),
+                "report_exists": True,
+                "report_bytes": second.with_name("report.html").stat().st_size,
+                "report_sha256": file_sha256(second.with_name("report.html")),
+                "hosted_report_paths": [
+                    f"asr-leaderboard/source-reports/{tmp_path.name}/report.html"
+                ],
+                "models": ["mlx-community/model-b"],
+                "result_count": 2,
+                "ok_count": 2,
+                "judge_samples": 6,
+                "average_score": 50,
+                "labels": {"inaccurate": 1, "needs_review": 1},
+                "categories": {
+                    "numeric_unit_integrity": 1,
+                    "transcription_accuracy_wer": 1,
+                },
+            },
+        ],
     }
     assert {artifact["path"] for artifact in artifact_index_data["artifacts"]} >= {
         str(out / "results.jsonl"),
@@ -1239,6 +1284,16 @@ def test_refresh_asr_leaderboard_artifacts_combines_report_and_page(tmp_path: Pa
     assert digest_statuses[str(artifact_index)] == "deferred_circular_reference"
     assert digest_statuses[str(hosted_manifest)] == "deferred_circular_reference"
     assert digest_statuses[str(out / "results.jsonl")] == "ok"
+    hosted_paths_by_artifact = {
+        artifact["path"]: artifact["hosted_paths"]
+        for artifact in artifact_index_data["artifacts"]
+    }
+    assert hosted_paths_by_artifact[str(first.with_name("report.html"))] == [
+        "asr-leaderboard/source-reports/model-a/report.html"
+    ]
+    assert hosted_paths_by_artifact[str(second.with_name("report.html"))] == [
+        f"asr-leaderboard/source-reports/{tmp_path.name}/report.html"
+    ]
     hosted_manifest_data = json.loads(hosted_manifest.read_text(encoding="utf-8"))
     assert hosted_manifest_data["artifact_count"] == 17
     assert {"asr-leaderboard/full-35-combined/results.jsonl"} in [
