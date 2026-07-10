@@ -168,7 +168,7 @@ This generated report summarizes the verified ASR leaderboard artifact set.
 | `preflight` | `cron_rehearsal_command`, `runtime_ready_check_command` | False | False |
 | `live_refresh` | `local_secret_env_command`, `model_run_commands` | False | True |
 | `artifact_refresh` | `discover_refresh_command`, `combine_refresh_command`, `manifest_refresh_command` | True | False |
-| `verification` | `page_validation_command`, `freshness_check_command`, `commit_verification_command` | False | False |
+| `verification` | `page_validation_command`, `freshness_check_command`, `commit_verification_command`, `cron_commit_verification_command` | False | False |
 | `hosted_sync` | `hosted_artifact_command`, `hosted_validation_command`, `hosted_commit_verification_command` | False | False |
 
 ## Runtime Status

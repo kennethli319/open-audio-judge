@@ -1255,6 +1255,12 @@ def _refresh_workflow(source_result_paths: list[Path]) -> dict[str, object]:
             ".venv/bin/python",
             "scripts/verify_asr_leaderboard_commit.py",
         ],
+        "cron_commit_verification_command": [
+            ".venv/bin/python",
+            "scripts/verify_asr_leaderboard_commit.py",
+            "--check-mlx-runtime",
+            "--cron-preflight-summary",
+        ],
         "hosted_commit_verification_command": [
             ".venv/bin/python",
             "scripts/verify_asr_leaderboard_commit.py",
@@ -1360,6 +1366,7 @@ def _automation_stages() -> list[dict[str, object]]:
                 "page_validation_command",
                 "freshness_check_command",
                 "commit_verification_command",
+                "cron_commit_verification_command",
             ],
             "writes_committed_artifacts": False,
             "runs_live_models": False,

@@ -658,6 +658,12 @@ def test_write_summary_artifact_records_models_and_categories(tmp_path: Path) ->
         ".venv/bin/python",
         "scripts/verify_asr_leaderboard_commit.py",
     ]
+    assert summary["refresh_workflow"]["cron_commit_verification_command"] == [
+        ".venv/bin/python",
+        "scripts/verify_asr_leaderboard_commit.py",
+        "--check-mlx-runtime",
+        "--cron-preflight-summary",
+    ]
     assert summary["refresh_workflow"]["hosted_commit_verification_command"] == [
         ".venv/bin/python",
         "scripts/verify_asr_leaderboard_commit.py",

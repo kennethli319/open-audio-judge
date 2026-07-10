@@ -35,7 +35,8 @@
       "command_keys": [
         "page_validation_command",
         "freshness_check_command",
-        "commit_verification_command"
+        "commit_verification_command",
+        "cron_commit_verification_command"
       ],
       "description": "Check page structure, generated freshness, test suite, and non-secret commit readiness before pushing.",
       "runs_live_models": false,
@@ -61,6 +62,7 @@
     "blocked_model_log_command",
     "combine_refresh_command",
     "commit_verification_command",
+    "cron_commit_verification_command",
     "cron_rehearsal_command",
     "discover_refresh_command",
     "freshness_check_command",
@@ -138,7 +140,8 @@
         "command_keys": [
           "page_validation_command",
           "freshness_check_command",
-          "commit_verification_command"
+          "commit_verification_command",
+          "cron_commit_verification_command"
         ],
         "description": "Check page structure, generated freshness, test suite, and non-secret commit readiness before pushing.",
         "runs_live_models": false,
@@ -226,6 +229,12 @@
     "commit_verification_command": [
       ".venv/bin/python",
       "scripts/verify_asr_leaderboard_commit.py"
+    ],
+    "cron_commit_verification_command": [
+      ".venv/bin/python",
+      "scripts/verify_asr_leaderboard_commit.py",
+      "--check-mlx-runtime",
+      "--cron-preflight-summary"
     ],
     "cron_rehearsal_command": [
       ".venv/bin/python",
