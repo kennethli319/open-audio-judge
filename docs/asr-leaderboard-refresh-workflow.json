@@ -5,6 +5,7 @@
     "blocked_model_log_command",
     "combine_refresh_command",
     "commit_verification_command",
+    "cron_rehearsal_command",
     "discover_refresh_command",
     "freshness_check_command",
     "full_preflight_command",
@@ -98,6 +99,16 @@
     "commit_verification_command": [
       ".venv/bin/python",
       "scripts/verify_asr_leaderboard_commit.py"
+    ],
+    "cron_rehearsal_command": [
+      ".venv/bin/python",
+      "scripts/refresh_asr_leaderboard_artifacts.py",
+      "--check-only",
+      "--require-generated-fresh",
+      "--require-audio-ready",
+      "--check-mlx-runtime",
+      "--check-summary-out",
+      "runs/asr-leaderboard/preflight-summary.json"
     ],
     "discover_refresh_command": [
       ".venv/bin/python",

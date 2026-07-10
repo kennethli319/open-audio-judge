@@ -354,6 +354,16 @@
       ".venv/bin/python",
       "scripts/verify_asr_leaderboard_commit.py"
     ],
+    "cron_rehearsal_command": [
+      ".venv/bin/python",
+      "scripts/refresh_asr_leaderboard_artifacts.py",
+      "--check-only",
+      "--require-generated-fresh",
+      "--require-audio-ready",
+      "--check-mlx-runtime",
+      "--check-summary-out",
+      "runs/asr-leaderboard/preflight-summary.json"
+    ],
     "discover_refresh_command": [
       ".venv/bin/python",
       "scripts/refresh_asr_leaderboard_artifacts.py",

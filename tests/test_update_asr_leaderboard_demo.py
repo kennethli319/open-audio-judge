@@ -250,6 +250,7 @@ def test_render_generated_sections_summarizes_verified_asr_results(tmp_path: Pat
     assert "Require runtime readiness" in html
     assert "--require-runtime-ready" in html
     assert "Full refresh readiness check" in html
+    assert "Cron refresh rehearsal" in html
     assert "Run refresh shell playbook" in html
     assert "Run live model refresh script" in html
     assert "Review blocked model log" in html
@@ -625,6 +626,16 @@ def test_write_summary_artifact_records_models_and_categories(tmp_path: Path) ->
         "--check-summary-out",
         "runs/asr-leaderboard/preflight-summary.json",
     ]
+    assert summary["refresh_workflow"]["cron_rehearsal_command"] == [
+        ".venv/bin/python",
+        "scripts/refresh_asr_leaderboard_artifacts.py",
+        "--check-only",
+        "--require-generated-fresh",
+        "--require-audio-ready",
+        "--check-mlx-runtime",
+        "--check-summary-out",
+        "runs/asr-leaderboard/preflight-summary.json",
+    ]
     assert summary["refresh_workflow"]["freshness_check_command"] == [
         ".venv/bin/python",
         "scripts/refresh_asr_leaderboard_artifacts.py",
@@ -972,6 +983,7 @@ def test_write_refresh_report_records_coverage_and_commands(tmp_path: Path) -> N
     assert "Require live runtime readiness" in text
     assert "--require-runtime-ready" in text
     assert "Full refresh readiness check" in text
+    assert "Cron refresh rehearsal" in text
     assert "Generated artifact freshness check" in text
     assert "--require-generated-fresh" in text
     assert "Commit verification" in text
