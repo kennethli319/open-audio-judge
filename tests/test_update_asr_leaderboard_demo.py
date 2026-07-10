@@ -220,6 +220,12 @@ def test_render_generated_sections_summarizes_verified_asr_results(tmp_path: Pat
     )
 
     assert "Verified Leaderboard Results" in html
+    assert "Semantic score" in html
+    assert "not word error rate" in html
+    assert "Benchmark scope" in html
+    assert "Shared Failure Patterns" in html
+    assert 'class="table-region ranking-region"' in html
+    assert 'class="technical-details"' in html
     assert "mlx-community/model-a" in html
     assert "2/2 ok" in html
     assert "90.0" in html
@@ -260,7 +266,10 @@ def test_render_generated_sections_summarizes_verified_asr_results(tmp_path: Pat
     assert "Discover latest complete runs" in html
     assert "Report Links" in html
     assert "Combined full-35 report" in html
-    assert "https://kennethli319.github.io/open-audio-judge/asr-leaderboard/full-35-combined/report.html" in html
+    assert (
+        "https://kennethli319.github.io/open-audio-judge/asr-leaderboard/full-35-combined/report.html"
+        in html
+    )
     assert "Generated report index" in html
     assert "Machine-readable report map" in html
     assert "--discover-complete-model-runs" in html
@@ -272,10 +281,7 @@ def test_render_generated_sections_summarizes_verified_asr_results(tmp_path: Pat
     assert "Run commit verification" in html
     assert ".venv/bin/python scripts/verify_asr_leaderboard_commit.py" in html
     assert "Run hosted commit verification" in html
-    assert (
-        ".venv/bin/python scripts/verify_asr_leaderboard_commit.py --hosted-dir-from-env"
-        in html
-    )
+    assert ".venv/bin/python scripts/verify_asr_leaderboard_commit.py --hosted-dir-from-env" in html
     assert "Check hosted mirror" in html
     assert (
         ".venv/bin/python scripts/refresh_asr_leaderboard_artifacts.py --check-only --hosted-dir-from-env --require-hosted-current"
@@ -999,7 +1005,10 @@ def test_write_refresh_report_records_coverage_and_commands(tmp_path: Path) -> N
     assert "PYTHONPATH=src .venv/bin/python -m open_audio_judge.cli check-mlx-asr-runtime" in text
     assert "Seed manifest validation: `docs/asr-seed-manifest-validation.json`" in text
     assert "Hosted artifact manifest: `docs/asr-leaderboard-hosted-manifest.json`" in text
-    assert "Hosted demo URL: `https://kennethli319.github.io/open-audio-judge/asr-leaderboard-demo.html`" in text
+    assert (
+        "Hosted demo URL: `https://kennethli319.github.io/open-audio-judge/asr-leaderboard-demo.html`"
+        in text
+    )
     assert (
         "Hosted combined report URL: "
         "`https://kennethli319.github.io/open-audio-judge/asr-leaderboard/full-35-combined/report.html`"
@@ -1030,10 +1039,7 @@ def test_write_refresh_report_records_coverage_and_commands(tmp_path: Path) -> N
     assert "Commit verification" in text
     assert ".venv/bin/python scripts/verify_asr_leaderboard_commit.py" in text
     assert "Commit verification with hosted mirror" in text
-    assert (
-        ".venv/bin/python scripts/verify_asr_leaderboard_commit.py --hosted-dir-from-env"
-        in text
-    )
+    assert ".venv/bin/python scripts/verify_asr_leaderboard_commit.py --hosted-dir-from-env" in text
     assert "--results " + str(source_results_path) in text
     assert "--update-run-manifest" in text
     assert "Discover latest complete runs" in text
@@ -1121,8 +1127,14 @@ def test_write_report_index_records_matrix_and_source_report_status(tmp_path: Pa
     assert "- Run manifest: `docs/asr-leaderboard-run-manifest.json`" in text
     assert "- Run manifest SHA-256: `" in text
     assert "- Source result files: 1" in text
-    assert "| Results | Local Report | Hosted Report | Model | Cases | Score | Report Status | Categories |" in text
-    assert "https://kennethli319.github.io/open-audio-judge/asr-leaderboard/source-reports/model-a/report.html" in text
+    assert (
+        "| Results | Local Report | Hosted Report | Model | Cases | Score | Report Status | Categories |"
+        in text
+    )
+    assert (
+        "https://kennethli319.github.io/open-audio-judge/asr-leaderboard/source-reports/model-a/report.html"
+        in text
+    )
     assert f"{source_report_path.stat().st_size} bytes, `{file_sha256(source_report_path)}`" in text
     assert "`numeric_unit_integrity`: 1, `transcription_accuracy_wer`: 1" in text
 
@@ -1171,9 +1183,7 @@ def test_write_report_links_records_source_coverage_matrix(tmp_path: Path) -> No
     assert matrix_row["total_results"] == 2
     assert len(matrix_row["cells"]) == 7
     populated_cells = {
-        cell["category"]: cell
-        for cell in matrix_row["cells"]
-        if cell["source_reports"]
+        cell["category"]: cell for cell in matrix_row["cells"] if cell["source_reports"]
     }
     assert set(populated_cells) == {
         "numeric_unit_integrity",
@@ -1602,8 +1612,7 @@ def test_refresh_asr_leaderboard_artifacts_combines_report_and_page(tmp_path: Pa
     assert digest_statuses[str(hosted_manifest)] == "deferred_circular_reference"
     assert digest_statuses[str(out / "results.jsonl")] == "ok"
     hosted_paths_by_artifact = {
-        artifact["path"]: artifact["hosted_paths"]
-        for artifact in artifact_index_data["artifacts"]
+        artifact["path"]: artifact["hosted_paths"] for artifact in artifact_index_data["artifacts"]
     }
     assert hosted_paths_by_artifact[str(first.with_name("report.html"))] == [
         "asr-leaderboard/source-reports/model-a/report.html"
@@ -1646,12 +1655,12 @@ def test_refresh_asr_leaderboard_artifacts_combines_report_and_page(tmp_path: Pa
     assert (hosted_dir / "asr-leaderboard" / "full-35-combined" / "report.html").read_text(
         encoding="utf-8"
     ) == (out / "report.html").read_text(encoding="utf-8")
-    assert (hosted_dir / "asr-leaderboard" / "source-reports" / "model-a" / "report.html").read_text(
-        encoding="utf-8"
-    ) == first.with_name("report.html").read_text(encoding="utf-8")
-    assert (hosted_dir / "asr-leaderboard" / "source-reports" / tmp_path.name / "report.html").read_text(
-        encoding="utf-8"
-    ) == second.with_name("report.html").read_text(encoding="utf-8")
+    assert (
+        hosted_dir / "asr-leaderboard" / "source-reports" / "model-a" / "report.html"
+    ).read_text(encoding="utf-8") == first.with_name("report.html").read_text(encoding="utf-8")
+    assert (
+        hosted_dir / "asr-leaderboard" / "source-reports" / tmp_path.name / "report.html"
+    ).read_text(encoding="utf-8") == second.with_name("report.html").read_text(encoding="utf-8")
 
     combined_results = update_module.load_results_jsonl(out / "results.jsonl")
     generated = update_module.render_generated_sections(
@@ -1760,7 +1769,7 @@ def test_refresh_asr_leaderboard_artifacts_combines_report_and_page(tmp_path: Pa
     combined_report_path = out / "report.html"
     combined_report_original = combined_report_path.read_text(encoding="utf-8")
     combined_report_path.write_text(
-        combined_report_original.replace("Open Audio Judge Report", "Stale ASR Report", 1),
+        combined_report_original.replace("Semantic impact", "Stale semantic impact", 1),
         encoding="utf-8",
     )
     with pytest.raises(ValueError, match="report.html.*stale"):
@@ -1925,8 +1934,7 @@ def test_check_asr_leaderboard_refresh_inputs_validates_default_artifacts() -> N
     assert check_summary["next_run_plan"]["missing_cell_count"] == 0
     assert len(check_summary["model_category_matrix"]) == 3
     assert all(
-        row["total_results"] == 35
-        and set(row["category_counts"].values()) == {5}
+        row["total_results"] == 35 and set(row["category_counts"].values()) == {5}
         for row in check_summary["model_category_matrix"]
     )
 
@@ -2301,7 +2309,9 @@ def test_validate_runtime_ready_requires_audio_secret_and_mlx_preflight() -> Non
         )
 
 
-def test_run_mlx_runtime_preflight_records_primary_and_fallback_models(monkeypatch: pytest.MonkeyPatch) -> None:
+def test_run_mlx_runtime_preflight_records_primary_and_fallback_models(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
     refresh_module = load_refresh_module()
     seen_models = []
 
@@ -3662,8 +3672,7 @@ def test_check_asr_leaderboard_page_validates_hosted_artifact_layout(tmp_path: P
                     "base_url": "https://kennethli319.github.io/open-audio-judge",
                     "demo_page_path": "open-audio-judge/asr-leaderboard-demo.html",
                     "demo_page_url": (
-                        "https://kennethli319.github.io/open-audio-judge/"
-                        "asr-leaderboard-demo.html"
+                        "https://kennethli319.github.io/open-audio-judge/asr-leaderboard-demo.html"
                     ),
                     "combined_results_path": (
                         "open-audio-judge/asr-leaderboard/full-35-combined/results.jsonl"
@@ -4173,7 +4182,9 @@ def test_check_asr_leaderboard_page_rejects_stale_run_manifest_digest(
     check_module = load_check_module()
     manifest = tmp_path / "run-manifest.json"
     summary_path = tmp_path / "summary.json"
-    results_path = tmp_path / "runs" / "asr-leaderboard" / "run-a" / "judge-report" / "results.jsonl"
+    results_path = (
+        tmp_path / "runs" / "asr-leaderboard" / "run-a" / "judge-report" / "results.jsonl"
+    )
     records = [
         result_record(
             case_id="asr-a-model-a",

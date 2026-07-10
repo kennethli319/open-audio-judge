@@ -2,43 +2,43 @@
   "artifact_count": 38,
   "artifacts": [
     {
-      "bytes": 34485,
+      "bytes": 55332,
       "hosted_paths": [
         "asr-leaderboard-demo.html"
       ],
-      "sha256": "347e64920cd198e3488dd0813336b19c22af44f19ebf8a173ef0b7bbf6ead65d",
+      "sha256": "4a26cde49b91305797ed7f327e129135eaad8392d18d1fe8eccdd437dd3c0868",
       "source_path": "docs/asr-leaderboard-demo.html"
     },
     {
-      "bytes": 37807,
+      "bytes": 37943,
       "hosted_paths": [
         "asr-leaderboard-summary.json"
       ],
-      "sha256": "fd5e7fef1f80dfc23cdd24e79c382e97d75c765204806ef7d7591f4b7132cdd0",
+      "sha256": "94dbb2f8db6e870dabe7958275c3ebe30b3ca0b5855a5c52790c6852da74c43e",
       "source_path": "docs/asr-leaderboard-summary.json"
     },
     {
-      "bytes": 20079,
+      "bytes": 20048,
       "hosted_paths": [
         "asr-leaderboard-refresh-report.md"
       ],
-      "sha256": "4897ff4e70cc8de8d519c9b1b2beb6ae184433d1d10a80e1af4c530237b14f8e",
+      "sha256": "174a30317131075899c7451a79851e518d8a6c2f81284651f334acee1e5efe60",
       "source_path": "docs/asr-leaderboard-refresh-report.md"
     },
     {
-      "bytes": 11110,
+      "bytes": 11113,
       "hosted_paths": [
         "asr-leaderboard-report-index.md"
       ],
-      "sha256": "aa88aa49b459c049e96c85755c6973dcd9b1a1fd2526203601f6ea32f7f5e8eb",
+      "sha256": "6d8cbc581832524989073fc19c7bed21396421f6b36199c3d8832307fce2d8b0",
       "source_path": "docs/asr-leaderboard-report-index.md"
     },
     {
-      "bytes": 47571,
+      "bytes": 47573,
       "hosted_paths": [
         "asr-leaderboard-report-links.json"
       ],
-      "sha256": "a499a02727b683adc1128f32e5d635fa69c3ff3ccb39ad119d7e9dd4135b37f2",
+      "sha256": "67cfba1f0a9cb1ed21e010fc697c621e2deb89a1b99652887ee2220390cdebbb",
       "source_path": "docs/asr-leaderboard-report-links.json"
     },
     {
@@ -70,7 +70,7 @@
       "hosted_paths": [
         "asr-leaderboard-run-manifest.json"
       ],
-      "sha256": "af02532d0b8837c14c34b0fd71a6def65e5afa5e3baa187acdbf56c82e611ea4",
+      "sha256": "9766f1f88ecbf277bba4f07023abced547b6ba0d9df132d7ae0100127c52c226",
       "source_path": "docs/asr-leaderboard-run-manifest.json"
     },
     {
@@ -78,7 +78,7 @@
       "hosted_paths": [
         "asr-leaderboard-manifest-validation.json"
       ],
-      "sha256": "d976da8486bd27929cf73c83897aa5f11d1434d1f3b038d5fbd54abdbb4bf7ba",
+      "sha256": "87c88e137af3f35bf5b264bc553df39e3cbb782f5b46469de0d7e00fbb65e502",
       "source_path": "docs/asr-leaderboard-manifest-validation.json"
     },
     {
@@ -98,11 +98,11 @@
       "source_path": "docs/asr-leaderboard-next-runs.json"
     },
     {
-      "bytes": 35785,
+      "bytes": 35759,
       "hosted_paths": [
         "asr-leaderboard-artifacts.json"
       ],
-      "sha256": "a64a3a49b4d59da75f19a86298f9b7b8f55cd0530505f1c2eef4c6cdfe33e3bb",
+      "sha256": "32bd02ae61d052c43024fda48992a4db31bebccf3f1f47651ae9db182347632e",
       "source_path": "docs/asr-leaderboard-artifacts.json"
     },
     {
@@ -110,7 +110,7 @@
       "hosted_paths": [
         "asr-leaderboard-runtime-status.json"
       ],
-      "sha256": "84c2baf3f4855b2cdbe134365aa02079a03acb94a20d981e732315f489b710ea",
+      "sha256": "552dbffce1531bba01924a3775bedb76430f2013c3c85bf2e63e27b3a09ae8a6",
       "source_path": "docs/asr-leaderboard-runtime-status.json"
     },
     {
@@ -118,7 +118,7 @@
       "hosted_paths": [
         "asr-leaderboard-refresh-decision.json"
       ],
-      "sha256": "d136e9aaef17e4e2b5c79664d4201263e15e067f79484e6216c053f4d36e33d1",
+      "sha256": "b9f811e37e8f216df9bae38753ea259d3952d422c2aec61a205c8746286d9a12",
       "source_path": "docs/asr-leaderboard-refresh-decision.json"
     },
     {
@@ -142,167 +142,167 @@
       "hosted_paths": [
         "asr-leaderboard-source-selection.json"
       ],
-      "sha256": "2ad6e90312c9b30098ae226e75f273334be31140e4cf7e9a5c8dca11942020c1",
+      "sha256": "2811817767ebc0a9e1d85809fb45eaa8324dda8f2fc3f0ccfb06b8f1a565db4a",
       "source_path": "docs/asr-leaderboard-source-selection.json"
     },
     {
-      "bytes": 404226,
+      "bytes": 411188,
       "hosted_paths": [
         "asr-leaderboard/full-35-combined/results.jsonl"
       ],
-      "sha256": "381ea5a536fed20456887b2bb171b64618f51ba5b22cb0b23a625189cfa61976",
+      "sha256": "652343f6394ee3da19096df6d08170f979d7eb0132dabdee39a92d9c3e0fbb03",
       "source_path": "runs/asr-leaderboard/full-35-combined/results.jsonl"
     },
     {
-      "bytes": 434978,
+      "bytes": 546803,
       "hosted_paths": [
         "asr-leaderboard/full-35-combined/report.html"
       ],
-      "sha256": "21246cd2be336e37d0c5da76ab7edfd7944e4bb38c509a0c3ccce9dc5fd45cf7",
+      "sha256": "03f096b07f24053b4eefd096c9c5a33059d8b8140f8dba9bebeb3c9c20162139",
       "source_path": "runs/asr-leaderboard/full-35-combined/report.html"
     },
     {
-      "bytes": 44479,
+      "bytes": 45145,
       "hosted_paths": [
         "asr-leaderboard/whisper-large-v3-turbo-smoke/judge-report/report.html"
       ],
-      "sha256": "b2c8783dc22204ce4ea1db6ea14cb1039f8e0eee36ff77f579778bdf3f39432f",
+      "sha256": "1447bfbe5451a54d275f097a897fe2a8dd551a522a5eec87ac0b791ffcd67766",
       "source_path": "runs/asr-leaderboard/whisper-large-v3-turbo-smoke/judge-report/report.html"
     },
     {
-      "bytes": 89605,
+      "bytes": 101886,
       "hosted_paths": [
         "asr-leaderboard/whisper-large-v3-turbo-full-gap/judge-report/report.html"
       ],
-      "sha256": "9ac46fcbbc4e0ab2702e9e9b0033999b1065a4f2482b6f6334ddda63118cedc6",
+      "sha256": "c740b61f2f91f6a3b056f44024356daf9db2b7df2c0675daa7d82ca11989708b",
       "source_path": "runs/asr-leaderboard/whisper-large-v3-turbo-full-gap/judge-report/report.html"
     },
     {
-      "bytes": 56416,
+      "bytes": 60761,
       "hosted_paths": [
         "asr-leaderboard/whisper-large-v3-turbo-semantic-smoke/judge-report/report.html"
       ],
-      "sha256": "15e588b5b78495d008231f1c8dc8b0efefc1f919f40c83c5ea0da79863dd8e84",
+      "sha256": "0c45cd42b488c66510f7bf50b6e2cc115d87713fa00ae6671feb1fc9aa070009",
       "source_path": "runs/asr-leaderboard/whisper-large-v3-turbo-semantic-smoke/judge-report/report.html"
     },
     {
-      "bytes": 54821,
+      "bytes": 56373,
       "hosted_paths": [
         "asr-leaderboard/whisper-large-v3-turbo-entity-smoke/judge-report/report.html"
       ],
-      "sha256": "a2749dd85b93f462ba9ea39a217bf49d832b23bb0629be23bce71dabcf7349a6",
+      "sha256": "108931082c11b55d3f1369cde392382e6b1340998b9625aeaf3f81576518db92",
       "source_path": "runs/asr-leaderboard/whisper-large-v3-turbo-entity-smoke/judge-report/report.html"
     },
     {
-      "bytes": 50021,
+      "bytes": 52111,
       "hosted_paths": [
         "asr-leaderboard/whisper-large-v3-turbo-paraphrase-smoke/judge-report/report.html"
       ],
-      "sha256": "667ec7f9ef23cccda1712650a1c5d85bda7c2251920dc70d940673c958552a81",
+      "sha256": "be307e0a5e7c96483dee43d1eb07ff4d620c1358ee44eddd4672a6972f572dcf",
       "source_path": "runs/asr-leaderboard/whisper-large-v3-turbo-paraphrase-smoke/judge-report/report.html"
     },
     {
-      "bytes": 49449,
+      "bytes": 51292,
       "hosted_paths": [
         "asr-leaderboard/whisper-large-v3-turbo-noise-smoke/judge-report/report.html"
       ],
-      "sha256": "959a2192e14927b8fde329ebf3a05ee5e836f9aed50a80e22172f575614a5300",
+      "sha256": "a2ca275e11420d16cb777080a468f2acd7c88cbf1388bb849f9b641d2d1b9989",
       "source_path": "runs/asr-leaderboard/whisper-large-v3-turbo-noise-smoke/judge-report/report.html"
     },
     {
-      "bytes": 44401,
+      "bytes": 45004,
       "hosted_paths": [
         "asr-leaderboard/qwen3-asr-1.7b-smoke/judge-report/report.html"
       ],
-      "sha256": "1d112998b833ec8ec2a33d3dad408658c34818f2c87d714d64726559fb1ac69e",
+      "sha256": "3ecc8918a7bd486e992656993da27d0d7a52e86ab665d20b1ca8dab0a4cd9060",
       "source_path": "runs/asr-leaderboard/qwen3-asr-1.7b-smoke/judge-report/report.html"
     },
     {
-      "bytes": 88026,
+      "bytes": 100425,
       "hosted_paths": [
         "asr-leaderboard/qwen3-asr-1.7b-full-gap/judge-report/report.html"
       ],
-      "sha256": "9aabf21100b2de38d86619ac79e5fe0a4cb5b96ea868ed9469b22a7c5087c051",
+      "sha256": "37c2cfeefda89ecc394955b17cc3764e251501ce5d63c32a5f3182ffda7cf114",
       "source_path": "runs/asr-leaderboard/qwen3-asr-1.7b-full-gap/judge-report/report.html"
     },
     {
-      "bytes": 53520,
+      "bytes": 58050,
       "hosted_paths": [
         "asr-leaderboard/qwen3-asr-1.7b-semantic-smoke/judge-report/report.html"
       ],
-      "sha256": "13c93e81662c83445a5097354af2a9416ca39e4b3ad7ddaf535d9c8bdd00e852",
+      "sha256": "5e911ee259d99fe9d3105049d398130bc9d8a4c14d07e82aa146ddbf837c7564",
       "source_path": "runs/asr-leaderboard/qwen3-asr-1.7b-semantic-smoke/judge-report/report.html"
     },
     {
-      "bytes": 53538,
+      "bytes": 55981,
       "hosted_paths": [
         "asr-leaderboard/qwen3-asr-1.7b-entity-smoke/judge-report/report.html"
       ],
-      "sha256": "8ee58dc1f78837ff66a168e9e7317504793ba3fd1fa5f956fd69c59633ad7b53",
+      "sha256": "f3d8e36f85e9247c4778fd899ddfb2c02d39c12fde83ee7dd6a1ebc1ca2273a1",
       "source_path": "runs/asr-leaderboard/qwen3-asr-1.7b-entity-smoke/judge-report/report.html"
     },
     {
-      "bytes": 47682,
+      "bytes": 49657,
       "hosted_paths": [
         "asr-leaderboard/qwen3-asr-1.7b-paraphrase-smoke/judge-report/report.html"
       ],
-      "sha256": "643c4825f4b554c1fe1e460d839bf65fa8a627a676d511caf7bf29864b2e1a2a",
+      "sha256": "eaf65460d2b37510c6f1caa4fc50e10325e7862ecc0527ca79c3044aa545d6c0",
       "source_path": "runs/asr-leaderboard/qwen3-asr-1.7b-paraphrase-smoke/judge-report/report.html"
     },
     {
-      "bytes": 51834,
+      "bytes": 54041,
       "hosted_paths": [
         "asr-leaderboard/qwen3-asr-1.7b-noise-smoke/judge-report/report.html"
       ],
-      "sha256": "eed8a650d0038098bac0464db1a7d9d21bf023a91bfa03bf9f26abb33767bfd3",
+      "sha256": "009888bc039b4d7388631aa413097a4d9c0bd0bee95da2c6858e465c3564a8fb",
       "source_path": "runs/asr-leaderboard/qwen3-asr-1.7b-noise-smoke/judge-report/report.html"
     },
     {
-      "bytes": 40503,
+      "bytes": 40961,
       "hosted_paths": [
         "asr-leaderboard/vibevoice-asr-smoke/judge-report/report.html"
       ],
-      "sha256": "e4d426984afa425e292f08ee79719f243178d02e89ddc12e9cbcc0e6a5608907",
+      "sha256": "b069a252a5c69ca08ec31bd536af261f54a4ffc58fefe2b28fa2d48f793e581f",
       "source_path": "runs/asr-leaderboard/vibevoice-asr-smoke/judge-report/report.html"
     },
     {
-      "bytes": 83874,
+      "bytes": 95931,
       "hosted_paths": [
         "asr-leaderboard/vibevoice-asr-full-gap/judge-report/report.html"
       ],
-      "sha256": "7e9f94596faa19805ecf3eb6aaca459fdaf0e1d082b099b7f0e6356282ed0538",
+      "sha256": "1ab919c7476612f9f4e5eb7110a1f995a7ee5db9ea09bcde80ba39bcc31ee17b",
       "source_path": "runs/asr-leaderboard/vibevoice-asr-full-gap/judge-report/report.html"
     },
     {
-      "bytes": 55384,
+      "bytes": 59983,
       "hosted_paths": [
         "asr-leaderboard/vibevoice-asr-semantic-smoke/judge-report/report.html"
       ],
-      "sha256": "cfd7a4dafb899d9102025096cda2b511a12cdade373ebd72b78352cea611a526",
+      "sha256": "6a4533b2b49d4a1206b13425d48b3242915c578af30ba5aac43014bfce578963",
       "source_path": "runs/asr-leaderboard/vibevoice-asr-semantic-smoke/judge-report/report.html"
     },
     {
-      "bytes": 53374,
+      "bytes": 55490,
       "hosted_paths": [
         "asr-leaderboard/vibevoice-asr-entity-smoke/judge-report/report.html"
       ],
-      "sha256": "7719f0881d29f9602a68dd4c5f90923e281e6046b1001ffe8372c93197724802",
+      "sha256": "4a7888cfdb9d486df4e48e7c5c5641a363d5b1061a95adf07d4ad711ecaea0e5",
       "source_path": "runs/asr-leaderboard/vibevoice-asr-entity-smoke/judge-report/report.html"
     },
     {
-      "bytes": 50209,
+      "bytes": 53051,
       "hosted_paths": [
         "asr-leaderboard/vibevoice-asr-paraphrase-smoke/judge-report/report.html"
       ],
-      "sha256": "9847426ce105299b8395c2d0c4d1b3382676e561f4e19395b745609876f7d139",
+      "sha256": "7ddbf7c82a822d251c6f5a5daf892fde8588e9a310753ae6ce07a2751bd09048",
       "source_path": "runs/asr-leaderboard/vibevoice-asr-paraphrase-smoke/judge-report/report.html"
     },
     {
-      "bytes": 52927,
+      "bytes": 55086,
       "hosted_paths": [
         "asr-leaderboard/vibevoice-asr-noise-smoke/judge-report/report.html"
       ],
-      "sha256": "3a5db2b26d710b9970feb3fb0358b660835ab65d6eb60fb053724198b677a226",
+      "sha256": "ae14250f92728086b3ba25ac0fe5340f56c3d0c01352130529fb618f226ba9ff",
       "source_path": "runs/asr-leaderboard/vibevoice-asr-noise-smoke/judge-report/report.html"
     }
   ],

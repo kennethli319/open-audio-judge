@@ -13,7 +13,7 @@ from open_audio_judge.models import EvaluationResult
 BASELINE_SYNTHESIS_MODEL = "mlx-community/chatterbox-turbo-6bit"
 
 
-def label_for_score(score: int, accurate_threshold: int = 80, review_threshold: int = 60) -> str:
+def label_for_score(score: int, accurate_threshold: int = 81, review_threshold: int = 60) -> str:
     if score >= accurate_threshold:
         return "accurate"
     if score >= review_threshold:
@@ -44,33 +44,36 @@ def render_html_report(
     average = statistics.mean(scores) if scores else 0
     median = statistics.median(scores) if scores else 0
     counts = {label: sum(1 for result in results if result.label == label) for label in LABELS}
+    is_asr_report = _is_asr_report(results)
+    model_metadata_key = "candidate_model" if is_asr_report else "synthesis_model"
+    slice_metadata_key = "asr_slice" if is_asr_report else "tts_slice"
     buckets = _bucket_counts(scores)
     meaning_counts = _field_counts(result.meaning_preservation for result in results)
     category_counts = _category_counts(results)
     high_impact_counts = _high_impact_category_counts(results)
     researcher_note_counts = _researcher_note_counts(results)
-    tts_slice_counts = _metadata_counts(results, "tts_slice")
-    synthesis_model_counts = _metadata_counts(results, "synthesis_model")
+    tts_slice_counts = _metadata_counts(results, slice_metadata_key)
+    synthesis_model_counts = _metadata_counts(results, model_metadata_key)
     synthesis_voice_counts = _metadata_counts(results, "synthesis_voice")
     language_counts = _language_counts(results)
     evaluation_category_counts = _evaluation_category_counts(results)
     sample_kind_counts = _metadata_counts(results, "sample_kind")
     issue_by_evaluation_category_counts = _issue_counts_by_metadata(results, "evaluation_category")
-    issue_by_slice_counts = _issue_counts_by_metadata(results, "tts_slice")
-    issue_by_model_counts = _issue_counts_by_metadata(results, "synthesis_model")
+    issue_by_slice_counts = _issue_counts_by_metadata(results, slice_metadata_key)
+    issue_by_model_counts = _issue_counts_by_metadata(results, model_metadata_key)
     issue_by_voice_counts = _issue_counts_by_metadata(results, "synthesis_voice")
     issue_by_language_counts = _issue_counts_by_metadata(results, "language")
     scores_by_evaluation_category = _score_summaries_by_metadata(results, "evaluation_category")
-    scores_by_slice = _score_summaries_by_metadata(results, "tts_slice")
-    scores_by_model = _score_summaries_by_metadata(results, "synthesis_model")
+    scores_by_slice = _score_summaries_by_metadata(results, slice_metadata_key)
+    scores_by_model = _score_summaries_by_metadata(results, model_metadata_key)
     scores_by_voice = _score_summaries_by_metadata(results, "synthesis_voice")
     scores_by_language = _score_summaries_by_metadata(results, "language")
     status_by_evaluation_category_counts = _status_counts_by_metadata(
         results,
         "evaluation_category",
     )
-    status_by_slice_counts = _status_counts_by_metadata(results, "tts_slice")
-    status_by_model_counts = _status_counts_by_metadata(results, "synthesis_model")
+    status_by_slice_counts = _status_counts_by_metadata(results, slice_metadata_key)
+    status_by_model_counts = _status_counts_by_metadata(results, model_metadata_key)
     status_by_voice_counts = _status_counts_by_metadata(results, "synthesis_voice")
     status_by_language_counts = _status_counts_by_metadata(results, "language")
     status_by_sample_kind_counts = _status_counts_by_metadata(results, "sample_kind")
@@ -80,6 +83,10 @@ def render_html_report(
     baseline_segment_deltas = _baseline_segment_deltas(results, baseline_model=baseline_model)
     priority_cases = _priority_cases(results)
     calibration_checks = _calibration_checks(results)
+    report_title = _report_title(results, is_asr=is_asr_report)
+    report_subtitle = _report_subtitle(results, is_asr=is_asr_report)
+    decision_markup = _render_decision_brief(results, priority_cases)
+    judge_health_markup = _render_judge_health(results)
 
     rows = "\n".join(_render_row(result) for result in results)
     case_table_controls = _render_case_table_controls(results)
@@ -190,53 +197,97 @@ def render_html_report(
     )
     priority_markup = _render_priority_cases(priority_cases)
     calibration_markup = _render_calibration_checks(calibration_checks)
+    slice_label = "ASR Slice" if is_asr_report else "TTS Slice"
+    model_label = "ASR Model" if is_asr_report else "Synthesis Model"
+    slice_heading = "ASR Slice" if is_asr_report else "TTS Slice"
+    baseline_markup = ""
+    if baseline_deltas or baseline_segment_deltas or not is_asr_report:
+        baseline_markup = f"""
+        <h3>Baseline Model Deltas</h3>
+        {baseline_deltas_markup}
+
+        <h3>Baseline Regression Slices</h3>
+        {baseline_segment_deltas_markup}
+        """
+    document_title = "Open Audio Judge ASR Report" if is_asr_report else "Open Audio Judge Report"
 
     return f"""<!doctype html>
 <html lang="en">
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Open Audio Judge Report</title>
+  <title>{html.escape(document_title)} · {html.escape(report_title)}</title>
   <style>
     :root {{
       --ink: #172026;
-      --muted: #5d6975;
-      --line: #d8dee5;
-      --bg: #f7f8fa;
+      --muted: #56616c;
+      --line: #d7dde4;
+      --bg: #f4f6f8;
       --panel: #ffffff;
-      --good: #0f8a5f;
-      --warn: #b36b00;
-      --bad: #c93535;
-      --accent: #2864b4;
+      --good: #087a55;
+      --warn: #9a5800;
+      --bad: #b4232d;
+      --accent: #1859a9;
+      --accent-soft: #eaf2fb;
     }}
     * {{ box-sizing: border-box; }}
+    html {{ overflow-x: hidden; }}
     body {{
       margin: 0;
       font-family: ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
       color: var(--ink);
       background: var(--bg);
+      line-height: 1.5;
+      overflow-wrap: anywhere;
     }}
     header {{
-      padding: 28px 32px 20px;
+      padding: 28px 24px 24px;
       background: var(--panel);
       border-bottom: 1px solid var(--line);
     }}
-    h1 {{ margin: 0 0 8px; font-size: 28px; letter-spacing: 0; }}
-    h2 {{ margin: 28px 0 12px; font-size: 18px; letter-spacing: 0; }}
-    main {{ max-width: 1180px; margin: 0 auto; padding: 24px 24px 40px; }}
+    .header-inner {{ max-width: 1180px; margin: 0 auto; }}
+    .eyebrow {{ color: var(--accent); font-size: 12px; font-weight: 750; letter-spacing: .08em; text-transform: uppercase; }}
+    h1 {{ margin: 5px 0 8px; font-size: clamp(26px, 4vw, 38px); line-height: 1.15; letter-spacing: -.025em; }}
+    h2 {{ margin: 32px 0 6px; font-size: 22px; letter-spacing: -.015em; }}
+    h3 {{ margin: 0 0 8px; font-size: 16px; }}
+    h4 {{ margin: 0 0 6px; font-size: 13px; color: var(--muted); text-transform: uppercase; letter-spacing: .04em; }}
+    .section-intro {{ margin: 0 0 14px; color: var(--muted); max-width: 72ch; }}
+    main {{ max-width: 1180px; min-width: 0; margin: 0 auto; padding: 24px 24px 56px; }}
     .summary {{
       display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+      grid-template-columns: repeat(auto-fit, minmax(min(100%, 160px), 1fr));
       gap: 12px;
     }}
     .metric {{
       background: var(--panel);
       border: 1px solid var(--line);
-      border-radius: 8px;
+      border-radius: 12px;
       padding: 14px 16px;
+      min-width: 0;
     }}
-    .metric span {{ display: block; color: var(--muted); font-size: 13px; }}
-    .metric strong {{ display: block; margin-top: 6px; font-size: 26px; }}
+    .metric > span {{ display: block; color: var(--muted); font-size: 13px; }}
+    .metric > strong {{ display: block; margin-top: 6px; font-size: 26px; line-height: 1.15; }}
+    .decision-brief {{
+      display: grid;
+      grid-template-columns: minmax(0, 1.3fr) minmax(0, 1fr);
+      gap: 12px;
+      margin-top: 18px;
+    }}
+    .decision-callout {{
+      background: #11283f;
+      border-radius: 14px;
+      color: #fff;
+      padding: 20px;
+    }}
+    .decision-callout .eyebrow {{ color: #9fc6ef; }}
+    .decision-callout strong {{ display: block; margin: 6px 0; font-size: clamp(22px, 3vw, 32px); line-height: 1.15; }}
+    .decision-callout p {{ margin: 8px 0 0; color: #d9e6f2; }}
+    .decision-actions {{ display: grid; gap: 10px; }}
+    .decision-action {{ background: var(--panel); border: 1px solid var(--line); border-radius: 12px; padding: 14px 16px; }}
+    .decision-action strong {{ display: block; margin-bottom: 3px; }}
+    .health {{ display: flex; flex-wrap: wrap; gap: 8px; align-items: center; margin-top: 12px; }}
+    .health-chip {{ border: 1px solid var(--line); border-radius: 999px; background: var(--panel); color: var(--muted); padding: 5px 10px; font-size: 12px; }}
+    .health-chip.warn {{ border-color: #d9ad73; background: #fff7e9; color: var(--warn); }}
     .bucket {{
       display: grid;
       grid-template-columns: 72px 1fr 42px;
@@ -247,18 +298,25 @@ def render_html_report(
     }}
     .track {{ height: 10px; border-radius: 999px; background: #e8edf2; overflow: hidden; }}
     .fill {{ height: 100%; background: var(--accent); }}
+    .table-region {{
+      max-width: 100%;
+      overflow-x: auto;
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      background: var(--panel);
+    }}
+    .table-region:focus {{ outline: 3px solid #8bb7e8; outline-offset: 2px; }}
+    .priority-table {{ min-width: 680px; }}
+    .calibration-table {{ min-width: 560px; }}
     table {{
       width: 100%;
       border-collapse: collapse;
       background: var(--panel);
-      border: 1px solid var(--line);
-      border-radius: 8px;
-      overflow: hidden;
+      table-layout: fixed;
     }}
-    th, td {{ padding: 12px 14px; border-bottom: 1px solid var(--line); vertical-align: top; }}
+    th, td {{ padding: 12px 14px; border-bottom: 1px solid var(--line); vertical-align: top; overflow-wrap: anywhere; }}
     th {{ text-align: left; font-size: 13px; color: var(--muted); background: #fbfcfd; }}
     tr:last-child td {{ border-bottom: 0; }}
-    .scorebar {{ min-width: 160px; }}
     .bar {{ height: 9px; background: #e8edf2; border-radius: 999px; overflow: hidden; margin-top: 7px; }}
     .bar > div {{ height: 100%; }}
     .accurate {{ color: var(--good); }}
@@ -270,11 +328,18 @@ def render_html_report(
     .reason {{ color: var(--ink); line-height: 1.45; }}
     .muted {{ color: var(--muted); }}
     details {{ margin-top: 8px; }}
-    summary {{ cursor: pointer; color: var(--accent); }}
+    summary {{ cursor: pointer; color: var(--accent); font-weight: 650; }}
+    .section-details {{ margin-top: 28px; border: 1px solid var(--line); border-radius: 12px; background: var(--panel); }}
+    .section-details > summary {{ padding: 15px 17px; }}
+    .section-details-content {{ border-top: 1px solid var(--line); padding: 4px 17px 18px; }}
     ul {{ margin: 6px 0 10px 18px; padding: 0; }}
     li {{ margin: 3px 0; }}
     .counts {{ list-style: none; margin: 10px 0 0; }}
-    .counts li {{ display: flex; justify-content: space-between; gap: 14px; }}
+    .counts > li {{ display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 14px; }}
+    .evidence-list > li {{ display: block; margin-bottom: 14px; }}
+    .provenance {{ display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 210px), 1fr)); gap: 7px 14px; margin-left: 0; }}
+    .provenance > li {{ display: grid; grid-template-columns: minmax(0, .65fr) minmax(0, 1fr); }}
+    .provenance strong {{ overflow-wrap: anywhere; }}
     .severity-low {{ border-left: 4px solid var(--bad); }}
     .severity-medium {{ border-left: 4px solid var(--warn); }}
     .severity-high {{ border-left: 4px solid var(--good); }}
@@ -288,12 +353,17 @@ def render_html_report(
       font-size: 12px;
       color: var(--muted);
     }}
+    .action-grid {{ display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 310px), 1fr)); gap: 12px; }}
+    .action-card {{ background: var(--panel); border: 1px solid var(--line); border-radius: 12px; padding: 16px; min-width: 0; }}
+    .action-card .score-line {{ display: flex; flex-wrap: wrap; gap: 8px; align-items: baseline; margin: 8px 0; }}
+    .action-card .score-line strong {{ font-size: 24px; }}
     .case-tools {{
       display: grid;
-      grid-template-columns: minmax(220px, 1fr) repeat(5, minmax(130px, 180px));
+      grid-template-columns: repeat(auto-fit, minmax(min(100%, 150px), 1fr));
       gap: 10px;
       margin: 0 0 12px;
       align-items: end;
+      min-width: 0;
     }}
     .case-tools label {{
       display: grid;
@@ -310,49 +380,76 @@ def render_html_report(
       color: var(--ink);
       background: var(--panel);
       font: inherit;
+      min-width: 0;
     }}
+    .case-tools .search-control {{ grid-column: span 2; }}
+    .case-tools .results-count {{ align-self: center; font-size: 13px; }}
+    .sort-tools {{ display: flex; flex-wrap: wrap; gap: 7px; }}
     .sort-button {{
-      border: 0;
-      background: transparent;
-      color: inherit;
+      border: 1px solid var(--line);
+      border-radius: 999px;
+      background: var(--panel);
+      color: var(--accent);
       cursor: pointer;
       font: inherit;
-      padding: 0;
+      font-size: 12px;
+      padding: 6px 10px;
       text-align: left;
     }}
-    .sort-button::after {{
-      content: "  sort";
-      color: var(--muted);
-      font-size: 11px;
-      font-weight: 400;
-    }}
+    .sort-button[aria-pressed="true"] {{ background: var(--accent-soft); border-color: #8bb7e8; }}
+    .case-list {{ display: grid; gap: 12px; }}
+    .case-card {{ background: var(--panel); border: 1px solid var(--line); border-radius: 14px; padding: 17px; min-width: 0; }}
+    .case-card.severity-low {{ border-left-width: 5px; }}
+    .case-card.severity-medium {{ border-left-width: 5px; }}
+    .case-card.severity-high {{ border-left-width: 5px; }}
+    .case-card-top {{ display: flex; justify-content: space-between; gap: 16px; align-items: flex-start; }}
+    .case-card-top h3 {{ margin: 3px 0 0; overflow-wrap: anywhere; }}
+    .case-score {{ flex: 0 0 auto; text-align: right; }}
+    .case-score > strong {{ display: block; font-size: 30px; line-height: 1; }}
+    .status-pill {{ display: inline-block; margin-top: 6px; padding: 3px 8px; border-radius: 999px; background: #f0f3f6; font-size: 12px; font-weight: 700; }}
+    .case-grid {{ display: grid; grid-template-columns: minmax(0, 1.05fr) minmax(0, .95fr); gap: 18px; margin-top: 16px; }}
+    .case-grid p {{ margin: 0 0 12px; }}
+    blockquote {{ margin: 0 0 12px; border-left: 3px solid #9fb5cb; padding: 8px 12px; background: #f7f9fb; color: #263746; }}
+    .case-evidence {{ min-width: 0; }}
+    .case-details {{ border-top: 1px solid var(--line); margin-top: 12px; padding-top: 8px; }}
     .is-hidden {{ display: none !important; }}
+    .sr-only {{ position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0,0,0,0); white-space: nowrap; border: 0; }}
     @media (max-width: 760px) {{
       header {{ padding: 22px 18px 16px; }}
       main {{ padding: 18px 12px 28px; }}
+      .decision-brief, .case-grid {{ grid-template-columns: 1fr; }}
       .case-tools {{ grid-template-columns: 1fr; }}
-      table, thead, tbody, th, td, tr {{ display: block; }}
-      thead {{ display: none; }}
-      tr {{ border-bottom: 1px solid var(--line); padding: 10px 0; }}
-      td {{ border-bottom: 0; padding: 8px 12px; }}
-      td::before {{ content: attr(data-label); display: block; color: var(--muted); font-size: 12px; }}
+      .case-tools .search-control {{ grid-column: auto; }}
+      .case-card-top {{ gap: 10px; }}
+      .summary {{ grid-template-columns: repeat(2, minmax(0, 1fr)); }}
+      .metric > strong {{ font-size: 23px; }}
     }}
   </style>
 </head>
 <body>
   <header>
-    <h1>Open Audio Judge Report</h1>
-    <div class="muted">Prompt-based audio LLM evaluation summary</div>
+    <div class="header-inner">
+      {'<a href="/open-audio-judge/asr-leaderboard-demo.html">&larr; ASR leaderboard</a>' if is_asr_report else '<span class="eyebrow">Open Audio Judge Report</span>'}
+      <h1>{html.escape(report_title)}</h1>
+      <div class="muted">{html.escape(report_subtitle)}</div>
+    </div>
   </header>
   <main>
-    <section class="summary">
+    <section class="summary" aria-label="Report summary">
       <div class="metric"><span>Cases</span><strong>{len(results)}</strong></div>
-      <div class="metric"><span>Average</span><strong>{average:.1f}</strong></div>
+      <div class="metric"><span>{"Semantic score" if is_asr_report else "Average score"}</span><strong>{average:.1f}</strong></div>
       <div class="metric"><span>Median</span><strong>{median:.1f}</strong></div>
       <div class="metric"><span>Accurate</span><strong>{counts["accurate"]}</strong></div>
       <div class="metric"><span>Needs Review</span><strong>{counts["needs_review"]}</strong></div>
       <div class="metric"><span>Inaccurate</span><strong>{counts["inaccurate"]}</strong></div>
     </section>
+
+    {decision_markup}
+    {judge_health_markup}
+
+    <h2>Priority Cases</h2>
+    <p class="section-intro">Start here: these cases have the largest semantic impact, a high-impact error, or a non-accurate label.</p>
+    {priority_markup}
 
     <h2>Score Distribution</h2>
     {bucket_markup}
@@ -362,78 +459,71 @@ def render_html_report(
       <div class="metric"><span>Meaning Preservation</span>{meaning_markup}</div>
       <div class="metric"><span>Error Categories</span>{category_markup}</div>
       <div class="metric"><span>High-Impact Errors</span>{high_impact_markup}</div>
-      <div class="metric"><span>Actionable Notes</span>{researcher_note_markup}</div>
     </section>
-
-    <h2>Candidate Metadata</h2>
-    <section class="summary">
-      <div class="metric"><span>TTS Slice</span>{tts_slice_markup}</div>
-      <div class="metric"><span>Synthesis Model</span>{synthesis_model_markup}</div>
-      <div class="metric"><span>Synthesis Voice</span>{synthesis_voice_markup}</div>
-      <div class="metric"><span>Language</span>{language_markup}</div>
-      <div class="metric"><span>Evaluation Category</span>{evaluation_category_markup}</div>
-      <div class="metric"><span>Sample Kind</span>{sample_kind_markup}</div>
-      <div class="metric"><span>Issues By Category</span>{issue_by_evaluation_category_markup}</div>
-      <div class="metric"><span>Issues By TTS Slice</span>{issue_by_slice_markup}</div>
-      <div class="metric"><span>Issues By Model</span>{issue_by_model_markup}</div>
-      <div class="metric"><span>Issues By Voice</span>{issue_by_voice_markup}</div>
-      <div class="metric"><span>Issues By Language</span>{issue_by_language_markup}</div>
-      <div class="metric"><span>Scores By Category</span>{scores_by_evaluation_category_markup}</div>
-      <div class="metric"><span>Scores By TTS Slice</span>{scores_by_slice_markup}</div>
-      <div class="metric"><span>Scores By Model</span>{scores_by_model_markup}</div>
-      <div class="metric"><span>Scores By Voice</span>{scores_by_voice_markup}</div>
-      <div class="metric"><span>Scores By Language</span>{scores_by_language_markup}</div>
-      <div class="metric"><span>Failures By Category</span>{status_by_evaluation_category_markup}</div>
-      <div class="metric"><span>Failures By TTS Slice</span>{status_by_slice_markup}</div>
-      <div class="metric"><span>Failures By Model</span>{status_by_model_markup}</div>
-      <div class="metric"><span>Failures By Voice</span>{status_by_voice_markup}</div>
-      <div class="metric"><span>Failures By Language</span>{status_by_language_markup}</div>
-      <div class="metric"><span>Failures By Sample Kind</span>{status_by_sample_kind_markup}</div>
+    <section class="metric" style="margin-top:12px">
+      <span>Actionable Notes</span>
+      {researcher_note_markup}
     </section>
-
-    <h2>Calibration Checks</h2>
-    {calibration_markup}
 
     <h2>Weakest Segments</h2>
+    <p class="section-intro">Compare slices with enough variation to reveal where quality drops and what to improve next.</p>
     {weakest_segments_markup}
 
-    <h2>Model-Category Action Matrix</h2>
-    {model_category_actions_markup}
-
-    <h2>Baseline Model Deltas</h2>
-    {baseline_deltas_markup}
-
-    <h2>Baseline Regression Slices</h2>
-    {baseline_segment_deltas_markup}
-
-    <h2>Priority Cases</h2>
-    {priority_markup}
-
     <h2>Case Results</h2>
+    <p class="section-intro">Lowest scores appear first. Search the judge rationale, model, category, slice, or issue.</p>
     {case_table_controls}
-    <table id="case-results-table">
-      <thead>
-        <tr>
-          <th><button class="sort-button" type="button" data-sort="case">Case</button></th>
-          <th>Provenance</th>
-          <th><button class="sort-button" type="button" data-sort="score">Score</button></th>
-          <th>Label</th>
-          <th>Reason</th>
-          <th>Diagnostics</th>
-          <th>Status</th>
-        </tr>
-      </thead>
-      <tbody>
-        {rows}
-      </tbody>
-    </table>
+    <section id="case-results-table" class="case-list" aria-live="polite">
+      {rows}
+    </section>
+
+    <details class="section-details">
+      <summary>Dataset coverage, metadata, and calibration</summary>
+      <div class="section-details-content">
+        <h2>Candidate Metadata</h2>
+        <section class="summary">
+          <div class="metric"><span>{html.escape(slice_label)}</span>{tts_slice_markup}</div>
+          <div class="metric"><span>{html.escape(model_label)}</span>{synthesis_model_markup}</div>
+          <div class="metric"><span>Synthesis Voice</span>{synthesis_voice_markup}</div>
+          <div class="metric"><span>Language</span>{language_markup}</div>
+          <div class="metric"><span>Evaluation Category</span>{evaluation_category_markup}</div>
+          <div class="metric"><span>Sample Kind</span>{sample_kind_markup}</div>
+          <div class="metric"><span>Issues By Category</span>{issue_by_evaluation_category_markup}</div>
+          <div class="metric"><span>Issues By {html.escape(slice_heading)}</span>{issue_by_slice_markup}</div>
+          <div class="metric"><span>Issues By Model</span>{issue_by_model_markup}</div>
+          <div class="metric"><span>Issues By Voice</span>{issue_by_voice_markup}</div>
+          <div class="metric"><span>Issues By Language</span>{issue_by_language_markup}</div>
+          <div class="metric"><span>Scores By Category</span>{scores_by_evaluation_category_markup}</div>
+          <div class="metric"><span>Scores By {html.escape(slice_heading)}</span>{scores_by_slice_markup}</div>
+          <div class="metric"><span>Scores By Model</span>{scores_by_model_markup}</div>
+          <div class="metric"><span>Scores By Voice</span>{scores_by_voice_markup}</div>
+          <div class="metric"><span>Scores By Language</span>{scores_by_language_markup}</div>
+          <div class="metric"><span>Failures By Category</span>{status_by_evaluation_category_markup}</div>
+          <div class="metric"><span>Failures By {html.escape(slice_heading)}</span>{status_by_slice_markup}</div>
+          <div class="metric"><span>Failures By Model</span>{status_by_model_markup}</div>
+          <div class="metric"><span>Failures By Voice</span>{status_by_voice_markup}</div>
+          <div class="metric"><span>Failures By Language</span>{status_by_language_markup}</div>
+          <div class="metric"><span>Failures By Sample Kind</span>{status_by_sample_kind_markup}</div>
+        </section>
+
+        <h2>Calibration Checks</h2>
+        {calibration_markup}
+      </div>
+    </details>
+
+    <details class="section-details">
+      <summary>Advanced comparison analysis</summary>
+      <div class="section-details-content">
+        <h2>Model-Category Action Matrix</h2>
+        {model_category_actions_markup}
+{baseline_markup}
+      </div>
+    </details>
   </main>
   <script>
     (() => {{
-      const table = document.querySelector("#case-results-table");
-      if (!table) return;
-      const tbody = table.querySelector("tbody");
-      const rows = Array.from(tbody.querySelectorAll("tr"));
+      const container = document.querySelector("#case-results-table");
+      if (!container) return;
+      const rows = Array.from(container.querySelectorAll(".case-card"));
       const search = document.querySelector("#case-search");
       const label = document.querySelector("#case-label-filter");
       const status = document.querySelector("#case-status-filter");
@@ -441,7 +531,19 @@ def render_html_report(
       const category = document.querySelector("#case-category-filter");
       const slice = document.querySelector("#case-slice-filter");
       const count = document.querySelector("#case-visible-count");
-      const state = {{ sortKey: "", sortDir: "desc" }};
+      const state = {{ sortKey: "score", sortDir: "desc" }};
+      const params = new URLSearchParams(window.location.search);
+      const initialValues = [
+        [search, "search"],
+        [label, "label"],
+        [status, "status"],
+        [model, "model"],
+        [category, "category"],
+        [slice, "slice"],
+      ];
+      initialValues.forEach(([control, key]) => {{
+        if (control && params.has(key)) control.value = params.get(key) || "";
+      }});
 
       function applyFilters() {{
         const query = (search?.value || "").trim().toLowerCase();
@@ -475,8 +577,11 @@ def render_html_report(
           }}
           return left.dataset.case.localeCompare(right.dataset.case) * dir;
         }});
-        sorted.forEach((row) => tbody.appendChild(row));
+        sorted.forEach((row) => container.appendChild(row));
         rows.splice(0, rows.length, ...sorted);
+        document.querySelectorAll("[data-sort]").forEach((button) => {{
+          button.setAttribute("aria-pressed", String(button.dataset.sort === key));
+        }});
         applyFilters();
       }}
 
@@ -484,7 +589,7 @@ def render_html_report(
         control?.addEventListener("input", applyFilters);
         control?.addEventListener("change", applyFilters);
       }});
-      table.querySelectorAll("[data-sort]").forEach((button) => {{
+      document.querySelectorAll("[data-sort]").forEach((button) => {{
         button.addEventListener("click", () => sortRows(button.dataset.sort));
       }});
       sortRows("score");
@@ -492,6 +597,178 @@ def render_html_report(
   </script>
 </body>
 </html>"""
+
+
+def _is_asr_report(results: list[EvaluationResult]) -> bool:
+    return bool(results) and all(result.task == "asr_error" for result in results)
+
+
+def _friendly_model_name(model: str) -> str:
+    known_names = {
+        "mlx-community/whisper-large-v3-turbo-asr-fp16": "Whisper Large v3 Turbo (FP16)",
+        "mlx-community/Qwen3-ASR-1.7B-8bit": "Qwen3 ASR 1.7B (8-bit)",
+        "mlx-community/VibeVoice-ASR-4bit": "VibeVoice ASR (4-bit)",
+    }
+    return known_names.get(model, model.rsplit("/", 1)[-1].replace("-", " "))
+
+
+def _report_title(results: list[EvaluationResult], *, is_asr: bool) -> str:
+    models = sorted(
+        {
+            value
+            for result in results
+            if (value := _metadata_group_value(result, "synthesis_model")) is not None
+        }
+    )
+    if len(models) == 1:
+        suffix = "ASR evaluation" if is_asr else "evaluation report"
+        return f"{_friendly_model_name(models[0])} — {suffix}"
+    if is_asr:
+        return "ASR model comparison"
+    return "Open Audio Judge Report"
+
+
+def _report_subtitle(results: list[EvaluationResult], *, is_asr: bool) -> str:
+    categories = sorted(
+        {
+            value.replace("_", " ")
+            for result in results
+            if (value := _metadata_group_value(result, "evaluation_category")) is not None
+        }
+    )
+    languages = sorted(
+        {
+            value
+            for result in results
+            if (value := _metadata_group_value(result, "language")) is not None
+        }
+    )
+    parts = [f"{len(results)} evaluated case{'s' if len(results) != 1 else ''}"]
+    if len(categories) == 1:
+        parts.append(categories[0])
+    elif categories:
+        parts.append(f"{len(categories)} evaluation categories")
+    if languages:
+        parts.append(", ".join(languages))
+    parts.append("semantic judge score; higher is better" if is_asr else "quality judge score")
+    return " · ".join(parts)
+
+
+def _render_decision_brief(
+    results: list[EvaluationResult],
+    priority_cases: list[EvaluationResult],
+) -> str:
+    accurate_count = sum(result.label == "accurate" for result in results)
+    flagged_count = len(results) - accurate_count
+    if flagged_count:
+        headline = f"Review {flagged_count} of {len(results)} cases before relying on this model"
+        summary = (
+            f"{accurate_count}/{len(results)} cases are labeled accurate. "
+            "Use the lowest-scoring evidence below to decide whether the remaining errors matter "
+            "for your workload."
+        )
+    else:
+        headline = f"All {len(results)} evaluated cases are labeled accurate"
+        summary = "No case crossed the review threshold in this benchmark slice."
+
+    if priority_cases:
+        first_case = priority_cases[0]
+        first_case_markup = (
+            f"<strong>Inspect {html.escape(first_case.case_id)} first</strong>"
+            f'<span class="muted">Score {first_case.overall_score}: '
+            f"{html.escape(first_case.semantic_error_summary or first_case.reason)}</span>"
+        )
+    else:
+        first_case_markup = (
+            '<strong>No priority cases</strong><span class="muted">'
+            "Review a representative sample before production use.</span>"
+        )
+
+    notes = [
+        note
+        for result in [*priority_cases, *results]
+        for note in result.researcher_notes
+        if note.strip()
+    ]
+    if notes:
+        next_step_markup = (
+            f'<strong>Recommended next step</strong><span class="muted">'
+            f"{html.escape(notes[0])}</span>"
+        )
+    else:
+        next_step_markup = (
+            '<strong>Recommended next step</strong><span class="muted">'
+            "Validate this result on representative real-world audio.</span>"
+        )
+
+    return f"""<section class="decision-brief" aria-label="Decision brief">
+      <div class="decision-callout">
+        <span class="eyebrow">Decision brief</span>
+        <strong>{html.escape(headline)}</strong>
+        <p>{html.escape(summary)}</p>
+      </div>
+      <div class="decision-actions">
+        <div class="decision-action">{first_case_markup}</div>
+        <div class="decision-action">{next_step_markup}</div>
+      </div>
+    </section>"""
+
+
+def _render_judge_health(results: list[EvaluationResult]) -> str:
+    total_attempts = 0
+    successful_attempts = 0
+    excluded_failures = 0
+    all_failed_cases = 0
+    high_variance_cases = 0
+    for result in results:
+        statuses = result.metadata.get("judge_sample_statuses")
+        if isinstance(statuses, list) and statuses:
+            normalized_statuses = [status for status in statuses if isinstance(status, str)]
+            successful_for_case = sum(status == "ok" for status in normalized_statuses)
+            failures_for_case = len(normalized_statuses) - successful_for_case
+            total_attempts += len(normalized_statuses)
+            successful_attempts += successful_for_case
+            if successful_for_case:
+                excluded_failures += failures_for_case
+            elif failures_for_case:
+                all_failed_cases += 1
+        else:
+            total_attempts += 1
+            successful_attempts += result.status == "ok"
+            all_failed_cases += result.status != "ok"
+        scores = result.metadata.get("judge_sample_scores")
+        if (
+            isinstance(scores, list)
+            and len(scores) > 1
+            and all(isinstance(score, (int, float)) for score in scores)
+            and max(scores) - min(scores) >= 20
+        ):
+            high_variance_cases += 1
+
+    failure_count = total_attempts - successful_attempts
+    health_class = "health-chip warn" if failure_count else "health-chip"
+    if all_failed_cases:
+        failure_text = (
+            f"{failure_count} failed attempt{'s' if failure_count != 1 else ''}; "
+            f"{all_failed_cases} all-failed case{'s' if all_failed_cases != 1 else ''} retain failure status"
+        )
+    elif excluded_failures:
+        failure_text = (
+            f"{excluded_failures} failed attempt{'s' if excluded_failures != 1 else ''} "
+            "excluded from quality scores"
+        )
+    else:
+        failure_text = "No judge execution failures"
+    variance_text = (
+        f"{high_variance_cases} case{'s' if high_variance_cases != 1 else ''} with 20+ point judge spread"
+        if high_variance_cases
+        else "No high judge-score variance"
+    )
+    return f"""<div class="health" aria-label="Judge health">
+      <span class="health-chip"><strong>{successful_attempts}/{total_attempts}</strong> judge attempts succeeded</span>
+      <span class="{health_class}">{html.escape(failure_text)}</span>
+      <span class="health-chip">{html.escape(variance_text)}</span>
+    </div>"""
 
 
 LABELS = ("accurate", "needs_review", "inaccurate")
@@ -1315,18 +1592,65 @@ def _render_row(result: EvaluationResult) -> str:
     model = _metadata_group_value(result, "synthesis_model") or ""
     category = _metadata_group_value(result, "evaluation_category") or ""
     tts_slice = _metadata_group_value(result, "tts_slice") or ""
-    return f"""<tr data-case="{html.escape(result.case_id)}" data-score="{score}" data-label="{html.escape(label)}" data-status="{html.escape(result.status)}" data-model="{html.escape(model)}" data-category="{html.escape(category)}" data-slice="{html.escape(tts_slice)}" data-search="{html.escape(search_text)}">
-  <td data-label="Case">{html.escape(result.case_id)}</td>
-  <td data-label="Provenance">{_render_provenance(result)}</td>
-  <td data-label="Score" class="scorebar"><strong>{score}</strong>
-    <div class="bar"><div class="{label}-fill" style="width:{score}%"></div></div>
+    category_label = category.replace("_", " ") if category else "uncategorized"
+    slice_label = tts_slice.replace("_", " ") if tts_slice else "all slices"
+    model_name = _friendly_model_name(model) if model else "Model not recorded"
+    impact = result.semantic_error_summary or result.reason
+    issue_markup = _render_inline_tags(
+        [item.replace("_", " ") for item in result.error_categories],
+        empty_label="No issue categories",
+    )
+    action_markup = (
+        _render_list("Recommended action", result.researcher_notes)
+        if result.researcher_notes
+        else '<p class="muted">No model-specific action was recorded.</p>'
+    )
+    if result.judge_transcript:
+        evidence_heading = "Model transcript"
+        transcript_markup = f"<blockquote>{html.escape(result.judge_transcript)}</blockquote>"
+    else:
+        evidence_heading = "Judge evidence"
+        transcript_markup = f"<p>{html.escape(result.reason)}</p>"
+    differences_markup = (
+        _render_list("Key differences", result.key_differences)
+        if result.key_differences
+        else '<p class="muted">No key differences recorded.</p>'
+    )
+    return f"""<article class="case-card {_segment_severity_class(score)}" data-case="{html.escape(result.case_id)}" data-score="{score}" data-label="{html.escape(label)}" data-status="{html.escape(result.status)}" data-model="{html.escape(model)}" data-category="{html.escape(category)}" data-slice="{html.escape(tts_slice)}" data-search="{html.escape(search_text)}">
+  <div class="case-card-top">
+    <div>
+      <div class="eyebrow">{html.escape(category_label)} &middot; {html.escape(slice_label)}</div>
+      <h3>{html.escape(result.case_id)}</h3>
+      <span class="muted">{html.escape(model_name)}</span>
+    </div>
+    <div class="case-score">
+      <strong>{score}</strong>
+      <span class="status-pill {label}">{html.escape(label.replace("_", " "))}</span>
+    </div>
+  </div>
+  <div class="case-grid">
+    <section>
+      <h4>Semantic impact</h4>
+      <p>{html.escape(impact)}</p>
+      <div>{issue_markup}</div>
+      {action_markup}
+    </section>
+    <section class="case-evidence">
+      <h4>{html.escape(evidence_heading)}</h4>
+      {transcript_markup}
+      {differences_markup}
+    </section>
+  </div>
+  <details class="case-details">
+    <summary>Judge rationale, vote details, and provenance</summary>
+    <p class="reason">{html.escape(result.reason)}</p>
     {score_detail}
-  </td>
-  <td data-label="Label" class="{label}">{html.escape(label.replace("_", " "))}</td>
-  <td data-label="Reason" class="reason">{html.escape(result.reason)}</td>
-  <td data-label="Diagnostics">{_render_diagnostics(result)}</td>
-  <td data-label="Status">{html.escape(result.status)}</td>
-</tr>"""
+    {_render_diagnostics(result)}
+    <h4 style="margin-top:14px">Provenance</h4>
+    {_render_provenance(result)}
+    <p class="muted">Evaluation status: {html.escape(result.status.replace("_", " "))}</p>
+  </details>
+</article>"""
 
 
 def _render_case_table_controls(results: list[EvaluationResult]) -> str:
@@ -1351,56 +1675,73 @@ def _render_case_table_controls(results: list[EvaluationResult]) -> str:
             if (value := _metadata_group_value(result, "tts_slice")) is not None
         }
     )
-    model_options = "".join(
-        f'<option value="{html.escape(model)}">{html.escape(model)}</option>' for model in models
+    labels = sorted({result.label for result in results})
+    statuses = sorted({result.status for result in results})
+
+    def select_control(
+        *,
+        control_id: str,
+        label: str,
+        all_label: str,
+        values: list[str],
+    ) -> str:
+        if len(values) <= 1:
+            return f'<input id="{control_id}" type="hidden" value="">'
+        options = "".join(
+            f'<option value="{html.escape(value)}">{html.escape(value.replace("_", " ").title())}</option>'
+            for value in values
+        )
+        return f"""<label>{html.escape(label)}
+        <select id="{control_id}">
+          <option value="">{html.escape(all_label)}</option>
+          {options}
+        </select>
+      </label>"""
+
+    label_control = select_control(
+        control_id="case-label-filter",
+        label="Quality",
+        all_label="All labels",
+        values=labels,
     )
-    category_options = "".join(
-        f'<option value="{html.escape(category)}">{html.escape(category.replace("_", " "))}</option>'
-        for category in categories
+    status_control = select_control(
+        control_id="case-status-filter",
+        label="Judge status",
+        all_label="All statuses",
+        values=statuses,
     )
-    slice_options = "".join(
-        f'<option value="{html.escape(tts_slice)}">{html.escape(tts_slice.replace("_", " "))}</option>'
-        for tts_slice in slices
+    model_control = select_control(
+        control_id="case-model-filter",
+        label="Model",
+        all_label="All models",
+        values=models,
+    )
+    category_control = select_control(
+        control_id="case-category-filter",
+        label="Category",
+        all_label="All categories",
+        values=categories,
+    )
+    slice_control = select_control(
+        control_id="case-slice-filter",
+        label="Slice",
+        all_label="All slices",
+        values=slices,
     )
     return f"""<section class="case-tools" aria-label="Case result filters">
-      <label>Search
+      <label class="search-control">Search
         <input id="case-search" type="search" placeholder="case, model, category, reason, issue">
       </label>
-      <label>Label
-        <select id="case-label-filter">
-          <option value="">All labels</option>
-          <option value="accurate">Accurate</option>
-          <option value="needs_review">Needs review</option>
-          <option value="inaccurate">Inaccurate</option>
-        </select>
-      </label>
-      <label>Status
-        <select id="case-status-filter">
-          <option value="">All statuses</option>
-          <option value="ok">OK</option>
-          <option value="provider_error">Provider error</option>
-          <option value="parse_error">Parse error</option>
-        </select>
-      </label>
-      <label>Model
-        <select id="case-model-filter">
-          <option value="">All models</option>
-          {model_options}
-        </select>
-      </label>
-      <label>Category
-        <select id="case-category-filter">
-          <option value="">All categories</option>
-          {category_options}
-        </select>
-      </label>
-      <label>TTS Slice
-        <select id="case-slice-filter">
-          <option value="">All slices</option>
-          {slice_options}
-        </select>
-      </label>
-      <div class="muted" id="case-visible-count">{len(results)} / {len(results)} shown</div>
+      {label_control}
+      {status_control}
+      {model_control}
+      {category_control}
+      {slice_control}
+      <div class="sort-tools" aria-label="Sort cases">
+        <button class="sort-button" type="button" data-sort="score" aria-pressed="true">Lowest score</button>
+        <button class="sort-button" type="button" data-sort="case" aria-pressed="false">Case ID</button>
+      </div>
+      <div class="muted results-count" id="case-visible-count" role="status" aria-live="polite">{len(results)} / {len(results)} shown</div>
     </section>"""
 
 
@@ -1439,7 +1780,10 @@ def _result_search_text(result: EvaluationResult) -> str:
 
 def _bucket_counts(scores: list[int]) -> list[tuple[str, int]]:
     ranges = [(1, 20), (21, 40), (41, 60), (61, 80), (81, 100)]
-    return [(f"{low}-{high}", sum(1 for score in scores if low <= score <= high)) for low, high in ranges]
+    return [
+        (f"{low}-{high}", sum(1 for score in scores if low <= score <= high))
+        for low, high in ranges
+    ]
 
 
 def _field_counts(values: Iterable[str | None]) -> list[tuple[str, int]]:
@@ -1458,9 +1802,7 @@ def _high_impact_category_counts(results: list[EvaluationResult]) -> list[tuple[
     counts: Counter[str] = Counter()
     for result in results:
         counts.update(
-            category
-            for category in result.error_categories
-            if category in HIGH_IMPACT_CATEGORIES
+            category for category in result.error_categories if category in HIGH_IMPACT_CATEGORIES
         )
     return counts.most_common()
 
@@ -1562,6 +1904,7 @@ def _weakest_segments(
     representative_limit: int = 3,
 ) -> list[SegmentSummary]:
     summaries: list[SegmentSummary] = []
+    is_asr = _is_asr_report(results)
     for field_label, field in SEGMENT_FIELDS:
         groups: dict[str, list[EvaluationResult]] = {}
         for result in results:
@@ -1569,6 +1912,11 @@ def _weakest_segments(
             if value is None:
                 continue
             groups.setdefault(value, []).append(result)
+
+        if len(groups) < 2:
+            continue
+
+        display_field_label = "ASR Slice" if is_asr and field == "tts_slice" else field_label
 
         field_summaries: list[SegmentSummary] = []
         for name, group_results in groups.items():
@@ -1585,7 +1933,7 @@ def _weakest_segments(
             )[:representative_limit]
             field_summaries.append(
                 SegmentSummary(
-                    field_label=field_label,
+                    field_label=display_field_label,
                     name=name,
                     count=len(group_results),
                     average=statistics.mean(scores),
@@ -1656,7 +2004,9 @@ def _source_bases_for_results(results: list[EvaluationResult], limit: int = 2) -
 
 def _render_weakest_segments(items: list[SegmentSummary]) -> str:
     if not items:
-        return '<div class="metric"><strong class="muted">No segment metadata available</strong></div>'
+        return (
+            '<div class="metric"><strong class="muted">No segment metadata available</strong></div>'
+        )
 
     cards = "\n".join(_render_weakest_segment_card(item) for item in items)
     return f'<section class="summary">{cards}</section>'
@@ -1685,7 +2035,7 @@ def _render_weakest_segment_card(item: SegmentSummary) -> str:
       <div><span class="muted">Likely fix areas</span><br>{fix_markup}</div>
       <div><span class="muted">Issue categories</span><br>{issue_markup}</div>
       <div><span class="muted">Evaluation failures</span><br>{status_markup}</div>
-      <div><span class="muted">Representative low-score samples</span><ul class="counts">{case_markup}</ul></div>
+      <div><span class="muted">Representative low-score samples</span><ul class="evidence-list">{case_markup}</ul></div>
     </div>"""
 
 
@@ -1700,14 +2050,14 @@ def _render_guidance_tags(label: str, items: list[str]) -> str:
         return ""
     return (
         f'<div><span class="muted">{html.escape(label)}</span><br>'
-        f'{_render_inline_tags(items, empty_label="")}</div>'
+        f"{_render_inline_tags(items, empty_label='')}</div>"
     )
 
 
 def _segment_severity_class(average: float) -> str:
     if average < 60:
         return "severity-low"
-    if average < 80:
+    if average < 81:
         return "severity-medium"
     return "severity-high"
 
@@ -1768,23 +2118,8 @@ def _render_model_category_actions(items: list[ModelCategoryAction]) -> str:
     if not items:
         return '<div class="metric"><strong class="muted">No model/category pairs available</strong></div>'
 
-    rows = "\n".join(_render_model_category_action_row(item) for item in items)
-    return f"""<table>
-      <thead>
-        <tr>
-          <th>Model</th>
-          <th>Category</th>
-          <th>Score</th>
-          <th>Likely Fix Areas</th>
-          <th>Category Guidance</th>
-          <th>Evidence</th>
-          <th>Representative Cases</th>
-        </tr>
-      </thead>
-      <tbody>
-        {rows}
-      </tbody>
-    </table>"""
+    cards = "\n".join(_render_model_category_action_row(item) for item in items)
+    return f'<section class="action-grid">{cards}</section>'
 
 
 def _render_model_category_action_row(item: ModelCategoryAction) -> str:
@@ -1800,15 +2135,16 @@ def _render_model_category_action_row(item: ModelCategoryAction) -> str:
     focus_markup = _render_guidance_block("Focus", item.category_focus)
     basis_markup = _render_guidance_tags("Source basis", item.source_bases)
     case_markup = _render_representative_case_items(item.representative_cases)
-    return f"""<tr class="{_segment_severity_class(item.average)}">
-  <td data-label="Model">{html.escape(item.model)}</td>
-  <td data-label="Category">{html.escape(item.category.replace("_", " "))}</td>
-  <td data-label="Score"><strong>avg {item.average:.1f}</strong><br><span class="muted">n {item.count} / range {item.low}-{item.high}</span></td>
-  <td data-label="Likely Fix Areas">{fix_markup}</td>
-  <td data-label="Category Guidance">{focus_markup}{basis_markup}</td>
-  <td data-label="Evidence"><span class="muted">Issues</span><br>{issue_markup}<br><span class="muted">Failures</span><br>{status_markup}</td>
-  <td data-label="Representative Low-Score Samples"><ul class="counts">{case_markup}</ul></td>
-</tr>"""
+    return f"""<article class="action-card {_segment_severity_class(item.average)}">
+  <span class="eyebrow">{html.escape(item.category.replace("_", " "))}</span>
+  <h3>{html.escape(_friendly_model_name(item.model))}</h3>
+  <div class="score-line"><strong>{item.average:.1f}</strong><span class="muted">n={item.count} &middot; range {item.low}-{item.high}</span></div>
+  <div><span class="muted">Likely Fix Areas</span><br>{fix_markup}</div>
+  <div><span class="muted">Category Guidance</span>{focus_markup}{basis_markup}</div>
+  <div><span class="muted">Issues</span><br>{issue_markup}</div>
+  <div><span class="muted">Failures</span><br>{status_markup}</div>
+  <details><summary>Representative low-score samples</summary><ul class="evidence-list">{case_markup}</ul></details>
+</article>"""
 
 
 def _render_representative_case_items(results: list[EvaluationResult]) -> str:
@@ -1825,7 +2161,11 @@ def _render_representative_case_item(result: EvaluationResult) -> str:
         else ""
     )
     issue_markup = _render_inline_tags(
-        [category.replace("_", " ") for category in result.error_categories if category != "no_error"],
+        [
+            category.replace("_", " ")
+            for category in result.error_categories
+            if category != "no_error"
+        ],
         empty_label="No judge issue categories",
     )
     reason = result.semantic_error_summary or result.reason
@@ -1894,7 +2234,7 @@ def _baseline_deltas(
 def _render_baseline_context(baseline_model: str, detail: str) -> str:
     return (
         '<div class="metric">'
-        f'<span>Baseline Model</span><strong>{html.escape(baseline_model)}</strong>'
+        f"<span>Baseline Model</span><strong>{html.escape(baseline_model)}</strong>"
         f'<div class="muted">{html.escape(detail)}</div>'
         "</div>"
     )
@@ -1940,7 +2280,7 @@ def _render_baseline_delta_row(item: BaselineDeltaSummary) -> str:
         "<li>"
         f"<span>{html.escape(_source_case_key(result) or result.case_id)}</span> "
         f"<strong>{delta:+d}</strong>"
-        f"<br><span class=\"muted\">{html.escape(result.case_id)}: "
+        f'<br><span class="muted">{html.escape(result.case_id)}: '
         f"{result.overall_score} vs baseline {baseline.overall_score}</span>"
         "</li>"
         for result, baseline, delta in item.largest_regressions
@@ -1953,7 +2293,7 @@ def _render_baseline_delta_row(item: BaselineDeltaSummary) -> str:
   <td data-label="Matched Cases">{item.count}</td>
   <td data-label="Avg Delta"><strong>{item.average_delta:+.1f}</strong></td>
   <td data-label="Wins / Ties / Losses">{item.wins} / {item.ties} / {item.losses}</td>
-  <td data-label="Largest Regressions"><ul class="counts">{regression_markup}</ul></td>
+  <td data-label="Largest Regressions"><ul class="evidence-list">{regression_markup}</ul></td>
 </tr>"""
 
 
@@ -1990,7 +2330,9 @@ def _baseline_segment_deltas(
         deltas = [delta for _result, _baseline, delta in segment_pairs]
         regressions = [pair for pair in segment_pairs if pair[2] < 0]
         issue_counts = _segment_issue_counts([result for result, _baseline, _delta in regressions])
-        status_counts = _segment_status_counts([result for result, _baseline, _delta in regressions])
+        status_counts = _segment_status_counts(
+            [result for result, _baseline, _delta in regressions]
+        )
         summaries.append(
             BaselineSegmentDeltaSummary(
                 model=model,
@@ -2090,7 +2432,7 @@ def _render_baseline_segment_delta_row(item: BaselineSegmentDeltaSummary) -> str
         "<li>"
         f"<span>{html.escape(_source_case_key(result) or result.case_id)}</span> "
         f"<strong>{delta:+d}</strong>"
-        f"<br><span class=\"muted\">{html.escape(result.case_id)}: "
+        f'<br><span class="muted">{html.escape(result.case_id)}: '
         f"{result.overall_score} vs baseline {baseline.overall_score}</span>"
         "</li>"
         for result, baseline, delta in item.largest_regressions
@@ -2106,7 +2448,7 @@ def _render_baseline_segment_delta_row(item: BaselineSegmentDeltaSummary) -> str
   <td data-label="Avg Delta"><strong>{item.average_delta:+.1f}</strong></td>
   <td data-label="Wins / Ties / Losses">{item.wins} / {item.ties} / {item.losses}</td>
   <td data-label="Likely Fix Areas">{fix_markup}</td>
-  <td data-label="Regression Examples"><ul class="counts">{regression_markup}</ul></td>
+  <td data-label="Regression Examples"><ul class="evidence-list">{regression_markup}</ul></td>
 </tr>"""
 
 
@@ -2231,23 +2573,26 @@ def _render_priority_cases(results: list[EvaluationResult]) -> str:
 </tr>"""
         for result in results
     )
-    return f"""<table>
+    return f"""<div class="table-region" role="region" aria-label="Priority cases" tabindex="0"><table class="priority-table">
+      <caption class="sr-only">Cases that need attention, ordered by semantic severity and score</caption>
       <thead>
         <tr>
-          <th>Case</th>
-          <th>Score</th>
-          <th>Meaning</th>
-          <th>Category</th>
-          <th>Summary</th>
+          <th scope="col">Case</th>
+          <th scope="col">Score</th>
+          <th scope="col">Meaning</th>
+          <th scope="col">Category</th>
+          <th scope="col">Summary</th>
         </tr>
       </thead>
       <tbody>
         {rows}
       </tbody>
-    </table>"""
+    </table></div>"""
 
 
-def _calibration_checks(results: list[EvaluationResult]) -> list[tuple[EvaluationResult, list[str]]]:
+def _calibration_checks(
+    results: list[EvaluationResult],
+) -> list[tuple[EvaluationResult, list[str]]]:
     checks: list[tuple[EvaluationResult, list[str]]] = []
     for result in results:
         mismatches: list[str] = []
@@ -2289,18 +2634,19 @@ def _render_calibration_checks(checks: list[tuple[EvaluationResult, list[str]]])
 </tr>"""
         for result, mismatches in checks
     )
-    return f"""<table>
+    return f"""<div class="table-region" role="region" aria-label="Calibration mismatches" tabindex="0"><table class="calibration-table">
+      <caption class="sr-only">Calibration checks that did not match expectations</caption>
       <thead>
         <tr>
-          <th>Case</th>
-          <th>Focus</th>
-          <th>Mismatch</th>
+          <th scope="col">Case</th>
+          <th scope="col">Focus</th>
+          <th scope="col">Mismatch</th>
         </tr>
       </thead>
       <tbody>
         {rows}
       </tbody>
-    </table>"""
+    </table></div>"""
 
 
 def _meaning_severity(result: EvaluationResult) -> int:
@@ -2339,14 +2685,16 @@ def _render_diagnostics(result: EvaluationResult) -> str:
         )
     if result.judge_transcript:
         parts.append(
-            f'<details><summary>Judge transcript</summary>'
+            f"<details><summary>Judge transcript</summary>"
             f"{html.escape(result.judge_transcript)}</details>"
         )
     if result.key_differences:
         parts.append(_render_list("Key differences", result.key_differences))
     if result.error_categories:
         categories = ", ".join(result.error_categories)
-        parts.append(f'<div><span class="muted">Categories</span><br>{html.escape(categories)}</div>')
+        parts.append(
+            f'<div><span class="muted">Categories</span><br>{html.escape(categories)}</div>'
+        )
     if result.researcher_notes:
         parts.append(_render_list("Researcher notes", result.researcher_notes))
     return "".join(parts) if parts else '<span class="muted">None</span>'
@@ -2388,7 +2736,9 @@ def _render_judge_sample_scores(result: EvaluationResult) -> str:
     if not isinstance(scores, list) or len(scores) <= 1:
         return ""
     score_text = ", ".join(str(score) for score in scores)
-    average_text = f"{average:.2f}" if isinstance(average, (int, float)) else str(result.overall_score)
+    average_text = (
+        f"{average:.2f}" if isinstance(average, (int, float)) else str(result.overall_score)
+    )
     return (
         '<div class="muted" style="margin-top:6px">'
         f"judge samples: {html.escape(score_text)}; avg {html.escape(average_text)}"

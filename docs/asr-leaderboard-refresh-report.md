@@ -33,7 +33,7 @@ This generated report summarizes the verified ASR leaderboard artifact set.
 | --- | ---: | ---: | ---: | --- |
 | `mlx-community/VibeVoice-ASR-4bit` | 35/35 ok | 105 | 96.5 | 33 accurate, 1 needs_review, 1 inaccurate |
 | `mlx-community/Qwen3-ASR-1.7B-8bit` | 35/35 ok | 105 | 95.2 | 31 accurate, 3 needs_review, 1 inaccurate |
-| `mlx-community/whisper-large-v3-turbo-asr-fp16` | 35/35 ok | 105 | 93.4 | 30 accurate, 3 needs_review, 2 inaccurate |
+| `mlx-community/whisper-large-v3-turbo-asr-fp16` | 35/35 ok | 105 | 94.3 | 31 accurate, 2 needs_review, 2 inaccurate |
 
 ## Category Scores
 
@@ -41,7 +41,7 @@ This generated report summarizes the verified ASR leaderboard artifact set.
 | --- | ---: | ---: | --- |
 | `transcription_accuracy_wer` | 15 | 94.6 | 13 accurate, 2 needs_review |
 | `numeric_unit_integrity` | 15 | 94.4 | 13 accurate, 2 needs_review |
-| `negation_modality_scope` | 15 | 97.7 | 14 accurate, 1 needs_review |
+| `negation_modality_scope` | 15 | 99.9 | 15 accurate |
 | `temporal_scheduling_accuracy` | 15 | 96.5 | 14 accurate, 1 inaccurate |
 | `entity_factual_integrity` | 15 | 89.3 | 12 accurate, 3 inaccurate |
 | `semantic_paraphrase_preservation` | 15 | 98.7 | 15 accurate |
@@ -82,7 +82,7 @@ This generated report summarizes the verified ASR leaderboard artifact set.
 | --- | --- | --- | ---: | --- | ---: | ---: | --- |
 | `runs/asr-leaderboard/whisper-large-v3-turbo-smoke/judge-report/results.jsonl` | `runs/asr-leaderboard/whisper-large-v3-turbo-smoke/judge-report/report.html` | `mlx-community/whisper-large-v3-turbo-asr-fp16` | 3/3 ok | `transcription_accuracy_wer`: 3 | 9 | 92.0 | 2 accurate, 1 needs_review |
 | `runs/asr-leaderboard/whisper-large-v3-turbo-full-gap/judge-report/results.jsonl` | `runs/asr-leaderboard/whisper-large-v3-turbo-full-gap/judge-report/report.html` | `mlx-community/whisper-large-v3-turbo-asr-fp16` | 12/12 ok | `negation_modality_scope`: 3, `numeric_unit_integrity`: 3, `temporal_scheduling_accuracy`: 4, `transcription_accuracy_wer`: 2 | 36 | 92.6 | 10 accurate, 1 needs_review, 1 inaccurate |
-| `runs/asr-leaderboard/whisper-large-v3-turbo-semantic-smoke/judge-report/results.jsonl` | `runs/asr-leaderboard/whisper-large-v3-turbo-semantic-smoke/judge-report/report.html` | `mlx-community/whisper-large-v3-turbo-asr-fp16` | 5/5 ok | `negation_modality_scope`: 2, `numeric_unit_integrity`: 2, `temporal_scheduling_accuracy`: 1 | 15 | 93.4 | 4 accurate, 1 needs_review |
+| `runs/asr-leaderboard/whisper-large-v3-turbo-semantic-smoke/judge-report/results.jsonl` | `runs/asr-leaderboard/whisper-large-v3-turbo-semantic-smoke/judge-report/report.html` | `mlx-community/whisper-large-v3-turbo-asr-fp16` | 5/5 ok | `negation_modality_scope`: 2, `numeric_unit_integrity`: 2, `temporal_scheduling_accuracy`: 1 | 15 | 100.0 | 5 accurate |
 | `runs/asr-leaderboard/whisper-large-v3-turbo-entity-smoke/judge-report/results.jsonl` | `runs/asr-leaderboard/whisper-large-v3-turbo-entity-smoke/judge-report/report.html` | `mlx-community/whisper-large-v3-turbo-asr-fp16` | 5/5 ok | `entity_factual_integrity`: 5 | 15 | 88.6 | 4 accurate, 1 inaccurate |
 | `runs/asr-leaderboard/whisper-large-v3-turbo-paraphrase-smoke/judge-report/results.jsonl` | `runs/asr-leaderboard/whisper-large-v3-turbo-paraphrase-smoke/judge-report/report.html` | `mlx-community/whisper-large-v3-turbo-asr-fp16` | 5/5 ok | `semantic_paraphrase_preservation`: 5 | 15 | 97.6 | 5 accurate |
 | `runs/asr-leaderboard/whisper-large-v3-turbo-noise-smoke/judge-report/results.jsonl` | `runs/asr-leaderboard/whisper-large-v3-turbo-noise-smoke/judge-report/report.html` | `mlx-community/whisper-large-v3-turbo-asr-fp16` | 5/5 ok | `acoustic_noise_robustness`: 5 | 15 | 96.6 | 5 accurate |

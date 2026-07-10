@@ -5,15 +5,19 @@ import hashlib
 import html
 import json
 import statistics
+import sys
 from collections import Counter, defaultdict
 from dataclasses import dataclass
 from pathlib import Path
-
-from open_audio_judge.models import EvaluationResult
-from open_audio_judge.runner import load_results_jsonl
-
+from urllib.parse import urlencode
 
 ROOT = Path(__file__).resolve().parents[1]
+sys.path.insert(0, str(ROOT / "src"))
+
+from open_audio_judge.models import EvaluationResult  # noqa: E402
+from open_audio_judge.runner import load_results_jsonl  # noqa: E402
+
+
 DEFAULT_RESULTS = ROOT / "runs" / "asr-leaderboard" / "full-35-combined" / "results.jsonl"
 DEFAULT_PAGE = ROOT / "docs" / "asr-leaderboard-demo.html"
 DEFAULT_SUMMARY = ROOT / "docs" / "asr-leaderboard-summary.json"
@@ -282,7 +286,6 @@ def render_generated_sections(
     categories = sorted({str(result.metadata.get("eval_category", "")) for result in results})
     category_list = ", ".join(f"<code>{html.escape(category)}</code>" for category in categories)
     category_columns = category_columns_for_results(results)
-    results_label = html.escape(_repo_relative(results_path))
     report_label = html.escape(_repo_relative(results_path.with_name("report.html")))
     hosted_combined_report_url = html.escape(
         f"{HOSTED_BASE_URL}/asr-leaderboard/full-35-combined/report.html"
@@ -336,62 +339,122 @@ def render_generated_sections(
     source_file_summaries = summarize_source_result_files(source_result_paths or [])
     source_report_rows = _render_source_report_rows(source_file_summaries)
     automation_stage_rows = _render_automation_stage_rows(workflow["automation_stages"])
+    judge_successes, judge_attempts = _judge_attempt_health(results)
+    scope_markup = _render_benchmark_scope(
+        results,
+        model_count=len(model_summaries),
+        judge_successes=judge_successes,
+        judge_attempts=judge_attempts,
+    )
+    decision_markup = _render_leaderboard_decision_brief(
+        results,
+        model_summaries=model_summaries,
+        report_url=hosted_combined_report_url,
+    )
+    shared_risk_markup = _render_shared_risks(
+        results,
+        model_count=len(model_summaries),
+        report_url=hosted_combined_report_url,
+    )
+    best_category_scores = _best_category_scores(results)
+    limitations_text = _benchmark_limitations_text(results)
 
     return "\n".join(
         [
             START_MARKER,
-            "    <h2>Verified Leaderboard Results</h2>",
+            '    <nav class="jump-links" aria-label="Leaderboard sections">'
+            '<a href="#ranking">Ranking</a><a href="#category-breakdown">Use-case scores</a>'
+            '<a href="#shared-risks">Shared risks</a><a href="#methodology">Methodology</a>'
+            f'<a href="{hosted_combined_report_url}">Explore all cases</a></nav>',
+            '    <section id="ranking" class="section-heading">',
+            '      <span class="eyebrow">Benchmark snapshot</span>',
+            "      <h2>Verified Leaderboard Results</h2>",
             (
-                '    <p class="muted">Generated from <code>'
-                f"{results_label}</code>. The verified matrix covers {len(results)} judged transcripts "
-                f"across {len(model_summaries)} MLX ASR models and {len(categories)} research categories: "
-                f"{category_list}.</p>"
+                '      <p class="lede">Which model best preserves meaning on this small, controlled ASR set? '
+                "Three MLX Community ASR models transcribe the same research-guided eval set. "
+                "Scores below are Gemini semantic-judge scores (higher is better), not word error rate.</p>"
             ),
-            "    <table>",
-            "      <thead><tr><th>Model</th><th>Cases</th><th>Gemini Samples</th><th>Average Score</th><th>Labels</th></tr></thead>",
+            "    </section>",
+            scope_markup,
+            decision_markup,
+            '    <div class="table-region ranking-region" role="region" aria-label="ASR model ranking" tabindex="0">',
+            '    <table class="ranking-table">',
+            '      <caption class="sr-only">ASR models ranked by average semantic judge score</caption>',
+            '      <thead><tr><th scope="col">Rank</th><th scope="col">Model</th>'
+            '<th scope="col">Semantic score &#8593;</th><th scope="col">Accurate cases</th>'
+            '<th scope="col">Needs attention</th><th scope="col">Weakest category</th>'
+            '<th scope="col">Evidence</th></tr></thead>',
             "      <tbody>",
-            *(_render_model_row(summary) for summary in model_summaries),
+            *(
+                _render_model_row(
+                    summary,
+                    rank=index,
+                    results=results,
+                    report_url=hosted_combined_report_url,
+                )
+                for index, summary in enumerate(model_summaries, start=1)
+            ),
             "      </tbody>",
             "    </table>",
+            "    </div>",
             "",
+            '    <section id="category-breakdown" class="section-heading">',
             "    <h2>Category Breakdown</h2>",
-            "    <table>",
-            "      <thead><tr><th>Model</th>"
-            + "".join(f"<th>{html.escape(label)}</th>" for _, label in category_columns)
+            '    <p class="muted">Use this matrix to choose for a workload. Every cell is a semantic score over five cases; it is not WER. Best-in-column cells are marked.</p>',
+            '    <div class="heat-legend" aria-label="Score legend"><span class="heat heat-top">95–100 strong</span><span class="heat heat-good">81–94 solid</span><span class="heat heat-watch">60–80 review</span><span class="heat heat-risk">Below 60 risk</span></div>',
+            "    </section>",
+            '    <div class="table-region heatmap-region" role="region" aria-label="Scores by model and category" tabindex="0">',
+            '    <table class="heatmap">',
+            '      <caption class="sr-only">Semantic score by model and evaluation category</caption>',
+            '      <thead><tr><th scope="col">Model</th>'
+            + "".join(
+                _render_category_header(category, label) for category, label in category_columns
+            )
             + "</tr></thead>",
             "      <tbody>",
             *(
-                _render_category_row(model, results, category_columns=category_columns)
+                _render_category_row(
+                    model,
+                    results,
+                    category_columns=category_columns,
+                    best_category_scores=best_category_scores,
+                    report_url=hosted_combined_report_url,
+                )
                 for model in [summary.model for summary in model_summaries]
             ),
             "      </tbody>",
             "    </table>",
+            "    </div>",
+            "",
+            '    <section id="shared-risks" class="section-heading">',
+            "      <h2>Shared Failure Patterns</h2>",
+            '      <p class="muted">These cases expose risks that affect more than one model and deserve targeted validation or guardrails.</p>',
+            "    </section>",
+            shared_risk_markup,
+            "",
+            '    <section id="methodology" class="methodology-panel">',
+            "      <h2>Methodology &amp; limitations</h2>",
+            f"      <p>{html.escape(limitations_text)}</p>",
+            (
+                '      <p class="muted">The seven research categories are '
+                f"{category_list}. Results are directional evidence, not deployment proof.</p>"
+            ),
+            "    </section>",
             "",
             "    <h2>Report Links</h2>",
-            "    <table>",
-            "      <thead><tr><th>Artifact</th><th>Hosted Link</th><th>Local Source</th></tr></thead>",
-            "      <tbody>",
-            "        <tr>"
-            "<td>Combined full-35 report</td>"
-            f"<td><a href=\"{hosted_combined_report_url}\">{hosted_combined_report_url}</a></td>"
-            f"<td><code>{report_label}</code></td>"
-            "</tr>",
-            "        <tr>"
-            "<td>Generated report index</td>"
-            f"<td><a href=\"{hosted_report_index_url}\">{hosted_report_index_url}</a></td>"
-            f"<td><code>{report_index_label}</code></td>"
-            "</tr>",
-            "        <tr>"
-            "<td>Machine-readable report map</td>"
-            f"<td><a href=\"{hosted_report_links_url}\">{hosted_report_links_url}</a></td>"
-            f"<td><code>{report_links_label}</code></td>"
-            "</tr>",
-            "      </tbody>",
-            "    </table>",
+            '    <div class="report-links">',
+            f'      <a class="link-card" href="{hosted_combined_report_url}"><strong>Combined full-35 report</strong><span>Explore all 105 case results by model, category, slice, score, and issue.</span></a>',
+            f'      <a class="link-card" href="{hosted_report_index_url}"><strong>Generated report index</strong><span>Browse source reports generated for each contributing run.</span></a>',
+            f'      <a class="link-card" href="{hosted_report_links_url}"><strong>Machine-readable report map</strong><span>Use the JSON links and provenance index.</span></a>',
+            "    </div>",
+            "",
+            '    <details class="technical-details">',
+            "      <summary>Maintainer appendix: reproduce, refresh, and inspect generated artifacts</summary>",
+            '      <div class="technical-details-body">',
             (
                 '    <p class="muted">Total Gemini judge samples: '
                 f"{total_judge_samples}. Refresh this block with "
-                '<code>.venv/bin/python scripts/refresh_asr_leaderboard_artifacts.py</code> '
+                "<code>.venv/bin/python scripts/refresh_asr_leaderboard_artifacts.py</code> "
                 "after rerunning the verified ASR model jobs. The combined local report is "
                 f"<code>{report_label}</code> and the committed summary artifact is "
                 f"<code>{summary_label}</code>. The generated refresh report is "
@@ -420,7 +483,7 @@ def render_generated_sections(
             ),
             "",
             "    <h2>Generated Refresh Workflow</h2>",
-            "    <p class=\"muted\">These commands are generated from the same workflow metadata written to "
+            '    <p class="muted">These commands are generated from the same workflow metadata written to '
             f"<code>{summary_label}</code> and <code>{refresh_report_label}</code>.</p>",
             "    <table>",
             "      <thead><tr><th>Step</th><th>Command</th></tr></thead>",
@@ -444,7 +507,7 @@ def render_generated_sections(
             "    </table>",
             "",
             "    <h2>Generated Model Refresh Commands</h2>",
-            "    <p class=\"muted\">Load the Gemini secret only in the local shell before running live judge calls: "
+            '    <p class="muted">Load the Gemini secret only in the local shell before running live judge calls: '
             f"<code>{html.escape(_shell_join(workflow['local_secret_env_command']))}</code>.</p>",
             "    <table>",
             "      <thead><tr><th>Model</th><th>Run Command</th></tr></thead>",
@@ -459,11 +522,10 @@ def render_generated_sections(
             "      </tbody>",
             "    </table>",
             (
-                "    <p class=\"muted\">If a primary MLX ASR model is unsupported locally, record that "
+                '    <p class="muted">If a primary MLX ASR model is unsupported locally, record that '
                 "blocked state in the run notes before trying the documented fallbacks: "
                 + ", ".join(
-                    f"<code>{html.escape(model)}</code>"
-                    for model in workflow["fallback_model_ids"]
+                    f"<code>{html.escape(model)}</code>" for model in workflow["fallback_model_ids"]
                 )
                 + ".</p>"
             ),
@@ -482,6 +544,8 @@ def render_generated_sections(
             "      </tbody>",
             "    </table>",
             *source_report_rows,
+            "      </div>",
+            "    </details>",
             END_MARKER,
         ]
     )
@@ -504,19 +568,16 @@ def write_summary_artifact(
     source_file_summaries = summarize_source_result_files(source_result_paths or [])
     output_artifacts = build_output_artifact_index(results_path=results_path)
     next_runs = build_next_run_plan(results, expected_cases_per_model=expected_cases_per_model)
+    judge_successes, judge_attempts = _judge_attempt_health(results)
     output_path.parent.mkdir(parents=True, exist_ok=True)
     output_path.write_text(
         json.dumps(
             {
                 "results_path": _repo_relative(results_path),
                 "report_path": _repo_relative(results_path.with_name("report.html")),
-                "source_result_paths": [
-                    _repo_relative(path)
-                    for path in source_result_paths or []
-                ],
+                "source_result_paths": [_repo_relative(path) for path in source_result_paths or []],
                 "source_result_files": [
-                    _source_file_summary_json(summary)
-                    for summary in source_file_summaries
+                    _source_file_summary_json(summary) for summary in source_file_summaries
                 ],
                 "run_manifest_path": _repo_relative(DEFAULT_RUN_MANIFEST),
                 "refresh_commands_path": _repo_relative(DEFAULT_REFRESH_COMMANDS),
@@ -542,10 +603,17 @@ def write_summary_artifact(
                 "category_count": len(category_summaries),
                 "expected_cases_per_model": expected_cases_per_model,
                 "category_columns": [
-                    {"category": category, "label": label}
-                    for category, label in category_columns
+                    {"category": category, "label": label} for category, label in category_columns
                 ],
-                "total_gemini_judge_samples": sum(summary.judge_samples for summary in model_summaries),
+                "total_gemini_judge_samples": sum(
+                    summary.judge_samples for summary in model_summaries
+                ),
+                "judge_attempt_success_count": judge_successes,
+                "judge_attempt_count": judge_attempts,
+                "score_definition": (
+                    "Gemini semantic meaning-preservation score from 1 to 100; higher is better; "
+                    "not word error rate"
+                ),
                 "model_category_matrix": coverage_matrix,
                 "models": [
                     {
@@ -651,19 +719,13 @@ def write_refresh_report(
                 "",
                 "## Source Result Files",
                 "",
-                *(
-                    f"- `{_repo_relative(path)}`"
-                    for path in source_result_paths or [results_path]
-                ),
+                *(f"- `{_repo_relative(path)}`" for path in source_result_paths or [results_path]),
                 "",
                 "## Source Result File Coverage",
                 "",
                 "| Path | Report | Models | Cases | Categories | Gemini Samples | Average Score | Labels |",
                 "| --- | --- | --- | ---: | --- | ---: | ---: | --- |",
-                *(
-                    _source_file_markdown_row(summary)
-                    for summary in source_file_summaries
-                ),
+                *(_source_file_markdown_row(summary) for summary in source_file_summaries),
                 "",
                 "## Next Refresh Plan",
                 "",
@@ -982,10 +1044,7 @@ def write_refresh_commands_script(
         "# " + _shell_join(workflow["runtime_ready_check_command"]),
         "",
         "# Optional live refresh: run primary MLX ASR model jobs when the local runtime is ready.",
-        *(
-            "# " + _shell_join(command["command"])
-            for command in workflow["model_run_commands"]
-        ),
+        *("# " + _shell_join(command["command"]) for command in workflow["model_run_commands"]),
         "",
         "# If a primary model is blocked, record the unsupported state before trying fallbacks.",
         "# Fallback models: " + ", ".join(workflow["fallback_model_ids"]),
@@ -1089,7 +1148,7 @@ def write_live_refresh_script(output_path: Path) -> None:
         "  if [[ ${exit_code} -ne 0 ]]; then",
         '    mkdir -p "$(dirname "${BLOCKED_MODEL_LOG}")"',
         "    blocked_model_count=$((blocked_model_count + 1))",
-        "    printf '{\"schema_version\":1,\"model\":\"%s\",\"run_name\":\"%s\",\"status\":\"blocked\",\"exit_code\":%s,\"recorded_at_utc\":\"%s\",\"cases_path\":\"%s\",\"judge_provider\":\"%s\",\"judge_samples\":%s,\"fallback_model_ids\":%s,\"fallback_policy\":\"record before fallback; do not silently substitute\"}\\n' \\",
+        '    printf \'{"schema_version":1,"model":"%s","run_name":"%s","status":"blocked","exit_code":%s,"recorded_at_utc":"%s","cases_path":"%s","judge_provider":"%s","judge_samples":%s,"fallback_model_ids":%s,"fallback_policy":"record before fallback; do not silently substitute"}\\n\' \\',
         '      "${model}" "${run_name}" "${exit_code}" "$(date -u +%Y-%m-%dT%H:%M:%SZ)" "${PRIMARY_CASES}" "${JUDGE_PROVIDER}" "${JUDGE_SAMPLES}" "${FALLBACK_MODEL_IDS_JSON}" >> "${BLOCKED_MODEL_LOG}"',
         '    echo "Recorded blocked primary ASR model in ${BLOCKED_MODEL_LOG}: ${model}" >&2',
         "  fi",
@@ -1556,7 +1615,9 @@ def build_next_run_plan(
                 {
                     "model": model,
                     "run_name": run_name,
-                    "missing_case_count": sum(int(cell["missing_ok_cases"]) for cell in missing_for_model),
+                    "missing_case_count": sum(
+                        int(cell["missing_ok_cases"]) for cell in missing_for_model
+                    ),
                     "categories": [str(cell["category"]) for cell in missing_for_model],
                     "command": [
                         ".venv/bin/oaj",
@@ -1616,18 +1677,17 @@ def build_model_category_matrix(results: list[EvaluationResult]) -> list[dict[st
     matrix = []
     for summary in model_summaries:
         model_results = [
-            result
-            for result in results
-            if result.metadata.get("candidate_model") == summary.model
+            result for result in results if result.metadata.get("candidate_model") == summary.model
         ]
-        counts = Counter(str(result.metadata.get("eval_category") or "") for result in model_results)
+        counts = Counter(
+            str(result.metadata.get("eval_category") or "") for result in model_results
+        )
         matrix.append(
             {
                 "model": summary.model,
                 "total_results": len(model_results),
                 "category_counts": {
-                    category: counts.get(category, 0)
-                    for category in category_order
+                    category: counts.get(category, 0) for category in category_order
                 },
             }
         )
@@ -1705,10 +1765,7 @@ def build_source_report_coverage_matrix(
 
 
 def category_columns_for_results(results: list[EvaluationResult]) -> list[tuple[str, str]]:
-    observed_categories = {
-        str(result.metadata.get("eval_category") or "")
-        for result in results
-    }
+    observed_categories = {str(result.metadata.get("eval_category") or "") for result in results}
     if "" in observed_categories:
         raise ValueError("Every result must include metadata.eval_category.")
 
@@ -1732,16 +1789,13 @@ def summarize_source_result_files(result_paths: list[Path]) -> list[SourceResult
         if not file_results:
             raise ValueError(f"Source result file is empty: {path}")
         models = tuple(
-            sorted(
-                {
-                    str(result.metadata.get("candidate_model") or "")
-                    for result in file_results
-                }
-            )
+            sorted({str(result.metadata.get("candidate_model") or "") for result in file_results})
         )
         if any(not model for model in models):
             raise ValueError(f"Missing metadata.candidate_model in {path}")
-        categories = Counter(str(result.metadata.get("eval_category") or "") for result in file_results)
+        categories = Counter(
+            str(result.metadata.get("eval_category") or "") for result in file_results
+        )
         if any(not category for category in categories):
             raise ValueError(f"Missing metadata.eval_category in {path}")
         summaries.append(
@@ -1760,7 +1814,9 @@ def summarize_source_result_files(result_paths: list[Path]) -> list[SourceResult
                 models=models,
                 result_count=len(file_results),
                 ok_count=sum(1 for result in file_results if result.status == "ok"),
-                judge_samples=sum(int(result.metadata.get("judge_sample_count") or 1) for result in file_results),
+                judge_samples=sum(
+                    int(result.metadata.get("judge_sample_count") or 1) for result in file_results
+                ),
                 average_score=statistics.mean(result.overall_score for result in file_results),
                 labels=Counter(result.label for result in file_results),
                 categories=categories,
@@ -1784,12 +1840,27 @@ def summarize_models(results: list[EvaluationResult]) -> list[ModelSummary]:
                 model=model,
                 result_count=len(model_results),
                 ok_count=sum(1 for result in model_results if result.status == "ok"),
-                judge_samples=sum(int(result.metadata.get("judge_sample_count") or 1) for result in model_results),
+                judge_samples=sum(
+                    int(result.metadata.get("judge_sample_count") or 1) for result in model_results
+                ),
                 average_score=statistics.mean(result.overall_score for result in model_results),
                 labels=Counter(result.label for result in model_results),
             )
         )
     return sorted(summaries, key=lambda summary: (-summary.average_score, summary.model.lower()))
+
+
+def _judge_attempt_health(results: list[EvaluationResult]) -> tuple[int, int]:
+    successes = 0
+    attempts = 0
+    for result in results:
+        sample_count = int(result.metadata.get("judge_sample_count") or 1)
+        success_count = result.metadata.get("judge_sample_success_count")
+        if success_count is None:
+            success_count = sample_count if result.status == "ok" else 0
+        successes += int(success_count or 0)
+        attempts += sample_count
+    return successes, attempts
 
 
 def summarize_categories(results: list[EvaluationResult]) -> list[CategorySummary]:
@@ -1813,7 +1884,10 @@ def summarize_categories(results: list[EvaluationResult]) -> list[CategorySummar
     column_order = {category: index for index, (category, _) in enumerate(CATEGORY_COLUMNS)}
     return sorted(
         summaries,
-        key=lambda summary: (column_order.get(summary.category, len(column_order)), summary.category),
+        key=lambda summary: (
+            column_order.get(summary.category, len(column_order)),
+            summary.category,
+        ),
     )
 
 
@@ -1834,13 +1908,18 @@ def validate_coverage(
                 f"{summary.model} has {summary.result_count} results; expected {expected_cases_per_model}."
             )
         if summary.ok_count != summary.result_count:
-            raise ValueError(f"{summary.model} has {summary.result_count - summary.ok_count} non-ok results.")
+            raise ValueError(
+                f"{summary.model} has {summary.result_count - summary.ok_count} non-ok results."
+            )
         model_category_counts = Counter(
             str(result.metadata.get("eval_category") or "")
             for result in results
             if result.metadata.get("candidate_model") == summary.model
         )
-        if set(model_category_counts) != set(category_counts) or len(set(model_category_counts.values())) != 1:
+        if (
+            set(model_category_counts) != set(category_counts)
+            or len(set(model_category_counts.values())) != 1
+        ):
             raise ValueError(
                 f"{summary.model} has uneven category coverage: {dict(model_category_counts)}"
             )
@@ -1855,12 +1934,311 @@ def replace_generated_block(page: Path, generated: str) -> None:
     page.write_text(before + generated + after, encoding="utf-8")
 
 
-def _render_model_row(summary: ModelSummary) -> str:
+def _display_model_name(model: str) -> str:
+    known_names = {
+        "mlx-community/whisper-large-v3-turbo-asr-fp16": "Whisper Large v3 Turbo",
+        "mlx-community/Qwen3-ASR-1.7B-8bit": "Qwen3 ASR 1.7B",
+        "mlx-community/VibeVoice-ASR-4bit": "VibeVoice ASR",
+    }
+    return known_names.get(model, model.rsplit("/", 1)[-1].replace("-", " "))
+
+
+def _report_query_url(report_url: str, **params: str) -> str:
+    return html.escape(f"{report_url}?{urlencode(params)}", quote=True)
+
+
+def _source_case_id(result: EvaluationResult) -> str:
+    source_case_id = result.metadata.get("source_case_id")
+    if isinstance(source_case_id, str) and source_case_id.strip():
+        return source_case_id.strip()
+    return result.case_id.removesuffix("-local-tts")
+
+
+def _category_groups_for_model(
+    results: list[EvaluationResult],
+    model: str,
+) -> dict[str, list[EvaluationResult]]:
+    groups: dict[str, list[EvaluationResult]] = defaultdict(list)
+    for result in results:
+        if result.metadata.get("candidate_model") == model:
+            groups[str(result.metadata.get("eval_category") or "")].append(result)
+    return groups
+
+
+def _category_winner(
+    results: list[EvaluationResult],
+    category: str,
+) -> tuple[str, float] | None:
+    candidates = []
+    models = {
+        str(result.metadata.get("candidate_model") or "")
+        for result in results
+        if result.metadata.get("candidate_model")
+    }
+    for model in models:
+        category_results = _category_groups_for_model(results, model).get(category, [])
+        if category_results:
+            candidates.append(
+                (model, statistics.mean(result.overall_score for result in category_results))
+            )
+    return max(candidates, key=lambda item: (item[1], item[0])) if candidates else None
+
+
+def _shared_risk_groups(
+    results: list[EvaluationResult],
+    *,
+    model_count: int,
+) -> list[list[EvaluationResult]]:
+    by_case: dict[str, list[EvaluationResult]] = defaultdict(list)
+    for result in results:
+        by_case[_source_case_id(result)].append(result)
+    groups = []
+    for case_results in by_case.values():
+        affected_count = sum(result.label != "accurate" for result in case_results)
+        covered_models = {
+            result.metadata.get("candidate_model")
+            for result in case_results
+            if result.metadata.get("candidate_model")
+        }
+        if len(covered_models) == model_count and affected_count >= 2:
+            groups.append(case_results)
+    return sorted(
+        groups,
+        key=lambda group: (
+            -sum(result.label != "accurate" for result in group),
+            statistics.mean(result.overall_score for result in group),
+            _source_case_id(group[0]),
+        ),
+    )
+
+
+def _benchmark_limitations_text(results: list[EvaluationResult]) -> str:
+    case_count = len({_source_case_id(result) for result in results})
+    model_count = len(
+        {
+            result.metadata.get("candidate_model")
+            for result in results
+            if result.metadata.get("candidate_model")
+        }
+    )
+    categories = {
+        result.metadata.get("eval_category")
+        for result in results
+        if result.metadata.get("eval_category")
+    }
+    voices = {
+        result.metadata.get("synthesis_voice")
+        for result in results
+        if result.metadata.get("synthesis_voice")
+    }
+    attempts_per_case = max(
+        (int(result.metadata.get("judge_sample_count") or 1) for result in results),
+        default=1,
+    )
+    prompt_versions = ", ".join(sorted({result.judge_version for result in results}))
+    return (
+        f"{case_count} English clips generated with {len(voices)} synthetic voice were evaluated "
+        f"across {model_count} models ({len(results)} model-case evaluations; "
+        f"{case_count // max(len(categories), 1)} cases per category). Each result uses up to "
+        f"{attempts_per_case} Gemini judge attempts with prompt {prompt_versions}. Semantic scores "
+        "measure meaning preservation and downstream usability; they do not measure word error "
+        "rate, latency, memory, or production robustness. Validate on representative real speech, "
+        "accents, devices, and domain data before deployment."
+    )
+
+
+def _render_benchmark_scope(
+    results: list[EvaluationResult],
+    *,
+    model_count: int,
+    judge_successes: int,
+    judge_attempts: int,
+) -> str:
+    category_count = len({str(result.metadata.get("eval_category") or "") for result in results})
+    case_count = len({_source_case_id(result) for result in results})
+    languages = sorted(
+        {
+            str(result.metadata.get("language") or result.metadata.get("synthesis_lang_code"))
+            for result in results
+            if result.metadata.get("language") or result.metadata.get("synthesis_lang_code")
+        }
+    )
+    voices = {
+        str(result.metadata.get("synthesis_voice"))
+        for result in results
+        if result.metadata.get("synthesis_voice")
+    }
+    judge_class = "scope-item scope-warn" if judge_successes < judge_attempts else "scope-item"
+    return f"""    <section class="scope-strip" aria-label="Benchmark scope">
+      <div class="scope-item"><span>Clips</span><strong>{case_count} synthetic</strong></div>
+      <div class="scope-item"><span>Models</span><strong>{model_count} MLX</strong></div>
+      <div class="scope-item"><span>Categories</span><strong>{category_count}</strong></div>
+      <div class="scope-item"><span>Evaluations</span><strong>{len(results)}</strong><small>{len(results)} judged transcripts</small></div>
+      <div class="scope-item"><span>Language</span><strong>{html.escape(", ".join(languages) or "Unspecified")}</strong></div>
+      <div class="scope-item"><span>Voices</span><strong>{len(voices)}</strong></div>
+      <div class="{judge_class}"><span>Judge health</span><strong>{judge_successes}/{judge_attempts} attempts</strong></div>
+    </section>"""
+
+
+def _render_leaderboard_decision_brief(
+    results: list[EvaluationResult],
+    *,
+    model_summaries: list[ModelSummary],
+    report_url: str,
+) -> str:
+    leader = model_summaries[0]
+    leader_attention = leader.labels["needs_review"] + leader.labels["inaccurate"]
+    noise_winner = _category_winner(results, "acoustic_noise_robustness")
+    risk_groups = _shared_risk_groups(results, model_count=len(model_summaries))
+    cards = [
+        '<article class="decision-card recommendation-card">'
+        '<span class="eyebrow">Best overall on this set</span>'
+        f"<h3>{html.escape(_display_model_name(leader.model))}</h3>"
+        f"<p><strong>{leader.average_score:.1f}</strong> semantic score; "
+        f"{leader.labels['accurate']}/{leader.result_count} accurate and "
+        f"{leader_attention} needing attention.</p>"
+        f'<a href="{_report_query_url(report_url, model=leader.model)}">Inspect this model</a>'
+        "</article>"
+    ]
+    if noise_winner:
+        noise_model, noise_score = noise_winner
+        cards.append(
+            '<article class="decision-card">'
+            '<span class="eyebrow">Noise specialist</span>'
+            f"<h3>{html.escape(_display_model_name(noise_model))}</h3>"
+            f"<p><strong>{noise_score:.1f}</strong> on acoustic-noise robustness.</p>"
+            f'<a href="{_report_query_url(report_url, model=noise_model, category="acoustic_noise_robustness")}">Inspect noise cases</a>'
+            "</article>"
+        )
+    if risk_groups:
+        first_risk = risk_groups[0]
+        case_id = _source_case_id(first_risk[0])
+        slice_name = str(first_risk[0].metadata.get("asr_slice") or case_id).replace("_", " ")
+        cards.append(
+            '<article class="decision-card risk-card">'
+            '<span class="eyebrow">Shared blocker</span>'
+            f"<h3>{html.escape(slice_name.title())}</h3>"
+            f"<p>All {len(first_risk)} models need attention on this case.</p>"
+            f'<a href="{_report_query_url(report_url, search=case_id)}">Inspect shared failure</a>'
+            "</article>"
+        )
+    return (
+        '    <section class="decision-grid" aria-label="Model selection guidance">'
+        + "".join(cards)
+        + "</section>"
+    )
+
+
+def _render_shared_risks(
+    results: list[EvaluationResult],
+    *,
+    model_count: int,
+    report_url: str,
+) -> str:
+    groups = _shared_risk_groups(results, model_count=model_count)[:3]
+    if not groups:
+        return '    <div class="panel"><strong>No multi-model failure pattern found.</strong></div>'
+
+    cards = []
+    for group in groups:
+        case_id = _source_case_id(group[0])
+        slice_name = str(group[0].metadata.get("asr_slice") or case_id).replace("_", " ")
+        category = str(group[0].metadata.get("eval_category") or "").replace("_", " ")
+        affected_count = sum(result.label != "accurate" for result in group)
+        score_tags = "".join(
+            f'<span class="pill">{html.escape(_display_model_name(str(result.metadata.get("candidate_model") or "")))} {result.overall_score}</span>'
+            for result in sorted(group, key=lambda item: item.overall_score)
+        )
+        lowest = min(group, key=lambda item: item.overall_score)
+        cards.append(
+            '<article class="risk-pattern">'
+            f'<span class="eyebrow">{html.escape(category)}</span>'
+            f"<h3>{html.escape(slice_name.title())}</h3>"
+            f"<p><strong>{affected_count}/{len(group)} models flagged.</strong> "
+            f"{html.escape(lowest.semantic_error_summary or lowest.reason)}</p>"
+            f'<div class="risk-scores">{score_tags}</div>'
+            f'<a href="{_report_query_url(report_url, search=case_id)}">Open case evidence</a>'
+            "</article>"
+        )
+    return '    <section class="risk-grid">' + "".join(cards) + "</section>"
+
+
+def _best_category_scores(results: list[EvaluationResult]) -> dict[str, float]:
+    best: dict[str, float] = {}
+    for category, _ in category_columns_for_results(results):
+        category_results = [
+            result
+            for result in results
+            if str(result.metadata.get("eval_category") or "") == category
+        ]
+        by_model: dict[str, list[EvaluationResult]] = defaultdict(list)
+        for result in category_results:
+            by_model[str(result.metadata.get("candidate_model") or "")].append(result)
+        scores = [
+            statistics.mean(result.overall_score for result in model_results)
+            for model_results in by_model.values()
+            if model_results
+        ]
+        if scores:
+            best[category] = max(scores)
+    return best
+
+
+def _render_category_header(category: str, label: str) -> str:
+    display_label = "Surface Transcription" if category == "transcription_accuracy_wer" else label
+    title = (
+        "Gemini semantic score on surface transcription error cases; this is not word error rate."
+        if category == "transcription_accuracy_wer"
+        else f"Gemini semantic score for {label.lower()} cases."
+    )
+    return f'<th scope="col"><abbr title="{html.escape(title, quote=True)}">{html.escape(display_label)}</abbr></th>'
+
+
+def _render_model_row(
+    summary: ModelSummary,
+    *,
+    rank: int | None = None,
+    results: list[EvaluationResult] | None = None,
+    report_url: str | None = None,
+) -> str:
     labels = ", ".join(
         f"{summary.labels[label]} {label}"
         for label in ("accurate", "needs_review", "inaccurate")
         if summary.labels[label]
     )
+    if rank is not None and results is not None:
+        model_results = [
+            result for result in results if result.metadata.get("candidate_model") == summary.model
+        ]
+        by_category: dict[str, list[EvaluationResult]] = defaultdict(list)
+        for result in model_results:
+            by_category[str(result.metadata.get("eval_category") or "")].append(result)
+        weakest_category, weakest_results = min(
+            by_category.items(),
+            key=lambda item: (statistics.mean(result.overall_score for result in item[1]), item[0]),
+        )
+        weakest_average = statistics.mean(result.overall_score for result in weakest_results)
+        needs_attention = summary.labels["needs_review"] + summary.labels["inaccurate"]
+        report_link = (
+            f'<a href="{_report_query_url(report_url, model=summary.model)}">View cases</a>'
+            if report_url
+            else f"{summary.judge_samples} judge samples"
+        )
+        return (
+            "        <tr>"
+            f'<td class="rank-cell">#{rank}</td>'
+            f'<th scope="row"><strong>{html.escape(_display_model_name(summary.model))}</strong>'
+            f"<code>{html.escape(summary.model)}</code></th>"
+            f'<td class="semantic-score"><strong>{summary.average_score:.1f}</strong></td>'
+            f"<td><strong>{summary.labels['accurate']}/{summary.result_count}</strong>"
+            f'<span class="cell-note">{summary.ok_count}/{summary.result_count} ok</span></td>'
+            f'<td><strong>{needs_attention}</strong><span class="cell-note">'
+            f"{summary.labels['needs_review']} review, {summary.labels['inaccurate']} inaccurate</span></td>"
+            f"<td>{html.escape(CATEGORY_LABELS.get(weakest_category, _titleize_category(weakest_category)))} "
+            f'<span class="cell-note">{weakest_average:.1f}</span></td>'
+            f"<td>{report_link}</td>"
+            "</tr>"
+        )
     return (
         "        <tr>"
         f"<td><code>{html.escape(summary.model)}</code></td>"
@@ -1902,9 +2280,7 @@ def _category_markdown_row(summary: CategorySummary) -> str:
 
 
 def _automation_stage_markdown_row(stage: dict[str, object]) -> str:
-    commands = ", ".join(
-        f"`{command_key}`" for command_key in stage["command_keys"]
-    )
+    commands = ", ".join(f"`{command_key}`" for command_key in stage["command_keys"])
     return (
         f"| `{stage['stage']}` | {commands} | "
         f"{stage['writes_committed_artifacts']} | {stage['runs_live_models']} |"
@@ -1912,19 +2288,13 @@ def _automation_stage_markdown_row(stage: dict[str, object]) -> str:
 
 
 def _format_category_counts(categories: Counter[str]) -> str:
-    return ", ".join(
-        f"`{category}`: {count}"
-        for category, count in sorted(categories.items())
-    )
+    return ", ".join(f"`{category}`: {count}" for category, count in sorted(categories.items()))
 
 
 def _format_source_report_status(summary: SourceResultFileSummary) -> str:
     if not summary.report_exists:
         return "missing"
-    return (
-        f"{summary.report_bytes} bytes, "
-        f"`{summary.report_sha256}`"
-    )
+    return f"{summary.report_bytes} bytes, `{summary.report_sha256}`"
 
 
 def _hosted_report_path_for_source_report(source_report: Path) -> str:
@@ -1969,8 +2339,7 @@ def _source_file_summary_json(summary: SourceResultFileSummary) -> dict[str, obj
         "average_score": round(summary.average_score, 3),
         "labels": _ordered_label_counts(summary.labels),
         "categories": {
-            category: summary.categories[category]
-            for category in sorted(summary.categories)
+            category: summary.categories[category] for category in sorted(summary.categories)
         },
     }
 
@@ -1978,8 +2347,7 @@ def _source_file_summary_json(summary: SourceResultFileSummary) -> dict[str, obj
 def _source_file_markdown_row(summary: SourceResultFileSummary) -> str:
     models = "<br>".join(f"`{model}`" for model in summary.models)
     categories = ", ".join(
-        f"`{category}`: {count}"
-        for category, count in sorted(summary.categories.items())
+        f"`{category}`: {count}" for category, count in sorted(summary.categories.items())
     )
     labels = ", ".join(
         f"{summary.labels[label]} {label}"
@@ -2005,7 +2373,7 @@ def _render_source_report_rows(summaries: list[SourceResultFileSummary]) -> list
         "",
         "    <h2>Source Run Reports</h2>",
         (
-            "    <p class=\"muted\">Each source run keeps its own local report alongside "
+            '    <p class="muted">Each source run keeps its own local report alongside '
             "the JSONL file that feeds the combined 35-case leaderboard; hosted refreshes "
             "mirror available source reports under the same ASR leaderboard path.</p>"
         ),
@@ -2041,8 +2409,7 @@ def _render_automation_stage_rows(stages: object) -> list[str]:
         if not isinstance(stage, dict):
             raise TypeError("automation stage must be a dictionary")
         commands = ", ".join(
-            f"<code>{html.escape(str(command_key))}</code>"
-            for command_key in stage["command_keys"]
+            f"<code>{html.escape(str(command_key))}</code>" for command_key in stage["command_keys"]
         )
         behavior = []
         if stage.get("runs_live_models"):
@@ -2076,8 +2443,12 @@ def _render_category_row(
     results: list[EvaluationResult],
     *,
     category_columns: list[tuple[str, str]] | None = None,
+    best_category_scores: dict[str, float] | None = None,
+    report_url: str | None = None,
 ) -> str:
-    model_results = [result for result in results if result.metadata.get("candidate_model") == model]
+    model_results = [
+        result for result in results if result.metadata.get("candidate_model") == model
+    ]
     by_category: dict[str, list[EvaluationResult]] = defaultdict(list)
     for result in model_results:
         by_category[str(result.metadata["eval_category"])].append(result)
@@ -2090,19 +2461,45 @@ def _render_category_row(
             continue
         labels = Counter(result.label for result in category_results)
         label_summary = ", ".join(
-            f"{labels[label]} {label}" for label in ("accurate", "needs_review", "inaccurate") if labels[label]
+            f"{labels[label]} {label}"
+            for label in ("accurate", "needs_review", "inaccurate")
+            if labels[label]
         )
         average = statistics.mean(result.overall_score for result in category_results)
+        best_class = (
+            " best-cell"
+            if best_category_scores and average == best_category_scores.get(category)
+            else ""
+        )
+        best_badge = '<span class="best-badge">Best</span>' if best_class else ""
+        link_url = (
+            _report_query_url(report_url, model=model, category=category) if report_url else ""
+        )
+        accurate_count = labels["accurate"]
+        attention_count = len(category_results) - accurate_count
         cells.append(
-            f"<td>{len(category_results)} cases, {average:.1f} avg, {html.escape(label_summary)}</td>"
+            f'<td class="{_heat_class(average)}{best_class}">'
+            f'{best_badge}<a href="{link_url}" aria-label="{html.escape(_display_model_name(model))}, {_titleize_category(category)}, score {average:.1f}">'
+            f"<strong>{average:.1f}</strong><span>{accurate_count}/{len(category_results)} accurate"
+            f"{f' · {attention_count} flagged' if attention_count else ''}</span></a>"
+            f'<span class="sr-only">{html.escape(label_summary)}</span></td>'
         )
 
     return (
         "        <tr>"
-        f"<td><code>{html.escape(model)}</code></td>"
-        + "".join(cells)
-        + "</tr>"
+        f'<th scope="row"><strong>{html.escape(_display_model_name(model))}</strong>'
+        f"<code>{html.escape(model)}</code></th>" + "".join(cells) + "</tr>"
     )
+
+
+def _heat_class(score: float) -> str:
+    if score >= 95:
+        return "heat-top"
+    if score >= 81:
+        return "heat-good"
+    if score >= 60:
+        return "heat-watch"
+    return "heat-risk"
 
 
 def _titleize_category(category: str) -> str:

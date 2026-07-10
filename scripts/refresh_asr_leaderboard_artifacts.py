@@ -14,6 +14,7 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT))
+sys.path.insert(0, str(ROOT / "src"))
 
 from open_audio_judge.reports import write_html_report  # noqa: E402
 from open_audio_judge.runner import load_cases, load_results_jsonl, write_results_jsonl  # noqa: E402
@@ -86,12 +87,7 @@ FULL_RUN_RESULT_PATHS = [
     / "qwen3-asr-1.7b-full-gap"
     / "judge-report"
     / "results.jsonl",
-    ROOT
-    / "runs"
-    / "asr-leaderboard"
-    / "vibevoice-asr-full-gap"
-    / "judge-report"
-    / "results.jsonl",
+    ROOT / "runs" / "asr-leaderboard" / "vibevoice-asr-full-gap" / "judge-report" / "results.jsonl",
 ]
 SEGMENTED_MODEL_RUNS = [
     "whisper-large-v3-turbo-smoke",
@@ -323,10 +319,7 @@ def main() -> None:
         help="Fail unless every model has this many ok judged results.",
     )
     args = parser.parse_args()
-    if (
-        args.check_only
-        and not _source_selection_summary_arg_was_provided(sys.argv[1:])
-    ):
+    if args.check_only and not _source_selection_summary_arg_was_provided(sys.argv[1:]):
         args.source_selection_summary_out = DEFAULT_CHECK_ONLY_SOURCE_SELECTION_SUMMARY
     hosted_dir = args.hosted_dir
     if hosted_dir is None and args.hosted_dir_from_env:
@@ -386,9 +379,7 @@ def main() -> None:
                 runtime_status=runtime_status,
                 runtime_status_out=args.runtime_status_out,
             )
-            check_summary["refresh_decision_path"] = _repo_relative(
-                args.refresh_decision_out
-            )
+            check_summary["refresh_decision_path"] = _repo_relative(args.refresh_decision_out)
             check_summary["refresh_decision"] = refresh_decision
             check_summary["next_action_path"] = _repo_relative(args.next_action_out)
             check_summary["cron_status_path"] = _repo_relative(args.cron_status_out)
@@ -467,8 +458,7 @@ def _hosted_dir_from_env(env_var: str) -> Path:
 
 def _source_selection_summary_arg_was_provided(argv: list[str]) -> bool:
     return any(
-        arg == "--source-selection-summary-out"
-        or arg.startswith("--source-selection-summary-out=")
+        arg == "--source-selection-summary-out" or arg.startswith("--source-selection-summary-out=")
         for arg in argv
     )
 
@@ -501,11 +491,7 @@ def check_asr_leaderboard_refresh_inputs(
         if not path.exists():
             raise FileNotFoundError(f"Missing ASR result file: {path}")
 
-    combined_results = [
-        result
-        for path in result_paths
-        for result in load_results_jsonl(path)
-    ]
+    combined_results = [result for path in result_paths for result in load_results_jsonl(path)]
     if not combined_results:
         raise ValueError("No ASR evaluation results were loaded.")
     generated = render_generated_sections(
@@ -568,16 +554,10 @@ def check_asr_leaderboard_refresh_inputs(
         "result_file_count": len(result_paths),
         "total_results": len(combined_results),
         "model_count": len(
-            {
-                str(result.metadata.get("candidate_model") or "")
-                for result in combined_results
-            }
+            {str(result.metadata.get("candidate_model") or "") for result in combined_results}
         ),
         "category_count": len(
-            {
-                str(result.metadata.get("eval_category") or "")
-                for result in combined_results
-            }
+            {str(result.metadata.get("eval_category") or "") for result in combined_results}
         ),
         "seed_manifest_status": seed_validation["status"],
         "audio_manifest_status": audio_manifest["status"],
@@ -686,8 +666,7 @@ def validate_hosted_artifacts_current(
         expected_sha256 = artifact.get("sha256")
         if not isinstance(source_path, str) or not source_path:
             raise ValueError(
-                f"{hosted_manifest_out} artifacts[{index}] has invalid source_path: "
-                f"{source_path!r}"
+                f"{hosted_manifest_out} artifacts[{index}] has invalid source_path: {source_path!r}"
             )
         if (
             not isinstance(hosted_paths, list)
@@ -700,8 +679,7 @@ def validate_hosted_artifacts_current(
             )
         if not isinstance(expected_bytes, int) or expected_bytes < 0:
             raise ValueError(
-                f"{hosted_manifest_out} artifacts[{index}] has invalid bytes: "
-                f"{expected_bytes!r}"
+                f"{hosted_manifest_out} artifacts[{index}] has invalid bytes: {expected_bytes!r}"
             )
         if (
             not isinstance(expected_sha256, str)
@@ -709,35 +687,25 @@ def validate_hosted_artifacts_current(
             or any(char not in "0123456789abcdef" for char in expected_sha256)
         ):
             raise ValueError(
-                f"{hosted_manifest_out} artifacts[{index}] has invalid sha256: "
-                f"{expected_sha256!r}"
+                f"{hosted_manifest_out} artifacts[{index}] has invalid sha256: {expected_sha256!r}"
             )
 
         source = ROOT / source_path
         if not source.exists():
-            raise FileNotFoundError(
-                f"Hosted current check source is missing: {source_path}"
-            )
+            raise FileNotFoundError(f"Hosted current check source is missing: {source_path}")
         if source.stat().st_size != expected_bytes or _sha256_file(source) != expected_sha256:
             raise ValueError(
-                f"{_repo_relative(hosted_manifest_out)} is stale for source artifact: "
-                f"{source_path}"
+                f"{_repo_relative(hosted_manifest_out)} is stale for source artifact: {source_path}"
             )
         for hosted_path in hosted_paths:
             destination = hosted_dir / hosted_path
             if not destination.exists():
-                raise FileNotFoundError(
-                    f"Hosted Pages artifact is missing: {destination}"
-                )
+                raise FileNotFoundError(f"Hosted Pages artifact is missing: {destination}")
             if destination.stat().st_size != expected_bytes:
-                raise ValueError(
-                    f"Hosted Pages artifact byte size is stale: {destination}"
-                )
+                raise ValueError(f"Hosted Pages artifact byte size is stale: {destination}")
             actual_sha256 = _sha256_file(destination)
             if actual_sha256 != expected_sha256:
-                raise ValueError(
-                    f"Hosted Pages artifact sha256 is stale: {destination}"
-                )
+                raise ValueError(f"Hosted Pages artifact sha256 is stale: {destination}")
             checked_paths += 1
 
     return {
@@ -879,9 +847,11 @@ def _validate_generated_artifacts_fresh(
                 refresh_commands_out=refresh_commands_out or DEFAULT_REFRESH_COMMANDS,
                 refresh_workflow_out=(
                     refresh_workflow_out
-                    or (refresh_commands_out.with_name(DEFAULT_REFRESH_WORKFLOW.name)
+                    or (
+                        refresh_commands_out.with_name(DEFAULT_REFRESH_WORKFLOW.name)
                         if refresh_commands_out is not None
-                        else DEFAULT_REFRESH_WORKFLOW)
+                        else DEFAULT_REFRESH_WORKFLOW
+                    )
                 ),
                 live_refresh_script_out=live_refresh_script_out or DEFAULT_LIVE_REFRESH_SCRIPT,
                 run_manifest=run_manifest or DEFAULT_RUN_MANIFEST,
@@ -920,9 +890,11 @@ def _validate_generated_artifacts_fresh(
                         refresh_commands_out=refresh_commands_out or DEFAULT_REFRESH_COMMANDS,
                         refresh_workflow_out=(
                             refresh_workflow_out
-                            or (refresh_commands_out.with_name(DEFAULT_REFRESH_WORKFLOW.name)
+                            or (
+                                refresh_commands_out.with_name(DEFAULT_REFRESH_WORKFLOW.name)
                                 if refresh_commands_out is not None
-                                else DEFAULT_REFRESH_WORKFLOW)
+                                else DEFAULT_REFRESH_WORKFLOW
+                            )
                         ),
                         live_refresh_script_out=(
                             live_refresh_script_out or DEFAULT_LIVE_REFRESH_SCRIPT
@@ -1100,7 +1072,9 @@ def refresh_asr_leaderboard_artifacts(
 ) -> None:
     report_index_out = report_index_out or refresh_report_out.with_name(DEFAULT_REPORT_INDEX.name)
     report_links_out = report_links_out or refresh_report_out.with_name(DEFAULT_REPORT_LINKS.name)
-    runtime_status_out = runtime_status_out or artifact_index_out.with_name(DEFAULT_RUNTIME_STATUS.name)
+    runtime_status_out = runtime_status_out or artifact_index_out.with_name(
+        DEFAULT_RUNTIME_STATUS.name
+    )
     refresh_decision_out = refresh_decision_out or artifact_index_out.with_name(
         DEFAULT_REFRESH_DECISION.name
     )
@@ -1115,11 +1089,12 @@ def refresh_asr_leaderboard_artifacts(
         if not path.exists():
             raise FileNotFoundError(f"Missing ASR result file: {path}")
 
-    combined_results = [
-        result
-        for path in result_paths
-        for result in load_results_jsonl(path)
-    ]
+    for path in result_paths:
+        source_results = load_results_jsonl(path)
+        write_results_jsonl(source_results, path)
+        write_html_report(source_results, path.with_name("report.html"))
+
+    combined_results = [result for path in result_paths for result in load_results_jsonl(path)]
     if not combined_results:
         raise ValueError("No ASR evaluation results were loaded.")
 
@@ -1339,12 +1314,7 @@ def write_run_manifest_artifact(
         results = load_results_jsonl(path)
         if not results:
             raise ValueError(f"Cannot add empty result file to run manifest: {path}")
-        models = sorted(
-            {
-                str(result.metadata.get("candidate_model") or "")
-                for result in results
-            }
-        )
+        models = sorted({str(result.metadata.get("candidate_model") or "") for result in results})
         if len(models) != 1 or not models[0]:
             raise ValueError(
                 f"Run manifest source must contain exactly one model with metadata.candidate_model: {path}"
@@ -1431,7 +1401,10 @@ def copy_hosted_asr_artifacts(
         (live_refresh_script_out, {live_refresh_script_out.name, DEFAULT_LIVE_REFRESH_SCRIPT.name}),
         (run_manifest, {run_manifest.name, DEFAULT_RUN_MANIFEST.name}),
         (manifest_validation_out, {manifest_validation_out.name, DEFAULT_MANIFEST_VALIDATION.name}),
-        (seed_manifest_validation_out, {seed_manifest_validation_out.name, DEFAULT_SEED_MANIFEST_VALIDATION.name}),
+        (
+            seed_manifest_validation_out,
+            {seed_manifest_validation_out.name, DEFAULT_SEED_MANIFEST_VALIDATION.name},
+        ),
         (next_runs_out, {next_runs_out.name, DEFAULT_NEXT_RUNS.name}),
         (hosted_manifest_out, {hosted_manifest_out.name, DEFAULT_HOSTED_MANIFEST.name}),
         (artifact_index_out, {artifact_index_out.name, DEFAULT_ARTIFACT_INDEX.name}),
@@ -1513,7 +1486,10 @@ def write_hosted_manifest_artifact(
         (live_refresh_script_out, {live_refresh_script_out.name, DEFAULT_LIVE_REFRESH_SCRIPT.name}),
         (run_manifest, {run_manifest.name, DEFAULT_RUN_MANIFEST.name}),
         (manifest_validation_out, {manifest_validation_out.name, DEFAULT_MANIFEST_VALIDATION.name}),
-        (seed_manifest_validation_out, {seed_manifest_validation_out.name, DEFAULT_SEED_MANIFEST_VALIDATION.name}),
+        (
+            seed_manifest_validation_out,
+            {seed_manifest_validation_out.name, DEFAULT_SEED_MANIFEST_VALIDATION.name},
+        ),
         (next_runs_out, {next_runs_out.name, DEFAULT_NEXT_RUNS.name}),
         (artifact_index_out, {artifact_index_out.name, DEFAULT_ARTIFACT_INDEX.name}),
         (runtime_status_out, {runtime_status_out.name, DEFAULT_RUNTIME_STATUS.name}),
@@ -1685,9 +1661,7 @@ def build_artifact_index_data(
     refresh_workflow_out = refresh_workflow_out or refresh_commands_out.with_name(
         DEFAULT_REFRESH_WORKFLOW.name
     )
-    source_selection_summary_out = (
-        source_selection_summary_out or DEFAULT_SOURCE_SELECTION_SUMMARY
-    )
+    source_selection_summary_out = source_selection_summary_out or DEFAULT_SOURCE_SELECTION_SUMMARY
     artifact_paths = {
         _repo_relative(results_path): results_path,
         _repo_relative(report_path): report_path,
@@ -1794,18 +1768,8 @@ def build_artifact_index_data(
             }
         )
 
-    models = sorted(
-        {
-            str(result.metadata.get("candidate_model") or "")
-            for result in results
-        }
-    )
-    categories = sorted(
-        {
-            str(result.metadata.get("eval_category") or "")
-            for result in results
-        }
-    )
+    models = sorted({str(result.metadata.get("candidate_model") or "") for result in results})
+    categories = sorted({str(result.metadata.get("eval_category") or "") for result in results})
     result_bundle = {
         "results_path": _repo_relative(results_path),
         "exists": results_path.exists(),
@@ -1882,14 +1846,10 @@ def _hosted_paths_for_artifact(
         ],
         "docs/asr-seed-manifest-validation.json": ["asr-seed-manifest-validation.json"],
         "docs/asr-leaderboard-next-runs.json": ["asr-leaderboard-next-runs.json"],
-        "docs/asr-leaderboard-hosted-manifest.json": [
-            "asr-leaderboard-hosted-manifest.json"
-        ],
+        "docs/asr-leaderboard-hosted-manifest.json": ["asr-leaderboard-hosted-manifest.json"],
         "docs/asr-leaderboard-artifacts.json": ["asr-leaderboard-artifacts.json"],
         "docs/asr-leaderboard-runtime-status.json": ["asr-leaderboard-runtime-status.json"],
-        "docs/asr-leaderboard-refresh-decision.json": [
-            "asr-leaderboard-refresh-decision.json"
-        ],
+        "docs/asr-leaderboard-refresh-decision.json": ["asr-leaderboard-refresh-decision.json"],
         "docs/asr-leaderboard-next-action.md": ["asr-leaderboard-next-action.md"],
         "docs/asr-leaderboard-cron-status.json": ["asr-leaderboard-cron-status.json"],
         _repo_relative(results_path): ["asr-leaderboard/full-35-combined/results.jsonl"],
@@ -1952,11 +1912,7 @@ def _result_paths_from_run_manifest(manifest_path: Path) -> list[Path]:
         runs = data.get("runs")
         if not isinstance(runs, list):
             raise ValueError("Run manifest must include result_paths or runs.")
-        raw_paths = [
-            run.get("results_path")
-            for run in runs
-            if isinstance(run, dict)
-        ]
+        raw_paths = [run.get("results_path") for run in runs if isinstance(run, dict)]
 
     if not isinstance(raw_paths, list) or not raw_paths:
         raise ValueError("Run manifest did not list any result paths.")
@@ -1998,9 +1954,7 @@ def discover_complete_model_result_paths(
             candidates[model].append((result_path.stat().st_mtime, result_path))
 
     missing_models = [
-        model
-        for model, model_candidates in candidates.items()
-        if not model_candidates
+        model for model, model_candidates in candidates.items() if not model_candidates
     ]
     if missing_models:
         raise ValueError(
@@ -2224,12 +2178,7 @@ def _complete_result_file_model(
 ) -> str:
     if not results:
         raise ValueError("empty result file")
-    models = sorted(
-        {
-            str(result.metadata.get("candidate_model") or "")
-            for result in results
-        }
-    )
+    models = sorted({str(result.metadata.get("candidate_model") or "") for result in results})
     if len(models) != 1 or not models[0]:
         raise ValueError("result file must contain exactly one model")
     render_generated_sections(
@@ -2245,11 +2194,7 @@ def _validate_candidate_paths(paths: list[Path], *, expected_cases_per_model: in
     for path in paths:
         if not path.exists():
             raise FileNotFoundError(path)
-    combined_results = [
-        result
-        for path in paths
-        for result in load_results_jsonl(path)
-    ]
+    combined_results = [result for path in paths for result in load_results_jsonl(path)]
     render_generated_sections(
         combined_results,
         results_path=DEFAULT_COMBINED_OUT / "results.jsonl",
@@ -2268,8 +2213,7 @@ def _validate_unique_result_paths(paths: list[Path], *, context: str) -> None:
             seen.add(resolved)
     if duplicates:
         raise ValueError(
-            f"{context} contains duplicate result path(s): "
-            + ", ".join(sorted(duplicates))
+            f"{context} contains duplicate result path(s): " + ", ".join(sorted(duplicates))
         )
 
 
@@ -2350,8 +2294,7 @@ def write_refresh_decision_artifact(
 def write_refresh_decision_data(output_path: Path, data: dict[str, object]) -> None:
     output_path.parent.mkdir(parents=True, exist_ok=True)
     output_path.write_text(
-        json.dumps(data, indent=2, sort_keys=True)
-        + "\n",
+        json.dumps(data, indent=2, sort_keys=True) + "\n",
         encoding="utf-8",
     )
 
@@ -2470,11 +2413,7 @@ def _compact_cron_preflight_summary(summary: dict[str, object]) -> dict[str, obj
         "runtime_ready",
         "runtime_ready_issue",
     )
-    return {
-        field: summary[field]
-        for field in fields
-        if field in summary
-    }
+    return {field: summary[field] for field in fields if field in summary}
 
 
 def build_refresh_decision_artifact_data(
@@ -2500,7 +2439,9 @@ def build_refresh_decision_artifact_data(
         runtime_issue = None
         coverage_complete = True
         live_refresh_required = False
-        rationale.append("Live MLX ASR/Gemini refresh is not required for the selected result bundle.")
+        rationale.append(
+            "Live MLX ASR/Gemini refresh is not required for the selected result bundle."
+        )
     else:
         coverage_complete = False
         live_refresh_required = True
@@ -2515,16 +2456,22 @@ def build_refresh_decision_artifact_data(
 
     if next_runs["status"] != "complete" and runtime_ready is True:
         action = "run_live_refresh"
-        reason = "The leaderboard has missing model/category cells and live runtime checks are ready."
+        reason = (
+            "The leaderboard has missing model/category cells and live runtime checks are ready."
+        )
         command = next_runs["next_run_commands"][0]["command"]
         rationale.append("Audio, Gemini secret, and MLX ASR runtime gates are ready.")
-        rationale.append("Run the first recommended live-refresh command, then rebuild generated artifacts.")
+        rationale.append(
+            "Run the first recommended live-refresh command, then rebuild generated artifacts."
+        )
     elif next_runs["status"] != "complete":
         action = "blocked_runtime"
         reason = "The leaderboard has missing model/category cells, but live runtime is not ready."
         command = None
         rationale.append(f"Live refresh is blocked: {runtime_issue}")
-        rationale.append("Improve runtime readiness or record unsupported model states before trying fallbacks.")
+        rationale.append(
+            "Improve runtime readiness or record unsupported model states before trying fallbacks."
+        )
 
     decision_summary = _format_refresh_decision_summary(
         action=action,
@@ -2614,11 +2561,7 @@ def _refresh_decision_summary_lines(
 
 
 def combined_results_from_paths(result_paths: list[Path]) -> list:
-    return [
-        result
-        for path in result_paths
-        for result in load_results_jsonl(path)
-    ]
+    return [result for path in result_paths for result in load_results_jsonl(path)]
 
 
 def write_runtime_status_artifact(
@@ -2731,8 +2674,7 @@ def _validate_runtime_ready(status: dict[str, object]) -> None:
         failures.append("mlx_runtime_preflight.primary_model_checks")
     if failures:
         raise ValueError(
-            "ASR runtime is not ready for live MLX/Gemini refresh: "
-            + ", ".join(failures)
+            "ASR runtime is not ready for live MLX/Gemini refresh: " + ", ".join(failures)
         )
 
 
@@ -2742,10 +2684,7 @@ def _primary_mlx_preflight_ready(mlx_preflight: dict[str, object]) -> bool:
         return True
     if not isinstance(raw_checks, list) or not raw_checks:
         return False
-    return all(
-        isinstance(check, dict) and check.get("status") == "ok"
-        for check in raw_checks
-    )
+    return all(isinstance(check, dict) and check.get("status") == "ok" for check in raw_checks)
 
 
 def build_runtime_result_bundle_status(
@@ -2754,18 +2693,8 @@ def build_runtime_result_bundle_status(
     results_path: Path | None = None,
     source_result_paths: list[Path] | None = None,
 ) -> dict[str, object]:
-    models = sorted(
-        {
-            str(result.metadata.get("candidate_model") or "")
-            for result in results
-        }
-    )
-    categories = sorted(
-        {
-            str(result.metadata.get("eval_category") or "")
-            for result in results
-        }
-    )
+    models = sorted({str(result.metadata.get("candidate_model") or "") for result in results})
+    categories = sorted({str(result.metadata.get("eval_category") or "") for result in results})
     source_files = []
     for path in source_result_paths or []:
         path = _normalize_results_path(path)
@@ -2817,10 +2746,7 @@ def build_audio_manifest_status(
     seed_cases = load_cases(seed_cases_path)
     audio_cases = load_cases(audio_cases_path)
     seed_case_ids = {case.id for case in seed_cases}
-    audio_source_ids = {
-        str(case.metadata.get("source_case_id") or "")
-        for case in audio_cases
-    }
+    audio_source_ids = {str(case.metadata.get("source_case_id") or "") for case in audio_cases}
     missing_source_ids = sorted(seed_case_ids - audio_source_ids)
     extra_source_ids = sorted(audio_source_ids - seed_case_ids)
     missing_audio_files = []
@@ -2877,13 +2803,9 @@ def _run_mlx_runtime_preflight_for_model(model: str) -> dict[str, object]:
 
 def _run_mlx_runtime_preflight() -> dict[str, object]:
     primary_checks = [
-        _run_mlx_runtime_preflight_for_model(model)
-        for model, _ in ASR_LEADERBOARD_MODELS
+        _run_mlx_runtime_preflight_for_model(model) for model, _ in ASR_LEADERBOARD_MODELS
     ]
-    fallback_checks = [
-        _run_mlx_runtime_preflight_for_model(model)
-        for model in ASR_FALLBACK_MODELS
-    ]
+    fallback_checks = [_run_mlx_runtime_preflight_for_model(model) for model in ASR_FALLBACK_MODELS]
     ok_count = sum(1 for check in primary_checks if check["status"] == "ok")
     return {
         "status": "ok" if ok_count == len(primary_checks) else "blocked",
@@ -2915,7 +2837,9 @@ def _mlx_runtime_preflight_command(model: str | None = None) -> list[str]:
 def _gemini_secret_status() -> dict[str, object]:
     secret_path = Path(GEMINI_SECRET_ENV)
     return {
-        "status": "present" if secret_path.exists() and secret_path.stat().st_size > 0 else "missing",
+        "status": "present"
+        if secret_path.exists() and secret_path.stat().st_size > 0
+        else "missing",
         "path": GEMINI_SECRET_ENV,
     }
 
@@ -2940,24 +2864,15 @@ def build_manifest_validation(
     category_counts: dict[str, int] = {}
     manifest_runs_by_path = _manifest_declared_runs_by_result_path(run_manifest)
     manifest_result_paths = set(manifest_runs_by_path)
-    selected_result_paths = {
-        _normalize_results_path(path).resolve()
-        for path in result_paths
-    }
+    selected_result_paths = {_normalize_results_path(path).resolve() for path in result_paths}
     missing_from_manifest = sorted(
-        _repo_relative(path)
-        for path in selected_result_paths - manifest_result_paths
+        _repo_relative(path) for path in selected_result_paths - manifest_result_paths
     )
     extra_in_manifest = sorted(
-        _repo_relative(path)
-        for path in manifest_result_paths - selected_result_paths
+        _repo_relative(path) for path in manifest_result_paths - selected_result_paths
     )
-    manifest_source_match = (
-        not run_manifest.exists()
-        or (
-            not missing_from_manifest
-            and not extra_in_manifest
-        )
+    manifest_source_match = not run_manifest.exists() or (
+        not missing_from_manifest and not extra_in_manifest
     )
 
     for result in results:
@@ -2986,8 +2901,7 @@ def build_manifest_validation(
                 "result_count": model_counts[model],
                 "ok_count": model_ok_counts.get(model, 0),
                 "category_counts": {
-                    category: category_map.get(category, 0)
-                    for category in categories
+                    category: category_map.get(category, 0) for category in categories
                 },
                 "complete": (
                     model_counts[model] == expected_cases_per_model
@@ -3004,15 +2918,12 @@ def build_manifest_validation(
         )
 
     result_file_checks = [
-        _result_file_manifest_check(path, manifest_runs_by_path)
-        for path in result_paths
+        _result_file_manifest_check(path, manifest_runs_by_path) for path in result_paths
     ]
     complete = (
         manifest_source_match
         and all(model["complete"] for model in models)
-        and all(
-            check["model_match"] and check["digest_match"] for check in result_file_checks
-        )
+        and all(check["model_match"] and check["digest_match"] for check in result_file_checks)
     )
 
     return {
@@ -3029,10 +2940,7 @@ def build_manifest_validation(
         "category_count": len(categories),
         "expected_cases_per_model": expected_cases_per_model,
         "expected_cases_per_category": expected_cases_per_category,
-        "category_counts": {
-            category: category_counts[category]
-            for category in categories
-        },
+        "category_counts": {category: category_counts[category] for category in categories},
         "models": models,
     }
 
@@ -3062,27 +2970,22 @@ def _manifest_declared_runs_by_result_path(manifest_path: Path) -> dict[Path, di
     return runs_by_path
 
 
-def _result_file_manifest_check(path: Path, manifest_runs_by_path: dict[Path, dict[str, object]]) -> dict[str, object]:
+def _result_file_manifest_check(
+    path: Path, manifest_runs_by_path: dict[Path, dict[str, object]]
+) -> dict[str, object]:
     file_results = load_results_jsonl(path)
     actual_models = sorted(
-        {
-            str(result.metadata.get("candidate_model") or "")
-            for result in file_results
-        }
+        {str(result.metadata.get("candidate_model") or "") for result in file_results}
     )
     manifest_run = manifest_runs_by_path.get(path.resolve(), {})
     declared_model = manifest_run.get("model")
-    model_match = (
-        declared_model is None
-        or actual_models == [declared_model]
-    )
+    model_match = declared_model is None or actual_models == [declared_model]
     declared_bytes = manifest_run.get("bytes")
     declared_sha256 = manifest_run.get("sha256")
     actual_bytes = path.stat().st_size
     actual_sha256 = _sha256_file(path)
-    digest_match = (
-        (declared_bytes is None or declared_bytes == actual_bytes)
-        and (declared_sha256 is None or declared_sha256 == actual_sha256)
+    digest_match = (declared_bytes is None or declared_bytes == actual_bytes) and (
+        declared_sha256 is None or declared_sha256 == actual_sha256
     )
     return {
         "path": _repo_relative(path),

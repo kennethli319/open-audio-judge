@@ -64,235 +64,235 @@
   ],
   "result_file_checks": [
     {
-      "actual_bytes": 12081,
+      "actual_bytes": 12279,
       "actual_models": [
         "mlx-community/whisper-large-v3-turbo-asr-fp16"
       ],
-      "actual_sha256": "bbd88190b8993e094468890b9821d0805984b43d5219bc1fd6601ff9c32bbd82",
-      "declared_bytes": 12081,
+      "actual_sha256": "c19589553bdfe3a279cde6c17ae8c25abcfd10f163efeb7ea866e03fbac57b4d",
+      "declared_bytes": 12279,
       "declared_model": "mlx-community/whisper-large-v3-turbo-asr-fp16",
-      "declared_sha256": "bbd88190b8993e094468890b9821d0805984b43d5219bc1fd6601ff9c32bbd82",
+      "declared_sha256": "c19589553bdfe3a279cde6c17ae8c25abcfd10f163efeb7ea866e03fbac57b4d",
       "digest_match": true,
       "model_match": true,
       "path": "runs/asr-leaderboard/whisper-large-v3-turbo-smoke/judge-report/results.jsonl"
     },
     {
-      "actual_bytes": 47155,
+      "actual_bytes": 47947,
       "actual_models": [
         "mlx-community/whisper-large-v3-turbo-asr-fp16"
       ],
-      "actual_sha256": "29514fa7ac55d1add005080261b6f6efc3b8249c76112689ca74d47907385302",
-      "declared_bytes": 47155,
+      "actual_sha256": "e7bebb2d053d787aa9fe1cab549eee6d253a69363fa6721951f7f879f31d6322",
+      "declared_bytes": 47947,
       "declared_model": "mlx-community/whisper-large-v3-turbo-asr-fp16",
-      "declared_sha256": "29514fa7ac55d1add005080261b6f6efc3b8249c76112689ca74d47907385302",
+      "declared_sha256": "e7bebb2d053d787aa9fe1cab549eee6d253a69363fa6721951f7f879f31d6322",
       "digest_match": true,
       "model_match": true,
       "path": "runs/asr-leaderboard/whisper-large-v3-turbo-full-gap/judge-report/results.jsonl"
     },
     {
-      "actual_bytes": 19260,
+      "actual_bytes": 19622,
       "actual_models": [
         "mlx-community/whisper-large-v3-turbo-asr-fp16"
       ],
-      "actual_sha256": "1731a6bef87dee5500efdc5fdccd60c68cc2813696ae5d58126f889349118451",
-      "declared_bytes": 19260,
+      "actual_sha256": "3189bda2eae5e1b65fa82f76a4024f41b156fff96633e05eedc743de73f3f6da",
+      "declared_bytes": 19622,
       "declared_model": "mlx-community/whisper-large-v3-turbo-asr-fp16",
-      "declared_sha256": "1731a6bef87dee5500efdc5fdccd60c68cc2813696ae5d58126f889349118451",
+      "declared_sha256": "3189bda2eae5e1b65fa82f76a4024f41b156fff96633e05eedc743de73f3f6da",
       "digest_match": true,
       "model_match": true,
       "path": "runs/asr-leaderboard/whisper-large-v3-turbo-semantic-smoke/judge-report/results.jsonl"
     },
     {
-      "actual_bytes": 19449,
+      "actual_bytes": 19779,
       "actual_models": [
         "mlx-community/whisper-large-v3-turbo-asr-fp16"
       ],
-      "actual_sha256": "68a3bd82f09c109a7e623c594ff639a36f467877a39943e859729d5d16bb776d",
-      "declared_bytes": 19449,
+      "actual_sha256": "1802d7c7888e4b50a937e8b0f4116e36e48ed7ad7883700b47e0feee9193b6c3",
+      "declared_bytes": 19779,
       "declared_model": "mlx-community/whisper-large-v3-turbo-asr-fp16",
-      "declared_sha256": "68a3bd82f09c109a7e623c594ff639a36f467877a39943e859729d5d16bb776d",
+      "declared_sha256": "1802d7c7888e4b50a937e8b0f4116e36e48ed7ad7883700b47e0feee9193b6c3",
       "digest_match": true,
       "model_match": true,
       "path": "runs/asr-leaderboard/whisper-large-v3-turbo-entity-smoke/judge-report/results.jsonl"
     },
     {
-      "actual_bytes": 18953,
+      "actual_bytes": 19283,
       "actual_models": [
         "mlx-community/whisper-large-v3-turbo-asr-fp16"
       ],
-      "actual_sha256": "29c1777225f052e42f0d2028e30c9f14530259ebea2cf4ac5299bbd997239b4d",
-      "declared_bytes": 18953,
+      "actual_sha256": "ea3c7b9fece942fae17acfd4cf4d07d19ab04fb381474deabf8c0302bc193864",
+      "declared_bytes": 19283,
       "declared_model": "mlx-community/whisper-large-v3-turbo-asr-fp16",
-      "declared_sha256": "29c1777225f052e42f0d2028e30c9f14530259ebea2cf4ac5299bbd997239b4d",
+      "declared_sha256": "ea3c7b9fece942fae17acfd4cf4d07d19ab04fb381474deabf8c0302bc193864",
       "digest_match": true,
       "model_match": true,
       "path": "runs/asr-leaderboard/whisper-large-v3-turbo-paraphrase-smoke/judge-report/results.jsonl"
     },
     {
-      "actual_bytes": 18758,
+      "actual_bytes": 19088,
       "actual_models": [
         "mlx-community/whisper-large-v3-turbo-asr-fp16"
       ],
-      "actual_sha256": "ef1ecb77514c22e38c0efc097df7f5c4151749ebb7b99156d74ad976047b5ebb",
-      "declared_bytes": 18758,
+      "actual_sha256": "9758e1e06e23c4ff600c46f95f9a5018fc1ce125d782e48e1c7396cf02a75949",
+      "declared_bytes": 19088,
       "declared_model": "mlx-community/whisper-large-v3-turbo-asr-fp16",
-      "declared_sha256": "ef1ecb77514c22e38c0efc097df7f5c4151749ebb7b99156d74ad976047b5ebb",
+      "declared_sha256": "9758e1e06e23c4ff600c46f95f9a5018fc1ce125d782e48e1c7396cf02a75949",
       "digest_match": true,
       "model_match": true,
       "path": "runs/asr-leaderboard/whisper-large-v3-turbo-noise-smoke/judge-report/results.jsonl"
     },
     {
-      "actual_bytes": 12269,
+      "actual_bytes": 12467,
       "actual_models": [
         "mlx-community/Qwen3-ASR-1.7B-8bit"
       ],
-      "actual_sha256": "c1b68dbc36a7025f0060bcc85f173a113d37841fb4c03b8308a62727274fff4c",
-      "declared_bytes": 12269,
+      "actual_sha256": "da790e5afb80a39064e177424503518466ce918adbffb090895cc90d67bb2161",
+      "declared_bytes": 12467,
       "declared_model": "mlx-community/Qwen3-ASR-1.7B-8bit",
-      "declared_sha256": "c1b68dbc36a7025f0060bcc85f173a113d37841fb4c03b8308a62727274fff4c",
+      "declared_sha256": "da790e5afb80a39064e177424503518466ce918adbffb090895cc90d67bb2161",
       "digest_match": true,
       "model_match": true,
       "path": "runs/asr-leaderboard/qwen3-asr-1.7b-smoke/judge-report/results.jsonl"
     },
     {
-      "actual_bytes": 46978,
+      "actual_bytes": 47770,
       "actual_models": [
         "mlx-community/Qwen3-ASR-1.7B-8bit"
       ],
-      "actual_sha256": "4fe693498472d0071b3cd2e24d6cf2c04f616f973f05f978d742d2eb5f935a25",
-      "declared_bytes": 46978,
+      "actual_sha256": "2ff034ef89f5e2b94b3648fb8f34f809a573840f3f6767785b61243ed6ebc4c2",
+      "declared_bytes": 47770,
       "declared_model": "mlx-community/Qwen3-ASR-1.7B-8bit",
-      "declared_sha256": "4fe693498472d0071b3cd2e24d6cf2c04f616f973f05f978d742d2eb5f935a25",
+      "declared_sha256": "2ff034ef89f5e2b94b3648fb8f34f809a573840f3f6767785b61243ed6ebc4c2",
       "digest_match": true,
       "model_match": true,
       "path": "runs/asr-leaderboard/qwen3-asr-1.7b-full-gap/judge-report/results.jsonl"
     },
     {
-      "actual_bytes": 17782,
+      "actual_bytes": 18112,
       "actual_models": [
         "mlx-community/Qwen3-ASR-1.7B-8bit"
       ],
-      "actual_sha256": "13cf26a6451d2ecc5e53af0bf7719d8ad328d6b1608f179b9351ea1edcccc0dd",
-      "declared_bytes": 17782,
+      "actual_sha256": "5386712d72a1b7443fd974e810c2716243e74a4e61c9f49f6eecec63b3862af7",
+      "declared_bytes": 18112,
       "declared_model": "mlx-community/Qwen3-ASR-1.7B-8bit",
-      "declared_sha256": "13cf26a6451d2ecc5e53af0bf7719d8ad328d6b1608f179b9351ea1edcccc0dd",
+      "declared_sha256": "5386712d72a1b7443fd974e810c2716243e74a4e61c9f49f6eecec63b3862af7",
       "digest_match": true,
       "model_match": true,
       "path": "runs/asr-leaderboard/qwen3-asr-1.7b-semantic-smoke/judge-report/results.jsonl"
     },
     {
-      "actual_bytes": 19955,
+      "actual_bytes": 20285,
       "actual_models": [
         "mlx-community/Qwen3-ASR-1.7B-8bit"
       ],
-      "actual_sha256": "fe06d5f677f8eb271a8f98e599d1063dfac4cf3bac6e7a5a6e9be4a50bb3bca8",
-      "declared_bytes": 19955,
+      "actual_sha256": "c33bbefa5573baeb7d92fae9638d7aab3f2a7047e53b2b82aac32401d3f0e3c6",
+      "declared_bytes": 20285,
       "declared_model": "mlx-community/Qwen3-ASR-1.7B-8bit",
-      "declared_sha256": "fe06d5f677f8eb271a8f98e599d1063dfac4cf3bac6e7a5a6e9be4a50bb3bca8",
+      "declared_sha256": "c33bbefa5573baeb7d92fae9638d7aab3f2a7047e53b2b82aac32401d3f0e3c6",
       "digest_match": true,
       "model_match": true,
       "path": "runs/asr-leaderboard/qwen3-asr-1.7b-entity-smoke/judge-report/results.jsonl"
     },
     {
-      "actual_bytes": 17661,
+      "actual_bytes": 17991,
       "actual_models": [
         "mlx-community/Qwen3-ASR-1.7B-8bit"
       ],
-      "actual_sha256": "31e3f291ff565d63a3d361bda80930ed9722bb6b5d9b7262c5996be547cfc125",
-      "declared_bytes": 17661,
+      "actual_sha256": "b618d9cc01f7f85b19fc400843f48c9ac7686a0d75e30bfff92c5b47f7880816",
+      "declared_bytes": 17991,
       "declared_model": "mlx-community/Qwen3-ASR-1.7B-8bit",
-      "declared_sha256": "31e3f291ff565d63a3d361bda80930ed9722bb6b5d9b7262c5996be547cfc125",
+      "declared_sha256": "b618d9cc01f7f85b19fc400843f48c9ac7686a0d75e30bfff92c5b47f7880816",
       "digest_match": true,
       "model_match": true,
       "path": "runs/asr-leaderboard/qwen3-asr-1.7b-paraphrase-smoke/judge-report/results.jsonl"
     },
     {
-      "actual_bytes": 19038,
+      "actual_bytes": 19368,
       "actual_models": [
         "mlx-community/Qwen3-ASR-1.7B-8bit"
       ],
-      "actual_sha256": "984f75e7a808b20f619805ecfa0405ea0d84787cb5fde7af62b8667bf313a0c5",
-      "declared_bytes": 19038,
+      "actual_sha256": "0d2f2f5644753dd4cb79fcb318a5d43401785cef8b04c95b1a1516876db98bd7",
+      "declared_bytes": 19368,
       "declared_model": "mlx-community/Qwen3-ASR-1.7B-8bit",
-      "declared_sha256": "984f75e7a808b20f619805ecfa0405ea0d84787cb5fde7af62b8667bf313a0c5",
+      "declared_sha256": "0d2f2f5644753dd4cb79fcb318a5d43401785cef8b04c95b1a1516876db98bd7",
       "digest_match": true,
       "model_match": true,
       "path": "runs/asr-leaderboard/qwen3-asr-1.7b-noise-smoke/judge-report/results.jsonl"
     },
     {
-      "actual_bytes": 11196,
+      "actual_bytes": 11394,
       "actual_models": [
         "mlx-community/VibeVoice-ASR-4bit"
       ],
-      "actual_sha256": "ecfb6e2cade45368ba7320cf5e2e08e1b8a70015604f59506817ea5cd34018c0",
-      "declared_bytes": 11196,
+      "actual_sha256": "4c883cf2ae204becf1b498d24e5189ed06191a59320d64a068bc6cc0dee09f2c",
+      "declared_bytes": 11394,
       "declared_model": "mlx-community/VibeVoice-ASR-4bit",
-      "declared_sha256": "ecfb6e2cade45368ba7320cf5e2e08e1b8a70015604f59506817ea5cd34018c0",
+      "declared_sha256": "4c883cf2ae204becf1b498d24e5189ed06191a59320d64a068bc6cc0dee09f2c",
       "digest_match": true,
       "model_match": true,
       "path": "runs/asr-leaderboard/vibevoice-asr-smoke/judge-report/results.jsonl"
     },
     {
-      "actual_bytes": 45543,
+      "actual_bytes": 46335,
       "actual_models": [
         "mlx-community/VibeVoice-ASR-4bit"
       ],
-      "actual_sha256": "19a0905ab13fce72d669d5d0c8fc075963bd23a578a2f8c072f6f328998f041e",
-      "declared_bytes": 45543,
+      "actual_sha256": "18dcfb75b9a165f026f3d8e30e31a7dba78d71b4552ece0db95fe772dad15f5d",
+      "declared_bytes": 46335,
       "declared_model": "mlx-community/VibeVoice-ASR-4bit",
-      "declared_sha256": "19a0905ab13fce72d669d5d0c8fc075963bd23a578a2f8c072f6f328998f041e",
+      "declared_sha256": "18dcfb75b9a165f026f3d8e30e31a7dba78d71b4552ece0db95fe772dad15f5d",
       "digest_match": true,
       "model_match": true,
       "path": "runs/asr-leaderboard/vibevoice-asr-full-gap/judge-report/results.jsonl"
     },
     {
-      "actual_bytes": 18984,
+      "actual_bytes": 19314,
       "actual_models": [
         "mlx-community/VibeVoice-ASR-4bit"
       ],
-      "actual_sha256": "40e11be673f96ad4cf2cb57d7fbb51be3e02443a2d4fbc291971cd1d80a943ee",
-      "declared_bytes": 18984,
+      "actual_sha256": "566a04bdd182d0b97a7bf0df2601f162ca18885dcdc592572e0406b95c716dc7",
+      "declared_bytes": 19314,
       "declared_model": "mlx-community/VibeVoice-ASR-4bit",
-      "declared_sha256": "40e11be673f96ad4cf2cb57d7fbb51be3e02443a2d4fbc291971cd1d80a943ee",
+      "declared_sha256": "566a04bdd182d0b97a7bf0df2601f162ca18885dcdc592572e0406b95c716dc7",
       "digest_match": true,
       "model_match": true,
       "path": "runs/asr-leaderboard/vibevoice-asr-semantic-smoke/judge-report/results.jsonl"
     },
     {
-      "actual_bytes": 19752,
+      "actual_bytes": 20082,
       "actual_models": [
         "mlx-community/VibeVoice-ASR-4bit"
       ],
-      "actual_sha256": "0b30d9564cbc330e44d1994765412fadd65b2c5849d77d849bc4babd69a7a7c9",
-      "declared_bytes": 19752,
+      "actual_sha256": "29295d6874abfac306d656503001586dbaeab62531333113b7f3deed7dda4291",
+      "declared_bytes": 20082,
       "declared_model": "mlx-community/VibeVoice-ASR-4bit",
-      "declared_sha256": "0b30d9564cbc330e44d1994765412fadd65b2c5849d77d849bc4babd69a7a7c9",
+      "declared_sha256": "29295d6874abfac306d656503001586dbaeab62531333113b7f3deed7dda4291",
       "digest_match": true,
       "model_match": true,
       "path": "runs/asr-leaderboard/vibevoice-asr-entity-smoke/judge-report/results.jsonl"
     },
     {
-      "actual_bytes": 19869,
+      "actual_bytes": 20199,
       "actual_models": [
         "mlx-community/VibeVoice-ASR-4bit"
       ],
-      "actual_sha256": "427cb36f67fc2f8fb468b66d3d56197fa5899c8318be9752dac76bf34b1313f7",
-      "declared_bytes": 19869,
+      "actual_sha256": "77bdc4b49fc30a36df6da414c506f5a173e930530115d5589d1edb2c94e63260",
+      "declared_bytes": 20199,
       "declared_model": "mlx-community/VibeVoice-ASR-4bit",
-      "declared_sha256": "427cb36f67fc2f8fb468b66d3d56197fa5899c8318be9752dac76bf34b1313f7",
+      "declared_sha256": "77bdc4b49fc30a36df6da414c506f5a173e930530115d5589d1edb2c94e63260",
       "digest_match": true,
       "model_match": true,
       "path": "runs/asr-leaderboard/vibevoice-asr-paraphrase-smoke/judge-report/results.jsonl"
     },
     {
-      "actual_bytes": 19543,
+      "actual_bytes": 19873,
       "actual_models": [
         "mlx-community/VibeVoice-ASR-4bit"
       ],
-      "actual_sha256": "dea03c102fae8b37591eed82519ed54c489dfcff589b292c8eba50213bd5ab3f",
-      "declared_bytes": 19543,
+      "actual_sha256": "325f307fcb4a18ef1334623ebfefeb203c0fdc0a70fb8f82d6db6769628398cc",
+      "declared_bytes": 19873,
       "declared_model": "mlx-community/VibeVoice-ASR-4bit",
-      "declared_sha256": "dea03c102fae8b37591eed82519ed54c489dfcff589b292c8eba50213bd5ab3f",
+      "declared_sha256": "325f307fcb4a18ef1334623ebfefeb203c0fdc0a70fb8f82d6db6769628398cc",
       "digest_match": true,
       "model_match": true,
       "path": "runs/asr-leaderboard/vibevoice-asr-noise-smoke/judge-report/results.jsonl"

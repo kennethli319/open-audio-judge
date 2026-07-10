@@ -4,7 +4,13 @@ from pathlib import Path
 from open_audio_judge.models import EvaluationCase, ProviderResponse, RenderedPrompt
 from open_audio_judge.prompting import load_prompt
 from open_audio_judge.providers.mock import MockProvider
-from open_audio_judge.runner import evaluate_case, evaluate_case_with_sampling, evaluate_cases, load_cases
+from open_audio_judge.runner import (
+    evaluate_case,
+    evaluate_case_with_sampling,
+    evaluate_cases,
+    load_cases,
+    load_results_jsonl,
+)
 
 
 class MalformedJsonProvider:
@@ -59,6 +65,30 @@ class SequencedTtsProvider:
         )
 
 
+class PartiallyFailingTtsProvider:
+    name = "partially-failing-tts-provider"
+
+    def __init__(self) -> None:
+        self.index = 0
+
+    def generate(self, case: EvaluationCase, prompt: RenderedPrompt) -> ProviderResponse:
+        self.index += 1
+        if self.index == 3:
+            raise RuntimeError("temporary judge outage")
+        return ProviderResponse(
+            content=json.dumps(
+                {
+                    "overall_score": 100,
+                    "reason": "Transcript is accurate.",
+                    "semantic_error_summary": "Meaning is preserved.",
+                    "key_differences": [],
+                    "error_categories": ["no_error"],
+                    "researcher_notes": [],
+                }
+            )
+        )
+
+
 def test_evaluate_cases_with_mock(tmp_path: Path) -> None:
     cases = load_cases(Path("examples/asr_cases.jsonl"))
     prompt = load_prompt("asr_error")
@@ -77,6 +107,7 @@ def test_evaluate_cases_with_mock(tmp_path: Path) -> None:
     assert "date_time_error" in by_id["asr-calibration-date-001"].error_categories
     assert "date_time_error" in by_id["asr-calibration-time-001"].error_categories
     assert "unit_error" in by_id["asr-calibration-unit-001"].error_categories
+
 
 def test_evaluate_tts_case_with_mock_matches_tts_schema() -> None:
     prompt = load_prompt("tts_naturalness")
@@ -171,13 +202,80 @@ def test_evaluate_case_with_sampling_averages_scores_and_preserves_attempts() ->
     )
 
     assert result.overall_score == 80
-    assert result.label == "accurate"
+    assert result.label == "needs_review"
     assert result.metadata["judge_sample_count"] == 3
     assert result.metadata["judge_sample_scores"] == [70, 80, 90]
     assert result.metadata["judge_sample_average"] == 80.0
     assert result.metadata["eval_category"] == "storytelling"
     assert "Average of 3 judge samples" in result.reason
     assert result.raw_response["judge_samples"][0]["overall_score"] == 70
+
+
+def test_evaluate_case_with_sampling_excludes_failed_attempts_from_score() -> None:
+    prompt = load_prompt("tts_naturalness")
+    result = evaluate_case_with_sampling(
+        EvaluationCase(
+            id="sampled-tts-with-outage",
+            task="tts_naturalness",
+            audio_url="https://example.test/audio.wav",
+            reference_text="Read this naturally.",
+        ),
+        prompt,
+        PartiallyFailingTtsProvider(),
+        judge_samples=3,
+    )
+
+    assert result.status == "ok"
+    assert result.overall_score == 100
+    assert result.label == "accurate"
+    assert result.metadata["judge_sample_count"] == 3
+    assert result.metadata["judge_sample_success_count"] == 2
+    assert result.metadata["judge_sample_failure_count"] == 1
+    assert result.metadata["judge_sample_scores"] == [100, 100]
+    assert result.metadata["judge_sample_statuses"] == ["ok", "ok", "provider_error"]
+    assert "1 failed attempt excluded" in result.reason
+    assert result.raw_response["judge_samples"][2]["status"] == "provider_error"
+
+
+def test_load_results_reconciles_legacy_failed_sample_score(tmp_path: Path) -> None:
+    path = tmp_path / "results.jsonl"
+    path.write_text(
+        json.dumps(
+            {
+                "case_id": "legacy-partial-outage",
+                "task": "asr_error",
+                "judge_id": "asr_error",
+                "judge_version": "0.2.0",
+                "provider": "gemini",
+                "overall_score": 67,
+                "reason": (
+                    "Average of 3 judge samples: 67.00 (scores: 100, 100, 1). "
+                    "Representative reason: Transcript is accurate."
+                ),
+                "meaning_preservation": "preserved",
+                "error_categories": ["formatting_only"],
+                "label": "needs_review",
+                "status": "ok",
+                "metadata": {
+                    "judge_sample_count": 3,
+                    "judge_sample_scores": [100, 100, 1],
+                    "judge_sample_average": 67.0,
+                    "judge_sample_statuses": ["ok", "ok", "provider_error"],
+                },
+            }
+        )
+        + "\n",
+        encoding="utf-8",
+    )
+
+    result = load_results_jsonl(path)[0]
+
+    assert result.overall_score == 100
+    assert result.label == "accurate"
+    assert result.metadata["judge_sample_scores"] == [100, 100]
+    assert result.metadata["judge_sample_success_count"] == 2
+    assert result.metadata["judge_sample_failure_count"] == 1
+    assert "1 failed attempt excluded" in result.reason
 
 
 def test_evaluate_cases_accepts_judge_samples(tmp_path: Path) -> None:
@@ -201,6 +299,6 @@ def test_evaluate_cases_accepts_judge_samples(tmp_path: Path) -> None:
     assert results[0].overall_score == 62
     written = json.loads((tmp_path / "results.jsonl").read_text(encoding="utf-8"))
     assert written["metadata"]["judge_sample_scores"] == [61, 62, 63]
-    assert "judge samples: 61, 62, 63; avg 62.00" in (
-        tmp_path / "report.html"
-    ).read_text(encoding="utf-8")
+    assert "judge samples: 61, 62, 63; avg 62.00" in (tmp_path / "report.html").read_text(
+        encoding="utf-8"
+    )

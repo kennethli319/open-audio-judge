@@ -6,6 +6,7 @@ from open_audio_judge.reports import label_for_score, write_html_report
 
 def test_label_for_score() -> None:
     assert label_for_score(92) == "accurate"
+    assert label_for_score(80) == "needs_review"
     assert label_for_score(71) == "needs_review"
     assert label_for_score(12) == "inaccurate"
 
@@ -30,7 +31,11 @@ def test_write_html_report(tmp_path: Path) -> None:
     output = write_html_report([result], tmp_path / "report.html")
     html = output.read_text(encoding="utf-8")
 
-    assert "Open Audio Judge Report" in html
+    assert "Open Audio Judge ASR Report" in html
+    assert "Decision brief" in html
+    assert 'class="case-list"' in html
+    assert 'class="case-card' in html
+    assert "Judge health" in html
     assert "Mostly correct." in html
     assert "Meaning is preserved." in html
     assert "Meaning Preservation" in html
@@ -223,6 +228,7 @@ def test_write_html_report_aggregates_tts_candidate_metadata(tmp_path: Path) -> 
     assert "Failures By Language" in html
     assert "en / provider error" in html
     assert "Failures By Sample Kind" in html
+    assert "all-failed case" in html
     assert "local synthetic tts / provider error" in html
     assert "dates times / prosody issue" in html
     assert "judge samples: 65, 75; avg 70.00" in html
@@ -326,6 +332,11 @@ def test_write_html_report_groups_asr_by_candidate_model(tmp_path: Path) -> None
     assert 'data-slice="function_word_substitution"' in html
     assert "ASR slice" in html
     assert "Candidate model" in html
+    assert "ASR Model" in html
+    assert "ASR Slice" in html
+    assert "semantic judge score; higher is better" in html
+    assert "Judge rationale, vote details, and provenance" in html
+    assert "VibeVoice ASR (4-bit)" in html
 
 
 def test_write_html_report_shows_sample_provenance_per_row(tmp_path: Path) -> None:
@@ -355,8 +366,8 @@ def test_write_html_report_shows_sample_provenance_per_row(tmp_path: Path) -> No
     output = write_html_report([result], tmp_path / "report.html")
     html = output.read_text(encoding="utf-8")
 
-    assert "<th>Provenance</th>" in html
-    assert 'data-label="Provenance"' in html
+    assert "Judge rationale, vote details, and provenance" in html
+    assert '<h4 style="margin-top:14px">Provenance</h4>' in html
     assert "dates times" in html
     assert "mlx-community/chatterbox-turbo-6bit" in html
     assert "af heart" in html
