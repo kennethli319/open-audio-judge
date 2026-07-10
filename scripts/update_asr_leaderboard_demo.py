@@ -1441,12 +1441,16 @@ def _automation_stages() -> list[dict[str, object]]:
     return [
         {
             "stage": "preflight",
-            "description": "Validate committed result sources, generated artifacts, audio readiness, and MLX runtime status.",
+            "description": (
+                "Validate committed result sources, generated artifacts, audio readiness, "
+                "and MLX runtime status; cron rehearsal may refresh runtime, decision, "
+                "and handoff artifacts."
+            ),
             "command_keys": [
                 "cron_rehearsal_command",
                 "runtime_ready_check_command",
             ],
-            "writes_committed_artifacts": False,
+            "writes_committed_artifacts": True,
             "runs_live_models": False,
         },
         {

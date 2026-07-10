@@ -882,6 +882,10 @@ def test_write_summary_artifact_records_models_and_categories(tmp_path: Path) ->
         "mlx-community/GLM-ASR-Nano-2512-4bit",
     ]
     assert "do not substitute silently" in summary["refresh_workflow"]["fallback_handling"]
+    preflight_stage = summary["refresh_workflow"]["automation_stages"][0]
+    assert preflight_stage["stage"] == "preflight"
+    assert preflight_stage["writes_committed_artifacts"] is True
+    assert "may refresh runtime, decision, and handoff artifacts" in preflight_stage["description"]
     assert summary["refresh_runtime_status"] == {
         "all_loaded_results_ok": True,
         "gemini_judge": "verified_from_loaded_results",

@@ -2,27 +2,27 @@
   "artifact_count": 39,
   "artifacts": [
     {
-      "bytes": 61654,
+      "bytes": 61665,
       "hosted_paths": [
         "asr-leaderboard-demo.html"
       ],
-      "sha256": "b905044a57f5598114ee4fdfdb72cea7ec9ba3449f16588ee2d0d7ee65470b14",
+      "sha256": "1ae9256f26a7839a203f8507c7746ead5cac98f724af3ba8cfa8ea637fbdbe47",
       "source_path": "docs/asr-leaderboard-demo.html"
     },
     {
-      "bytes": 38685,
+      "bytes": 38753,
       "hosted_paths": [
         "asr-leaderboard-summary.json"
       ],
-      "sha256": "ac1a6a3ed1fe4f144c2c82e5489878a5cf70d315d107ac51fda0dec30bb85a88",
+      "sha256": "69136498967a0c1a08cd5270de7f17f4aed21960933c0a222ae711761df64537",
       "source_path": "docs/asr-leaderboard-summary.json"
     },
     {
-      "bytes": 20354,
+      "bytes": 20353,
       "hosted_paths": [
         "asr-leaderboard-refresh-report.md"
       ],
-      "sha256": "0baa82a040f175ff483c0e64244002329c04e9e54029ed77138eb88e08d747e5",
+      "sha256": "ad7313d6e02d04e59e966c27ec14a1446b72a0be6f106c036786b74883ac7426",
       "source_path": "docs/asr-leaderboard-refresh-report.md"
     },
     {
@@ -50,11 +50,11 @@
       "source_path": "docs/asr-leaderboard-refresh-commands.sh"
     },
     {
-      "bytes": 15072,
+      "bytes": 15208,
       "hosted_paths": [
         "asr-leaderboard-refresh-workflow.json"
       ],
-      "sha256": "a1f9f359825f935b762ee1548e63b7bfc6898e6fc74b0d3e32b62e2e843c86d7",
+      "sha256": "5ca2b5d4e6d9b9f776723d6dd9c4e948474870a1853f38c58b6351725ecf158d",
       "source_path": "docs/asr-leaderboard-refresh-workflow.json"
     },
     {
@@ -102,7 +102,7 @@
       "hosted_paths": [
         "asr-leaderboard-artifacts.json"
       ],
-      "sha256": "078596b43ecacb8cd1f8a49c55c4e55e477e136742653a5eb9f26066c5409d91",
+      "sha256": "d7e62634ddcdad3cfb9d114c1d4751501293011e3a3c031780b14896243c7a3c",
       "source_path": "docs/asr-leaderboard-artifacts.json"
     },
     {
@@ -110,7 +110,7 @@
       "hosted_paths": [
         "asr-leaderboard-runtime-status.json"
       ],
-      "sha256": "8a9f0ea49f7458a2a212390c179146eab201563dcc730bf1fbe70a6a81205479",
+      "sha256": "bea98735600318feae9a0d04ea716399a468e14f1e2819b8759e74e098aa4282",
       "source_path": "docs/asr-leaderboard-runtime-status.json"
     },
     {
@@ -118,7 +118,7 @@
       "hosted_paths": [
         "asr-leaderboard-refresh-decision.json"
       ],
-      "sha256": "6965ccb8205f256ee4d8bb6b7915f9ed1af249f1780c1e463472af8ba50af4b8",
+      "sha256": "40e47efca441bf3b5fdbe989ac13b01b4825a57157e74c3b7ebd055764512e09",
       "source_path": "docs/asr-leaderboard-refresh-decision.json"
     },
     {

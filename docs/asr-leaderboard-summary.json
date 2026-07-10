@@ -328,10 +328,10 @@
           "cron_rehearsal_command",
           "runtime_ready_check_command"
         ],
-        "description": "Validate committed result sources, generated artifacts, audio readiness, and MLX runtime status.",
+        "description": "Validate committed result sources, generated artifacts, audio readiness, and MLX runtime status; cron rehearsal may refresh runtime, decision, and handoff artifacts.",
         "runs_live_models": false,
         "stage": "preflight",
-        "writes_committed_artifacts": false
+        "writes_committed_artifacts": true
       },
       {
         "command_keys": [
