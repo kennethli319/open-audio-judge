@@ -1351,6 +1351,19 @@ def test_refresh_asr_leaderboard_artifacts_combines_report_and_page(tmp_path: Pa
     assert "runs/asr-leaderboard/blocked-models.jsonl" in live_refresh_text
     assert "run_primary_model" in live_refresh_text
     assert "record before fallback; do not silently substitute" in live_refresh_text
+    assert "ASR_SYNC_HOSTED=1" in live_refresh_text
+    assert (
+        ': "${ASR_LEADERBOARD_HOSTED_DIR:?Set ASR_LEADERBOARD_HOSTED_DIR '
+        'to the Pages checkout open-audio-judge directory}"'
+    ) in live_refresh_text
+    assert (
+        ".venv/bin/python scripts/refresh_asr_leaderboard_artifacts.py --hosted-dir-from-env"
+        in live_refresh_text
+    )
+    assert (
+        ".venv/bin/python scripts/refresh_asr_leaderboard_artifacts.py --check-only --hosted-dir-from-env --require-hosted-current"
+        in live_refresh_text
+    )
     assert (
         ".venv/bin/python scripts/refresh_asr_leaderboard_artifacts.py --check-only --require-generated-fresh --check-summary-out runs/asr-leaderboard/preflight-summary.json"
         in refresh_command_text

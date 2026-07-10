@@ -56,5 +56,12 @@ fi
 .venv/bin/python scripts/check_asr_leaderboard_page.py
 .venv/bin/python scripts/refresh_asr_leaderboard_artifacts.py --check-only --require-generated-fresh
 
+# Optional hosted sync; export ASR_SYNC_HOSTED=1 and set ASR_LEADERBOARD_HOSTED_DIR first.
+if [[ "${ASR_SYNC_HOSTED:-0}" == "1" ]]; then
+  : "${ASR_LEADERBOARD_HOSTED_DIR:?Set ASR_LEADERBOARD_HOSTED_DIR to the Pages checkout open-audio-judge directory}"
+  .venv/bin/python scripts/refresh_asr_leaderboard_artifacts.py --hosted-dir-from-env
+  .venv/bin/python scripts/refresh_asr_leaderboard_artifacts.py --check-only --hosted-dir-from-env --require-hosted-current
+fi
+
 # If a primary model fails, record the unsupported/blocked state before trying fallbacks.
 # Fallback models: mlx-community/whisper-small.en-asr-4bit, mlx-community/parakeet-rnnt-0.6b, mlx-community/GLM-ASR-Nano-2512-4bit
