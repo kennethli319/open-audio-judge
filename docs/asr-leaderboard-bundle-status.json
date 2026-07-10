@@ -3,6 +3,7 @@
   "artifact_index_path": "docs/asr-leaderboard-artifacts.json",
   "category_count": 7,
   "cron_action": "skip_live_refresh",
+  "cron_artifact_digest": "296bf0550080eb0d676f351eee0db1ee41045342266b16ccdd44c7256058c7df",
   "cron_status_path": "docs/asr-leaderboard-cron-status.json",
   "description": "Compact ASR leaderboard artifact-bundle status for cron and hosted checks.",
   "digest_status_counts": {
@@ -20,6 +21,13 @@
   "missing_artifact_paths": [],
   "mlx_runtime_status": "not_executed_by_refresh; transcripts loaded from verified result artifacts",
   "model_count": 3,
+  "next_best_task": "Keep the verified 35-case artifacts fresh; run preflight and hosted checks, then improve report automation or eval-set quality.",
+  "public_urls": {
+    "combined_report": "https://kennethli319.github.io/open-audio-judge/asr-leaderboard/full-35-combined/report.html",
+    "demo": "https://kennethli319.github.io/open-audio-judge/asr-leaderboard-demo.html",
+    "report_index": "https://kennethli319.github.io/open-audio-judge/asr-leaderboard-report-index.md",
+    "report_links": "https://kennethli319.github.io/open-audio-judge/asr-leaderboard-report-links.json"
+  },
   "refresh_action": "skip_live_refresh",
   "refresh_decision_path": "docs/asr-leaderboard-refresh-decision.json",
   "results_path": "runs/asr-leaderboard/full-35-combined/results.jsonl",

@@ -154,11 +154,11 @@
       "source_path": "docs/asr-leaderboard-cron-handoff.md"
     },
     {
-      "bytes": 1573,
+      "bytes": 2257,
       "hosted_paths": [
         "asr-leaderboard-bundle-status.json"
       ],
-      "sha256": "d8a38415088e69bfced10e9b068e65c3d336719495396b055a010824a03b410f",
+      "sha256": "5981fae30a6f872e191b48e330c9f8ed587eff593aa4b34c1c378c7cba017612",
       "source_path": "docs/asr-leaderboard-bundle-status.json"
     },
     {

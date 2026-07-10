@@ -3750,6 +3750,11 @@ def test_check_asr_leaderboard_page_validates_generated_artifacts(tmp_path: Path
         results_path=results_path,
         expected_cases_per_model=2,
     )
+    bundle_status_data = json.loads(bundle_status.read_text(encoding="utf-8"))
+    cron_status_data = json.loads(cron_status.read_text(encoding="utf-8"))
+    assert bundle_status_data["cron_artifact_digest"] == cron_status_data["artifact_digest"]
+    assert bundle_status_data["next_best_task"] == cron_status_data["next_best_task"]
+    assert bundle_status_data["public_urls"] == cron_status_data["public_urls"]
 
     validation = check_module.check_asr_leaderboard_page(page, summary_path=summary)
 

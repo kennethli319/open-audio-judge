@@ -2107,6 +2107,9 @@ def write_bundle_status_artifact(
                 "live_refresh_required": refresh_decision.get("live_refresh_required"),
                 "cron_status_path": _generated_artifact_label(cron_status_out, DEFAULT_CRON_STATUS),
                 "cron_action": cron_status.get("action"),
+                "cron_artifact_digest": cron_status.get("artifact_digest"),
+                "next_best_task": cron_status.get("next_best_task"),
+                "public_urls": cron_status.get("public_urls", {}),
                 "verification_commands": artifact_index.get("verification", {}).get(
                     "non_secret_verification_commands",
                     [],
