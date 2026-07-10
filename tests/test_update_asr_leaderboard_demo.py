@@ -1950,6 +1950,8 @@ def test_check_only_runtime_preflight_writes_refresh_decision(
     assert refresh_decision["action"] == "skip_live_refresh"
     assert refresh_decision["runtime_status"] == runtime_status
     assert check_summary["refresh_decision_path"] == str(refresh_decision_out)
+    assert check_summary["refresh_decision"] == refresh_decision
+    assert check_summary["refresh_decision"]["action"] == "skip_live_refresh"
 
 
 def test_check_only_can_require_audio_manifest_readiness(

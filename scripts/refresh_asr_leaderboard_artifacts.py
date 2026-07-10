@@ -359,12 +359,12 @@ def main() -> None:
                 check_mlx_runtime=True,
             )
             write_runtime_status_data(args.runtime_status_out, runtime_status)
-            write_refresh_decision_artifact(
-                args.refresh_decision_out,
+            refresh_decision = build_refresh_decision_artifact_data(
                 results=combined_results,
                 runtime_status=runtime_status,
                 expected_cases_per_model=args.expected_cases_per_model,
             )
+            write_refresh_decision_data(args.refresh_decision_out, refresh_decision)
             enrich_check_summary_with_runtime_status(
                 check_summary,
                 runtime_status=runtime_status,
@@ -373,6 +373,7 @@ def main() -> None:
             check_summary["refresh_decision_path"] = _repo_relative(
                 args.refresh_decision_out
             )
+            check_summary["refresh_decision"] = refresh_decision
             if args.require_runtime_ready:
                 _validate_runtime_ready(runtime_status)
         write_optional_source_selection_summary(
@@ -2243,17 +2244,20 @@ def write_refresh_decision_artifact(
     runtime_status: dict[str, object],
     expected_cases_per_model: int,
 ) -> None:
+    write_refresh_decision_data(
+        output_path,
+        build_refresh_decision_artifact_data(
+            results=results,
+            runtime_status=runtime_status,
+            expected_cases_per_model=expected_cases_per_model,
+        ),
+    )
+
+
+def write_refresh_decision_data(output_path: Path, data: dict[str, object]) -> None:
     output_path.parent.mkdir(parents=True, exist_ok=True)
     output_path.write_text(
-        json.dumps(
-            build_refresh_decision_artifact_data(
-                results=results,
-                runtime_status=runtime_status,
-                expected_cases_per_model=expected_cases_per_model,
-            ),
-            indent=2,
-            sort_keys=True,
-        )
+        json.dumps(data, indent=2, sort_keys=True)
         + "\n",
         encoding="utf-8",
     )
