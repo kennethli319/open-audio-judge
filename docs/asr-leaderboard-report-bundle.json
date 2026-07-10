@@ -1,0 +1,395 @@
+{
+  "combined_report": {
+    "hosted_report_url": "https://kennethli319.github.io/open-audio-judge/asr-leaderboard/full-35-combined/report.html",
+    "hosted_results_url": "https://kennethli319.github.io/open-audio-judge/asr-leaderboard/full-35-combined/results.jsonl",
+    "report_path": "runs/asr-leaderboard/full-35-combined/report.html",
+    "report_sha256": "7816e7113843acd30b2f74a5b75f3e94b13c8593339e4f8e62b261583bdd14a1",
+    "results_path": "runs/asr-leaderboard/full-35-combined/results.jsonl",
+    "results_sha256": "8bff4dff3a4b3e9bd9436e10efc28ea57649ac64ab8b82e337fda43d75992dfb"
+  },
+  "coverage": {
+    "categories": [
+      "acoustic_noise_robustness",
+      "entity_factual_integrity",
+      "negation_modality_scope",
+      "numeric_unit_integrity",
+      "semantic_paraphrase_preservation",
+      "temporal_scheduling_accuracy",
+      "transcription_accuracy_wer"
+    ],
+    "category_count": 7,
+    "expected_cases_per_model": 35,
+    "model_count": 3,
+    "models": [
+      "mlx-community/Qwen3-ASR-1.7B-8bit",
+      "mlx-community/VibeVoice-ASR-4bit",
+      "mlx-community/whisper-large-v3-turbo-asr-fp16"
+    ],
+    "total_results": 105
+  },
+  "demo_page": {
+    "hosted_url": "https://kennethli319.github.io/open-audio-judge/asr-leaderboard-demo.html",
+    "path": "docs/asr-leaderboard-demo.html"
+  },
+  "description": "Single ASR leaderboard report-bundle manifest for hosted demo automation.",
+  "hosted_base_url": "https://kennethli319.github.io/open-audio-judge",
+  "refresh_provenance": {
+    "artifact_index_path": "docs/asr-leaderboard-artifacts.json",
+    "bundle_status_path": "docs/asr-leaderboard-bundle-status.json",
+    "run_manifest_path": "docs/asr-leaderboard-run-manifest.json",
+    "source_selection_summary_path": "docs/asr-leaderboard-source-selection.json",
+    "summary_path": "docs/asr-leaderboard-summary.json"
+  },
+  "report_index": {
+    "hosted_url": "https://kennethli319.github.io/open-audio-judge/asr-leaderboard-report-index.md",
+    "path": "docs/asr-leaderboard-report-index.md"
+  },
+  "report_links": {
+    "hosted_url": "https://kennethli319.github.io/open-audio-judge/asr-leaderboard-report-links.json",
+    "path": "docs/asr-leaderboard-report-links.json"
+  },
+  "secret_policy": "Gemini secrets are runtime-only and are not stored in this bundle.",
+  "source_reports": [
+    {
+      "average_score": 92,
+      "categories": {
+        "transcription_accuracy_wer": 3
+      },
+      "hosted_report_path": "asr-leaderboard/whisper-large-v3-turbo-smoke/judge-report/report.html",
+      "hosted_report_url": "https://kennethli319.github.io/open-audio-judge/asr-leaderboard/whisper-large-v3-turbo-smoke/judge-report/report.html",
+      "models": [
+        "mlx-community/whisper-large-v3-turbo-asr-fp16"
+      ],
+      "ok_count": 3,
+      "report_exists": true,
+      "report_path": "runs/asr-leaderboard/whisper-large-v3-turbo-smoke/judge-report/report.html",
+      "report_sha256": "22ceba42ac1bbde50dc0d5f1164c40ad8c8ad9dbb44ed88cafe4b60a86075d66",
+      "result_count": 3,
+      "results_path": "runs/asr-leaderboard/whisper-large-v3-turbo-smoke/judge-report/results.jsonl",
+      "results_sha256": "c19589553bdfe3a279cde6c17ae8c25abcfd10f163efeb7ea866e03fbac57b4d"
+    },
+    {
+      "average_score": 92.58333333333333,
+      "categories": {
+        "negation_modality_scope": 3,
+        "numeric_unit_integrity": 3,
+        "temporal_scheduling_accuracy": 4,
+        "transcription_accuracy_wer": 2
+      },
+      "hosted_report_path": "asr-leaderboard/whisper-large-v3-turbo-full-gap/judge-report/report.html",
+      "hosted_report_url": "https://kennethli319.github.io/open-audio-judge/asr-leaderboard/whisper-large-v3-turbo-full-gap/judge-report/report.html",
+      "models": [
+        "mlx-community/whisper-large-v3-turbo-asr-fp16"
+      ],
+      "ok_count": 12,
+      "report_exists": true,
+      "report_path": "runs/asr-leaderboard/whisper-large-v3-turbo-full-gap/judge-report/report.html",
+      "report_sha256": "243301fb4d9cf9a007488389e933f34b70a384c33b74dedf0ddaf5bf6c674a26",
+      "result_count": 12,
+      "results_path": "runs/asr-leaderboard/whisper-large-v3-turbo-full-gap/judge-report/results.jsonl",
+      "results_sha256": "e7bebb2d053d787aa9fe1cab549eee6d253a69363fa6721951f7f879f31d6322"
+    },
+    {
+      "average_score": 100,
+      "categories": {
+        "negation_modality_scope": 2,
+        "numeric_unit_integrity": 2,
+        "temporal_scheduling_accuracy": 1
+      },
+      "hosted_report_path": "asr-leaderboard/whisper-large-v3-turbo-semantic-smoke/judge-report/report.html",
+      "hosted_report_url": "https://kennethli319.github.io/open-audio-judge/asr-leaderboard/whisper-large-v3-turbo-semantic-smoke/judge-report/report.html",
+      "models": [
+        "mlx-community/whisper-large-v3-turbo-asr-fp16"
+      ],
+      "ok_count": 5,
+      "report_exists": true,
+      "report_path": "runs/asr-leaderboard/whisper-large-v3-turbo-semantic-smoke/judge-report/report.html",
+      "report_sha256": "5a8d7b2f475f8bb2e3e6f774a0142d226c4bba2ff5549b6099a6e4f27fed200a",
+      "result_count": 5,
+      "results_path": "runs/asr-leaderboard/whisper-large-v3-turbo-semantic-smoke/judge-report/results.jsonl",
+      "results_sha256": "3189bda2eae5e1b65fa82f76a4024f41b156fff96633e05eedc743de73f3f6da"
+    },
+    {
+      "average_score": 88.6,
+      "categories": {
+        "entity_factual_integrity": 5
+      },
+      "hosted_report_path": "asr-leaderboard/whisper-large-v3-turbo-entity-smoke/judge-report/report.html",
+      "hosted_report_url": "https://kennethli319.github.io/open-audio-judge/asr-leaderboard/whisper-large-v3-turbo-entity-smoke/judge-report/report.html",
+      "models": [
+        "mlx-community/whisper-large-v3-turbo-asr-fp16"
+      ],
+      "ok_count": 5,
+      "report_exists": true,
+      "report_path": "runs/asr-leaderboard/whisper-large-v3-turbo-entity-smoke/judge-report/report.html",
+      "report_sha256": "f75cf61c922affb9ead8910448c2e53fb60197f9a147cef62cc472574fe7109d",
+      "result_count": 5,
+      "results_path": "runs/asr-leaderboard/whisper-large-v3-turbo-entity-smoke/judge-report/results.jsonl",
+      "results_sha256": "1802d7c7888e4b50a937e8b0f4116e36e48ed7ad7883700b47e0feee9193b6c3"
+    },
+    {
+      "average_score": 97.6,
+      "categories": {
+        "semantic_paraphrase_preservation": 5
+      },
+      "hosted_report_path": "asr-leaderboard/whisper-large-v3-turbo-paraphrase-smoke/judge-report/report.html",
+      "hosted_report_url": "https://kennethli319.github.io/open-audio-judge/asr-leaderboard/whisper-large-v3-turbo-paraphrase-smoke/judge-report/report.html",
+      "models": [
+        "mlx-community/whisper-large-v3-turbo-asr-fp16"
+      ],
+      "ok_count": 5,
+      "report_exists": true,
+      "report_path": "runs/asr-leaderboard/whisper-large-v3-turbo-paraphrase-smoke/judge-report/report.html",
+      "report_sha256": "d09ae3ebd414526e0e450b5cdd942b6947834f35135d731d58eafcf98f9249e2",
+      "result_count": 5,
+      "results_path": "runs/asr-leaderboard/whisper-large-v3-turbo-paraphrase-smoke/judge-report/results.jsonl",
+      "results_sha256": "ea3c7b9fece942fae17acfd4cf4d07d19ab04fb381474deabf8c0302bc193864"
+    },
+    {
+      "average_score": 96.6,
+      "categories": {
+        "acoustic_noise_robustness": 5
+      },
+      "hosted_report_path": "asr-leaderboard/whisper-large-v3-turbo-noise-smoke/judge-report/report.html",
+      "hosted_report_url": "https://kennethli319.github.io/open-audio-judge/asr-leaderboard/whisper-large-v3-turbo-noise-smoke/judge-report/report.html",
+      "models": [
+        "mlx-community/whisper-large-v3-turbo-asr-fp16"
+      ],
+      "ok_count": 5,
+      "report_exists": true,
+      "report_path": "runs/asr-leaderboard/whisper-large-v3-turbo-noise-smoke/judge-report/report.html",
+      "report_sha256": "88397489492dfe14ff8758e6b2326fcec6c4b835990a810531fe5d1e027c9973",
+      "result_count": 5,
+      "results_path": "runs/asr-leaderboard/whisper-large-v3-turbo-noise-smoke/judge-report/results.jsonl",
+      "results_sha256": "9758e1e06e23c4ff600c46f95f9a5018fc1ce125d782e48e1c7396cf02a75949"
+    },
+    {
+      "average_score": 88,
+      "categories": {
+        "transcription_accuracy_wer": 3
+      },
+      "hosted_report_path": "asr-leaderboard/qwen3-asr-1.7b-smoke/judge-report/report.html",
+      "hosted_report_url": "https://kennethli319.github.io/open-audio-judge/asr-leaderboard/qwen3-asr-1.7b-smoke/judge-report/report.html",
+      "models": [
+        "mlx-community/Qwen3-ASR-1.7B-8bit"
+      ],
+      "ok_count": 3,
+      "report_exists": true,
+      "report_path": "runs/asr-leaderboard/qwen3-asr-1.7b-smoke/judge-report/report.html",
+      "report_sha256": "ac0323e6fbe58aa53f3a6b98a1c6f8cf4db094a0786db41937a81f4dfac14929",
+      "result_count": 3,
+      "results_path": "runs/asr-leaderboard/qwen3-asr-1.7b-smoke/judge-report/results.jsonl",
+      "results_sha256": "da790e5afb80a39064e177424503518466ce918adbffb090895cc90d67bb2161"
+    },
+    {
+      "average_score": 96.66666666666667,
+      "categories": {
+        "negation_modality_scope": 3,
+        "numeric_unit_integrity": 3,
+        "temporal_scheduling_accuracy": 4,
+        "transcription_accuracy_wer": 2
+      },
+      "hosted_report_path": "asr-leaderboard/qwen3-asr-1.7b-full-gap/judge-report/report.html",
+      "hosted_report_url": "https://kennethli319.github.io/open-audio-judge/asr-leaderboard/qwen3-asr-1.7b-full-gap/judge-report/report.html",
+      "models": [
+        "mlx-community/Qwen3-ASR-1.7B-8bit"
+      ],
+      "ok_count": 12,
+      "report_exists": true,
+      "report_path": "runs/asr-leaderboard/qwen3-asr-1.7b-full-gap/judge-report/report.html",
+      "report_sha256": "34306e9292986aa7ce97f0bc972c9547b725b96230ec69588645d9ffe17569d3",
+      "result_count": 12,
+      "results_path": "runs/asr-leaderboard/qwen3-asr-1.7b-full-gap/judge-report/results.jsonl",
+      "results_sha256": "2ff034ef89f5e2b94b3648fb8f34f809a573840f3f6767785b61243ed6ebc4c2"
+    },
+    {
+      "average_score": 100,
+      "categories": {
+        "negation_modality_scope": 2,
+        "numeric_unit_integrity": 2,
+        "temporal_scheduling_accuracy": 1
+      },
+      "hosted_report_path": "asr-leaderboard/qwen3-asr-1.7b-semantic-smoke/judge-report/report.html",
+      "hosted_report_url": "https://kennethli319.github.io/open-audio-judge/asr-leaderboard/qwen3-asr-1.7b-semantic-smoke/judge-report/report.html",
+      "models": [
+        "mlx-community/Qwen3-ASR-1.7B-8bit"
+      ],
+      "ok_count": 5,
+      "report_exists": true,
+      "report_path": "runs/asr-leaderboard/qwen3-asr-1.7b-semantic-smoke/judge-report/report.html",
+      "report_sha256": "942b37c19a5c873ae9e9d836f8d1df30038b896170e2cf28e1049038c76483d5",
+      "result_count": 5,
+      "results_path": "runs/asr-leaderboard/qwen3-asr-1.7b-semantic-smoke/judge-report/results.jsonl",
+      "results_sha256": "5386712d72a1b7443fd974e810c2716243e74a4e61c9f49f6eecec63b3862af7"
+    },
+    {
+      "average_score": 89,
+      "categories": {
+        "entity_factual_integrity": 5
+      },
+      "hosted_report_path": "asr-leaderboard/qwen3-asr-1.7b-entity-smoke/judge-report/report.html",
+      "hosted_report_url": "https://kennethli319.github.io/open-audio-judge/asr-leaderboard/qwen3-asr-1.7b-entity-smoke/judge-report/report.html",
+      "models": [
+        "mlx-community/Qwen3-ASR-1.7B-8bit"
+      ],
+      "ok_count": 5,
+      "report_exists": true,
+      "report_path": "runs/asr-leaderboard/qwen3-asr-1.7b-entity-smoke/judge-report/report.html",
+      "report_sha256": "df3cf3cb02d08f0afa0169c59e47b10e78a329b030a7ae69a03ac55866769185",
+      "result_count": 5,
+      "results_path": "runs/asr-leaderboard/qwen3-asr-1.7b-entity-smoke/judge-report/results.jsonl",
+      "results_sha256": "c33bbefa5573baeb7d92fae9638d7aab3f2a7047e53b2b82aac32401d3f0e3c6"
+    },
+    {
+      "average_score": 100,
+      "categories": {
+        "semantic_paraphrase_preservation": 5
+      },
+      "hosted_report_path": "asr-leaderboard/qwen3-asr-1.7b-paraphrase-smoke/judge-report/report.html",
+      "hosted_report_url": "https://kennethli319.github.io/open-audio-judge/asr-leaderboard/qwen3-asr-1.7b-paraphrase-smoke/judge-report/report.html",
+      "models": [
+        "mlx-community/Qwen3-ASR-1.7B-8bit"
+      ],
+      "ok_count": 5,
+      "report_exists": true,
+      "report_path": "runs/asr-leaderboard/qwen3-asr-1.7b-paraphrase-smoke/judge-report/report.html",
+      "report_sha256": "8f48aba791d54993fc009125a65eb87e3de331f0a6c4e06608413ef81714785f",
+      "result_count": 5,
+      "results_path": "runs/asr-leaderboard/qwen3-asr-1.7b-paraphrase-smoke/judge-report/results.jsonl",
+      "results_sha256": "b618d9cc01f7f85b19fc400843f48c9ac7686a0d75e30bfff92c5b47f7880816"
+    },
+    {
+      "average_score": 92.4,
+      "categories": {
+        "acoustic_noise_robustness": 5
+      },
+      "hosted_report_path": "asr-leaderboard/qwen3-asr-1.7b-noise-smoke/judge-report/report.html",
+      "hosted_report_url": "https://kennethli319.github.io/open-audio-judge/asr-leaderboard/qwen3-asr-1.7b-noise-smoke/judge-report/report.html",
+      "models": [
+        "mlx-community/Qwen3-ASR-1.7B-8bit"
+      ],
+      "ok_count": 5,
+      "report_exists": true,
+      "report_path": "runs/asr-leaderboard/qwen3-asr-1.7b-noise-smoke/judge-report/report.html",
+      "report_sha256": "01e4ae83885b0d9e10a8da71d751765b2705bdf4bfc8ba1768c451c9404a103f",
+      "result_count": 5,
+      "results_path": "runs/asr-leaderboard/qwen3-asr-1.7b-noise-smoke/judge-report/results.jsonl",
+      "results_sha256": "0d2f2f5644753dd4cb79fcb318a5d43401785cef8b04c95b1a1516876db98bd7"
+    },
+    {
+      "average_score": 94.33333333333333,
+      "categories": {
+        "transcription_accuracy_wer": 3
+      },
+      "hosted_report_path": "asr-leaderboard/vibevoice-asr-smoke/judge-report/report.html",
+      "hosted_report_url": "https://kennethli319.github.io/open-audio-judge/asr-leaderboard/vibevoice-asr-smoke/judge-report/report.html",
+      "models": [
+        "mlx-community/VibeVoice-ASR-4bit"
+      ],
+      "ok_count": 3,
+      "report_exists": true,
+      "report_path": "runs/asr-leaderboard/vibevoice-asr-smoke/judge-report/report.html",
+      "report_sha256": "b79c16d73e731333a8f599fdb783342d8f5149d02fcbe7ae3290fb2e23e213a5",
+      "result_count": 3,
+      "results_path": "runs/asr-leaderboard/vibevoice-asr-smoke/judge-report/results.jsonl",
+      "results_sha256": "4c883cf2ae204becf1b498d24e5189ed06191a59320d64a068bc6cc0dee09f2c"
+    },
+    {
+      "average_score": 99.33333333333333,
+      "categories": {
+        "negation_modality_scope": 3,
+        "numeric_unit_integrity": 3,
+        "temporal_scheduling_accuracy": 4,
+        "transcription_accuracy_wer": 2
+      },
+      "hosted_report_path": "asr-leaderboard/vibevoice-asr-full-gap/judge-report/report.html",
+      "hosted_report_url": "https://kennethli319.github.io/open-audio-judge/asr-leaderboard/vibevoice-asr-full-gap/judge-report/report.html",
+      "models": [
+        "mlx-community/VibeVoice-ASR-4bit"
+      ],
+      "ok_count": 12,
+      "report_exists": true,
+      "report_path": "runs/asr-leaderboard/vibevoice-asr-full-gap/judge-report/report.html",
+      "report_sha256": "0e7f6c0e1695eddc365db8b1c7007c242d66b7ca0648d2e9ad77e6983c8cc74a",
+      "result_count": 12,
+      "results_path": "runs/asr-leaderboard/vibevoice-asr-full-gap/judge-report/results.jsonl",
+      "results_sha256": "18dcfb75b9a165f026f3d8e30e31a7dba78d71b4552ece0db95fe772dad15f5d"
+    },
+    {
+      "average_score": 98.8,
+      "categories": {
+        "negation_modality_scope": 2,
+        "numeric_unit_integrity": 2,
+        "temporal_scheduling_accuracy": 1
+      },
+      "hosted_report_path": "asr-leaderboard/vibevoice-asr-semantic-smoke/judge-report/report.html",
+      "hosted_report_url": "https://kennethli319.github.io/open-audio-judge/asr-leaderboard/vibevoice-asr-semantic-smoke/judge-report/report.html",
+      "models": [
+        "mlx-community/VibeVoice-ASR-4bit"
+      ],
+      "ok_count": 5,
+      "report_exists": true,
+      "report_path": "runs/asr-leaderboard/vibevoice-asr-semantic-smoke/judge-report/report.html",
+      "report_sha256": "6ed47f1eb78b8a233706c2fd1cfe92c9df010240d24b3962c34b7a19fb8baf12",
+      "result_count": 5,
+      "results_path": "runs/asr-leaderboard/vibevoice-asr-semantic-smoke/judge-report/results.jsonl",
+      "results_sha256": "566a04bdd182d0b97a7bf0df2601f162ca18885dcdc592572e0406b95c716dc7"
+    },
+    {
+      "average_score": 90.2,
+      "categories": {
+        "entity_factual_integrity": 5
+      },
+      "hosted_report_path": "asr-leaderboard/vibevoice-asr-entity-smoke/judge-report/report.html",
+      "hosted_report_url": "https://kennethli319.github.io/open-audio-judge/asr-leaderboard/vibevoice-asr-entity-smoke/judge-report/report.html",
+      "models": [
+        "mlx-community/VibeVoice-ASR-4bit"
+      ],
+      "ok_count": 5,
+      "report_exists": true,
+      "report_path": "runs/asr-leaderboard/vibevoice-asr-entity-smoke/judge-report/report.html",
+      "report_sha256": "328a585702ba6ce8e1af97d693fbce321bcb701e26b1c06eba8b4e401651bf18",
+      "result_count": 5,
+      "results_path": "runs/asr-leaderboard/vibevoice-asr-entity-smoke/judge-report/results.jsonl",
+      "results_sha256": "29295d6874abfac306d656503001586dbaeab62531333113b7f3deed7dda4291"
+    },
+    {
+      "average_score": 98.4,
+      "categories": {
+        "semantic_paraphrase_preservation": 5
+      },
+      "hosted_report_path": "asr-leaderboard/vibevoice-asr-paraphrase-smoke/judge-report/report.html",
+      "hosted_report_url": "https://kennethli319.github.io/open-audio-judge/asr-leaderboard/vibevoice-asr-paraphrase-smoke/judge-report/report.html",
+      "models": [
+        "mlx-community/VibeVoice-ASR-4bit"
+      ],
+      "ok_count": 5,
+      "report_exists": true,
+      "report_path": "runs/asr-leaderboard/vibevoice-asr-paraphrase-smoke/judge-report/report.html",
+      "report_sha256": "e0d96f509504e71a1b1a19645f740aec5e6ac1193b0113971e2f8bd3c672bc1b",
+      "result_count": 5,
+      "results_path": "runs/asr-leaderboard/vibevoice-asr-paraphrase-smoke/judge-report/results.jsonl",
+      "results_sha256": "77bdc4b49fc30a36df6da414c506f5a173e930530115d5589d1edb2c94e63260"
+    },
+    {
+      "average_score": 92.8,
+      "categories": {
+        "acoustic_noise_robustness": 5
+      },
+      "hosted_report_path": "asr-leaderboard/vibevoice-asr-noise-smoke/judge-report/report.html",
+      "hosted_report_url": "https://kennethli319.github.io/open-audio-judge/asr-leaderboard/vibevoice-asr-noise-smoke/judge-report/report.html",
+      "models": [
+        "mlx-community/VibeVoice-ASR-4bit"
+      ],
+      "ok_count": 5,
+      "report_exists": true,
+      "report_path": "runs/asr-leaderboard/vibevoice-asr-noise-smoke/judge-report/report.html",
+      "report_sha256": "b5a929f95474a4a85f4882e92abb68ee7c9b58e2095c1ee3e144c0b9d785b1d4",
+      "result_count": 5,
+      "results_path": "runs/asr-leaderboard/vibevoice-asr-noise-smoke/judge-report/results.jsonl",
+      "results_sha256": "325f307fcb4a18ef1334623ebfefeb203c0fdc0a70fb8f82d6db6769628398cc"
+    }
+  ],
+  "status": "complete",
+  "version": 1
+}

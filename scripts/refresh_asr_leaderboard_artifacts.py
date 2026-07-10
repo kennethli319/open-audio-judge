@@ -27,6 +27,7 @@ from scripts.update_asr_leaderboard_demo import (  # noqa: E402
     DEFAULT_AUDIO_CASES,
     DEFAULT_REPORT_INDEX,
     DEFAULT_REPORT_LINKS,
+    DEFAULT_REPORT_BUNDLE,
     DEFAULT_LIVE_REFRESH_SCRIPT,
     DEFAULT_REFRESH_COMMANDS,
     DEFAULT_REFRESH_WORKFLOW,
@@ -137,6 +138,7 @@ def main() -> None:
     parser.add_argument("--refresh-report-out", type=Path, default=DEFAULT_REFRESH_REPORT)
     parser.add_argument("--report-index-out", type=Path, default=DEFAULT_REPORT_INDEX)
     parser.add_argument("--report-links-out", type=Path, default=DEFAULT_REPORT_LINKS)
+    parser.add_argument("--report-bundle-out", type=Path, default=DEFAULT_REPORT_BUNDLE)
     parser.add_argument("--refresh-commands-out", type=Path, default=DEFAULT_REFRESH_COMMANDS)
     parser.add_argument("--refresh-workflow-out", type=Path, default=DEFAULT_REFRESH_WORKFLOW)
     parser.add_argument("--live-refresh-script-out", type=Path, default=DEFAULT_LIVE_REFRESH_SCRIPT)
@@ -358,6 +360,7 @@ def main() -> None:
             refresh_report_out=args.refresh_report_out,
             report_index_out=args.report_index_out,
             report_links_out=args.report_links_out,
+            report_bundle_out=args.report_bundle_out,
             refresh_commands_out=args.refresh_commands_out,
             refresh_workflow_out=args.refresh_workflow_out,
             live_refresh_script_out=args.live_refresh_script_out,
@@ -474,6 +477,7 @@ def main() -> None:
         refresh_report_out=args.refresh_report_out,
         report_index_out=args.report_index_out,
         report_links_out=args.report_links_out,
+        report_bundle_out=args.report_bundle_out,
         refresh_commands_out=args.refresh_commands_out,
         refresh_workflow_out=args.refresh_workflow_out,
         live_refresh_script_out=args.live_refresh_script_out,
@@ -526,6 +530,7 @@ def check_asr_leaderboard_refresh_inputs(
     refresh_report_out: Path = DEFAULT_REFRESH_REPORT,
     report_index_out: Path = DEFAULT_REPORT_INDEX,
     report_links_out: Path = DEFAULT_REPORT_LINKS,
+    report_bundle_out: Path = DEFAULT_REPORT_BUNDLE,
     refresh_commands_out: Path = DEFAULT_REFRESH_COMMANDS,
     refresh_workflow_out: Path = DEFAULT_REFRESH_WORKFLOW,
     live_refresh_script_out: Path = DEFAULT_LIVE_REFRESH_SCRIPT,
@@ -576,6 +581,7 @@ def check_asr_leaderboard_refresh_inputs(
             refresh_report_out=refresh_report_out,
             report_index_out=report_index_out,
             report_links_out=report_links_out,
+            report_bundle_out=report_bundle_out,
             refresh_commands_out=refresh_commands_out,
             refresh_workflow_out=refresh_workflow_out,
             live_refresh_script_out=live_refresh_script_out,
@@ -809,6 +815,7 @@ def _validate_generated_artifacts_fresh(
     refresh_report_out: Path | None = None,
     report_index_out: Path | None = None,
     report_links_out: Path | None = None,
+    report_bundle_out: Path | None = None,
     refresh_commands_out: Path | None = None,
     refresh_workflow_out: Path | None = None,
     live_refresh_script_out: Path | None = None,
@@ -918,6 +925,18 @@ def _validate_generated_artifacts_fresh(
                 source_result_paths=result_paths,
             )
             _compare_generated_text_artifact(report_links_out, expected_report_links)
+        if report_bundle_out is not None:
+            expected_report_bundle = tmp_dir / report_bundle_out.name
+            write_report_bundle_artifact(
+                combined_results,
+                expected_report_bundle,
+                results_path=combined_results_path,
+                expected_cases_per_model=expected_cases_per_model,
+                source_result_paths=result_paths,
+                report_index_out=report_index_out or DEFAULT_REPORT_INDEX,
+                report_links_out=report_links_out or DEFAULT_REPORT_LINKS,
+            )
+            _compare_generated_text_artifact(report_bundle_out, expected_report_bundle)
         if next_runs_out is not None:
             expected_next_runs = tmp_dir / next_runs_out.name
             write_next_run_plan_artifact(
@@ -935,6 +954,7 @@ def _validate_generated_artifacts_fresh(
                 refresh_report_out=refresh_report_out or DEFAULT_REFRESH_REPORT,
                 report_index_out=report_index_out or DEFAULT_REPORT_INDEX,
                 report_links_out=report_links_out or DEFAULT_REPORT_LINKS,
+                report_bundle_out=report_bundle_out or DEFAULT_REPORT_BUNDLE,
                 refresh_commands_out=refresh_commands_out or DEFAULT_REFRESH_COMMANDS,
                 refresh_workflow_out=(
                     refresh_workflow_out
@@ -980,6 +1000,7 @@ def _validate_generated_artifacts_fresh(
                         refresh_report_out=refresh_report_out or DEFAULT_REFRESH_REPORT,
                         report_index_out=report_index_out or DEFAULT_REPORT_INDEX,
                         report_links_out=report_links_out or DEFAULT_REPORT_LINKS,
+                        report_bundle_out=report_bundle_out or DEFAULT_REPORT_BUNDLE,
                         refresh_commands_out=refresh_commands_out or DEFAULT_REFRESH_COMMANDS,
                         refresh_workflow_out=(
                             refresh_workflow_out
@@ -1173,6 +1194,7 @@ def refresh_asr_leaderboard_artifacts(
     expected_cases_per_model: int,
     report_index_out: Path | None = None,
     report_links_out: Path | None = None,
+    report_bundle_out: Path | None = None,
     update_run_manifest: bool = False,
     seed_cases: Path = DEFAULT_CASES,
     seed_manifest_validation_out: Path = DEFAULT_SEED_MANIFEST_VALIDATION,
@@ -1192,6 +1214,7 @@ def refresh_asr_leaderboard_artifacts(
 ) -> None:
     report_index_out = report_index_out or refresh_report_out.with_name(DEFAULT_REPORT_INDEX.name)
     report_links_out = report_links_out or refresh_report_out.with_name(DEFAULT_REPORT_LINKS.name)
+    report_bundle_out = report_bundle_out or refresh_report_out.with_name(DEFAULT_REPORT_BUNDLE.name)
     runtime_status_out = runtime_status_out or artifact_index_out.with_name(
         DEFAULT_RUNTIME_STATUS.name
     )
@@ -1266,6 +1289,15 @@ def refresh_asr_leaderboard_artifacts(
         expected_cases_per_model=expected_cases_per_model,
         source_result_paths=result_paths,
     )
+    write_report_bundle_artifact(
+        combined_results,
+        report_bundle_out,
+        results_path=combined_results_path,
+        expected_cases_per_model=expected_cases_per_model,
+        source_result_paths=result_paths,
+        report_index_out=report_index_out,
+        report_links_out=report_links_out,
+    )
     write_refresh_commands_script(
         refresh_commands_out,
         source_result_paths=result_paths,
@@ -1319,6 +1351,7 @@ def refresh_asr_leaderboard_artifacts(
         refresh_report_out=refresh_report_out,
         report_index_out=report_index_out,
         report_links_out=report_links_out,
+        report_bundle_out=report_bundle_out,
         refresh_commands_out=refresh_commands_out,
         refresh_workflow_out=refresh_workflow_out,
         live_refresh_script_out=live_refresh_script_out,
@@ -1354,6 +1387,7 @@ def refresh_asr_leaderboard_artifacts(
         refresh_report_out=refresh_report_out,
         report_index_out=report_index_out,
         report_links_out=report_links_out,
+        report_bundle_out=report_bundle_out,
         refresh_commands_out=refresh_commands_out,
         refresh_workflow_out=refresh_workflow_out,
         live_refresh_script_out=live_refresh_script_out,
@@ -1381,6 +1415,7 @@ def refresh_asr_leaderboard_artifacts(
             refresh_report_out=refresh_report_out,
             report_index_out=report_index_out,
             report_links_out=report_links_out,
+            report_bundle_out=report_bundle_out,
             refresh_commands_out=refresh_commands_out,
             refresh_workflow_out=refresh_workflow_out,
             live_refresh_script_out=live_refresh_script_out,
@@ -1424,6 +1459,7 @@ def refresh_asr_leaderboard_artifacts(
     print(f"Refresh report: {refresh_report_out}")
     print(f"Report index: {report_index_out}")
     print(f"Report links: {report_links_out}")
+    print(f"Report bundle: {report_bundle_out}")
     print(f"Refresh commands: {refresh_commands_out}")
     print(f"Live refresh script: {live_refresh_script_out}")
     print(f"Manifest validation: {manifest_validation_out}")
@@ -1510,6 +1546,7 @@ def copy_hosted_asr_artifacts(
     refresh_report_out: Path = DEFAULT_REFRESH_REPORT,
     report_index_out: Path = DEFAULT_REPORT_INDEX,
     report_links_out: Path = DEFAULT_REPORT_LINKS,
+    report_bundle_out: Path = DEFAULT_REPORT_BUNDLE,
     refresh_commands_out: Path = DEFAULT_REFRESH_COMMANDS,
     refresh_workflow_out: Path = DEFAULT_REFRESH_WORKFLOW,
     live_refresh_script_out: Path = DEFAULT_LIVE_REFRESH_SCRIPT,
@@ -1538,6 +1575,7 @@ def copy_hosted_asr_artifacts(
         (refresh_report_out, {refresh_report_out.name, DEFAULT_REFRESH_REPORT.name}),
         (report_index_out, {report_index_out.name, DEFAULT_REPORT_INDEX.name}),
         (report_links_out, {report_links_out.name, DEFAULT_REPORT_LINKS.name}),
+        (report_bundle_out, {report_bundle_out.name, DEFAULT_REPORT_BUNDLE.name}),
         (refresh_commands_out, {refresh_commands_out.name, DEFAULT_REFRESH_COMMANDS.name}),
         (refresh_workflow_out, {refresh_workflow_out.name, DEFAULT_REFRESH_WORKFLOW.name}),
         (live_refresh_script_out, {live_refresh_script_out.name, DEFAULT_LIVE_REFRESH_SCRIPT.name}),
@@ -1601,6 +1639,7 @@ def write_hosted_manifest_artifact(
     refresh_report_out: Path = DEFAULT_REFRESH_REPORT,
     report_index_out: Path = DEFAULT_REPORT_INDEX,
     report_links_out: Path = DEFAULT_REPORT_LINKS,
+    report_bundle_out: Path = DEFAULT_REPORT_BUNDLE,
     refresh_commands_out: Path = DEFAULT_REFRESH_COMMANDS,
     refresh_workflow_out: Path = DEFAULT_REFRESH_WORKFLOW,
     live_refresh_script_out: Path = DEFAULT_LIVE_REFRESH_SCRIPT,
@@ -1627,6 +1666,7 @@ def write_hosted_manifest_artifact(
         (refresh_report_out, {refresh_report_out.name, DEFAULT_REFRESH_REPORT.name}),
         (report_index_out, {report_index_out.name, DEFAULT_REPORT_INDEX.name}),
         (report_links_out, {report_links_out.name, DEFAULT_REPORT_LINKS.name}),
+        (report_bundle_out, {report_bundle_out.name, DEFAULT_REPORT_BUNDLE.name}),
         (refresh_commands_out, {refresh_commands_out.name, DEFAULT_REFRESH_COMMANDS.name}),
         (refresh_workflow_out, {refresh_workflow_out.name, DEFAULT_REFRESH_WORKFLOW.name}),
         (live_refresh_script_out, {live_refresh_script_out.name, DEFAULT_LIVE_REFRESH_SCRIPT.name}),
@@ -1704,6 +1744,109 @@ def _hosted_report_path_for_source_report(source_report: Path) -> str:
     return f"asr-leaderboard/source-reports/{source_report.parent.parent.name}/report.html"
 
 
+def write_report_bundle_artifact(
+    results: list,
+    output_path: Path,
+    *,
+    results_path: Path,
+    expected_cases_per_model: int,
+    source_result_paths: list[Path] | None = None,
+    report_index_out: Path = DEFAULT_REPORT_INDEX,
+    report_links_out: Path = DEFAULT_REPORT_LINKS,
+) -> None:
+    models = sorted({str(result.metadata.get("candidate_model") or "") for result in results})
+    categories = sorted({str(result.metadata.get("eval_category") or "") for result in results})
+    source_summaries = summarize_source_result_files(source_result_paths or [])
+    source_reports = []
+    for summary in source_summaries:
+        hosted_report_path = (
+            _hosted_report_path_for_source_report(summary.report_path)
+            if summary.report_exists
+            else None
+        )
+        source_reports.append(
+            {
+                "results_path": _repo_relative(summary.path),
+                "results_sha256": summary.result_sha256,
+                "report_path": _repo_relative(summary.report_path),
+                "report_exists": summary.report_exists,
+                "report_sha256": summary.report_sha256,
+                "hosted_report_path": hosted_report_path,
+                "hosted_report_url": (
+                    f"{HOSTED_BASE_URL}/{hosted_report_path}" if hosted_report_path else None
+                ),
+                "models": list(summary.models),
+                "result_count": summary.result_count,
+                "ok_count": summary.ok_count,
+                "categories": dict(sorted(summary.categories.items())),
+                "average_score": summary.average_score,
+            }
+        )
+
+    output_path.parent.mkdir(parents=True, exist_ok=True)
+    output_path.write_text(
+        json.dumps(
+            {
+                "description": "Single ASR leaderboard report-bundle manifest for hosted demo automation.",
+                "version": 1,
+                "status": "complete",
+                "hosted_base_url": HOSTED_BASE_URL,
+                "demo_page": {
+                    "path": "docs/asr-leaderboard-demo.html",
+                    "hosted_url": f"{HOSTED_BASE_URL}/asr-leaderboard-demo.html",
+                },
+                "combined_report": {
+                    "results_path": _repo_relative(results_path),
+                    "results_sha256": _sha256_file(results_path) if results_path.exists() else None,
+                    "report_path": _repo_relative(results_path.with_name("report.html")),
+                    "report_sha256": (
+                        _sha256_file(results_path.with_name("report.html"))
+                        if results_path.with_name("report.html").exists()
+                        else None
+                    ),
+                    "hosted_results_url": (
+                        f"{HOSTED_BASE_URL}/asr-leaderboard/full-35-combined/results.jsonl"
+                    ),
+                    "hosted_report_url": (
+                        f"{HOSTED_BASE_URL}/asr-leaderboard/full-35-combined/report.html"
+                    ),
+                },
+                "report_index": {
+                    "path": _repo_relative(report_index_out),
+                    "hosted_url": f"{HOSTED_BASE_URL}/{report_index_out.name}",
+                },
+                "report_links": {
+                    "path": _repo_relative(report_links_out),
+                    "hosted_url": f"{HOSTED_BASE_URL}/{report_links_out.name}",
+                },
+                "coverage": {
+                    "total_results": len(results),
+                    "model_count": len(models),
+                    "category_count": len(categories),
+                    "expected_cases_per_model": expected_cases_per_model,
+                    "models": models,
+                    "categories": categories,
+                },
+                "source_reports": source_reports,
+                "refresh_provenance": {
+                    "run_manifest_path": _repo_relative(DEFAULT_RUN_MANIFEST),
+                    "summary_path": _repo_relative(DEFAULT_SUMMARY),
+                    "artifact_index_path": _repo_relative(DEFAULT_ARTIFACT_INDEX),
+                    "bundle_status_path": _repo_relative(DEFAULT_BUNDLE_STATUS),
+                    "source_selection_summary_path": _repo_relative(
+                        DEFAULT_SOURCE_SELECTION_SUMMARY
+                    ),
+                },
+                "secret_policy": "Gemini secrets are runtime-only and are not stored in this bundle.",
+            },
+            indent=2,
+            sort_keys=True,
+        )
+        + "\n",
+        encoding="utf-8",
+    )
+
+
 def write_artifact_index(
     output_path: Path,
     *,
@@ -1722,6 +1865,7 @@ def write_artifact_index(
     expected_cases_per_model: int,
     report_index_out: Path | None = None,
     report_links_out: Path | None = None,
+    report_bundle_out: Path | None = None,
     runtime_status_out: Path | None = None,
     refresh_decision_out: Path | None = None,
     next_action_out: Path | None = None,
@@ -1755,6 +1899,7 @@ def write_artifact_index(
                 expected_cases_per_model=expected_cases_per_model,
                 report_index_out=report_index_out,
                 report_links_out=report_links_out,
+                report_bundle_out=report_bundle_out,
                 runtime_status_out=runtime_status_out,
                 refresh_decision_out=refresh_decision_out,
                 next_action_out=next_action_out,
@@ -1891,6 +2036,7 @@ def build_artifact_index_data(
     expected_cases_per_model: int,
     report_index_out: Path | None = None,
     report_links_out: Path | None = None,
+    report_bundle_out: Path | None = None,
     runtime_status_out: Path | None = None,
     refresh_decision_out: Path | None = None,
     next_action_out: Path | None = None,
@@ -1903,6 +2049,7 @@ def build_artifact_index_data(
 ) -> dict[str, object]:
     report_index_out = report_index_out or refresh_report_out.with_name(DEFAULT_REPORT_INDEX.name)
     report_links_out = report_links_out or refresh_report_out.with_name(DEFAULT_REPORT_LINKS.name)
+    report_bundle_out = report_bundle_out or refresh_report_out.with_name(DEFAULT_REPORT_BUNDLE.name)
     runtime_status_out = runtime_status_out or output_path.with_name(DEFAULT_RUNTIME_STATUS.name)
     refresh_decision_out = refresh_decision_out or output_path.with_name(
         DEFAULT_REFRESH_DECISION.name
@@ -1926,6 +2073,7 @@ def build_artifact_index_data(
         _repo_relative(refresh_report_out): refresh_report_out,
         _repo_relative(report_index_out): report_index_out,
         _repo_relative(report_links_out): report_links_out,
+        _repo_relative(report_bundle_out): report_bundle_out,
         _repo_relative(refresh_commands_out): refresh_commands_out,
         _repo_relative(refresh_workflow_out): refresh_workflow_out,
         _repo_relative(live_refresh_script_out): live_refresh_script_out,
@@ -1946,6 +2094,7 @@ def build_artifact_index_data(
         _repo_relative(DEFAULT_REFRESH_REPORT): refresh_report_out,
         _repo_relative(DEFAULT_REPORT_INDEX): report_index_out,
         _repo_relative(DEFAULT_REPORT_LINKS): report_links_out,
+        _repo_relative(DEFAULT_REPORT_BUNDLE): report_bundle_out,
         _repo_relative(DEFAULT_REFRESH_COMMANDS): refresh_commands_out,
         _repo_relative(DEFAULT_REFRESH_WORKFLOW): refresh_workflow_out,
         _repo_relative(DEFAULT_LIVE_REFRESH_SCRIPT): live_refresh_script_out,
@@ -2133,6 +2282,7 @@ def _hosted_paths_for_artifact(
         "docs/asr-leaderboard-refresh-report.md": ["asr-leaderboard-refresh-report.md"],
         "docs/asr-leaderboard-report-index.md": ["asr-leaderboard-report-index.md"],
         "docs/asr-leaderboard-report-links.json": ["asr-leaderboard-report-links.json"],
+        "docs/asr-leaderboard-report-bundle.json": ["asr-leaderboard-report-bundle.json"],
         "docs/asr-leaderboard-refresh-commands.sh": ["asr-leaderboard-refresh-commands.sh"],
         "docs/asr-leaderboard-refresh-workflow.json": ["asr-leaderboard-refresh-workflow.json"],
         "docs/asr-leaderboard-live-refresh.sh": ["asr-leaderboard-live-refresh.sh"],

@@ -553,6 +553,13 @@ def test_write_summary_artifact_records_models_and_categories(tmp_path: Path) ->
             "purpose": "Machine-readable map linking the demo page to combined and source ASR reports.",
         },
         {
+            "path": "docs/asr-leaderboard-report-bundle.json",
+            "purpose": (
+                "Single machine-readable entry point for ASR report URLs, source reports, "
+                "and refresh provenance."
+            ),
+        },
+        {
             "path": "docs/asr-leaderboard-refresh-commands.sh",
             "purpose": "Generated shell playbook for repeatable ASR leaderboard refreshes.",
         },
@@ -1636,8 +1643,8 @@ def test_refresh_asr_leaderboard_artifacts_combines_report_and_page(tmp_path: Pa
     )
     assert hosted_current == {
         "status": "complete",
-        "hosted_artifact_count": 25,
-        "hosted_path_count": 40,
+        "hosted_artifact_count": 26,
+        "hosted_path_count": 41,
     }
     hosted_manifest_copy = hosted_dir / hosted_manifest.name
     hosted_manifest_text = hosted_manifest_copy.read_text(encoding="utf-8")
@@ -1868,7 +1875,7 @@ def test_refresh_asr_leaderboard_artifacts_combines_report_and_page(tmp_path: Pa
         "asr-leaderboard-cron-handoff.md"
     ]
     hosted_manifest_data = json.loads(hosted_manifest.read_text(encoding="utf-8"))
-    assert hosted_manifest_data["artifact_count"] == 24
+    assert hosted_manifest_data["artifact_count"] == 25
     assert {"asr-leaderboard/full-35-combined/results.jsonl"} in [
         set(artifact["hosted_paths"]) for artifact in hosted_manifest_data["artifacts"]
     ]
@@ -1930,6 +1937,7 @@ def test_refresh_asr_leaderboard_artifacts_combines_report_and_page(tmp_path: Pa
         refresh_report_out=refresh_report,
         report_index_out=report_index,
         report_links_out=report_links,
+        report_bundle_out=refresh_report.with_name("asr-leaderboard-report-bundle.json"),
         refresh_commands_out=refresh_commands,
         live_refresh_script_out=live_refresh_script,
         run_manifest=run_manifest,
@@ -1966,6 +1974,7 @@ def test_refresh_asr_leaderboard_artifacts_combines_report_and_page(tmp_path: Pa
             refresh_report_out=refresh_report,
             report_index_out=report_index,
             report_links_out=report_links,
+            report_bundle_out=refresh_report.with_name("asr-leaderboard-report-bundle.json"),
             refresh_commands_out=refresh_commands,
             live_refresh_script_out=live_refresh_script,
             run_manifest=run_manifest,
@@ -3594,6 +3603,7 @@ def test_check_asr_leaderboard_page_validates_generated_artifacts(tmp_path: Path
         mlx_preflight["fallback_model_commands"][0]["model"]
         == "mlx-community/whisper-small.en-asr-4bit"
     )
+    report_bundle = tmp_path / "asr-leaderboard-report-bundle.json"
     summary_data = json.loads(summary.read_text(encoding="utf-8"))
     summary_data["run_manifest_path"] = str(run_manifest)
     summary_data["manifest_validation_path"] = str(manifest_validation)
@@ -3608,6 +3618,8 @@ def test_check_asr_leaderboard_page_validates_generated_artifacts(tmp_path: Path
     summary_data["cron_handoff_path"] = str(cron_handoff)
     summary_data["bundle_status_path"] = str(bundle_status)
     for artifact in summary_data["output_artifacts"]:
+        if artifact["path"] == "docs/asr-leaderboard-report-bundle.json":
+            artifact["path"] = str(report_bundle)
         if artifact["path"] == "docs/asr-leaderboard-cron-handoff.md":
             artifact["path"] = str(cron_handoff)
         if artifact["path"] == "docs/asr-leaderboard-bundle-status.json":
@@ -3628,6 +3640,14 @@ def test_check_asr_leaderboard_page_validates_generated_artifacts(tmp_path: Path
         report_links,
         results_path=results_path,
         expected_cases_per_model=2,
+    )
+    refresh_module.write_report_bundle_artifact(
+        results,
+        report_bundle,
+        results_path=results_path,
+        expected_cases_per_model=2,
+        report_index_out=report_index,
+        report_links_out=report_links,
     )
     refresh_commands = tmp_path / "refresh-commands.sh"
     update_module.write_refresh_commands_script(refresh_commands)
@@ -3670,6 +3690,7 @@ def test_check_asr_leaderboard_page_validates_generated_artifacts(tmp_path: Path
         refresh_report_out=refresh_report,
         report_index_out=report_index,
         report_links_out=report_links,
+        report_bundle_out=report_bundle,
         refresh_commands_out=refresh_commands,
         refresh_workflow_out=refresh_workflow,
         live_refresh_script_out=live_refresh_script,

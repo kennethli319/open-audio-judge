@@ -118,6 +118,7 @@ This generated report summarizes the verified ASR leaderboard artifact set.
 | `docs/asr-leaderboard-refresh-report.md` | Human-readable coverage, score, source-file, and command report. |
 | `docs/asr-leaderboard-report-index.md` | Human-readable index linking the demo page, combined report, and source run reports. |
 | `docs/asr-leaderboard-report-links.json` | Machine-readable map linking the demo page to combined and source ASR reports. |
+| `docs/asr-leaderboard-report-bundle.json` | Single machine-readable entry point for ASR report URLs, source reports, and refresh provenance. |
 | `docs/asr-leaderboard-refresh-commands.sh` | Generated shell playbook for repeatable ASR leaderboard refreshes. |
 | `docs/asr-leaderboard-refresh-workflow.json` | Machine-readable generated workflow for ASR refresh automation. |
 | `docs/asr-leaderboard-live-refresh.sh` | Opt-in generated shell script for live MLX ASR/Gemini refreshes. |

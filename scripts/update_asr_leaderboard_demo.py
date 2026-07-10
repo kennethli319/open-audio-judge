@@ -24,6 +24,7 @@ DEFAULT_SUMMARY = ROOT / "docs" / "asr-leaderboard-summary.json"
 DEFAULT_REFRESH_REPORT = ROOT / "docs" / "asr-leaderboard-refresh-report.md"
 DEFAULT_REPORT_INDEX = ROOT / "docs" / "asr-leaderboard-report-index.md"
 DEFAULT_REPORT_LINKS = ROOT / "docs" / "asr-leaderboard-report-links.json"
+DEFAULT_REPORT_BUNDLE = ROOT / "docs" / "asr-leaderboard-report-bundle.json"
 DEFAULT_REFRESH_COMMANDS = ROOT / "docs" / "asr-leaderboard-refresh-commands.sh"
 DEFAULT_REFRESH_WORKFLOW = ROOT / "docs" / "asr-leaderboard-refresh-workflow.json"
 DEFAULT_LIVE_REFRESH_SCRIPT = ROOT / "docs" / "asr-leaderboard-live-refresh.sh"
@@ -310,10 +311,12 @@ def render_generated_sections(
     )
     hosted_report_index_url = html.escape(f"{HOSTED_BASE_URL}/{DEFAULT_REPORT_INDEX.name}")
     hosted_report_links_url = html.escape(f"{HOSTED_BASE_URL}/{DEFAULT_REPORT_LINKS.name}")
+    hosted_report_bundle_url = html.escape(f"{HOSTED_BASE_URL}/{DEFAULT_REPORT_BUNDLE.name}")
     summary_label = html.escape(_repo_relative(DEFAULT_SUMMARY))
     refresh_report_label = html.escape(_repo_relative(DEFAULT_REFRESH_REPORT))
     report_index_label = html.escape(_repo_relative(DEFAULT_REPORT_INDEX))
     report_links_label = html.escape(_repo_relative(DEFAULT_REPORT_LINKS))
+    report_bundle_label = html.escape(_repo_relative(DEFAULT_REPORT_BUNDLE))
     refresh_commands_label = html.escape(_repo_relative(DEFAULT_REFRESH_COMMANDS))
     refresh_workflow_label = html.escape(_repo_relative(DEFAULT_REFRESH_WORKFLOW))
     live_refresh_script_label = html.escape(_repo_relative(DEFAULT_LIVE_REFRESH_SCRIPT))
@@ -477,6 +480,7 @@ def render_generated_sections(
             f'      <a class="link-card" href="{hosted_combined_report_url}"><strong>Combined {case_count}-clip report</strong><span>Explore all {evaluation_count} model-case {_pluralize("evaluation", evaluation_count)} by model, category, slice, score, and issue.</span></a>',
             f'      <a class="link-card" href="{hosted_report_index_url}"><strong>Generated report index</strong><span>Browse source reports generated for each contributing run.</span></a>',
             f'      <a class="link-card" href="{hosted_report_links_url}"><strong>Machine-readable report map</strong><span>Use the JSON links and provenance index.</span></a>',
+            f'      <a class="link-card" href="{hosted_report_bundle_url}"><strong>Report bundle manifest</strong><span>Open one JSON entry point for the combined report, source reports, hosted URLs, and refresh provenance.</span></a>',
             f'      <a class="link-card" href="{REPOSITORY_URL}"><strong>Open Audio Judge repository</strong><span>Read the methodology, run the tools, and inspect the source behind this benchmark.</span></a>',
             f'      <a class="link-card" href="{BENCHMARK_INDEX_URL}"><strong>Audio Benchmark Index</strong><span>Pick another compatible speech benchmark and reuse the generated case-to-report workflow with a task-specific adapter and rubric.</span></a>',
             "    </div>",
@@ -514,7 +518,9 @@ def render_generated_sections(
                 f"Use <code>{report_index_label}</code> as the generated map from the demo page to the combined benchmark report "
                 "and per-source run reports; use "
                 f"<code>{report_links_label}</code> for the same map in machine-readable form, including "
-                "the source artifact list behind each model/category cell.</p>"
+                "the source artifact list behind each model/category cell. Use "
+                f"<code>{report_bundle_label}</code> as the single automation entry point for the combined report, "
+                "source reports, hosted URLs, selected source files, and refresh provenance.</p>"
             ),
             "",
             "    <h2>Generated Refresh Workflow</h2>",
@@ -1566,6 +1572,10 @@ def build_output_artifact_index(*, results_path: Path) -> list[dict[str, str]]:
         {
             "path": _repo_relative(DEFAULT_REPORT_LINKS),
             "purpose": "Machine-readable map linking the demo page to combined and source ASR reports.",
+        },
+        {
+            "path": _repo_relative(DEFAULT_REPORT_BUNDLE),
+            "purpose": "Single machine-readable entry point for ASR report URLs, source reports, and refresh provenance.",
         },
         {
             "path": _repo_relative(DEFAULT_REFRESH_COMMANDS),

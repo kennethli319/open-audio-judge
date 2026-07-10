@@ -1,5 +1,5 @@
 {
-  "artifact_count": 41,
+  "artifact_count": 42,
   "artifact_index_path": "docs/asr-leaderboard-artifacts.json",
   "category_count": 7,
   "cron_action": "skip_live_refresh",
@@ -7,13 +7,13 @@
   "description": "Compact ASR leaderboard artifact-bundle status for cron and hosted checks.",
   "digest_status_counts": {
     "deferred_circular_reference": 3,
-    "ok": 38
+    "ok": 39
   },
   "expected_cases_per_model": 35,
   "gemini_status": "verified_from_loaded_results",
-  "hosted_artifact_count": 40,
+  "hosted_artifact_count": 41,
   "hosted_manifest_path": "docs/asr-leaderboard-hosted-manifest.json",
-  "hosted_path_count": 40,
+  "hosted_path_count": 41,
   "live_model_calls": "none",
   "live_refresh_required": false,
   "missing_artifact_count": 0,

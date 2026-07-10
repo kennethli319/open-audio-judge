@@ -234,6 +234,10 @@
       "purpose": "Machine-readable map linking the demo page to combined and source ASR reports."
     },
     {
+      "path": "docs/asr-leaderboard-report-bundle.json",
+      "purpose": "Single machine-readable entry point for ASR report URLs, source reports, and refresh provenance."
+    },
+    {
       "path": "docs/asr-leaderboard-refresh-commands.sh",
       "purpose": "Generated shell playbook for repeatable ASR leaderboard refreshes."
     },
