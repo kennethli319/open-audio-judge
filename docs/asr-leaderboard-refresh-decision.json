@@ -316,5 +316,12 @@
     "status": "complete"
   },
   "status": "complete",
+  "summary": "Action: skip_live_refresh. Coverage complete: true (0 missing cells). Runtime ready: not_required. Reason: The selected ASR result bundle already covers every model/category cell.",
+  "telegram_summary_lines": [
+    "Action: skip_live_refresh.",
+    "Coverage complete: true (0 missing cells).",
+    "Runtime ready: not_required.",
+    "Reason: The selected ASR result bundle already covers every model/category cell."
+  ],
   "version": 1
 }

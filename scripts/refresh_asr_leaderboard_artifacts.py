@@ -4,6 +4,7 @@ import argparse
 import hashlib
 import json
 import os
+import shlex
 import shutil
 import subprocess
 import sys
@@ -628,6 +629,11 @@ def format_check_summary_message(summary: dict[str, object]) -> str:
         message += f" Runtime: {runtime_label}."
         if not summary["runtime_ready"] and summary.get("runtime_ready_issue"):
             message += f" Runtime issue: {summary['runtime_ready_issue']}"
+    refresh_decision = summary.get("refresh_decision")
+    if isinstance(refresh_decision, dict) and refresh_decision.get("action"):
+        message += f" Decision: {refresh_decision['action']}."
+        if refresh_decision.get("reason"):
+            message += f" Reason: {refresh_decision['reason']}"
     return message
 
 
@@ -2312,12 +2318,32 @@ def build_refresh_decision_artifact_data(
         rationale.append(f"Live refresh is blocked: {runtime_issue}")
         rationale.append("Improve runtime readiness or record unsupported model states before trying fallbacks.")
 
+    decision_summary = _format_refresh_decision_summary(
+        action=action,
+        reason=reason,
+        coverage_complete=coverage_complete,
+        missing_cell_count=next_runs["missing_cell_count"],
+        runtime_ready=runtime_ready,
+        runtime_issue=runtime_issue,
+        recommended_command=command,
+    )
+
     return {
         "description": "Generated runtime-gated next action for ASR leaderboard cron refreshes.",
         "version": 1,
         "status": "complete",
         "action": action,
         "reason": reason,
+        "summary": decision_summary,
+        "telegram_summary_lines": _refresh_decision_summary_lines(
+            action=action,
+            reason=reason,
+            coverage_complete=coverage_complete,
+            missing_cell_count=next_runs["missing_cell_count"],
+            runtime_ready=runtime_ready,
+            runtime_issue=runtime_issue,
+            recommended_command=command,
+        ),
         "rationale": rationale,
         "coverage_complete": coverage_complete,
         "live_refresh_required": live_refresh_required,
@@ -2332,6 +2358,51 @@ def build_refresh_decision_artifact_data(
         "fallback_handling": next_runs["fallback_handling"],
         "runtime_status": runtime_status,
     }
+
+
+def _format_refresh_decision_summary(
+    *,
+    action: str,
+    reason: str,
+    coverage_complete: bool,
+    missing_cell_count: int,
+    runtime_ready: bool | str,
+    runtime_issue: str | None,
+    recommended_command: list[str] | None,
+) -> str:
+    lines = _refresh_decision_summary_lines(
+        action=action,
+        reason=reason,
+        coverage_complete=coverage_complete,
+        missing_cell_count=missing_cell_count,
+        runtime_ready=runtime_ready,
+        runtime_issue=runtime_issue,
+        recommended_command=recommended_command,
+    )
+    return " ".join(lines)
+
+
+def _refresh_decision_summary_lines(
+    *,
+    action: str,
+    reason: str,
+    coverage_complete: bool,
+    missing_cell_count: int,
+    runtime_ready: bool | str,
+    runtime_issue: str | None,
+    recommended_command: list[str] | None,
+) -> list[str]:
+    lines = [
+        f"Action: {action}.",
+        f"Coverage complete: {str(coverage_complete).lower()} ({missing_cell_count} missing cells).",
+        f"Runtime ready: {runtime_ready}.",
+        f"Reason: {reason}",
+    ]
+    if runtime_issue:
+        lines.append(f"Runtime issue: {runtime_issue}")
+    if recommended_command:
+        lines.append(f"Recommended command: {shlex.join(recommended_command)}")
+    return lines
 
 
 def combined_results_from_paths(result_paths: list[Path]) -> list:

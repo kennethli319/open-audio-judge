@@ -1948,10 +1948,20 @@ def test_check_only_runtime_preflight_writes_refresh_decision(
     assert runtime_status["mlx_runtime_preflight"]["status"] == "ok"
     assert refresh_decision["status"] == "complete"
     assert refresh_decision["action"] == "skip_live_refresh"
+    assert refresh_decision["summary"].startswith("Action: skip_live_refresh.")
+    assert refresh_decision["telegram_summary_lines"] == [
+        "Action: skip_live_refresh.",
+        "Coverage complete: true (0 missing cells).",
+        "Runtime ready: not_required.",
+        "Reason: The selected ASR result bundle already covers every model/category cell.",
+    ]
     assert refresh_decision["runtime_status"] == runtime_status
     assert check_summary["refresh_decision_path"] == str(refresh_decision_out)
     assert check_summary["refresh_decision"] == refresh_decision
     assert check_summary["refresh_decision"]["action"] == "skip_live_refresh"
+    assert "Decision: skip_live_refresh." in refresh_module.format_check_summary_message(
+        check_summary
+    )
 
 
 def test_check_only_can_require_audio_manifest_readiness(
@@ -2420,6 +2430,11 @@ def test_refresh_decision_exposes_live_refresh_gate(
     assert complete["action"] == "skip_live_refresh"
     assert complete["coverage_complete"] is True
     assert complete["live_refresh_required"] is False
+    assert complete["summary"] == (
+        "Action: skip_live_refresh. Coverage complete: true (0 missing cells). "
+        "Runtime ready: not_required. Reason: The selected ASR result bundle already "
+        "covers every model/category cell."
+    )
     assert complete["rationale"] == [
         "Coverage status: complete.",
         "Missing model/category cells: 0.",
@@ -2429,6 +2444,9 @@ def test_refresh_decision_exposes_live_refresh_gate(
     assert underfilled["action"] == "run_live_refresh"
     assert underfilled["coverage_complete"] is False
     assert underfilled["live_refresh_required"] is True
+    assert underfilled["telegram_summary_lines"][-1].startswith(
+        "Recommended command: .venv/bin/oaj autojudge-mlx-asr"
+    )
     assert underfilled["rationale"] == [
         "Coverage status: incomplete.",
         "Missing model/category cells: 2.",
@@ -2472,6 +2490,7 @@ def test_refresh_decision_explains_blocked_runtime() -> None:
 
     assert decision["action"] == "blocked_runtime"
     assert decision["runtime_ready"] is False
+    assert "Runtime issue: ASR runtime is not ready" in decision["summary"]
     assert decision["rationale"][:3] == [
         "Coverage status: incomplete.",
         "Missing model/category cells: 1.",

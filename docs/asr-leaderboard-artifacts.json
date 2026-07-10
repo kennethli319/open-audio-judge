@@ -78,7 +78,7 @@
       "sha256": "892dff35ff781a4ff94cbcd358ed4a0174983f724ad4ac02cd53b253bc08ae41"
     },
     {
-      "bytes": 11772,
+      "bytes": 12210,
       "digest_status": "ok",
       "exists": true,
       "hosted_paths": [
@@ -86,7 +86,7 @@
       ],
       "path": "docs/asr-leaderboard-refresh-decision.json",
       "purpose": "Machine-readable runtime-gated decision for the next ASR refresh action.",
-      "sha256": "3b0f2fa5b8262828169e7eca04a73eaa2387b9bd323c2664c70e77cc62dfb014"
+      "sha256": "d136e9aaef17e4e2b5c79664d4201263e15e067f79484e6216c053f4d36e33d1"
     },
     {
       "bytes": 19736,
