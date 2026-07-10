@@ -20,6 +20,8 @@ COMMANDS = (
         "--check-only",
         "--require-generated-fresh",
     ),
+    ("bash", "-n", "docs/asr-leaderboard-refresh-commands.sh"),
+    ("bash", "-n", "docs/asr-leaderboard-live-refresh.sh"),
     ("git", "diff", "--check"),
 )
 
