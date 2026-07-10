@@ -10,6 +10,7 @@ from typing import Any
 
 ROOT = Path(__file__).resolve().parents[1]
 DEFAULT_BUNDLE = ROOT / "docs" / "asr-leaderboard-report-bundle.json"
+HOSTED_BASE_URL = "https://kennethli319.github.io/open-audio-judge"
 
 
 def main() -> None:
@@ -33,6 +34,20 @@ def check_asr_report_bundle(bundle_path: Path) -> dict[str, Any]:
     combined_report = _dict_value(bundle, "combined_report", issues)
     results_path = _required_repo_path(combined_report, "results_path", issues)
     report_path = _required_repo_path(combined_report, "report_path", issues)
+    _check_hosted_url(
+        combined_report,
+        "hosted_results_url",
+        _hosted_path_for_repo_path(results_path),
+        "combined_report.hosted_results_url",
+        issues,
+    )
+    _check_hosted_url(
+        combined_report,
+        "hosted_report_url",
+        _hosted_path_for_repo_path(report_path),
+        "combined_report.hosted_report_url",
+        issues,
+    )
     _check_file_digest(
         results_path,
         _string_value(combined_report, "results_sha256", issues),
@@ -64,6 +79,21 @@ def check_asr_report_bundle(bundle_path: Path) -> dict[str, Any]:
         )
         if source_report.get("report_exists") is True:
             source_report_path = _required_repo_path(source_report, "report_path", issues)
+            expected_hosted_path = _hosted_path_for_repo_path(source_report_path)
+            _check_hosted_path(
+                source_report,
+                "hosted_report_path",
+                expected_hosted_path,
+                f"{label}.hosted_report_path",
+                issues,
+            )
+            _check_hosted_url(
+                source_report,
+                "hosted_report_url",
+                expected_hosted_path,
+                f"{label}.hosted_report_url",
+                issues,
+            )
             _check_file_digest(
                 source_report_path,
                 _string_value(source_report, "report_sha256", issues),
@@ -156,6 +186,52 @@ def _check_file_digest(
             f"{label} sha256 mismatch for {_repo_relative(path)}: "
             f"expected {expected_sha256}, got {actual_sha256}."
         )
+
+
+def _check_hosted_path(
+    data: dict[str, Any],
+    key: str,
+    expected_path: str | None,
+    label: str,
+    issues: list[str],
+) -> None:
+    if expected_path is None:
+        return
+    value = data.get(key)
+    if not isinstance(value, str) or not value:
+        issues.append(f"{label} is required.")
+        return
+    if value != expected_path:
+        issues.append(f"{label}={value!r}, expected {expected_path!r}.")
+
+
+def _check_hosted_url(
+    data: dict[str, Any],
+    key: str,
+    expected_path: str | None,
+    label: str,
+    issues: list[str],
+) -> None:
+    if expected_path is None:
+        return
+    expected_url = f"{HOSTED_BASE_URL}/{expected_path}"
+    value = data.get(key)
+    if not isinstance(value, str) or not value:
+        issues.append(f"{label} is required.")
+        return
+    if value != expected_url:
+        issues.append(f"{label}={value!r}, expected {expected_url!r}.")
+
+
+def _hosted_path_for_repo_path(path: Path | None) -> str | None:
+    if path is None:
+        return None
+    repo_path = _repo_relative(path)
+    if repo_path.startswith("docs/"):
+        return repo_path.removeprefix("docs/")
+    if repo_path.startswith("runs/"):
+        return repo_path.removeprefix("runs/")
+    return None
 
 
 def _required_repo_path(data: dict[str, Any], key: str, issues: list[str]) -> Path | None:
