@@ -2126,6 +2126,38 @@ def test_run_mlx_runtime_preflight_records_primary_and_fallback_models(monkeypat
     ]
 
 
+def test_write_runtime_status_preserves_existing_checked_mlx_preflight(tmp_path: Path) -> None:
+    refresh_module = load_refresh_module()
+    runtime_status = tmp_path / "runtime-status.json"
+    checked_preflight = {
+        "status": "ok",
+        "primary_model_count": 2,
+        "primary_model_ok_count": 2,
+        "primary_model_checks": [
+            {"model": "mlx-community/primary-a", "status": "ok"},
+            {"model": "mlx-community/primary-b", "status": "ok"},
+        ],
+        "fallback_model_checks": [
+            {"model": "mlx-community/fallback-a", "status": "ok"},
+        ],
+    }
+    runtime_status.write_text(
+        json.dumps(
+            {
+                "status": "complete",
+                "mlx_runtime_preflight": checked_preflight,
+            }
+        )
+        + "\n",
+        encoding="utf-8",
+    )
+
+    refresh_module.write_runtime_status_artifact(runtime_status, results=[])
+
+    updated = json.loads(runtime_status.read_text(encoding="utf-8"))
+    assert updated["mlx_runtime_preflight"] == checked_preflight
+
+
 def test_enrich_check_summary_with_runtime_status_records_readiness(tmp_path: Path) -> None:
     refresh_module = load_refresh_module()
     summary = {"status": "complete"}

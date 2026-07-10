@@ -44,7 +44,7 @@
       "--model",
       "mlx-community/whisper-large-v3-turbo-asr-fp16"
     ],
-    "fallback_model_commands": [
+    "fallback_model_checks": [
       {
         "command": [
           "PYTHONPATH=src",
@@ -57,7 +57,10 @@
           "--model",
           "mlx-community/whisper-small.en-asr-4bit"
         ],
-        "model": "mlx-community/whisper-small.en-asr-4bit"
+        "returncode": 0,
+        "status": "ok",
+        "stderr": "",
+        "stdout": "MLX ASR runtime OK\nPython: .venv/bin/python\nModule: mlx_audio.stt.generate\nModel:  mlx-community/whisper-small.en-asr-4bit"
       },
       {
         "command": [
@@ -71,7 +74,10 @@
           "--model",
           "mlx-community/parakeet-rnnt-0.6b"
         ],
-        "model": "mlx-community/parakeet-rnnt-0.6b"
+        "returncode": 0,
+        "status": "ok",
+        "stderr": "",
+        "stdout": "MLX ASR runtime OK\nPython: .venv/bin/python\nModule: mlx_audio.stt.generate\nModel:  mlx-community/parakeet-rnnt-0.6b"
       },
       {
         "command": [
@@ -85,11 +91,15 @@
           "--model",
           "mlx-community/GLM-ASR-Nano-2512-4bit"
         ],
-        "model": "mlx-community/GLM-ASR-Nano-2512-4bit"
+        "returncode": 0,
+        "status": "ok",
+        "stderr": "",
+        "stdout": "MLX ASR runtime OK\nPython: .venv/bin/python\nModule: mlx_audio.stt.generate\nModel:  mlx-community/GLM-ASR-Nano-2512-4bit"
       }
     ],
     "fallback_model_count": 3,
-    "primary_model_commands": [
+    "fallback_model_ok_count": 3,
+    "primary_model_checks": [
       {
         "command": [
           "PYTHONPATH=src",
@@ -102,7 +112,10 @@
           "--model",
           "mlx-community/whisper-large-v3-turbo-asr-fp16"
         ],
-        "model": "mlx-community/whisper-large-v3-turbo-asr-fp16"
+        "returncode": 0,
+        "status": "ok",
+        "stderr": "",
+        "stdout": "MLX ASR runtime OK\nPython: .venv/bin/python\nModule: mlx_audio.stt.generate\nModel:  mlx-community/whisper-large-v3-turbo-asr-fp16"
       },
       {
         "command": [
@@ -116,7 +129,10 @@
           "--model",
           "mlx-community/Qwen3-ASR-1.7B-8bit"
         ],
-        "model": "mlx-community/Qwen3-ASR-1.7B-8bit"
+        "returncode": 0,
+        "status": "ok",
+        "stderr": "",
+        "stdout": "MLX ASR runtime OK\nPython: .venv/bin/python\nModule: mlx_audio.stt.generate\nModel:  mlx-community/Qwen3-ASR-1.7B-8bit"
       },
       {
         "command": [
@@ -130,11 +146,15 @@
           "--model",
           "mlx-community/VibeVoice-ASR-4bit"
         ],
-        "model": "mlx-community/VibeVoice-ASR-4bit"
+        "returncode": 0,
+        "status": "ok",
+        "stderr": "",
+        "stdout": "MLX ASR runtime OK\nPython: .venv/bin/python\nModule: mlx_audio.stt.generate\nModel:  mlx-community/VibeVoice-ASR-4bit"
       }
     ],
     "primary_model_count": 3,
-    "status": "not_checked"
+    "primary_model_ok_count": 3,
+    "status": "ok"
   },
   "result_bundle": {
     "categories": [

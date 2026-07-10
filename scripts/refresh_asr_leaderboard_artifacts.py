@@ -2122,7 +2122,30 @@ def write_runtime_status_artifact(
         source_result_paths=source_result_paths,
         check_mlx_runtime=check_mlx_runtime,
     )
+    if not check_mlx_runtime:
+        _preserve_checked_mlx_preflight(output_path, status)
     write_runtime_status_data(output_path, status)
+
+
+def _preserve_checked_mlx_preflight(
+    output_path: Path,
+    status: dict[str, object],
+) -> None:
+    if not output_path.exists():
+        return
+    try:
+        existing = json.loads(output_path.read_text(encoding="utf-8"))
+    except json.JSONDecodeError:
+        return
+    if not isinstance(existing, dict):
+        return
+    existing_preflight = existing.get("mlx_runtime_preflight")
+    if (
+        isinstance(existing_preflight, dict)
+        and existing_preflight.get("status") == "ok"
+        and _primary_mlx_preflight_ready(existing_preflight)
+    ):
+        status["mlx_runtime_preflight"] = existing_preflight
 
 
 def build_runtime_status_artifact_data(
