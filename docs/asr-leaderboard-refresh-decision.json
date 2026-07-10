@@ -1,5 +1,6 @@
 {
   "action": "skip_live_refresh",
+  "coverage_complete": true,
   "description": "Generated runtime-gated next action for ASR leaderboard cron refreshes.",
   "fallback_handling": "Record unsupported primary model states explicitly before trying fallbacks; do not silently substitute models.",
   "fallback_model_ids": [
@@ -7,6 +8,7 @@
     "mlx-community/parakeet-rnnt-0.6b",
     "mlx-community/GLM-ASR-Nano-2512-4bit"
   ],
+  "live_refresh_required": false,
   "missing_cell_count": 0,
   "next_run_command_count": 0,
   "next_run_commands": [],

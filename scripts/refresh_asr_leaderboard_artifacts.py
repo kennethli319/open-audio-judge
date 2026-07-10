@@ -2259,7 +2259,11 @@ def build_refresh_decision_artifact_data(
         command = None
         runtime_ready: bool | str = "not_required"
         runtime_issue = None
+        coverage_complete = True
+        live_refresh_required = False
     else:
+        coverage_complete = False
+        live_refresh_required = True
         try:
             _validate_runtime_ready(runtime_status)
         except ValueError as exc:
@@ -2284,6 +2288,8 @@ def build_refresh_decision_artifact_data(
         "status": "complete",
         "action": action,
         "reason": reason,
+        "coverage_complete": coverage_complete,
+        "live_refresh_required": live_refresh_required,
         "recommended_command": command,
         "runtime_ready": runtime_ready,
         "runtime_ready_issue": runtime_issue,

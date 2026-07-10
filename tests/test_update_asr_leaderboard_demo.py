@@ -2267,6 +2267,72 @@ def test_format_check_summary_message_reports_blocked_runtime_issue() -> None:
     )
 
 
+def test_refresh_decision_exposes_live_refresh_gate(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    refresh_module = load_refresh_module()
+    monkeypatch.setattr(
+        refresh_module,
+        "ASR_LEADERBOARD_MODELS",
+        [
+            ("mlx-community/model-a", "model-a-refresh"),
+            ("mlx-community/model-b", "model-b-refresh"),
+        ],
+    )
+    runtime_status = {
+        "audio_manifest": {"status": "complete"},
+        "gemini_secret": {"status": "present"},
+        "mlx_runtime_preflight": {
+            "status": "ok",
+            "primary_model_checks": [
+                {"model": "mlx-community/model-a", "status": "ok"},
+                {"model": "mlx-community/model-b", "status": "ok"},
+            ],
+        },
+    }
+    result_records = [
+        result_record(
+            case_id="asr-a-model-a",
+            model="mlx-community/model-a",
+            category="transcription_accuracy_wer",
+            score=100,
+            label="accurate",
+        ),
+        result_record(
+            case_id="asr-a-model-b",
+            model="mlx-community/model-b",
+            category="transcription_accuracy_wer",
+            score=100,
+            label="accurate",
+        ),
+    ]
+    results_path = tmp_path / "results.jsonl"
+    results_path.write_text(
+        "".join(json.dumps(record) + "\n" for record in result_records),
+        encoding="utf-8",
+    )
+    complete_results = refresh_module.load_results_jsonl(results_path)
+
+    complete = refresh_module.build_refresh_decision_artifact_data(
+        results=complete_results,
+        runtime_status=runtime_status,
+        expected_cases_per_model=1,
+    )
+    underfilled = refresh_module.build_refresh_decision_artifact_data(
+        results=complete_results,
+        runtime_status=runtime_status,
+        expected_cases_per_model=2,
+    )
+
+    assert complete["action"] == "skip_live_refresh"
+    assert complete["coverage_complete"] is True
+    assert complete["live_refresh_required"] is False
+    assert underfilled["action"] == "run_live_refresh"
+    assert underfilled["coverage_complete"] is False
+    assert underfilled["live_refresh_required"] is True
+
+
 def test_discover_complete_model_result_paths_selects_newest_complete_runs(tmp_path: Path) -> None:
     refresh_module = load_refresh_module()
     runs_root = tmp_path / "runs" / "asr-leaderboard"
