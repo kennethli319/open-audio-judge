@@ -3136,6 +3136,38 @@ def test_check_asr_leaderboard_page_validates_generated_artifacts(tmp_path: Path
         "to digest-verify them"
     )
 
+    artifact_index_data = json.loads(artifact_index.read_text(encoding="utf-8"))
+    artifact_index_data["artifacts"] = [
+        artifact
+        for artifact in artifact_index_data["artifacts"]
+        if artifact["path"] != "docs/asr-leaderboard-summary.json"
+    ]
+    artifact_index.write_text(json.dumps(artifact_index_data), encoding="utf-8")
+    with pytest.raises(ValueError, match="missing summary output_artifacts path"):
+        check_module.check_asr_leaderboard_page(page, summary_path=summary)
+    refresh_module.write_artifact_index(
+        artifact_index,
+        results=results,
+        results_path=results_path,
+        report_path=results_path.with_name("report.html"),
+        page=page,
+        summary_out=summary,
+        refresh_report_out=refresh_report,
+        report_index_out=report_index,
+        report_links_out=report_links,
+        refresh_commands_out=refresh_commands,
+        refresh_workflow_out=refresh_workflow,
+        live_refresh_script_out=live_refresh_script,
+        run_manifest=run_manifest,
+        manifest_validation_out=manifest_validation,
+        seed_manifest_validation_out=seed_manifest_validation,
+        next_runs_out=next_runs,
+        hosted_manifest_out=hosted_manifest,
+        runtime_status_out=runtime_status,
+        refresh_decision_out=refresh_decision,
+        expected_cases_per_model=2,
+    )
+
     report_links.unlink()
     with pytest.raises(ValueError, match="report_links_path=.*asr-leaderboard-report-links.json"):
         check_module.check_asr_leaderboard_page(page, summary_path=summary)
@@ -3707,6 +3739,11 @@ def test_check_asr_leaderboard_page_validates_hosted_artifact_layout(tmp_path: P
                     artifact_index_record(
                         "runs/asr-leaderboard/full-35-combined/report.html",
                         report_path,
+                    ),
+                    artifact_index_record(
+                        "docs/asr-leaderboard-summary.json",
+                        summary,
+                        digest_status="deferred_circular_reference",
                     ),
                     artifact_index_record(
                         "docs/asr-leaderboard-run-manifest.json",

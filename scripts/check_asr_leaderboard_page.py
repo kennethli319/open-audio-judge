@@ -820,12 +820,14 @@ def _validate_artifact_index(
     if not isinstance(artifacts, list) or not artifacts:
         raise ValueError(f"{path} must include a non-empty artifacts list.")
     artifact_paths = set()
+    indexed_artifacts_by_path: dict[str, dict[str, Any]] = {}
     for artifact in artifacts:
         if not isinstance(artifact, dict):
             raise ValueError(f"{path} artifacts entries must be objects.")
         raw_artifact_path = artifact.get("path")
         if not isinstance(raw_artifact_path, str) or not raw_artifact_path:
             raise ValueError(f"{path} has invalid artifact path: {raw_artifact_path!r}")
+        indexed_artifacts_by_path[raw_artifact_path] = artifact
         resolved = _resolve_summary_path(
             raw_artifact_path, artifact_root=artifact_root, path_maps=path_maps
         )
@@ -879,6 +881,58 @@ def _validate_artifact_index(
     ]
     if missing:
         raise ValueError(f"{path} is missing required artifact path(s): {missing}")
+
+    _validate_summary_output_artifacts_match_index(
+        summary,
+        indexed_artifacts_by_path=indexed_artifacts_by_path,
+        index_path=path,
+        summary_path=summary_path,
+    )
+
+
+def _validate_summary_output_artifacts_match_index(
+    summary: dict[str, Any],
+    *,
+    indexed_artifacts_by_path: dict[str, dict[str, Any]],
+    index_path: Path,
+    summary_path: Path,
+) -> None:
+    output_artifacts = summary.get("output_artifacts")
+    if not isinstance(output_artifacts, list) or not output_artifacts:
+        return
+
+    for artifact_index, artifact in enumerate(output_artifacts):
+        if not isinstance(artifact, dict):
+            raise ValueError(
+                f"{summary_path} output_artifacts[{artifact_index}] must be an object."
+            )
+        raw_path = artifact.get("path")
+        purpose = artifact.get("purpose")
+        if not isinstance(raw_path, str) or not raw_path:
+            raise ValueError(
+                f"{summary_path} output_artifacts[{artifact_index}] has invalid path: "
+                f"{raw_path!r}"
+            )
+        if not isinstance(purpose, str) or not purpose:
+            raise ValueError(
+                f"{summary_path} output_artifacts[{artifact_index}] has invalid purpose: "
+                f"{purpose!r}"
+            )
+
+        indexed_artifact = indexed_artifacts_by_path.get(raw_path)
+        if indexed_artifact is None:
+            raise ValueError(
+                f"{index_path} is missing summary output_artifacts path: {raw_path}"
+            )
+        indexed_purpose = indexed_artifact.get("purpose")
+        if (
+            indexed_purpose != purpose
+            and indexed_purpose != "Generated ASR leaderboard support artifact."
+        ):
+            raise ValueError(
+                f"{index_path} purpose for {raw_path} does not match "
+                f"{summary_path} output_artifacts[{artifact_index}]."
+            )
 
 
 def _validate_artifact_index_result_bundle(
