@@ -12,7 +12,7 @@
       "sha256": null
     },
     {
-      "bytes": 30907,
+      "bytes": 31079,
       "digest_status": "ok",
       "exists": true,
       "hosted_paths": [
@@ -20,7 +20,7 @@
       ],
       "path": "docs/asr-leaderboard-demo.html",
       "purpose": "Generated ASR leaderboard demo HTML page.",
-      "sha256": "484fc006dda12808fa2671c715ee062995b33f30c81babdad93e612f18776bae"
+      "sha256": "a23c7a080ea6cb2adc652495182bdd57b0460da8a51e73defdd991e4cd267d10"
     },
     {
       "bytes": null,
@@ -78,7 +78,7 @@
       "sha256": "887b346f6e31c9a181b1f2e92c6d27e0b1ae8fbf425a24662a11cab502e41024"
     },
     {
-      "bytes": 18623,
+      "bytes": 18756,
       "digest_status": "ok",
       "exists": true,
       "hosted_paths": [
@@ -86,7 +86,7 @@
       ],
       "path": "docs/asr-leaderboard-refresh-report.md",
       "purpose": "Human-readable coverage, score, source-file, and command report.",
-      "sha256": "fd51544b3d88bfa10bb3f79fe523fb03ad77b19613babfe2d54a451083d4c4a2"
+      "sha256": "9d11cddcf7cc35fa1ae322afd367013ab12bd0621292433a68745b267c9d5421"
     },
     {
       "bytes": 9965,
@@ -144,7 +144,16 @@
       "sha256": "84c2baf3f4855b2cdbe134365aa02079a03acb94a20d981e732315f489b710ea"
     },
     {
-      "bytes": 34057,
+      "bytes": 12183,
+      "digest_status": "ok",
+      "exists": true,
+      "hosted_paths": [],
+      "path": "docs/asr-leaderboard-source-selection.json",
+      "purpose": "Machine-readable record of selected ASR source result files for the last refresh.",
+      "sha256": "2ad6e90312c9b30098ae226e75f273334be31140e4cf7e9a5c8dca11942020c1"
+    },
+    {
+      "bytes": 34231,
       "digest_status": "ok",
       "exists": true,
       "hosted_paths": [
@@ -152,7 +161,7 @@
       ],
       "path": "docs/asr-leaderboard-summary.json",
       "purpose": "Machine-readable leaderboard summary and reproducible refresh workflow.",
-      "sha256": "5560c5acb78ff487aba749c001a3cdab7992c2d97f265584d70878ac46b06d9c"
+      "sha256": "3f4372e15398bd917201eb76b033d1ac979770142b6320606b45dda74cca2875"
     },
     {
       "bytes": 1634,

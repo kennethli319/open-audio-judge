@@ -61,7 +61,8 @@ from scripts.validate_asr_seed_manifest import (  # noqa: E402
 
 
 DEFAULT_COMBINED_OUT = ROOT / "runs" / "asr-leaderboard" / "full-35-combined"
-DEFAULT_SOURCE_SELECTION_SUMMARY = (
+DEFAULT_SOURCE_SELECTION_SUMMARY = ROOT / "docs" / "asr-leaderboard-source-selection.json"
+DEFAULT_CHECK_ONLY_SOURCE_SELECTION_SUMMARY = (
     ROOT / "runs" / "asr-leaderboard" / "source-selection-summary.json"
 )
 DEFAULT_RUN_MANIFEST = ROOT / "docs" / "asr-leaderboard-run-manifest.json"
@@ -299,6 +300,11 @@ def main() -> None:
         help="Fail unless every model has this many ok judged results.",
     )
     args = parser.parse_args()
+    if (
+        args.check_only
+        and not _source_selection_summary_arg_was_provided(sys.argv[1:])
+    ):
+        args.source_selection_summary_out = DEFAULT_CHECK_ONLY_SOURCE_SELECTION_SUMMARY
     hosted_dir = args.hosted_dir
     if hosted_dir is None and args.hosted_dir_from_env:
         hosted_dir = _hosted_dir_from_env(args.hosted_dir_env)
@@ -334,6 +340,7 @@ def main() -> None:
             require_generated_fresh=args.require_generated_fresh,
             require_audio_ready=args.require_audio_ready,
             require_hosted_current=args.require_hosted_current,
+            source_selection_summary_out=args.source_selection_summary_out,
         )
         if args.check_mlx_runtime or args.require_runtime_ready:
             runtime_status = build_runtime_status_artifact_data(
@@ -394,6 +401,7 @@ def main() -> None:
         hosted_manifest_out=args.hosted_manifest_out,
         artifact_index_out=args.artifact_index_out,
         runtime_status_out=args.runtime_status_out,
+        source_selection_summary_out=args.source_selection_summary_out,
         run_manifest=args.run_manifest,
         update_run_manifest=args.update_run_manifest,
         hosted_dir=hosted_dir,
@@ -410,6 +418,14 @@ def _hosted_dir_from_env(env_var: str) -> Path:
             "kennethli319.github.io/open-audio-judge checkout."
         )
     return Path(raw_value).expanduser()
+
+
+def _source_selection_summary_arg_was_provided(argv: list[str]) -> bool:
+    return any(
+        arg == "--source-selection-summary-out"
+        or arg.startswith("--source-selection-summary-out=")
+        for arg in argv
+    )
 
 
 def check_asr_leaderboard_refresh_inputs(
@@ -432,6 +448,7 @@ def check_asr_leaderboard_refresh_inputs(
     require_generated_fresh: bool = False,
     require_audio_ready: bool = False,
     require_hosted_current: bool = False,
+    source_selection_summary_out: Path = DEFAULT_SOURCE_SELECTION_SUMMARY,
 ) -> dict[str, object]:
     result_paths = [_normalize_results_path(path) for path in result_paths]
     _validate_unique_result_paths(result_paths, context="ASR refresh preflight result sources")
@@ -486,6 +503,7 @@ def check_asr_leaderboard_refresh_inputs(
             hosted_manifest_out=DEFAULT_HOSTED_MANIFEST,
             artifact_index_out=DEFAULT_ARTIFACT_INDEX,
             runtime_status_out=DEFAULT_RUNTIME_STATUS,
+            source_selection_summary_out=DEFAULT_SOURCE_SELECTION_SUMMARY,
             generated=generated,
             combined_results_path=DEFAULT_COMBINED_OUT / "results.jsonl",
             expected_cases_per_model=expected_cases_per_model,
@@ -693,6 +711,7 @@ def _validate_generated_artifacts_fresh(
     hosted_manifest_out: Path | None = None,
     artifact_index_out: Path | None = None,
     runtime_status_out: Path | None = None,
+    source_selection_summary_out: Path | None = None,
     generated: str,
     expected_cases_per_model: int,
     combined_results_path: Path = DEFAULT_COMBINED_OUT / "results.jsonl",
@@ -808,6 +827,9 @@ def _validate_generated_artifacts_fresh(
                 next_runs_out=next_runs_out or DEFAULT_NEXT_RUNS,
                 artifact_index_out=artifact_index_out or DEFAULT_ARTIFACT_INDEX,
                 runtime_status_out=runtime_status_out,
+                source_selection_summary_out=(
+                    source_selection_summary_out or DEFAULT_SOURCE_SELECTION_SUMMARY
+                ),
                 combined_results_path=combined_results_path,
                 combined_report_path=combined_results_path.with_name("report.html"),
                 source_result_paths=result_paths,
@@ -847,6 +869,9 @@ def _validate_generated_artifacts_fresh(
                         next_runs_out=next_runs_out or DEFAULT_NEXT_RUNS,
                         hosted_manifest_out=hosted_manifest_out or DEFAULT_HOSTED_MANIFEST,
                         runtime_status_out=runtime_status_out or DEFAULT_RUNTIME_STATUS,
+                        source_selection_summary_out=(
+                            source_selection_summary_out or DEFAULT_SOURCE_SELECTION_SUMMARY
+                        ),
                         expected_cases_per_model=expected_cases_per_model,
                         source_result_paths=result_paths,
                     ),
@@ -949,6 +974,7 @@ def refresh_asr_leaderboard_artifacts(
     hosted_manifest_out: Path = DEFAULT_HOSTED_MANIFEST,
     artifact_index_out: Path = DEFAULT_ARTIFACT_INDEX,
     runtime_status_out: Path | None = None,
+    source_selection_summary_out: Path = DEFAULT_SOURCE_SELECTION_SUMMARY,
     refresh_workflow_out: Path | None = None,
     hosted_dir: Path | None = None,
     check_mlx_runtime: bool = False,
@@ -1071,6 +1097,7 @@ def refresh_asr_leaderboard_artifacts(
         next_runs_out=next_runs_out,
         hosted_manifest_out=hosted_manifest_out,
         runtime_status_out=runtime_status_out,
+        source_selection_summary_out=source_selection_summary_out,
         expected_cases_per_model=expected_cases_per_model,
         source_result_paths=result_paths,
     )
@@ -1090,6 +1117,7 @@ def refresh_asr_leaderboard_artifacts(
         next_runs_out=next_runs_out,
         artifact_index_out=artifact_index_out,
         runtime_status_out=runtime_status_out,
+        source_selection_summary_out=source_selection_summary_out,
         combined_results_path=combined_results_path,
         combined_report_path=combined_report_path,
         source_result_paths=result_paths,
@@ -1112,6 +1140,7 @@ def refresh_asr_leaderboard_artifacts(
             hosted_manifest_out=hosted_manifest_out,
             artifact_index_out=artifact_index_out,
             runtime_status_out=runtime_status_out,
+            source_selection_summary_out=source_selection_summary_out,
             combined_results_path=combined_results_path,
             combined_report_path=combined_report_path,
             source_result_paths=result_paths,
@@ -1235,6 +1264,7 @@ def copy_hosted_asr_artifacts(
     hosted_manifest_out: Path = DEFAULT_HOSTED_MANIFEST,
     artifact_index_out: Path = DEFAULT_ARTIFACT_INDEX,
     runtime_status_out: Path = DEFAULT_RUNTIME_STATUS,
+    source_selection_summary_out: Path = DEFAULT_SOURCE_SELECTION_SUMMARY,
     combined_results_path: Path | None = None,
     combined_report_path: Path | None = None,
     source_result_paths: list[Path] | None = None,
@@ -1257,6 +1287,10 @@ def copy_hosted_asr_artifacts(
         (hosted_manifest_out, {hosted_manifest_out.name, DEFAULT_HOSTED_MANIFEST.name}),
         (artifact_index_out, {artifact_index_out.name, DEFAULT_ARTIFACT_INDEX.name}),
         (runtime_status_out, {runtime_status_out.name, DEFAULT_RUNTIME_STATUS.name}),
+        (
+            source_selection_summary_out,
+            {source_selection_summary_out.name, DEFAULT_SOURCE_SELECTION_SUMMARY.name},
+        ),
     )
     for source, destination_names in source_destinations:
         if not source.exists():
@@ -1307,6 +1341,7 @@ def write_hosted_manifest_artifact(
     next_runs_out: Path = DEFAULT_NEXT_RUNS,
     artifact_index_out: Path = DEFAULT_ARTIFACT_INDEX,
     runtime_status_out: Path = DEFAULT_RUNTIME_STATUS,
+    source_selection_summary_out: Path = DEFAULT_SOURCE_SELECTION_SUMMARY,
     combined_results_path: Path,
     combined_report_path: Path,
     source_result_paths: list[Path] | None = None,
@@ -1327,6 +1362,10 @@ def write_hosted_manifest_artifact(
         (next_runs_out, {next_runs_out.name, DEFAULT_NEXT_RUNS.name}),
         (artifact_index_out, {artifact_index_out.name, DEFAULT_ARTIFACT_INDEX.name}),
         (runtime_status_out, {runtime_status_out.name, DEFAULT_RUNTIME_STATUS.name}),
+        (
+            source_selection_summary_out,
+            {source_selection_summary_out.name, DEFAULT_SOURCE_SELECTION_SUMMARY.name},
+        ),
         (output_path, {output_path.name, DEFAULT_HOSTED_MANIFEST.name}),
         (combined_results_path, {"asr-leaderboard/full-35-combined/results.jsonl"}),
         (combined_report_path, {"asr-leaderboard/full-35-combined/report.html"}),
@@ -1404,6 +1443,7 @@ def write_artifact_index(
     runtime_status_out: Path | None = None,
     live_refresh_script_out: Path | None = None,
     refresh_workflow_out: Path | None = None,
+    source_selection_summary_out: Path | None = None,
     source_result_paths: list[Path] | None = None,
 ) -> None:
     output_path.parent.mkdir(parents=True, exist_ok=True)
@@ -1429,6 +1469,7 @@ def write_artifact_index(
                 report_index_out=report_index_out,
                 report_links_out=report_links_out,
                 runtime_status_out=runtime_status_out,
+                source_selection_summary_out=source_selection_summary_out,
                 source_result_paths=source_result_paths,
             ),
             indent=2,
@@ -1460,6 +1501,7 @@ def build_artifact_index_data(
     report_links_out: Path | None = None,
     runtime_status_out: Path | None = None,
     live_refresh_script_out: Path | None = None,
+    source_selection_summary_out: Path | None = None,
     source_result_paths: list[Path] | None = None,
 ) -> dict[str, object]:
     report_index_out = report_index_out or refresh_report_out.with_name(DEFAULT_REPORT_INDEX.name)
@@ -1470,6 +1512,9 @@ def build_artifact_index_data(
     )
     refresh_workflow_out = refresh_workflow_out or refresh_commands_out.with_name(
         DEFAULT_REFRESH_WORKFLOW.name
+    )
+    source_selection_summary_out = (
+        source_selection_summary_out or DEFAULT_SOURCE_SELECTION_SUMMARY
     )
     artifact_paths = {
         _repo_relative(results_path): results_path,
@@ -1488,6 +1533,7 @@ def build_artifact_index_data(
         _repo_relative(next_runs_out): next_runs_out,
         _repo_relative(hosted_manifest_out): hosted_manifest_out,
         _repo_relative(runtime_status_out): runtime_status_out,
+        _repo_relative(source_selection_summary_out): source_selection_summary_out,
         _repo_relative(output_path): output_path,
         _repo_relative(DEFAULT_SUMMARY): summary_out,
         _repo_relative(DEFAULT_REFRESH_REPORT): refresh_report_out,
@@ -1503,6 +1549,7 @@ def build_artifact_index_data(
         _repo_relative(DEFAULT_HOSTED_MANIFEST): hosted_manifest_out,
         _repo_relative(DEFAULT_ARTIFACT_INDEX): output_path,
         _repo_relative(DEFAULT_RUNTIME_STATUS): runtime_status_out,
+        _repo_relative(DEFAULT_SOURCE_SELECTION_SUMMARY): source_selection_summary_out,
     }
     for source_result_path in source_result_paths or []:
         source_report = _normalize_results_path(source_result_path).with_name("report.html")

@@ -261,6 +261,10 @@
     {
       "path": "docs/asr-leaderboard-runtime-status.json",
       "purpose": "Machine-readable MLX ASR and Gemini readiness status for refresh automation."
+    },
+    {
+      "path": "docs/asr-leaderboard-source-selection.json",
+      "purpose": "Machine-readable record of selected ASR source result files for the last refresh."
     }
   ],
   "refresh_commands_path": "docs/asr-leaderboard-refresh-commands.sh",

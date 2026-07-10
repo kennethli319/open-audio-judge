@@ -450,6 +450,10 @@ def test_write_summary_artifact_records_models_and_categories(tmp_path: Path) ->
             "path": "docs/asr-leaderboard-runtime-status.json",
             "purpose": "Machine-readable MLX ASR and Gemini readiness status for refresh automation.",
         },
+        {
+            "path": "docs/asr-leaderboard-source-selection.json",
+            "purpose": "Machine-readable record of selected ASR source result files for the last refresh.",
+        },
     ]
     assert summary["refresh_workflow"]["seed_manifest_validation_command"] == [
         ".venv/bin/python",
@@ -1402,8 +1406,8 @@ def test_refresh_asr_leaderboard_artifacts_combines_report_and_page(tmp_path: Pa
     )
     assert hosted_current == {
         "status": "complete",
-        "hosted_artifact_count": 18,
-        "hosted_path_count": 29,
+        "hosted_artifact_count": 19,
+        "hosted_path_count": 30,
     }
     assert (hosted_dir / "asr-leaderboard-run-manifest.json").exists()
     assert (hosted_dir / "manifest-validation.json").read_text(
@@ -1529,7 +1533,7 @@ def test_refresh_asr_leaderboard_artifacts_combines_report_and_page(tmp_path: Pa
         f"asr-leaderboard/source-reports/{tmp_path.name}/report.html"
     ]
     hosted_manifest_data = json.loads(hosted_manifest.read_text(encoding="utf-8"))
-    assert hosted_manifest_data["artifact_count"] == 18
+    assert hosted_manifest_data["artifact_count"] == 19
     assert {"asr-leaderboard/full-35-combined/results.jsonl"} in [
         set(artifact["hosted_paths"]) for artifact in hosted_manifest_data["artifacts"]
     ]

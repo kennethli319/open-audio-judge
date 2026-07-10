@@ -1338,6 +1338,10 @@ def build_output_artifact_index(*, results_path: Path) -> list[dict[str, str]]:
             "path": _repo_relative(DEFAULT_RUNTIME_STATUS),
             "purpose": "Machine-readable MLX ASR and Gemini readiness status for refresh automation.",
         },
+        {
+            "path": _repo_relative(DEFAULT_SOURCE_SELECTION_SUMMARY),
+            "purpose": "Machine-readable record of selected ASR source result files for the last refresh.",
+        },
     ]
 
 

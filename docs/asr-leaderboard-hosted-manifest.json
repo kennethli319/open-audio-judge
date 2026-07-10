@@ -1,28 +1,28 @@
 {
-  "artifact_count": 34,
+  "artifact_count": 35,
   "artifacts": [
     {
-      "bytes": 30907,
+      "bytes": 31079,
       "hosted_paths": [
         "asr-leaderboard-demo.html"
       ],
-      "sha256": "484fc006dda12808fa2671c715ee062995b33f30c81babdad93e612f18776bae",
+      "sha256": "a23c7a080ea6cb2adc652495182bdd57b0460da8a51e73defdd991e4cd267d10",
       "source_path": "docs/asr-leaderboard-demo.html"
     },
     {
-      "bytes": 34057,
+      "bytes": 34231,
       "hosted_paths": [
         "asr-leaderboard-summary.json"
       ],
-      "sha256": "5560c5acb78ff487aba749c001a3cdab7992c2d97f265584d70878ac46b06d9c",
+      "sha256": "3f4372e15398bd917201eb76b033d1ac979770142b6320606b45dda74cca2875",
       "source_path": "docs/asr-leaderboard-summary.json"
     },
     {
-      "bytes": 18623,
+      "bytes": 18756,
       "hosted_paths": [
         "asr-leaderboard-refresh-report.md"
       ],
-      "sha256": "fd51544b3d88bfa10bb3f79fe523fb03ad77b19613babfe2d54a451083d4c4a2",
+      "sha256": "9d11cddcf7cc35fa1ae322afd367013ab12bd0621292433a68745b267c9d5421",
       "source_path": "docs/asr-leaderboard-refresh-report.md"
     },
     {
@@ -98,11 +98,11 @@
       "source_path": "docs/asr-leaderboard-next-runs.json"
     },
     {
-      "bytes": 34229,
+      "bytes": 34586,
       "hosted_paths": [
         "asr-leaderboard-artifacts.json"
       ],
-      "sha256": "78606ffe60ef0d5115dee0d99895849e19513f59219b5118a566182833efd5e2",
+      "sha256": "5ec9851d504925accc932951ab9fd462850d1008ba3e81f064202a7071f2712f",
       "source_path": "docs/asr-leaderboard-artifacts.json"
     },
     {
@@ -112,6 +112,14 @@
       ],
       "sha256": "84c2baf3f4855b2cdbe134365aa02079a03acb94a20d981e732315f489b710ea",
       "source_path": "docs/asr-leaderboard-runtime-status.json"
+    },
+    {
+      "bytes": 12183,
+      "hosted_paths": [
+        "asr-leaderboard-source-selection.json"
+      ],
+      "sha256": "2ad6e90312c9b30098ae226e75f273334be31140e4cf7e9a5c8dca11942020c1",
+      "source_path": "docs/asr-leaderboard-source-selection.json"
     },
     {
       "bytes": 404226,
