@@ -100,7 +100,7 @@
       "sha256": "81c7c30aed86a16d1b3cd6a6528bfdb20069551ed3369136a8d5742e0adb0079"
     },
     {
-      "bytes": 10936,
+      "bytes": 11110,
       "digest_status": "ok",
       "exists": true,
       "hosted_paths": [
@@ -108,7 +108,7 @@
       ],
       "path": "docs/asr-leaderboard-report-index.md",
       "purpose": "Human-readable index linking the demo page, combined report, and source run reports.",
-      "sha256": "7393934dca2e1dc7564e64865a344445bbc7b2cfe9a285d277f7b1d2ccde656a"
+      "sha256": "aa88aa49b459c049e96c85755c6973dcd9b1a1fd2526203601f6ea32f7f5e8eb"
     },
     {
       "bytes": 47571,

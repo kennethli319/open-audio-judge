@@ -1052,6 +1052,9 @@ def test_write_report_index_records_matrix_and_source_report_status(tmp_path: Pa
     assert "| `mlx-community/model-a` | 1 | 1 | 0 | 0 | 0 | 0 | 0 |" in text
     assert f"- Results SHA-256: `{file_sha256(results_path)}`" in text
     assert f"- Report SHA-256: `{file_sha256(results_path.with_name('report.html'))}`" in text
+    assert "- Run manifest: `docs/asr-leaderboard-run-manifest.json`" in text
+    assert "- Run manifest SHA-256: `" in text
+    assert "- Source result files: 1" in text
     assert "| Results | Local Report | Hosted Report | Model | Cases | Score | Report Status | Categories |" in text
     assert "https://kennethli319.github.io/open-audio-judge/asr-leaderboard/source-reports/model-a/report.html" in text
     assert f"{source_report_path.stat().st_size} bytes, `{file_sha256(source_report_path)}`" in text

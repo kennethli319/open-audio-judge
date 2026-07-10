@@ -12,6 +12,9 @@ This generated index maps the hosted ASR demo to the full combined report and so
 - Summary JSON: `docs/asr-leaderboard-summary.json`
 - Refresh report: `docs/asr-leaderboard-refresh-report.md`
 - Report links JSON: `docs/asr-leaderboard-report-links.json`
+- Run manifest: `docs/asr-leaderboard-run-manifest.json`
+- Run manifest SHA-256: `af02532d0b8837c14c34b0fd71a6def65e5afa5e3baa187acdbf56c82e611ea4`
+- Source result files: 18
 - Hosted demo URL: `https://kennethli319.github.io/open-audio-judge/asr-leaderboard-demo.html`
 - Hosted combined report URL: `https://kennethli319.github.io/open-audio-judge/asr-leaderboard/full-35-combined/report.html`
 
