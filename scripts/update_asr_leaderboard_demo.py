@@ -1456,6 +1456,14 @@ def build_source_report_coverage_matrix(
             )
             for result in source_results
         )
+        source_case_ids: dict[tuple[str, str], list[str]] = defaultdict(list)
+        for result in source_results:
+            source_case_ids[
+                (
+                    str(result.metadata.get("candidate_model") or ""),
+                    str(result.metadata.get("eval_category") or ""),
+                )
+            ].append(result.case_id)
         for model in summary.models:
             for category in category_order:
                 case_count = source_counts.get((model, category), 0)
@@ -1476,6 +1484,7 @@ def build_source_report_coverage_matrix(
                             else None
                         ),
                         "case_count": case_count,
+                        "case_ids": sorted(source_case_ids[(model, category)]),
                     }
                 )
 

@@ -111,7 +111,7 @@
       "sha256": "7393934dca2e1dc7564e64865a344445bbc7b2cfe9a285d277f7b1d2ccde656a"
     },
     {
-      "bytes": 40350,
+      "bytes": 47571,
       "digest_status": "ok",
       "exists": true,
       "hosted_paths": [
@@ -119,7 +119,7 @@
       ],
       "path": "docs/asr-leaderboard-report-links.json",
       "purpose": "Machine-readable map linking the demo page to combined and source ASR reports.",
-      "sha256": "e1ff542adb93bf0098ec3847df25cf1d1dede920900e98b4a86b1cf30dfa6fb0"
+      "sha256": "a499a02727b683adc1128f32e5d635fa69c3ff3ccb39ad119d7e9dd4135b37f2"
     },
     {
       "bytes": 10460,

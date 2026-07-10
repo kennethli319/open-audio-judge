@@ -26,6 +26,11 @@
           "source_reports": [
             {
               "case_count": 3,
+              "case_ids": [
+                "asr-wer-function-word-001-local-tts",
+                "asr-wer-homophone-001-local-tts",
+                "asr-wer-short-utterance-001-local-tts"
+              ],
               "hosted_report_path": "open-audio-judge/asr-leaderboard/vibevoice-asr-smoke/judge-report/report.html",
               "hosted_report_url": "https://kennethli319.github.io/open-audio-judge/asr-leaderboard/vibevoice-asr-smoke/judge-report/report.html",
               "report_path": "runs/asr-leaderboard/vibevoice-asr-smoke/judge-report/report.html",
@@ -33,6 +38,10 @@
             },
             {
               "case_count": 2,
+              "case_ids": [
+                "asr-wer-disfluency-001-local-tts",
+                "asr-wer-punctuation-boundary-001-local-tts"
+              ],
               "hosted_report_path": "open-audio-judge/asr-leaderboard/vibevoice-asr-full-gap/judge-report/report.html",
               "hosted_report_url": "https://kennethli319.github.io/open-audio-judge/asr-leaderboard/vibevoice-asr-full-gap/judge-report/report.html",
               "report_path": "runs/asr-leaderboard/vibevoice-asr-full-gap/judge-report/report.html",
@@ -46,6 +55,11 @@
           "source_reports": [
             {
               "case_count": 3,
+              "case_ids": [
+                "asr-numeric-account-001-local-tts",
+                "asr-numeric-measurement-001-local-tts",
+                "asr-numeric-percentage-001-local-tts"
+              ],
               "hosted_report_path": "open-audio-judge/asr-leaderboard/vibevoice-asr-full-gap/judge-report/report.html",
               "hosted_report_url": "https://kennethli319.github.io/open-audio-judge/asr-leaderboard/vibevoice-asr-full-gap/judge-report/report.html",
               "report_path": "runs/asr-leaderboard/vibevoice-asr-full-gap/judge-report/report.html",
@@ -53,6 +67,10 @@
             },
             {
               "case_count": 2,
+              "case_ids": [
+                "asr-numeric-medication-001-local-tts",
+                "asr-numeric-transfer-001-local-tts"
+              ],
               "hosted_report_path": "open-audio-judge/asr-leaderboard/vibevoice-asr-semantic-smoke/judge-report/report.html",
               "hosted_report_url": "https://kennethli319.github.io/open-audio-judge/asr-leaderboard/vibevoice-asr-semantic-smoke/judge-report/report.html",
               "report_path": "runs/asr-leaderboard/vibevoice-asr-semantic-smoke/judge-report/report.html",
@@ -66,6 +84,11 @@
           "source_reports": [
             {
               "case_count": 3,
+              "case_ids": [
+                "asr-negation-condition-001-local-tts",
+                "asr-negation-medical-001-local-tts",
+                "asr-negation-policy-001-local-tts"
+              ],
               "hosted_report_path": "open-audio-judge/asr-leaderboard/vibevoice-asr-full-gap/judge-report/report.html",
               "hosted_report_url": "https://kennethli319.github.io/open-audio-judge/asr-leaderboard/vibevoice-asr-full-gap/judge-report/report.html",
               "report_path": "runs/asr-leaderboard/vibevoice-asr-full-gap/judge-report/report.html",
@@ -73,6 +96,10 @@
             },
             {
               "case_count": 2,
+              "case_ids": [
+                "asr-negation-refund-001-local-tts",
+                "asr-negation-server-001-local-tts"
+              ],
               "hosted_report_path": "open-audio-judge/asr-leaderboard/vibevoice-asr-semantic-smoke/judge-report/report.html",
               "hosted_report_url": "https://kennethli319.github.io/open-audio-judge/asr-leaderboard/vibevoice-asr-semantic-smoke/judge-report/report.html",
               "report_path": "runs/asr-leaderboard/vibevoice-asr-semantic-smoke/judge-report/report.html",
@@ -86,6 +113,12 @@
           "source_reports": [
             {
               "case_count": 4,
+              "case_ids": [
+                "asr-temporal-date-001-local-tts",
+                "asr-temporal-duration-001-local-tts",
+                "asr-temporal-relative-001-local-tts",
+                "asr-temporal-window-001-local-tts"
+              ],
               "hosted_report_path": "open-audio-judge/asr-leaderboard/vibevoice-asr-full-gap/judge-report/report.html",
               "hosted_report_url": "https://kennethli319.github.io/open-audio-judge/asr-leaderboard/vibevoice-asr-full-gap/judge-report/report.html",
               "report_path": "runs/asr-leaderboard/vibevoice-asr-full-gap/judge-report/report.html",
@@ -93,6 +126,9 @@
             },
             {
               "case_count": 1,
+              "case_ids": [
+                "asr-temporal-deadline-001-local-tts"
+              ],
               "hosted_report_path": "open-audio-judge/asr-leaderboard/vibevoice-asr-semantic-smoke/judge-report/report.html",
               "hosted_report_url": "https://kennethli319.github.io/open-audio-judge/asr-leaderboard/vibevoice-asr-semantic-smoke/judge-report/report.html",
               "report_path": "runs/asr-leaderboard/vibevoice-asr-semantic-smoke/judge-report/report.html",
@@ -106,6 +142,13 @@
           "source_reports": [
             {
               "case_count": 5,
+              "case_ids": [
+                "asr-entity-address-001-local-tts",
+                "asr-entity-doctor-001-local-tts",
+                "asr-entity-organization-001-local-tts",
+                "asr-entity-product-001-local-tts",
+                "asr-entity-ticket-001-local-tts"
+              ],
               "hosted_report_path": "open-audio-judge/asr-leaderboard/vibevoice-asr-entity-smoke/judge-report/report.html",
               "hosted_report_url": "https://kennethli319.github.io/open-audio-judge/asr-leaderboard/vibevoice-asr-entity-smoke/judge-report/report.html",
               "report_path": "runs/asr-leaderboard/vibevoice-asr-entity-smoke/judge-report/report.html",
@@ -119,6 +162,13 @@
           "source_reports": [
             {
               "case_count": 5,
+              "case_ids": [
+                "asr-semantic-causal-001-local-tts",
+                "asr-semantic-comparison-001-local-tts",
+                "asr-semantic-coreference-001-local-tts",
+                "asr-semantic-instruction-001-local-tts",
+                "asr-semantic-paraphrase-001-local-tts"
+              ],
               "hosted_report_path": "open-audio-judge/asr-leaderboard/vibevoice-asr-paraphrase-smoke/judge-report/report.html",
               "hosted_report_url": "https://kennethli319.github.io/open-audio-judge/asr-leaderboard/vibevoice-asr-paraphrase-smoke/judge-report/report.html",
               "report_path": "runs/asr-leaderboard/vibevoice-asr-paraphrase-smoke/judge-report/report.html",
@@ -132,6 +182,13 @@
           "source_reports": [
             {
               "case_count": 5,
+              "case_ids": [
+                "asr-noise-cafe-order-001-local-tts",
+                "asr-noise-driving-route-001-local-tts",
+                "asr-noise-overlapping-speech-001-local-tts",
+                "asr-noise-reverberant-room-001-local-tts",
+                "asr-noise-warehouse-001-local-tts"
+              ],
               "hosted_report_path": "open-audio-judge/asr-leaderboard/vibevoice-asr-noise-smoke/judge-report/report.html",
               "hosted_report_url": "https://kennethli319.github.io/open-audio-judge/asr-leaderboard/vibevoice-asr-noise-smoke/judge-report/report.html",
               "report_path": "runs/asr-leaderboard/vibevoice-asr-noise-smoke/judge-report/report.html",
@@ -151,6 +208,11 @@
           "source_reports": [
             {
               "case_count": 3,
+              "case_ids": [
+                "asr-wer-function-word-001-local-tts",
+                "asr-wer-homophone-001-local-tts",
+                "asr-wer-short-utterance-001-local-tts"
+              ],
               "hosted_report_path": "open-audio-judge/asr-leaderboard/qwen3-asr-1.7b-smoke/judge-report/report.html",
               "hosted_report_url": "https://kennethli319.github.io/open-audio-judge/asr-leaderboard/qwen3-asr-1.7b-smoke/judge-report/report.html",
               "report_path": "runs/asr-leaderboard/qwen3-asr-1.7b-smoke/judge-report/report.html",
@@ -158,6 +220,10 @@
             },
             {
               "case_count": 2,
+              "case_ids": [
+                "asr-wer-disfluency-001-local-tts",
+                "asr-wer-punctuation-boundary-001-local-tts"
+              ],
               "hosted_report_path": "open-audio-judge/asr-leaderboard/qwen3-asr-1.7b-full-gap/judge-report/report.html",
               "hosted_report_url": "https://kennethli319.github.io/open-audio-judge/asr-leaderboard/qwen3-asr-1.7b-full-gap/judge-report/report.html",
               "report_path": "runs/asr-leaderboard/qwen3-asr-1.7b-full-gap/judge-report/report.html",
@@ -171,6 +237,11 @@
           "source_reports": [
             {
               "case_count": 3,
+              "case_ids": [
+                "asr-numeric-account-001-local-tts",
+                "asr-numeric-measurement-001-local-tts",
+                "asr-numeric-percentage-001-local-tts"
+              ],
               "hosted_report_path": "open-audio-judge/asr-leaderboard/qwen3-asr-1.7b-full-gap/judge-report/report.html",
               "hosted_report_url": "https://kennethli319.github.io/open-audio-judge/asr-leaderboard/qwen3-asr-1.7b-full-gap/judge-report/report.html",
               "report_path": "runs/asr-leaderboard/qwen3-asr-1.7b-full-gap/judge-report/report.html",
@@ -178,6 +249,10 @@
             },
             {
               "case_count": 2,
+              "case_ids": [
+                "asr-numeric-medication-001-local-tts",
+                "asr-numeric-transfer-001-local-tts"
+              ],
               "hosted_report_path": "open-audio-judge/asr-leaderboard/qwen3-asr-1.7b-semantic-smoke/judge-report/report.html",
               "hosted_report_url": "https://kennethli319.github.io/open-audio-judge/asr-leaderboard/qwen3-asr-1.7b-semantic-smoke/judge-report/report.html",
               "report_path": "runs/asr-leaderboard/qwen3-asr-1.7b-semantic-smoke/judge-report/report.html",
@@ -191,6 +266,11 @@
           "source_reports": [
             {
               "case_count": 3,
+              "case_ids": [
+                "asr-negation-condition-001-local-tts",
+                "asr-negation-medical-001-local-tts",
+                "asr-negation-policy-001-local-tts"
+              ],
               "hosted_report_path": "open-audio-judge/asr-leaderboard/qwen3-asr-1.7b-full-gap/judge-report/report.html",
               "hosted_report_url": "https://kennethli319.github.io/open-audio-judge/asr-leaderboard/qwen3-asr-1.7b-full-gap/judge-report/report.html",
               "report_path": "runs/asr-leaderboard/qwen3-asr-1.7b-full-gap/judge-report/report.html",
@@ -198,6 +278,10 @@
             },
             {
               "case_count": 2,
+              "case_ids": [
+                "asr-negation-refund-001-local-tts",
+                "asr-negation-server-001-local-tts"
+              ],
               "hosted_report_path": "open-audio-judge/asr-leaderboard/qwen3-asr-1.7b-semantic-smoke/judge-report/report.html",
               "hosted_report_url": "https://kennethli319.github.io/open-audio-judge/asr-leaderboard/qwen3-asr-1.7b-semantic-smoke/judge-report/report.html",
               "report_path": "runs/asr-leaderboard/qwen3-asr-1.7b-semantic-smoke/judge-report/report.html",
@@ -211,6 +295,12 @@
           "source_reports": [
             {
               "case_count": 4,
+              "case_ids": [
+                "asr-temporal-date-001-local-tts",
+                "asr-temporal-duration-001-local-tts",
+                "asr-temporal-relative-001-local-tts",
+                "asr-temporal-window-001-local-tts"
+              ],
               "hosted_report_path": "open-audio-judge/asr-leaderboard/qwen3-asr-1.7b-full-gap/judge-report/report.html",
               "hosted_report_url": "https://kennethli319.github.io/open-audio-judge/asr-leaderboard/qwen3-asr-1.7b-full-gap/judge-report/report.html",
               "report_path": "runs/asr-leaderboard/qwen3-asr-1.7b-full-gap/judge-report/report.html",
@@ -218,6 +308,9 @@
             },
             {
               "case_count": 1,
+              "case_ids": [
+                "asr-temporal-deadline-001-local-tts"
+              ],
               "hosted_report_path": "open-audio-judge/asr-leaderboard/qwen3-asr-1.7b-semantic-smoke/judge-report/report.html",
               "hosted_report_url": "https://kennethli319.github.io/open-audio-judge/asr-leaderboard/qwen3-asr-1.7b-semantic-smoke/judge-report/report.html",
               "report_path": "runs/asr-leaderboard/qwen3-asr-1.7b-semantic-smoke/judge-report/report.html",
@@ -231,6 +324,13 @@
           "source_reports": [
             {
               "case_count": 5,
+              "case_ids": [
+                "asr-entity-address-001-local-tts",
+                "asr-entity-doctor-001-local-tts",
+                "asr-entity-organization-001-local-tts",
+                "asr-entity-product-001-local-tts",
+                "asr-entity-ticket-001-local-tts"
+              ],
               "hosted_report_path": "open-audio-judge/asr-leaderboard/qwen3-asr-1.7b-entity-smoke/judge-report/report.html",
               "hosted_report_url": "https://kennethli319.github.io/open-audio-judge/asr-leaderboard/qwen3-asr-1.7b-entity-smoke/judge-report/report.html",
               "report_path": "runs/asr-leaderboard/qwen3-asr-1.7b-entity-smoke/judge-report/report.html",
@@ -244,6 +344,13 @@
           "source_reports": [
             {
               "case_count": 5,
+              "case_ids": [
+                "asr-semantic-causal-001-local-tts",
+                "asr-semantic-comparison-001-local-tts",
+                "asr-semantic-coreference-001-local-tts",
+                "asr-semantic-instruction-001-local-tts",
+                "asr-semantic-paraphrase-001-local-tts"
+              ],
               "hosted_report_path": "open-audio-judge/asr-leaderboard/qwen3-asr-1.7b-paraphrase-smoke/judge-report/report.html",
               "hosted_report_url": "https://kennethli319.github.io/open-audio-judge/asr-leaderboard/qwen3-asr-1.7b-paraphrase-smoke/judge-report/report.html",
               "report_path": "runs/asr-leaderboard/qwen3-asr-1.7b-paraphrase-smoke/judge-report/report.html",
@@ -257,6 +364,13 @@
           "source_reports": [
             {
               "case_count": 5,
+              "case_ids": [
+                "asr-noise-cafe-order-001-local-tts",
+                "asr-noise-driving-route-001-local-tts",
+                "asr-noise-overlapping-speech-001-local-tts",
+                "asr-noise-reverberant-room-001-local-tts",
+                "asr-noise-warehouse-001-local-tts"
+              ],
               "hosted_report_path": "open-audio-judge/asr-leaderboard/qwen3-asr-1.7b-noise-smoke/judge-report/report.html",
               "hosted_report_url": "https://kennethli319.github.io/open-audio-judge/asr-leaderboard/qwen3-asr-1.7b-noise-smoke/judge-report/report.html",
               "report_path": "runs/asr-leaderboard/qwen3-asr-1.7b-noise-smoke/judge-report/report.html",
@@ -276,6 +390,11 @@
           "source_reports": [
             {
               "case_count": 3,
+              "case_ids": [
+                "asr-wer-function-word-001-local-tts",
+                "asr-wer-homophone-001-local-tts",
+                "asr-wer-short-utterance-001-local-tts"
+              ],
               "hosted_report_path": "open-audio-judge/asr-leaderboard/whisper-large-v3-turbo-smoke/judge-report/report.html",
               "hosted_report_url": "https://kennethli319.github.io/open-audio-judge/asr-leaderboard/whisper-large-v3-turbo-smoke/judge-report/report.html",
               "report_path": "runs/asr-leaderboard/whisper-large-v3-turbo-smoke/judge-report/report.html",
@@ -283,6 +402,10 @@
             },
             {
               "case_count": 2,
+              "case_ids": [
+                "asr-wer-disfluency-001-local-tts",
+                "asr-wer-punctuation-boundary-001-local-tts"
+              ],
               "hosted_report_path": "open-audio-judge/asr-leaderboard/whisper-large-v3-turbo-full-gap/judge-report/report.html",
               "hosted_report_url": "https://kennethli319.github.io/open-audio-judge/asr-leaderboard/whisper-large-v3-turbo-full-gap/judge-report/report.html",
               "report_path": "runs/asr-leaderboard/whisper-large-v3-turbo-full-gap/judge-report/report.html",
@@ -296,6 +419,11 @@
           "source_reports": [
             {
               "case_count": 3,
+              "case_ids": [
+                "asr-numeric-account-001-local-tts",
+                "asr-numeric-measurement-001-local-tts",
+                "asr-numeric-percentage-001-local-tts"
+              ],
               "hosted_report_path": "open-audio-judge/asr-leaderboard/whisper-large-v3-turbo-full-gap/judge-report/report.html",
               "hosted_report_url": "https://kennethli319.github.io/open-audio-judge/asr-leaderboard/whisper-large-v3-turbo-full-gap/judge-report/report.html",
               "report_path": "runs/asr-leaderboard/whisper-large-v3-turbo-full-gap/judge-report/report.html",
@@ -303,6 +431,10 @@
             },
             {
               "case_count": 2,
+              "case_ids": [
+                "asr-numeric-medication-001-local-tts",
+                "asr-numeric-transfer-001-local-tts"
+              ],
               "hosted_report_path": "open-audio-judge/asr-leaderboard/whisper-large-v3-turbo-semantic-smoke/judge-report/report.html",
               "hosted_report_url": "https://kennethli319.github.io/open-audio-judge/asr-leaderboard/whisper-large-v3-turbo-semantic-smoke/judge-report/report.html",
               "report_path": "runs/asr-leaderboard/whisper-large-v3-turbo-semantic-smoke/judge-report/report.html",
@@ -316,6 +448,11 @@
           "source_reports": [
             {
               "case_count": 3,
+              "case_ids": [
+                "asr-negation-condition-001-local-tts",
+                "asr-negation-medical-001-local-tts",
+                "asr-negation-policy-001-local-tts"
+              ],
               "hosted_report_path": "open-audio-judge/asr-leaderboard/whisper-large-v3-turbo-full-gap/judge-report/report.html",
               "hosted_report_url": "https://kennethli319.github.io/open-audio-judge/asr-leaderboard/whisper-large-v3-turbo-full-gap/judge-report/report.html",
               "report_path": "runs/asr-leaderboard/whisper-large-v3-turbo-full-gap/judge-report/report.html",
@@ -323,6 +460,10 @@
             },
             {
               "case_count": 2,
+              "case_ids": [
+                "asr-negation-refund-001-local-tts",
+                "asr-negation-server-001-local-tts"
+              ],
               "hosted_report_path": "open-audio-judge/asr-leaderboard/whisper-large-v3-turbo-semantic-smoke/judge-report/report.html",
               "hosted_report_url": "https://kennethli319.github.io/open-audio-judge/asr-leaderboard/whisper-large-v3-turbo-semantic-smoke/judge-report/report.html",
               "report_path": "runs/asr-leaderboard/whisper-large-v3-turbo-semantic-smoke/judge-report/report.html",
@@ -336,6 +477,12 @@
           "source_reports": [
             {
               "case_count": 4,
+              "case_ids": [
+                "asr-temporal-date-001-local-tts",
+                "asr-temporal-duration-001-local-tts",
+                "asr-temporal-relative-001-local-tts",
+                "asr-temporal-window-001-local-tts"
+              ],
               "hosted_report_path": "open-audio-judge/asr-leaderboard/whisper-large-v3-turbo-full-gap/judge-report/report.html",
               "hosted_report_url": "https://kennethli319.github.io/open-audio-judge/asr-leaderboard/whisper-large-v3-turbo-full-gap/judge-report/report.html",
               "report_path": "runs/asr-leaderboard/whisper-large-v3-turbo-full-gap/judge-report/report.html",
@@ -343,6 +490,9 @@
             },
             {
               "case_count": 1,
+              "case_ids": [
+                "asr-temporal-deadline-001-local-tts"
+              ],
               "hosted_report_path": "open-audio-judge/asr-leaderboard/whisper-large-v3-turbo-semantic-smoke/judge-report/report.html",
               "hosted_report_url": "https://kennethli319.github.io/open-audio-judge/asr-leaderboard/whisper-large-v3-turbo-semantic-smoke/judge-report/report.html",
               "report_path": "runs/asr-leaderboard/whisper-large-v3-turbo-semantic-smoke/judge-report/report.html",
@@ -356,6 +506,13 @@
           "source_reports": [
             {
               "case_count": 5,
+              "case_ids": [
+                "asr-entity-address-001-local-tts",
+                "asr-entity-doctor-001-local-tts",
+                "asr-entity-organization-001-local-tts",
+                "asr-entity-product-001-local-tts",
+                "asr-entity-ticket-001-local-tts"
+              ],
               "hosted_report_path": "open-audio-judge/asr-leaderboard/whisper-large-v3-turbo-entity-smoke/judge-report/report.html",
               "hosted_report_url": "https://kennethli319.github.io/open-audio-judge/asr-leaderboard/whisper-large-v3-turbo-entity-smoke/judge-report/report.html",
               "report_path": "runs/asr-leaderboard/whisper-large-v3-turbo-entity-smoke/judge-report/report.html",
@@ -369,6 +526,13 @@
           "source_reports": [
             {
               "case_count": 5,
+              "case_ids": [
+                "asr-semantic-causal-001-local-tts",
+                "asr-semantic-comparison-001-local-tts",
+                "asr-semantic-coreference-001-local-tts",
+                "asr-semantic-instruction-001-local-tts",
+                "asr-semantic-paraphrase-001-local-tts"
+              ],
               "hosted_report_path": "open-audio-judge/asr-leaderboard/whisper-large-v3-turbo-paraphrase-smoke/judge-report/report.html",
               "hosted_report_url": "https://kennethli319.github.io/open-audio-judge/asr-leaderboard/whisper-large-v3-turbo-paraphrase-smoke/judge-report/report.html",
               "report_path": "runs/asr-leaderboard/whisper-large-v3-turbo-paraphrase-smoke/judge-report/report.html",
@@ -382,6 +546,13 @@
           "source_reports": [
             {
               "case_count": 5,
+              "case_ids": [
+                "asr-noise-cafe-order-001-local-tts",
+                "asr-noise-driving-route-001-local-tts",
+                "asr-noise-overlapping-speech-001-local-tts",
+                "asr-noise-reverberant-room-001-local-tts",
+                "asr-noise-warehouse-001-local-tts"
+              ],
               "hosted_report_path": "open-audio-judge/asr-leaderboard/whisper-large-v3-turbo-noise-smoke/judge-report/report.html",
               "hosted_report_url": "https://kennethli319.github.io/open-audio-judge/asr-leaderboard/whisper-large-v3-turbo-noise-smoke/judge-report/report.html",
               "report_path": "runs/asr-leaderboard/whisper-large-v3-turbo-noise-smoke/judge-report/report.html",

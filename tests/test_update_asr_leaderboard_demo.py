@@ -1110,7 +1110,11 @@ def test_write_report_links_records_source_coverage_matrix(tmp_path: Path) -> No
         "numeric_unit_integrity",
         "transcription_accuracy_wer",
     }
-    for cell in populated_cells.values():
+    expected_case_ids = {
+        "numeric_unit_integrity": ["asr-b-model-a"],
+        "transcription_accuracy_wer": ["asr-a-model-a"],
+    }
+    for category, cell in populated_cells.items():
         assert cell["case_count"] == 1
         assert cell["source_reports"] == [
             {
@@ -1124,6 +1128,7 @@ def test_write_report_links_records_source_coverage_matrix(tmp_path: Path) -> No
                     "asr-leaderboard/source-reports/model-a/report.html"
                 ),
                 "case_count": 1,
+                "case_ids": expected_case_ids[category],
             }
         ]
 
