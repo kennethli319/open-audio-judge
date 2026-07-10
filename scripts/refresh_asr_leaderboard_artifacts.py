@@ -2273,6 +2273,11 @@ def build_refresh_decision_artifact_data(
         results,
         expected_cases_per_model=expected_cases_per_model,
     )
+    rationale = [
+        f"Coverage status: {next_runs['status']}.",
+        f"Missing model/category cells: {next_runs['missing_cell_count']}.",
+        f"Candidate live-refresh commands: {next_runs['next_run_command_count']}.",
+    ]
     if next_runs["status"] == "complete":
         action = "skip_live_refresh"
         reason = "The selected ASR result bundle already covers every model/category cell."
@@ -2281,6 +2286,7 @@ def build_refresh_decision_artifact_data(
         runtime_issue = None
         coverage_complete = True
         live_refresh_required = False
+        rationale.append("Live MLX ASR/Gemini refresh is not required for the selected result bundle.")
     else:
         coverage_complete = False
         live_refresh_required = True
@@ -2297,10 +2303,14 @@ def build_refresh_decision_artifact_data(
         action = "run_live_refresh"
         reason = "The leaderboard has missing model/category cells and live runtime checks are ready."
         command = next_runs["next_run_commands"][0]["command"]
+        rationale.append("Audio, Gemini secret, and MLX ASR runtime gates are ready.")
+        rationale.append("Run the first recommended live-refresh command, then rebuild generated artifacts.")
     elif next_runs["status"] != "complete":
         action = "blocked_runtime"
         reason = "The leaderboard has missing model/category cells, but live runtime is not ready."
         command = None
+        rationale.append(f"Live refresh is blocked: {runtime_issue}")
+        rationale.append("Improve runtime readiness or record unsupported model states before trying fallbacks.")
 
     return {
         "description": "Generated runtime-gated next action for ASR leaderboard cron refreshes.",
@@ -2308,6 +2318,7 @@ def build_refresh_decision_artifact_data(
         "status": "complete",
         "action": action,
         "reason": reason,
+        "rationale": rationale,
         "coverage_complete": coverage_complete,
         "live_refresh_required": live_refresh_required,
         "recommended_command": command,

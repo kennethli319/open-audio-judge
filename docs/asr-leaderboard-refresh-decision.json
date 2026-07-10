@@ -13,6 +13,12 @@
   "next_run_command_count": 0,
   "next_run_commands": [],
   "next_run_status": "complete",
+  "rationale": [
+    "Coverage status: complete.",
+    "Missing model/category cells: 0.",
+    "Candidate live-refresh commands: 0.",
+    "Live MLX ASR/Gemini refresh is not required for the selected result bundle."
+  ],
   "reason": "The selected ASR result bundle already covers every model/category cell.",
   "recommended_command": null,
   "runtime_ready": "not_required",

@@ -2420,9 +2420,64 @@ def test_refresh_decision_exposes_live_refresh_gate(
     assert complete["action"] == "skip_live_refresh"
     assert complete["coverage_complete"] is True
     assert complete["live_refresh_required"] is False
+    assert complete["rationale"] == [
+        "Coverage status: complete.",
+        "Missing model/category cells: 0.",
+        "Candidate live-refresh commands: 0.",
+        "Live MLX ASR/Gemini refresh is not required for the selected result bundle.",
+    ]
     assert underfilled["action"] == "run_live_refresh"
     assert underfilled["coverage_complete"] is False
     assert underfilled["live_refresh_required"] is True
+    assert underfilled["rationale"] == [
+        "Coverage status: incomplete.",
+        "Missing model/category cells: 2.",
+        "Candidate live-refresh commands: 2.",
+        "Audio, Gemini secret, and MLX ASR runtime gates are ready.",
+        "Run the first recommended live-refresh command, then rebuild generated artifacts.",
+    ]
+
+
+def test_refresh_decision_explains_blocked_runtime() -> None:
+    refresh_module = load_refresh_module()
+    result_records = [
+        result_record(
+            case_id="asr-a-model-a",
+            model="mlx-community/model-a",
+            category="transcription_accuracy_wer",
+            score=100,
+            label="accurate",
+        ),
+    ]
+    runtime_status = {
+        "audio_manifest": {"status": "complete"},
+        "gemini_secret": {"status": "missing"},
+        "mlx_runtime_preflight": {"status": "ok"},
+    }
+
+    decision = refresh_module.build_refresh_decision_artifact_data(
+        results=[
+            SimpleNamespace(
+                case_id=record["case_id"],
+                status=record["status"],
+                overall_score=record["overall_score"],
+                label=record["label"],
+                metadata=record["metadata"],
+            )
+            for record in result_records
+        ],
+        runtime_status=runtime_status,
+        expected_cases_per_model=2,
+    )
+
+    assert decision["action"] == "blocked_runtime"
+    assert decision["runtime_ready"] is False
+    assert decision["rationale"][:3] == [
+        "Coverage status: incomplete.",
+        "Missing model/category cells: 1.",
+        "Candidate live-refresh commands: 1.",
+    ]
+    assert "gemini_secret" in decision["rationale"][3]
 
 
 def test_discover_complete_model_result_paths_selects_newest_complete_runs(tmp_path: Path) -> None:
