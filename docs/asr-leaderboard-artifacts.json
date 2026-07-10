@@ -12,7 +12,7 @@
       "sha256": null
     },
     {
-      "bytes": 33100,
+      "bytes": 34188,
       "digest_status": "ok",
       "exists": true,
       "hosted_paths": [
@@ -20,7 +20,7 @@
       ],
       "path": "docs/asr-leaderboard-demo.html",
       "purpose": "Generated ASR leaderboard demo HTML page.",
-      "sha256": "82b22894c779ed5f49e69366d05ce687660b8904c515e45d023d4297d40dfc08"
+      "sha256": "64a4069ac5dfa659fceda5b14e8acaff7747de9f75759d7c48173a0101f94303"
     },
     {
       "bytes": null,

@@ -2,11 +2,11 @@
   "artifact_count": 37,
   "artifacts": [
     {
-      "bytes": 33100,
+      "bytes": 34188,
       "hosted_paths": [
         "asr-leaderboard-demo.html"
       ],
-      "sha256": "82b22894c779ed5f49e69366d05ce687660b8904c515e45d023d4297d40dfc08",
+      "sha256": "64a4069ac5dfa659fceda5b14e8acaff7747de9f75759d7c48173a0101f94303",
       "source_path": "docs/asr-leaderboard-demo.html"
     },
     {
@@ -102,7 +102,7 @@
       "hosted_paths": [
         "asr-leaderboard-artifacts.json"
       ],
-      "sha256": "9cf6c74ac1004ec8dce5abf22a94e2eb64469a4444eb4cbb9c949dd2657905f0",
+      "sha256": "ddfbbe1d5e73895405473afdf72f27b8dafa468360af6022ca57b33f75f49fbf",
       "source_path": "docs/asr-leaderboard-artifacts.json"
     },
     {

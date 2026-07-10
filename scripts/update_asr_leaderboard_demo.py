@@ -283,6 +283,11 @@ def render_generated_sections(
     category_columns = category_columns_for_results(results)
     results_label = html.escape(_repo_relative(results_path))
     report_label = html.escape(_repo_relative(results_path.with_name("report.html")))
+    hosted_combined_report_url = html.escape(
+        f"{HOSTED_BASE_URL}/asr-leaderboard/full-35-combined/report.html"
+    )
+    hosted_report_index_url = html.escape(f"{HOSTED_BASE_URL}/{DEFAULT_REPORT_INDEX.name}")
+    hosted_report_links_url = html.escape(f"{HOSTED_BASE_URL}/{DEFAULT_REPORT_LINKS.name}")
     summary_label = html.escape(_repo_relative(DEFAULT_SUMMARY))
     refresh_report_label = html.escape(_repo_relative(DEFAULT_REFRESH_REPORT))
     report_index_label = html.escape(_repo_relative(DEFAULT_REPORT_INDEX))
@@ -357,6 +362,28 @@ def render_generated_sections(
                 _render_category_row(model, results, category_columns=category_columns)
                 for model in [summary.model for summary in model_summaries]
             ),
+            "      </tbody>",
+            "    </table>",
+            "",
+            "    <h2>Report Links</h2>",
+            "    <table>",
+            "      <thead><tr><th>Artifact</th><th>Hosted Link</th><th>Local Source</th></tr></thead>",
+            "      <tbody>",
+            "        <tr>"
+            "<td>Combined full-35 report</td>"
+            f"<td><a href=\"{hosted_combined_report_url}\">{hosted_combined_report_url}</a></td>"
+            f"<td><code>{report_label}</code></td>"
+            "</tr>",
+            "        <tr>"
+            "<td>Generated report index</td>"
+            f"<td><a href=\"{hosted_report_index_url}\">{hosted_report_index_url}</a></td>"
+            f"<td><code>{report_index_label}</code></td>"
+            "</tr>",
+            "        <tr>"
+            "<td>Machine-readable report map</td>"
+            f"<td><a href=\"{hosted_report_links_url}\">{hosted_report_links_url}</a></td>"
+            f"<td><code>{report_links_label}</code></td>"
+            "</tr>",
             "      </tbody>",
             "    </table>",
             (

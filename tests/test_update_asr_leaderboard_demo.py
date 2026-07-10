@@ -258,6 +258,11 @@ def test_render_generated_sections_summarizes_verified_asr_results(tmp_path: Pat
     assert "Generated Artifacts" in html
     assert "Validate seed manifest" in html
     assert "Discover latest complete runs" in html
+    assert "Report Links" in html
+    assert "Combined full-35 report" in html
+    assert "https://kennethli319.github.io/open-audio-judge/asr-leaderboard/full-35-combined/report.html" in html
+    assert "Generated report index" in html
+    assert "Machine-readable report map" in html
     assert "--discover-complete-model-runs" in html
     assert "scripts/validate_asr_seed_manifest.py" in html
     assert "Check generated page" in html
