@@ -155,7 +155,7 @@
       "sha256": "a5778b6eae4dde59aae0c1af281c880c2940904739b2f11e6f0e7ac45f78d9dc"
     },
     {
-      "bytes": 19152,
+      "bytes": 23629,
       "digest_status": "ok",
       "exists": true,
       "hosted_paths": [
@@ -163,7 +163,7 @@
       ],
       "path": "docs/asr-leaderboard-report-bundle.json",
       "purpose": "Single machine-readable entry point for ASR report URLs, source reports, and refresh provenance.",
-      "sha256": "e2761da337b4a2ac8359cea1405d6e90ab0a70c63b15c8f18fb3dae6cf27b31a"
+      "sha256": "da045962613af3fbbcfbcb231b604d983b386093f80af628b5f45ab9bdf2d620"
     },
     {
       "bytes": 11105,

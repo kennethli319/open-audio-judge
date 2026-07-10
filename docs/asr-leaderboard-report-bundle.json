@@ -1,4 +1,132 @@
 {
+  "automation": {
+    "automation_stages": [
+      {
+        "command_keys": [
+          "cron_rehearsal_command",
+          "runtime_ready_check_command"
+        ],
+        "description": "Validate committed result sources, generated artifacts, audio readiness, and MLX runtime status; cron rehearsal may refresh runtime, decision, and handoff artifacts.",
+        "runs_live_models": false,
+        "stage": "preflight",
+        "writes_committed_artifacts": true
+      },
+      {
+        "command_keys": [
+          "local_secret_env_command",
+          "model_run_commands"
+        ],
+        "description": "Run primary MLX ASR models with Gemini judging only when the runtime gate reports ready.",
+        "runs_live_models": true,
+        "stage": "live_refresh",
+        "writes_committed_artifacts": false
+      },
+      {
+        "command_keys": [
+          "discover_refresh_command",
+          "combine_refresh_command",
+          "manifest_refresh_command"
+        ],
+        "description": "Rebuild the combined report, generated demo page block, summary JSON, report links, and source manifest from verified result files.",
+        "runs_live_models": false,
+        "stage": "artifact_refresh",
+        "writes_committed_artifacts": true
+      },
+      {
+        "command_keys": [
+          "page_validation_command",
+          "freshness_check_command",
+          "commit_verification_command",
+          "cron_commit_verification_command"
+        ],
+        "description": "Check page structure, generated freshness, test suite, and non-secret commit readiness before pushing.",
+        "runs_live_models": false,
+        "stage": "verification",
+        "writes_committed_artifacts": false
+      },
+      {
+        "command_keys": [
+          "hosted_artifact_command",
+          "hosted_validation_command",
+          "hosted_status_command",
+          "hosted_commit_verification_command"
+        ],
+        "description": "Copy verified generated artifacts into the Pages checkout only after local artifacts change.",
+        "requires_env_var": "ASR_LEADERBOARD_HOSTED_DIR",
+        "runs_live_models": false,
+        "stage": "hosted_sync",
+        "writes_committed_artifacts": false
+      }
+    ],
+    "commands": {
+      "commit_verification": [
+        ".venv/bin/python",
+        "scripts/verify_asr_leaderboard_commit.py"
+      ],
+      "cron_rehearsal": [
+        ".venv/bin/python",
+        "scripts/refresh_asr_leaderboard_artifacts.py",
+        "--check-only",
+        "--require-generated-fresh",
+        "--require-audio-ready",
+        "--check-mlx-runtime",
+        "--check-summary-out",
+        "runs/asr-leaderboard/preflight-summary.json"
+      ],
+      "discover_refresh": [
+        ".venv/bin/python",
+        "scripts/refresh_asr_leaderboard_artifacts.py",
+        "--discover-complete-model-runs",
+        "--update-run-manifest",
+        "--source-selection-summary-out",
+        "docs/asr-leaderboard-source-selection.json"
+      ],
+      "freshness_check": [
+        ".venv/bin/python",
+        "scripts/refresh_asr_leaderboard_artifacts.py",
+        "--check-only",
+        "--require-generated-fresh"
+      ],
+      "hosted_sync": [
+        ".venv/bin/python",
+        "scripts/refresh_asr_leaderboard_artifacts.py",
+        "--hosted-dir-from-env"
+      ],
+      "hosted_validation": [
+        ".venv/bin/python",
+        "scripts/refresh_asr_leaderboard_artifacts.py",
+        "--check-only",
+        "--hosted-dir-from-env",
+        "--require-hosted-current"
+      ],
+      "live_refresh_script": [
+        "bash",
+        "docs/asr-leaderboard-live-refresh.sh"
+      ],
+      "manifest_refresh": [
+        ".venv/bin/python",
+        "scripts/refresh_asr_leaderboard_artifacts.py",
+        "--source-selection-summary-out",
+        "docs/asr-leaderboard-source-selection.json"
+      ],
+      "page_validation": [
+        ".venv/bin/python",
+        "scripts/check_asr_leaderboard_page.py"
+      ],
+      "preflight": [
+        ".venv/bin/python",
+        "scripts/refresh_asr_leaderboard_artifacts.py",
+        "--check-only",
+        "--require-generated-fresh",
+        "--require-audio-ready",
+        "--check-summary-out",
+        "runs/asr-leaderboard/preflight-summary.json"
+      ]
+    },
+    "live_refresh_script_path": "docs/asr-leaderboard-live-refresh.sh",
+    "refresh_commands_path": "docs/asr-leaderboard-refresh-commands.sh",
+    "refresh_workflow_path": "docs/asr-leaderboard-refresh-workflow.json"
+  },
   "combined_report": {
     "hosted_report_url": "https://kennethli319.github.io/open-audio-judge/asr-leaderboard/full-35-combined/report.html",
     "hosted_results_url": "https://kennethli319.github.io/open-audio-judge/asr-leaderboard/full-35-combined/results.jsonl",
@@ -391,5 +519,5 @@
     }
   ],
   "status": "complete",
-  "version": 1
+  "version": 2
 }

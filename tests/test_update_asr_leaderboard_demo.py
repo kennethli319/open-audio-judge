@@ -3682,6 +3682,34 @@ def test_check_asr_leaderboard_page_validates_generated_artifacts(tmp_path: Path
         report_index_out=report_index,
         report_links_out=report_links,
     )
+    report_bundle_data = json.loads(report_bundle.read_text(encoding="utf-8"))
+    assert report_bundle_data["version"] == 2
+    assert report_bundle_data["automation"]["refresh_commands_path"] == (
+        "docs/asr-leaderboard-refresh-commands.sh"
+    )
+    assert report_bundle_data["automation"]["refresh_workflow_path"] == (
+        "docs/asr-leaderboard-refresh-workflow.json"
+    )
+    assert report_bundle_data["automation"]["commands"]["preflight"] == [
+        ".venv/bin/python",
+        "scripts/refresh_asr_leaderboard_artifacts.py",
+        "--check-only",
+        "--require-generated-fresh",
+        "--require-audio-ready",
+        "--check-summary-out",
+        "runs/asr-leaderboard/preflight-summary.json",
+    ]
+    assert report_bundle_data["automation"]["commands"]["live_refresh_script"] == [
+        "bash",
+        "docs/asr-leaderboard-live-refresh.sh",
+    ]
+    assert [stage["stage"] for stage in report_bundle_data["automation"]["automation_stages"]] == [
+        "preflight",
+        "live_refresh",
+        "artifact_refresh",
+        "verification",
+        "hosted_sync",
+    ]
     refresh_commands = tmp_path / "refresh-commands.sh"
     update_module.write_refresh_commands_script(refresh_commands)
     refresh_workflow = tmp_path / "refresh-workflow.json"

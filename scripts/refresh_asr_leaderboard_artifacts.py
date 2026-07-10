@@ -47,6 +47,7 @@ from scripts.update_asr_leaderboard_demo import (  # noqa: E402
     HOSTED_BASE_PATH,
     HOSTED_BASE_URL,
     START_MARKER,
+    _refresh_workflow,
     build_next_run_plan,
     build_model_category_matrix,
     build_output_artifact_index,
@@ -1867,6 +1868,7 @@ def write_report_bundle_artifact(
     models = sorted({str(result.metadata.get("candidate_model") or "") for result in results})
     categories = sorted({str(result.metadata.get("eval_category") or "") for result in results})
     source_summaries = summarize_source_result_files(source_result_paths or [])
+    workflow = _refresh_workflow(source_result_paths or [])
     source_reports = []
     for summary in source_summaries:
         hosted_report_path = (
@@ -1898,7 +1900,7 @@ def write_report_bundle_artifact(
         json.dumps(
             {
                 "description": "Single ASR leaderboard report-bundle manifest for hosted demo automation.",
-                "version": 1,
+                "version": 2,
                 "status": "complete",
                 "hosted_base_url": HOSTED_BASE_URL,
                 "demo_page": {
@@ -1928,6 +1930,24 @@ def write_report_bundle_artifact(
                 "report_links": {
                     "path": _repo_relative(report_links_out),
                     "hosted_url": f"{HOSTED_BASE_URL}/{report_links_out.name}",
+                },
+                "automation": {
+                    "refresh_commands_path": _repo_relative(DEFAULT_REFRESH_COMMANDS),
+                    "refresh_workflow_path": _repo_relative(DEFAULT_REFRESH_WORKFLOW),
+                    "live_refresh_script_path": _repo_relative(DEFAULT_LIVE_REFRESH_SCRIPT),
+                    "automation_stages": workflow["automation_stages"],
+                    "commands": {
+                        "preflight": workflow["full_preflight_command"],
+                        "cron_rehearsal": workflow["cron_rehearsal_command"],
+                        "manifest_refresh": workflow["manifest_refresh_command"],
+                        "discover_refresh": workflow["discover_refresh_command"],
+                        "page_validation": workflow["page_validation_command"],
+                        "freshness_check": workflow["freshness_check_command"],
+                        "commit_verification": workflow["commit_verification_command"],
+                        "hosted_sync": workflow["hosted_artifact_command"],
+                        "hosted_validation": workflow["hosted_validation_command"],
+                        "live_refresh_script": ["bash", _repo_relative(DEFAULT_LIVE_REFRESH_SCRIPT)],
+                    },
                 },
                 "coverage": {
                     "total_results": len(results),
