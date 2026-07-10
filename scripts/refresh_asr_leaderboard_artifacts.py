@@ -655,9 +655,23 @@ def format_check_summary_message(summary: dict[str, object]) -> str:
             f"{summary['hosted_path_count']} paths."
         )
     if "runtime_ready" in summary:
-        runtime_label = "ready" if summary["runtime_ready"] else "blocked"
+        live_refresh_required = False
+        refresh_decision = summary.get("refresh_decision")
+        if isinstance(refresh_decision, dict):
+            live_refresh_required = bool(refresh_decision.get("live_refresh_required"))
+        runtime_label = (
+            "ready"
+            if summary["runtime_ready"]
+            else "blocked"
+            if live_refresh_required
+            else "not required"
+        )
         message += f" Runtime: {runtime_label}."
-        if not summary["runtime_ready"] and summary.get("runtime_ready_issue"):
+        if (
+            not summary["runtime_ready"]
+            and live_refresh_required
+            and summary.get("runtime_ready_issue")
+        ):
             message += f" Runtime issue: {summary['runtime_ready_issue']}"
     refresh_decision = summary.get("refresh_decision")
     if isinstance(refresh_decision, dict) and refresh_decision.get("action"):

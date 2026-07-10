@@ -2660,6 +2660,11 @@ def test_format_check_summary_message_reports_blocked_runtime_issue() -> None:
         "hosted_path_count": 18,
         "runtime_ready": False,
         "runtime_ready_issue": "mlx_runtime_preflight status is blocked",
+        "refresh_decision": {
+            "action": "run_live_refresh",
+            "live_refresh_required": True,
+            "reason": "1 model/category cell is missing.",
+        },
     }
 
     message = refresh_module.format_check_summary_message(summary)
@@ -2667,7 +2672,33 @@ def test_format_check_summary_message_reports_blocked_runtime_issue() -> None:
     assert message == (
         "ASR refresh preflight OK: 105 results, 3 models, 7 categories, "
         "18 source files. Hosted mirror: complete. Hosted artifacts: 16 sources, "
-        "18 paths. Runtime: blocked. Runtime issue: mlx_runtime_preflight status is blocked"
+        "18 paths. Runtime: blocked. Runtime issue: mlx_runtime_preflight status is blocked "
+        "Decision: run_live_refresh. Reason: 1 model/category cell is missing."
+    )
+
+
+def test_format_check_summary_message_reports_runtime_not_required_when_coverage_complete() -> None:
+    refresh_module = load_refresh_module()
+    summary = {
+        "total_results": 105,
+        "model_count": 3,
+        "category_count": 7,
+        "result_file_count": 18,
+        "runtime_ready": False,
+        "runtime_ready_issue": "gemini_secret status is missing",
+        "refresh_decision": {
+            "action": "skip_live_refresh",
+            "live_refresh_required": False,
+            "reason": "The selected ASR result bundle already covers every model/category cell.",
+        },
+    }
+
+    message = refresh_module.format_check_summary_message(summary)
+
+    assert message == (
+        "ASR refresh preflight OK: 105 results, 3 models, 7 categories, "
+        "18 source files. Runtime: not required. Decision: skip_live_refresh. "
+        "Reason: The selected ASR result bundle already covers every model/category cell."
     )
 
 
