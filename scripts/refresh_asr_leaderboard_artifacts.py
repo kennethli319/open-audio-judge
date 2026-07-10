@@ -381,11 +381,6 @@ def main() -> None:
             )
             write_refresh_decision_data(args.refresh_decision_out, refresh_decision)
             write_next_action_artifact(args.next_action_out, refresh_decision)
-            write_cron_status_artifact(
-                args.cron_status_out,
-                decision=refresh_decision,
-                check_summary=check_summary,
-            )
             enrich_check_summary_with_runtime_status(
                 check_summary,
                 runtime_status=runtime_status,
@@ -397,6 +392,11 @@ def main() -> None:
             check_summary["refresh_decision"] = refresh_decision
             check_summary["next_action_path"] = _repo_relative(args.next_action_out)
             check_summary["cron_status_path"] = _repo_relative(args.cron_status_out)
+            write_cron_status_artifact(
+                args.cron_status_out,
+                decision=refresh_decision,
+                check_summary=check_summary,
+            )
             if args.require_runtime_ready:
                 _validate_runtime_ready(runtime_status)
         write_optional_source_selection_summary(
@@ -1891,6 +1891,7 @@ def _hosted_paths_for_artifact(
             "asr-leaderboard-refresh-decision.json"
         ],
         "docs/asr-leaderboard-next-action.md": ["asr-leaderboard-next-action.md"],
+        "docs/asr-leaderboard-cron-status.json": ["asr-leaderboard-cron-status.json"],
         _repo_relative(results_path): ["asr-leaderboard/full-35-combined/results.jsonl"],
         _repo_relative(report_path): ["asr-leaderboard/full-35-combined/report.html"],
     }
@@ -2448,8 +2449,32 @@ def write_cron_status_artifact(
             "next_action": _repo_relative(DEFAULT_NEXT_ACTION),
         },
     }
+    if check_summary is not None:
+        data["preflight_summary"] = _compact_cron_preflight_summary(check_summary)
     output_path.parent.mkdir(parents=True, exist_ok=True)
     output_path.write_text(json.dumps(data, indent=2, sort_keys=True) + "\n", encoding="utf-8")
+
+
+def _compact_cron_preflight_summary(summary: dict[str, object]) -> dict[str, object]:
+    fields = (
+        "status",
+        "total_results",
+        "model_count",
+        "category_count",
+        "result_file_count",
+        "seed_manifest_status",
+        "audio_manifest_status",
+        "page_status",
+        "hosted_page_status",
+        "hosted_current_status",
+        "runtime_ready",
+        "runtime_ready_issue",
+    )
+    return {
+        field: summary[field]
+        for field in fields
+        if field in summary
+    }
 
 
 def build_refresh_decision_artifact_data(

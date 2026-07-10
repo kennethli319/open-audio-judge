@@ -1611,6 +1611,9 @@ def test_refresh_asr_leaderboard_artifacts_combines_report_and_page(tmp_path: Pa
     assert hosted_paths_by_artifact[str(second.with_name("report.html"))] == [
         f"asr-leaderboard/source-reports/{tmp_path.name}/report.html"
     ]
+    assert hosted_paths_by_artifact["docs/asr-leaderboard-cron-status.json"] == [
+        "asr-leaderboard-cron-status.json"
+    ]
     hosted_manifest_data = json.loads(hosted_manifest.read_text(encoding="utf-8"))
     assert hosted_manifest_data["artifact_count"] == 22
     assert {"asr-leaderboard/full-35-combined/results.jsonl"} in [
@@ -2030,6 +2033,17 @@ def test_check_only_runtime_preflight_writes_refresh_decision(
     assert cron_status["action"] == "skip_live_refresh"
     assert cron_status["coverage_complete"] is True
     assert cron_status["runtime_ready"] == "not_required"
+    assert cron_status["preflight_summary"] == {
+        "status": "complete",
+        "total_results": 105,
+        "model_count": 3,
+        "category_count": 7,
+        "result_file_count": 18,
+        "seed_manifest_status": "complete",
+        "audio_manifest_status": "complete",
+        "page_status": "complete",
+        "runtime_ready": True,
+    }
     assert "Action: skip_live_refresh." in next_action_out.read_text(encoding="utf-8")
     assert "Decision: skip_live_refresh." in refresh_module.format_check_summary_message(
         check_summary
