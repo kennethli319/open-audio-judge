@@ -40,6 +40,7 @@ from scripts.update_asr_leaderboard_demo import (  # noqa: E402
     DEFAULT_NEXT_ACTION,
     DEFAULT_CRON_STATUS,
     DEFAULT_CRON_HANDOFF,
+    DEFAULT_BUNDLE_STATUS,
     END_MARKER,
     GEMINI_SECRET_ENV_VAR,
     HOSTED_BASE_PATH,
@@ -204,6 +205,12 @@ def main() -> None:
         type=Path,
         default=DEFAULT_CRON_HANDOFF,
         help="Write a human-readable cron handoff summary for scheduled ASR refreshes.",
+    )
+    parser.add_argument(
+        "--bundle-status-out",
+        type=Path,
+        default=DEFAULT_BUNDLE_STATUS,
+        help="Write a compact machine-readable status digest for the ASR artifact bundle.",
     )
     parser.add_argument(
         "--check-mlx-runtime",
@@ -481,6 +488,7 @@ def main() -> None:
         next_action_out=args.next_action_out,
         cron_status_out=args.cron_status_out,
         cron_handoff_out=args.cron_handoff_out,
+        bundle_status_out=args.bundle_status_out,
         source_selection_summary_out=args.source_selection_summary_out,
         run_manifest=args.run_manifest,
         update_run_manifest=args.update_run_manifest,
@@ -580,6 +588,7 @@ def check_asr_leaderboard_refresh_inputs(
             artifact_index_out=DEFAULT_ARTIFACT_INDEX,
             runtime_status_out=DEFAULT_RUNTIME_STATUS,
             refresh_decision_out=DEFAULT_REFRESH_DECISION,
+            bundle_status_out=DEFAULT_BUNDLE_STATUS,
             source_selection_summary_out=DEFAULT_SOURCE_SELECTION_SUMMARY,
             generated=generated,
             combined_results_path=DEFAULT_COMBINED_OUT / "results.jsonl",
@@ -815,6 +824,7 @@ def _validate_generated_artifacts_fresh(
     next_action_out: Path | None = None,
     cron_status_out: Path | None = None,
     cron_handoff_out: Path | None = None,
+    bundle_status_out: Path | None = None,
     source_selection_summary_out: Path | None = None,
     generated: str,
     expected_cases_per_model: int,
@@ -828,6 +838,8 @@ def _validate_generated_artifacts_fresh(
         cron_status_out = artifact_index_out.with_name(DEFAULT_CRON_STATUS.name)
     if cron_handoff_out is None and artifact_index_out is not None:
         cron_handoff_out = artifact_index_out.with_name(DEFAULT_CRON_HANDOFF.name)
+    if bundle_status_out is None and artifact_index_out is not None:
+        bundle_status_out = artifact_index_out.with_name(DEFAULT_BUNDLE_STATUS.name)
     existing_generated = _extract_generated_block(page)
     if existing_generated != generated:
         raise ValueError(
@@ -945,6 +957,7 @@ def _validate_generated_artifacts_fresh(
                 next_action_out=next_action_out or DEFAULT_NEXT_ACTION,
                 cron_status_out=cron_status_out or DEFAULT_CRON_STATUS,
                 cron_handoff_out=cron_handoff_out or DEFAULT_CRON_HANDOFF,
+                bundle_status_out=bundle_status_out or DEFAULT_BUNDLE_STATUS,
                 source_selection_summary_out=(
                     source_selection_summary_out or DEFAULT_SOURCE_SELECTION_SUMMARY
                 ),
@@ -993,6 +1006,7 @@ def _validate_generated_artifacts_fresh(
                         next_action_out=next_action_out or DEFAULT_NEXT_ACTION,
                         cron_status_out=cron_status_out or DEFAULT_CRON_STATUS,
                         cron_handoff_out=cron_handoff_out or DEFAULT_CRON_HANDOFF,
+                        bundle_status_out=bundle_status_out or DEFAULT_BUNDLE_STATUS,
                         source_selection_summary_out=(
                             source_selection_summary_out or DEFAULT_SOURCE_SELECTION_SUMMARY
                         ),
@@ -1076,6 +1090,19 @@ def _validate_generated_artifacts_fresh(
                     decision=expected_refresh_decision_data,
                 )
                 _compare_generated_text_artifact(cron_handoff_out, expected_cron_handoff)
+        if bundle_status_out is not None and artifact_index_out is not None:
+            expected_bundle_status = tmp_dir / bundle_status_out.name
+            write_bundle_status_artifact(
+                expected_bundle_status,
+                artifact_index_out=artifact_index_out,
+                hosted_manifest_out=hosted_manifest_out or DEFAULT_HOSTED_MANIFEST,
+                runtime_status_out=runtime_status_out or DEFAULT_RUNTIME_STATUS,
+                refresh_decision_out=refresh_decision_out or DEFAULT_REFRESH_DECISION,
+                cron_status_out=cron_status_out or DEFAULT_CRON_STATUS,
+                results_path=combined_results_path,
+                expected_cases_per_model=expected_cases_per_model,
+            )
+            _compare_generated_text_artifact(bundle_status_out, expected_bundle_status)
 
 
 def _compare_generated_text_artifact(actual_path: Path, expected_path: Path) -> None:
@@ -1157,6 +1184,7 @@ def refresh_asr_leaderboard_artifacts(
     next_action_out: Path | None = None,
     cron_status_out: Path | None = None,
     cron_handoff_out: Path | None = None,
+    bundle_status_out: Path | None = None,
     source_selection_summary_out: Path = DEFAULT_SOURCE_SELECTION_SUMMARY,
     refresh_workflow_out: Path | None = None,
     hosted_dir: Path | None = None,
@@ -1173,6 +1201,7 @@ def refresh_asr_leaderboard_artifacts(
     next_action_out = next_action_out or artifact_index_out.with_name(DEFAULT_NEXT_ACTION.name)
     cron_status_out = cron_status_out or artifact_index_out.with_name(DEFAULT_CRON_STATUS.name)
     cron_handoff_out = cron_handoff_out or artifact_index_out.with_name(DEFAULT_CRON_HANDOFF.name)
+    bundle_status_out = bundle_status_out or artifact_index_out.with_name(DEFAULT_BUNDLE_STATUS.name)
     refresh_workflow_out = refresh_workflow_out or refresh_commands_out.with_name(
         DEFAULT_REFRESH_WORKFLOW.name
     )
@@ -1303,9 +1332,20 @@ def refresh_asr_leaderboard_artifacts(
         next_action_out=next_action_out,
         cron_status_out=cron_status_out,
         cron_handoff_out=cron_handoff_out,
+        bundle_status_out=bundle_status_out,
         source_selection_summary_out=source_selection_summary_out,
         expected_cases_per_model=expected_cases_per_model,
         source_result_paths=result_paths,
+    )
+    write_bundle_status_artifact(
+        bundle_status_out,
+        artifact_index_out=artifact_index_out,
+        hosted_manifest_out=hosted_manifest_out,
+        runtime_status_out=runtime_status_out,
+        refresh_decision_out=refresh_decision_out,
+        cron_status_out=cron_status_out,
+        results_path=combined_results_path,
+        expected_cases_per_model=expected_cases_per_model,
     )
     write_hosted_manifest_artifact(
         hosted_manifest_out,
@@ -1327,6 +1367,7 @@ def refresh_asr_leaderboard_artifacts(
         next_action_out=next_action_out,
         cron_status_out=cron_status_out,
         cron_handoff_out=cron_handoff_out,
+        bundle_status_out=bundle_status_out,
         source_selection_summary_out=source_selection_summary_out,
         combined_results_path=combined_results_path,
         combined_report_path=combined_report_path,
@@ -1354,6 +1395,7 @@ def refresh_asr_leaderboard_artifacts(
             next_action_out=next_action_out,
             cron_status_out=cron_status_out,
             cron_handoff_out=cron_handoff_out,
+            bundle_status_out=bundle_status_out,
             source_selection_summary_out=source_selection_summary_out,
             combined_results_path=combined_results_path,
             combined_report_path=combined_report_path,
@@ -1394,6 +1436,7 @@ def refresh_asr_leaderboard_artifacts(
     print(f"Next action: {next_action_out}")
     print(f"Cron status: {cron_status_out}")
     print(f"Cron handoff: {cron_handoff_out}")
+    print(f"Bundle status: {bundle_status_out}")
     for copied_path in copied_hosted_paths:
         print(f"Hosted:  {copied_path}")
 
@@ -1481,6 +1524,7 @@ def copy_hosted_asr_artifacts(
     next_action_out: Path = DEFAULT_NEXT_ACTION,
     cron_status_out: Path = DEFAULT_CRON_STATUS,
     cron_handoff_out: Path = DEFAULT_CRON_HANDOFF,
+    bundle_status_out: Path = DEFAULT_BUNDLE_STATUS,
     source_selection_summary_out: Path = DEFAULT_SOURCE_SELECTION_SUMMARY,
     combined_results_path: Path | None = None,
     combined_report_path: Path | None = None,
@@ -1511,6 +1555,7 @@ def copy_hosted_asr_artifacts(
         (next_action_out, {next_action_out.name, DEFAULT_NEXT_ACTION.name}),
         (cron_status_out, {cron_status_out.name, DEFAULT_CRON_STATUS.name}),
         (cron_handoff_out, {cron_handoff_out.name, DEFAULT_CRON_HANDOFF.name}),
+        (bundle_status_out, {bundle_status_out.name, DEFAULT_BUNDLE_STATUS.name}),
         (
             source_selection_summary_out,
             {source_selection_summary_out.name, DEFAULT_SOURCE_SELECTION_SUMMARY.name},
@@ -1569,6 +1614,7 @@ def write_hosted_manifest_artifact(
     next_action_out: Path = DEFAULT_NEXT_ACTION,
     cron_status_out: Path = DEFAULT_CRON_STATUS,
     cron_handoff_out: Path = DEFAULT_CRON_HANDOFF,
+    bundle_status_out: Path = DEFAULT_BUNDLE_STATUS,
     source_selection_summary_out: Path = DEFAULT_SOURCE_SELECTION_SUMMARY,
     combined_results_path: Path,
     combined_report_path: Path,
@@ -1597,6 +1643,7 @@ def write_hosted_manifest_artifact(
         (next_action_out, {next_action_out.name, DEFAULT_NEXT_ACTION.name}),
         (cron_status_out, {cron_status_out.name, DEFAULT_CRON_STATUS.name}),
         (cron_handoff_out, {cron_handoff_out.name, DEFAULT_CRON_HANDOFF.name}),
+        (bundle_status_out, {bundle_status_out.name, DEFAULT_BUNDLE_STATUS.name}),
         (
             source_selection_summary_out,
             {source_selection_summary_out.name, DEFAULT_SOURCE_SELECTION_SUMMARY.name},
@@ -1680,6 +1727,7 @@ def write_artifact_index(
     next_action_out: Path | None = None,
     cron_status_out: Path | None = None,
     cron_handoff_out: Path | None = None,
+    bundle_status_out: Path | None = None,
     live_refresh_script_out: Path | None = None,
     refresh_workflow_out: Path | None = None,
     source_selection_summary_out: Path | None = None,
@@ -1712,6 +1760,7 @@ def write_artifact_index(
                 next_action_out=next_action_out,
                 cron_status_out=cron_status_out,
                 cron_handoff_out=cron_handoff_out,
+                bundle_status_out=bundle_status_out,
                 source_selection_summary_out=source_selection_summary_out,
                 source_result_paths=source_result_paths,
             ),
@@ -1721,6 +1770,106 @@ def write_artifact_index(
         + "\n",
         encoding="utf-8",
     )
+
+
+def write_bundle_status_artifact(
+    output_path: Path,
+    *,
+    artifact_index_out: Path,
+    hosted_manifest_out: Path,
+    runtime_status_out: Path,
+    refresh_decision_out: Path,
+    cron_status_out: Path,
+    results_path: Path,
+    expected_cases_per_model: int,
+) -> None:
+    artifact_index = json.loads(artifact_index_out.read_text(encoding="utf-8"))
+    runtime_status = json.loads(runtime_status_out.read_text(encoding="utf-8"))
+    refresh_decision = json.loads(refresh_decision_out.read_text(encoding="utf-8"))
+    cron_status = json.loads(cron_status_out.read_text(encoding="utf-8"))
+
+    artifact_records = artifact_index.get("artifacts", [])
+    if not isinstance(artifact_records, list):
+        raise ValueError(f"{artifact_index_out} artifacts must be a list.")
+    hosted_path_count = sum(
+        len(record.get("hosted_paths", []))
+        for record in artifact_records
+        if isinstance(record, dict) and isinstance(record.get("hosted_paths"), list)
+    )
+    digest_status_counts = Counter(
+        str(record.get("digest_status"))
+        for record in artifact_records
+        if isinstance(record, dict)
+    )
+    missing_paths = [
+        str(record.get("path"))
+        for record in artifact_records
+        if isinstance(record, dict) and not record.get("exists")
+    ]
+
+    output_path.parent.mkdir(parents=True, exist_ok=True)
+    output_path.write_text(
+        json.dumps(
+            {
+                "description": "Compact ASR leaderboard artifact-bundle status for cron and hosted checks.",
+                "version": 1,
+                "status": "complete" if not missing_paths else "incomplete",
+                "results_path": _repo_relative(results_path),
+                "expected_cases_per_model": expected_cases_per_model,
+                "total_results": artifact_index.get("total_results"),
+                "model_count": artifact_index.get("model_count"),
+                "category_count": artifact_index.get("category_count"),
+                "artifact_index_path": _generated_artifact_label(
+                    artifact_index_out,
+                    DEFAULT_ARTIFACT_INDEX,
+                ),
+                "artifact_count": len(artifact_records),
+                "digest_status_counts": dict(sorted(digest_status_counts.items())),
+                "missing_artifact_count": len(missing_paths),
+                "missing_artifact_paths": missing_paths,
+                "hosted_manifest_path": _generated_artifact_label(
+                    hosted_manifest_out,
+                    DEFAULT_HOSTED_MANIFEST,
+                ),
+                "hosted_artifact_count": sum(
+                    1
+                    for record in artifact_records
+                    if isinstance(record, dict) and record.get("hosted_paths")
+                ),
+                "hosted_path_count": hosted_path_count,
+                "runtime_status_path": _generated_artifact_label(
+                    runtime_status_out,
+                    DEFAULT_RUNTIME_STATUS,
+                ),
+                "mlx_runtime_status": runtime_status.get("mlx_asr"),
+                "gemini_status": runtime_status.get("gemini_judge"),
+                "live_model_calls": runtime_status.get("live_model_calls"),
+                "refresh_decision_path": _generated_artifact_label(
+                    refresh_decision_out,
+                    DEFAULT_REFRESH_DECISION,
+                ),
+                "refresh_action": refresh_decision.get("action"),
+                "live_refresh_required": refresh_decision.get("live_refresh_required"),
+                "cron_status_path": _generated_artifact_label(cron_status_out, DEFAULT_CRON_STATUS),
+                "cron_action": cron_status.get("action"),
+                "verification_commands": artifact_index.get("verification", {}).get(
+                    "non_secret_verification_commands",
+                    [],
+                ),
+                "secret_policy": "Gemini secrets are runtime-only and must not be stored in artifacts.",
+            },
+            indent=2,
+            sort_keys=True,
+        )
+        + "\n",
+        encoding="utf-8",
+    )
+
+
+def _generated_artifact_label(path: Path, default_path: Path) -> str:
+    if path.name == default_path.name:
+        return _repo_relative(default_path)
+    return _repo_relative(path)
 
 
 def build_artifact_index_data(
@@ -1747,6 +1896,7 @@ def build_artifact_index_data(
     next_action_out: Path | None = None,
     cron_status_out: Path | None = None,
     cron_handoff_out: Path | None = None,
+    bundle_status_out: Path | None = None,
     live_refresh_script_out: Path | None = None,
     source_selection_summary_out: Path | None = None,
     source_result_paths: list[Path] | None = None,
@@ -1760,6 +1910,7 @@ def build_artifact_index_data(
     next_action_out = next_action_out or output_path.with_name(DEFAULT_NEXT_ACTION.name)
     cron_status_out = cron_status_out or output_path.with_name(DEFAULT_CRON_STATUS.name)
     cron_handoff_out = cron_handoff_out or output_path.with_name(DEFAULT_CRON_HANDOFF.name)
+    bundle_status_out = bundle_status_out or output_path.with_name(DEFAULT_BUNDLE_STATUS.name)
     live_refresh_script_out = live_refresh_script_out or refresh_commands_out.with_name(
         DEFAULT_LIVE_REFRESH_SCRIPT.name
     )
@@ -1788,6 +1939,7 @@ def build_artifact_index_data(
         _repo_relative(next_action_out): next_action_out,
         _repo_relative(cron_status_out): cron_status_out,
         _repo_relative(cron_handoff_out): cron_handoff_out,
+        _repo_relative(bundle_status_out): bundle_status_out,
         _repo_relative(source_selection_summary_out): source_selection_summary_out,
         _repo_relative(output_path): output_path,
         _repo_relative(DEFAULT_SUMMARY): summary_out,
@@ -1808,6 +1960,7 @@ def build_artifact_index_data(
         _repo_relative(DEFAULT_NEXT_ACTION): next_action_out,
         _repo_relative(DEFAULT_CRON_STATUS): cron_status_out,
         _repo_relative(DEFAULT_CRON_HANDOFF): cron_handoff_out,
+        _repo_relative(DEFAULT_BUNDLE_STATUS): bundle_status_out,
         _repo_relative(DEFAULT_SOURCE_SELECTION_SUMMARY): source_selection_summary_out,
     }
     for source_result_path in source_result_paths or []:
@@ -1842,7 +1995,7 @@ def build_artifact_index_data(
     records = []
     for raw_path in sorted(indexed_paths):
         path = artifact_paths.get(raw_path, ROOT / raw_path)
-        is_generated_after_index = path in {output_path, hosted_manifest_out}
+        is_generated_after_index = path in {output_path, hosted_manifest_out, bundle_status_out}
         is_stable_alias = raw_path != _repo_relative(path)
         digest_status = "ok"
         if is_generated_after_index:
@@ -1996,6 +2149,7 @@ def _hosted_paths_for_artifact(
         "docs/asr-leaderboard-next-action.md": ["asr-leaderboard-next-action.md"],
         "docs/asr-leaderboard-cron-status.json": ["asr-leaderboard-cron-status.json"],
         "docs/asr-leaderboard-cron-handoff.md": ["asr-leaderboard-cron-handoff.md"],
+        "docs/asr-leaderboard-bundle-status.json": ["asr-leaderboard-bundle-status.json"],
         _repo_relative(results_path): ["asr-leaderboard/full-35-combined/results.jsonl"],
         _repo_relative(report_path): ["asr-leaderboard/full-35-combined/report.html"],
     }

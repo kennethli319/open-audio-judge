@@ -24,6 +24,7 @@ This generated report summarizes the verified ASR leaderboard artifact set.
 - Runtime status: `docs/asr-leaderboard-runtime-status.json`
 - Cron status: `docs/asr-leaderboard-cron-status.json`
 - Cron handoff: `docs/asr-leaderboard-cron-handoff.md`
+- Bundle status: `docs/asr-leaderboard-bundle-status.json`
 - Total judged transcripts: 105
 - Models: 3
 - Categories: 7
@@ -132,6 +133,7 @@ This generated report summarizes the verified ASR leaderboard artifact set.
 | `docs/asr-leaderboard-cron-status.json` | Compact machine-readable cron handoff with action, coverage, and runtime gate status. |
 | `docs/asr-leaderboard-cron-handoff.md` | Human-readable cron handoff summary for scheduled ASR refresh turns. |
 | `docs/asr-leaderboard-source-selection.json` | Machine-readable record of selected ASR source result files for the last refresh. |
+| `docs/asr-leaderboard-bundle-status.json` | Compact digest of ASR leaderboard artifact, hosted, runtime, and decision status. |
 
 ## Refresh Commands
 

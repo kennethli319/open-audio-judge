@@ -1,6 +1,7 @@
 {
   "artifact_index_path": "docs/asr-leaderboard-artifacts.json",
   "benchmark_index_url": "https://kennethli319.github.io/audio-benchmark-index/",
+  "bundle_status_path": "docs/asr-leaderboard-bundle-status.json",
   "categories": [
     {
       "average_score": 94.6,
@@ -291,6 +292,10 @@
     {
       "path": "docs/asr-leaderboard-source-selection.json",
       "purpose": "Machine-readable record of selected ASR source result files for the last refresh."
+    },
+    {
+      "path": "docs/asr-leaderboard-bundle-status.json",
+      "purpose": "Compact digest of ASR leaderboard artifact, hosted, runtime, and decision status."
     }
   ],
   "refresh_commands_path": "docs/asr-leaderboard-refresh-commands.sh",
