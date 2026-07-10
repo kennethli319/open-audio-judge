@@ -39,6 +39,7 @@ from scripts.update_asr_leaderboard_demo import (  # noqa: E402
     DEFAULT_NEXT_RUNS,
     DEFAULT_NEXT_ACTION,
     DEFAULT_CRON_STATUS,
+    DEFAULT_CRON_HANDOFF,
     END_MARKER,
     GEMINI_SECRET_ENV_VAR,
     HOSTED_BASE_PATH,
@@ -197,6 +198,12 @@ def main() -> None:
         type=Path,
         default=DEFAULT_CRON_STATUS,
         help="Write a compact machine-readable cron handoff for scheduled ASR refreshes.",
+    )
+    parser.add_argument(
+        "--cron-handoff-out",
+        type=Path,
+        default=DEFAULT_CRON_HANDOFF,
+        help="Write a human-readable cron handoff summary for scheduled ASR refreshes.",
     )
     parser.add_argument(
         "--check-mlx-runtime",
@@ -391,6 +398,11 @@ def main() -> None:
                 if _cli_arg_was_provided(cli_args, "--cron-status-out")
                 else None
             )
+            cron_handoff_out = (
+                args.cron_handoff_out
+                if _cli_arg_was_provided(cli_args, "--cron-handoff-out")
+                else None
+            )
             if refresh_decision_out is not None:
                 write_refresh_decision_data(refresh_decision_out, refresh_decision)
             if next_action_out is not None:
@@ -409,6 +421,13 @@ def main() -> None:
                 check_summary["cron_status_path"] = _repo_relative(cron_status_out)
                 write_cron_status_artifact(
                     cron_status_out,
+                    decision=refresh_decision,
+                    check_summary=check_summary,
+                )
+            if cron_handoff_out is not None:
+                check_summary["cron_handoff_path"] = _repo_relative(cron_handoff_out)
+                write_cron_handoff_artifact(
+                    cron_handoff_out,
                     decision=refresh_decision,
                     check_summary=check_summary,
                 )
@@ -461,6 +480,7 @@ def main() -> None:
         refresh_decision_out=args.refresh_decision_out,
         next_action_out=args.next_action_out,
         cron_status_out=args.cron_status_out,
+        cron_handoff_out=args.cron_handoff_out,
         source_selection_summary_out=args.source_selection_summary_out,
         run_manifest=args.run_manifest,
         update_run_manifest=args.update_run_manifest,
@@ -794,6 +814,7 @@ def _validate_generated_artifacts_fresh(
     refresh_decision_out: Path | None = None,
     next_action_out: Path | None = None,
     cron_status_out: Path | None = None,
+    cron_handoff_out: Path | None = None,
     source_selection_summary_out: Path | None = None,
     generated: str,
     expected_cases_per_model: int,
@@ -805,6 +826,8 @@ def _validate_generated_artifacts_fresh(
         next_action_out = artifact_index_out.with_name(DEFAULT_NEXT_ACTION.name)
     if cron_status_out is None and artifact_index_out is not None:
         cron_status_out = artifact_index_out.with_name(DEFAULT_CRON_STATUS.name)
+    if cron_handoff_out is None and artifact_index_out is not None:
+        cron_handoff_out = artifact_index_out.with_name(DEFAULT_CRON_HANDOFF.name)
     existing_generated = _extract_generated_block(page)
     if existing_generated != generated:
         raise ValueError(
@@ -921,6 +944,7 @@ def _validate_generated_artifacts_fresh(
                 refresh_decision_out=refresh_decision_out or DEFAULT_REFRESH_DECISION,
                 next_action_out=next_action_out or DEFAULT_NEXT_ACTION,
                 cron_status_out=cron_status_out or DEFAULT_CRON_STATUS,
+                cron_handoff_out=cron_handoff_out or DEFAULT_CRON_HANDOFF,
                 source_selection_summary_out=(
                     source_selection_summary_out or DEFAULT_SOURCE_SELECTION_SUMMARY
                 ),
@@ -968,6 +992,7 @@ def _validate_generated_artifacts_fresh(
                         refresh_decision_out=refresh_decision_out or DEFAULT_REFRESH_DECISION,
                         next_action_out=next_action_out or DEFAULT_NEXT_ACTION,
                         cron_status_out=cron_status_out or DEFAULT_CRON_STATUS,
+                        cron_handoff_out=cron_handoff_out or DEFAULT_CRON_HANDOFF,
                         source_selection_summary_out=(
                             source_selection_summary_out or DEFAULT_SOURCE_SELECTION_SUMMARY
                         ),
@@ -1044,6 +1069,13 @@ def _validate_generated_artifacts_fresh(
                     decision=expected_refresh_decision_data,
                 )
                 _compare_generated_text_artifact(cron_status_out, expected_cron_status)
+            if cron_handoff_out is not None:
+                expected_cron_handoff = tmp_dir / cron_handoff_out.name
+                write_cron_handoff_artifact(
+                    expected_cron_handoff,
+                    decision=expected_refresh_decision_data,
+                )
+                _compare_generated_text_artifact(cron_handoff_out, expected_cron_handoff)
 
 
 def _compare_generated_text_artifact(actual_path: Path, expected_path: Path) -> None:
@@ -1124,6 +1156,7 @@ def refresh_asr_leaderboard_artifacts(
     refresh_decision_out: Path | None = None,
     next_action_out: Path | None = None,
     cron_status_out: Path | None = None,
+    cron_handoff_out: Path | None = None,
     source_selection_summary_out: Path = DEFAULT_SOURCE_SELECTION_SUMMARY,
     refresh_workflow_out: Path | None = None,
     hosted_dir: Path | None = None,
@@ -1139,6 +1172,7 @@ def refresh_asr_leaderboard_artifacts(
     )
     next_action_out = next_action_out or artifact_index_out.with_name(DEFAULT_NEXT_ACTION.name)
     cron_status_out = cron_status_out or artifact_index_out.with_name(DEFAULT_CRON_STATUS.name)
+    cron_handoff_out = cron_handoff_out or artifact_index_out.with_name(DEFAULT_CRON_HANDOFF.name)
     refresh_workflow_out = refresh_workflow_out or refresh_commands_out.with_name(
         DEFAULT_REFRESH_WORKFLOW.name
     )
@@ -1245,6 +1279,7 @@ def refresh_asr_leaderboard_artifacts(
     refresh_decision = json.loads(refresh_decision_out.read_text(encoding="utf-8"))
     write_next_action_artifact(next_action_out, refresh_decision)
     write_cron_status_artifact(cron_status_out, decision=refresh_decision)
+    write_cron_handoff_artifact(cron_handoff_out, decision=refresh_decision)
     write_artifact_index(
         artifact_index_out,
         results=combined_results,
@@ -1267,6 +1302,7 @@ def refresh_asr_leaderboard_artifacts(
         refresh_decision_out=refresh_decision_out,
         next_action_out=next_action_out,
         cron_status_out=cron_status_out,
+        cron_handoff_out=cron_handoff_out,
         source_selection_summary_out=source_selection_summary_out,
         expected_cases_per_model=expected_cases_per_model,
         source_result_paths=result_paths,
@@ -1290,6 +1326,7 @@ def refresh_asr_leaderboard_artifacts(
         refresh_decision_out=refresh_decision_out,
         next_action_out=next_action_out,
         cron_status_out=cron_status_out,
+        cron_handoff_out=cron_handoff_out,
         source_selection_summary_out=source_selection_summary_out,
         combined_results_path=combined_results_path,
         combined_report_path=combined_report_path,
@@ -1316,6 +1353,7 @@ def refresh_asr_leaderboard_artifacts(
             refresh_decision_out=refresh_decision_out,
             next_action_out=next_action_out,
             cron_status_out=cron_status_out,
+            cron_handoff_out=cron_handoff_out,
             source_selection_summary_out=source_selection_summary_out,
             combined_results_path=combined_results_path,
             combined_report_path=combined_report_path,
@@ -1355,6 +1393,7 @@ def refresh_asr_leaderboard_artifacts(
     print(f"Refresh decision: {refresh_decision_out}")
     print(f"Next action: {next_action_out}")
     print(f"Cron status: {cron_status_out}")
+    print(f"Cron handoff: {cron_handoff_out}")
     for copied_path in copied_hosted_paths:
         print(f"Hosted:  {copied_path}")
 
@@ -1441,6 +1480,7 @@ def copy_hosted_asr_artifacts(
     refresh_decision_out: Path = DEFAULT_REFRESH_DECISION,
     next_action_out: Path = DEFAULT_NEXT_ACTION,
     cron_status_out: Path = DEFAULT_CRON_STATUS,
+    cron_handoff_out: Path = DEFAULT_CRON_HANDOFF,
     source_selection_summary_out: Path = DEFAULT_SOURCE_SELECTION_SUMMARY,
     combined_results_path: Path | None = None,
     combined_report_path: Path | None = None,
@@ -1470,6 +1510,7 @@ def copy_hosted_asr_artifacts(
         (refresh_decision_out, {refresh_decision_out.name, DEFAULT_REFRESH_DECISION.name}),
         (next_action_out, {next_action_out.name, DEFAULT_NEXT_ACTION.name}),
         (cron_status_out, {cron_status_out.name, DEFAULT_CRON_STATUS.name}),
+        (cron_handoff_out, {cron_handoff_out.name, DEFAULT_CRON_HANDOFF.name}),
         (
             source_selection_summary_out,
             {source_selection_summary_out.name, DEFAULT_SOURCE_SELECTION_SUMMARY.name},
@@ -1527,6 +1568,7 @@ def write_hosted_manifest_artifact(
     refresh_decision_out: Path = DEFAULT_REFRESH_DECISION,
     next_action_out: Path = DEFAULT_NEXT_ACTION,
     cron_status_out: Path = DEFAULT_CRON_STATUS,
+    cron_handoff_out: Path = DEFAULT_CRON_HANDOFF,
     source_selection_summary_out: Path = DEFAULT_SOURCE_SELECTION_SUMMARY,
     combined_results_path: Path,
     combined_report_path: Path,
@@ -1554,6 +1596,7 @@ def write_hosted_manifest_artifact(
         (refresh_decision_out, {refresh_decision_out.name, DEFAULT_REFRESH_DECISION.name}),
         (next_action_out, {next_action_out.name, DEFAULT_NEXT_ACTION.name}),
         (cron_status_out, {cron_status_out.name, DEFAULT_CRON_STATUS.name}),
+        (cron_handoff_out, {cron_handoff_out.name, DEFAULT_CRON_HANDOFF.name}),
         (
             source_selection_summary_out,
             {source_selection_summary_out.name, DEFAULT_SOURCE_SELECTION_SUMMARY.name},
@@ -1636,6 +1679,7 @@ def write_artifact_index(
     refresh_decision_out: Path | None = None,
     next_action_out: Path | None = None,
     cron_status_out: Path | None = None,
+    cron_handoff_out: Path | None = None,
     live_refresh_script_out: Path | None = None,
     refresh_workflow_out: Path | None = None,
     source_selection_summary_out: Path | None = None,
@@ -1667,6 +1711,7 @@ def write_artifact_index(
                 refresh_decision_out=refresh_decision_out,
                 next_action_out=next_action_out,
                 cron_status_out=cron_status_out,
+                cron_handoff_out=cron_handoff_out,
                 source_selection_summary_out=source_selection_summary_out,
                 source_result_paths=source_result_paths,
             ),
@@ -1701,6 +1746,7 @@ def build_artifact_index_data(
     refresh_decision_out: Path | None = None,
     next_action_out: Path | None = None,
     cron_status_out: Path | None = None,
+    cron_handoff_out: Path | None = None,
     live_refresh_script_out: Path | None = None,
     source_selection_summary_out: Path | None = None,
     source_result_paths: list[Path] | None = None,
@@ -1713,6 +1759,7 @@ def build_artifact_index_data(
     )
     next_action_out = next_action_out or output_path.with_name(DEFAULT_NEXT_ACTION.name)
     cron_status_out = cron_status_out or output_path.with_name(DEFAULT_CRON_STATUS.name)
+    cron_handoff_out = cron_handoff_out or output_path.with_name(DEFAULT_CRON_HANDOFF.name)
     live_refresh_script_out = live_refresh_script_out or refresh_commands_out.with_name(
         DEFAULT_LIVE_REFRESH_SCRIPT.name
     )
@@ -1740,6 +1787,7 @@ def build_artifact_index_data(
         _repo_relative(refresh_decision_out): refresh_decision_out,
         _repo_relative(next_action_out): next_action_out,
         _repo_relative(cron_status_out): cron_status_out,
+        _repo_relative(cron_handoff_out): cron_handoff_out,
         _repo_relative(source_selection_summary_out): source_selection_summary_out,
         _repo_relative(output_path): output_path,
         _repo_relative(DEFAULT_SUMMARY): summary_out,
@@ -1759,6 +1807,7 @@ def build_artifact_index_data(
         _repo_relative(DEFAULT_REFRESH_DECISION): refresh_decision_out,
         _repo_relative(DEFAULT_NEXT_ACTION): next_action_out,
         _repo_relative(DEFAULT_CRON_STATUS): cron_status_out,
+        _repo_relative(DEFAULT_CRON_HANDOFF): cron_handoff_out,
         _repo_relative(DEFAULT_SOURCE_SELECTION_SUMMARY): source_selection_summary_out,
     }
     for source_result_path in source_result_paths or []:
@@ -1946,6 +1995,7 @@ def _hosted_paths_for_artifact(
         "docs/asr-leaderboard-refresh-decision.json": ["asr-leaderboard-refresh-decision.json"],
         "docs/asr-leaderboard-next-action.md": ["asr-leaderboard-next-action.md"],
         "docs/asr-leaderboard-cron-status.json": ["asr-leaderboard-cron-status.json"],
+        "docs/asr-leaderboard-cron-handoff.md": ["asr-leaderboard-cron-handoff.md"],
         _repo_relative(results_path): ["asr-leaderboard/full-35-combined/results.jsonl"],
         _repo_relative(report_path): ["asr-leaderboard/full-35-combined/report.html"],
     }
@@ -2507,6 +2557,75 @@ def write_cron_status_artifact(
     output_path.write_text(json.dumps(data, indent=2, sort_keys=True) + "\n", encoding="utf-8")
 
 
+def write_cron_handoff_artifact(
+    output_path: Path,
+    *,
+    decision: dict[str, object],
+    check_summary: dict[str, object] | None = None,
+) -> None:
+    commands = _cron_handoff_commands()
+    lines = [
+        "# ASR Leaderboard Cron Handoff",
+        "",
+        "Generated summary for scheduled ASR leaderboard continuation turns.",
+        "",
+        "## Decision",
+        "",
+        f"- Action: {decision.get('action')}",
+        f"- Coverage complete: {decision.get('coverage_complete')}",
+        f"- Live refresh required: {decision.get('live_refresh_required')}",
+        f"- Runtime ready: {decision.get('runtime_ready')}",
+        f"- Missing model/category cells: {decision.get('missing_cell_count')}",
+        f"- Next run commands: {decision.get('next_run_command_count')}",
+        f"- Reason: {decision.get('reason')}",
+        "",
+        "## Public Links",
+        "",
+        f"- Demo: `{HOSTED_BASE_URL}/asr-leaderboard-demo.html`",
+        f"- Combined report: `{HOSTED_BASE_URL}/asr-leaderboard/full-35-combined/report.html`",
+        f"- Report index: `{HOSTED_BASE_URL}/{DEFAULT_REPORT_INDEX.name}`",
+        "",
+        "## Local Artifacts",
+        "",
+        f"- Refresh decision: `{_repo_relative(DEFAULT_REFRESH_DECISION)}`",
+        f"- Runtime status: `{_repo_relative(DEFAULT_RUNTIME_STATUS)}`",
+        f"- Next action: `{_repo_relative(DEFAULT_NEXT_ACTION)}`",
+        f"- Cron status JSON: `{_repo_relative(DEFAULT_CRON_STATUS)}`",
+        f"- Report links: `{_repo_relative(DEFAULT_REPORT_LINKS)}`",
+        "",
+        "## Commands",
+        "",
+        f"- Preflight: `{shlex.join(commands['preflight'])}`",
+        f"- Runtime preflight: `{shlex.join(commands['runtime_preflight'])}`",
+        f"- Refresh artifacts: `{shlex.join(commands['refresh_artifacts'])}`",
+        f"- Discover latest complete runs: `{shlex.join(commands['discover_refresh_artifacts'])}`",
+        f"- Sync hosted artifacts: `{shlex.join(commands['sync_hosted_artifacts'])}`",
+        f"- Verify commit: `{shlex.join(commands['verify_commit'])}`",
+        "",
+    ]
+    if check_summary is not None:
+        compact_summary = _compact_cron_preflight_summary(check_summary)
+        lines.extend(
+            [
+                "## Preflight Snapshot",
+                "",
+                *(
+                    f"- {key}: {value}"
+                    for key, value in sorted(compact_summary.items())
+                ),
+                "",
+            ]
+        )
+    lines.extend(
+        [
+            "Gemini secrets must be loaded only at runtime and must not be stored in artifacts.",
+            "",
+        ]
+    )
+    output_path.parent.mkdir(parents=True, exist_ok=True)
+    output_path.write_text("\n".join(lines), encoding="utf-8")
+
+
 def _cron_artifact_provenance(result_bundle: dict[str, object]) -> dict[str, object]:
     results_path = _cron_path_from_bundle(result_bundle.get("results_path"))
     report_path = results_path.with_name("report.html") if results_path is not None else None
@@ -2623,6 +2742,8 @@ def _cron_handoff_commands() -> dict[str, list[str]]:
             _repo_relative(DEFAULT_NEXT_ACTION),
             "--cron-status-out",
             _repo_relative(DEFAULT_CRON_STATUS),
+            "--cron-handoff-out",
+            _repo_relative(DEFAULT_CRON_HANDOFF),
         ],
         "refresh_artifacts": [
             ".venv/bin/python",

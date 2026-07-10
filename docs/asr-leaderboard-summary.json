@@ -95,6 +95,7 @@
     }
   ],
   "category_count": 7,
+  "cron_handoff_path": "docs/asr-leaderboard-cron-handoff.md",
   "cron_status_path": "docs/asr-leaderboard-cron-status.json",
   "expected_cases_per_model": 35,
   "hosted_manifest_path": "docs/asr-leaderboard-hosted-manifest.json",
@@ -282,6 +283,10 @@
     {
       "path": "docs/asr-leaderboard-cron-status.json",
       "purpose": "Compact machine-readable cron handoff with action, coverage, and runtime gate status."
+    },
+    {
+      "path": "docs/asr-leaderboard-cron-handoff.md",
+      "purpose": "Human-readable cron handoff summary for scheduled ASR refresh turns."
     },
     {
       "path": "docs/asr-leaderboard-source-selection.json",

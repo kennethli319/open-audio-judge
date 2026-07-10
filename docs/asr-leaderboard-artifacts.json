@@ -12,7 +12,18 @@
       "sha256": null
     },
     {
-      "bytes": 13793,
+      "bytes": 2119,
+      "digest_status": "ok",
+      "exists": true,
+      "hosted_paths": [
+        "asr-leaderboard-cron-handoff.md"
+      ],
+      "path": "docs/asr-leaderboard-cron-handoff.md",
+      "purpose": "Human-readable cron handoff summary for scheduled ASR refresh turns.",
+      "sha256": "48d1da4062df03fb7e44a0ad352ae44ed93d9028bbcdee0c42d48b7cbe8d2201"
+    },
+    {
+      "bytes": 13867,
       "digest_status": "ok",
       "exists": true,
       "hosted_paths": [
@@ -20,10 +31,10 @@
       ],
       "path": "docs/asr-leaderboard-cron-status.json",
       "purpose": "Compact machine-readable cron handoff with action, coverage, and runtime gate status.",
-      "sha256": "6097cb378cc381a2754b23e4abbde65c5a275d23643cce6ba39bce43da49be6b"
+      "sha256": "9987ded205fe05b6faec2713d713cb3cd650882420f0627e5ff0904cb9084a41"
     },
     {
-      "bytes": 61424,
+      "bytes": 61654,
       "digest_status": "ok",
       "exists": true,
       "hosted_paths": [
@@ -31,7 +42,7 @@
       ],
       "path": "docs/asr-leaderboard-demo.html",
       "purpose": "Generated ASR leaderboard demo HTML page.",
-      "sha256": "1c97702ee56d4681466ab9ab9983a660d0a2597c69682ee0351b39b90f12a5d2"
+      "sha256": "b905044a57f5598114ee4fdfdb72cea7ec9ba3449f16588ee2d0d7ee65470b14"
     },
     {
       "bytes": null,
@@ -108,10 +119,10 @@
       ],
       "path": "docs/asr-leaderboard-refresh-decision.json",
       "purpose": "Machine-readable runtime-gated decision for the next ASR refresh action.",
-      "sha256": "40e47efca441bf3b5fdbe989ac13b01b4825a57157e74c3b7ebd055764512e09"
+      "sha256": "6965ccb8205f256ee4d8bb6b7915f9ed1af249f1780c1e463472af8ba50af4b8"
     },
     {
-      "bytes": 20185,
+      "bytes": 20354,
       "digest_status": "ok",
       "exists": true,
       "hosted_paths": [
@@ -119,7 +130,7 @@
       ],
       "path": "docs/asr-leaderboard-refresh-report.md",
       "purpose": "Human-readable coverage, score, source-file, and command report.",
-      "sha256": "35f60ec97889ee166941881d0e18f657e6a09f79fe6da0b52a69429c018b22e1"
+      "sha256": "0baa82a040f175ff483c0e64244002329c04e9e54029ed77138eb88e08d747e5"
     },
     {
       "bytes": 15072,
@@ -174,7 +185,7 @@
       ],
       "path": "docs/asr-leaderboard-runtime-status.json",
       "purpose": "Machine-readable MLX ASR and Gemini readiness status for refresh automation.",
-      "sha256": "bea98735600318feae9a0d04ea716399a468e14f1e2819b8759e74e098aa4282"
+      "sha256": "8a9f0ea49f7458a2a212390c179146eab201563dcc730bf1fbe70a6a81205479"
     },
     {
       "bytes": 12183,
@@ -186,7 +197,7 @@
       "sha256": "2811817767ebc0a9e1d85809fb45eaa8324dda8f2fc3f0ccfb06b8f1a565db4a"
     },
     {
-      "bytes": 38467,
+      "bytes": 38685,
       "digest_status": "ok",
       "exists": true,
       "hosted_paths": [
@@ -194,7 +205,7 @@
       ],
       "path": "docs/asr-leaderboard-summary.json",
       "purpose": "Machine-readable leaderboard summary and reproducible refresh workflow.",
-      "sha256": "d89e821c100591df7002cf568126075462116eb4ede5a2e6b5d59b17862b0d31"
+      "sha256": "ac1a6a3ed1fe4f144c2c82e5489878a5cf70d315d107ac51fda0dec30bb85a88"
     },
     {
       "bytes": 1634,
@@ -947,10 +958,10 @@
       ".venv/bin/python",
       "scripts/verify_asr_leaderboard_commit.py"
     ],
-    "digest_checked_artifact_count": 37,
+    "digest_checked_artifact_count": 38,
     "digest_status_counts": {
       "deferred_circular_reference": 2,
-      "ok": 37
+      "ok": 38
     },
     "freshness_check_command": [
       ".venv/bin/python",

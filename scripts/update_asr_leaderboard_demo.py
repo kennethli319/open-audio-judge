@@ -37,6 +37,7 @@ DEFAULT_RUNTIME_STATUS = ROOT / "docs" / "asr-leaderboard-runtime-status.json"
 DEFAULT_REFRESH_DECISION = ROOT / "docs" / "asr-leaderboard-refresh-decision.json"
 DEFAULT_NEXT_ACTION = ROOT / "docs" / "asr-leaderboard-next-action.md"
 DEFAULT_CRON_STATUS = ROOT / "docs" / "asr-leaderboard-cron-status.json"
+DEFAULT_CRON_HANDOFF = ROOT / "docs" / "asr-leaderboard-cron-handoff.md"
 DEFAULT_SOURCE_SELECTION_SUMMARY = ROOT / "docs" / "asr-leaderboard-source-selection.json"
 DEFAULT_AUDIO_CASES = ROOT / "runs" / "asr-research-audio" / "tts_audio_cases.jsonl"
 DEFAULT_SEED_CASES = ROOT / "examples" / "asr_research_cases.jsonl"
@@ -325,6 +326,7 @@ def render_generated_sections(
     refresh_decision_label = html.escape(_repo_relative(DEFAULT_REFRESH_DECISION))
     next_action_label = html.escape(_repo_relative(DEFAULT_NEXT_ACTION))
     cron_status_label = html.escape(_repo_relative(DEFAULT_CRON_STATUS))
+    cron_handoff_label = html.escape(_repo_relative(DEFAULT_CRON_HANDOFF))
     source_selection_label = html.escape(_repo_relative(DEFAULT_SOURCE_SELECTION_SUMMARY))
     workflow = _refresh_workflow([])
     workflow_commands = [
@@ -500,7 +502,8 @@ def render_generated_sections(
                 f"<code>{runtime_status_label}</code>, the cron refresh decision is recorded in "
                 f"<code>{refresh_decision_label}</code>, the Telegram-ready next-action note is "
                 f"<code>{next_action_label}</code>, the compact cron status is "
-                f"<code>{cron_status_label}</code>, and source selection is recorded in "
+                f"<code>{cron_status_label}</code>, the human cron handoff is "
+                f"<code>{cron_handoff_label}</code>, and source selection is recorded in "
                 f"<code>{source_selection_label}</code>; together they include the source result files, "
                 "complete model/category matrix, missing-cell guidance, runtime-gated next action, hosted copy map, and reproducible refresh workflow. Pass "
                 f"<code>{DEFAULT_HOSTED_DIR_ENV}</code> with "
@@ -624,6 +627,7 @@ def write_summary_artifact(
                 "refresh_decision_path": _repo_relative(DEFAULT_REFRESH_DECISION),
                 "next_action_path": _repo_relative(DEFAULT_NEXT_ACTION),
                 "cron_status_path": _repo_relative(DEFAULT_CRON_STATUS),
+                "cron_handoff_path": _repo_relative(DEFAULT_CRON_HANDOFF),
                 "output_artifacts": output_artifacts,
                 "refresh_workflow": _refresh_workflow(source_result_paths or []),
                 "refresh_runtime_status": runtime_status,
@@ -731,6 +735,7 @@ def write_refresh_report(
                 f"- Artifact bundle index: `{_repo_relative(DEFAULT_ARTIFACT_INDEX)}`",
                 f"- Runtime status: `{_repo_relative(DEFAULT_RUNTIME_STATUS)}`",
                 f"- Cron status: `{_repo_relative(DEFAULT_CRON_STATUS)}`",
+                f"- Cron handoff: `{_repo_relative(DEFAULT_CRON_HANDOFF)}`",
                 f"- Total judged transcripts: {len(results)}",
                 f"- Models: {len(model_summaries)}",
                 f"- Categories: {len(category_summaries)}",
@@ -1604,6 +1609,10 @@ def build_output_artifact_index(*, results_path: Path) -> list[dict[str, str]]:
         {
             "path": _repo_relative(DEFAULT_CRON_STATUS),
             "purpose": "Compact machine-readable cron handoff with action, coverage, and runtime gate status.",
+        },
+        {
+            "path": _repo_relative(DEFAULT_CRON_HANDOFF),
+            "purpose": "Human-readable cron handoff summary for scheduled ASR refresh turns.",
         },
         {
             "path": _repo_relative(DEFAULT_SOURCE_SELECTION_SUMMARY),

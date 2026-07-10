@@ -302,7 +302,9 @@
       "--next-action-out",
       "docs/asr-leaderboard-next-action.md",
       "--cron-status-out",
-      "docs/asr-leaderboard-cron-status.json"
+      "docs/asr-leaderboard-cron-status.json",
+      "--cron-handoff-out",
+      "docs/asr-leaderboard-cron-handoff.md"
     ],
     "sync_hosted_artifacts": [
       ".venv/bin/python",
