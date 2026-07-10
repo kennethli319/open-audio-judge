@@ -12,7 +12,7 @@
       "sha256": null
     },
     {
-      "bytes": 32852,
+      "bytes": 33100,
       "digest_status": "ok",
       "exists": true,
       "hosted_paths": [
@@ -20,7 +20,7 @@
       ],
       "path": "docs/asr-leaderboard-demo.html",
       "purpose": "Generated ASR leaderboard demo HTML page.",
-      "sha256": "9454bce1df004abc6df243ea7872475ec6552cf1aee36b14d65b87eae19545a7"
+      "sha256": "82b22894c779ed5f49e69366d05ce687660b8904c515e45d023d4297d40dfc08"
     },
     {
       "bytes": null,
@@ -56,6 +56,17 @@
       "sha256": "d976da8486bd27929cf73c83897aa5f11d1434d1f3b038d5fbd54abdbb4bf7ba"
     },
     {
+      "bytes": 950,
+      "digest_status": "ok",
+      "exists": true,
+      "hosted_paths": [
+        "asr-leaderboard-next-action.md"
+      ],
+      "path": "docs/asr-leaderboard-next-action.md",
+      "purpose": "Telegram-ready Markdown note summarizing the runtime-gated next ASR action.",
+      "sha256": "dd80e18df8e8a90d162b72712a5821e0bb4000534b3c5d7e3be9866396b56126"
+    },
+    {
       "bytes": 546,
       "digest_status": "ok",
       "exists": true,
@@ -89,7 +100,7 @@
       "sha256": "d136e9aaef17e4e2b5c79664d4201263e15e067f79484e6216c053f4d36e33d1"
     },
     {
-      "bytes": 19736,
+      "bytes": 19856,
       "digest_status": "ok",
       "exists": true,
       "hosted_paths": [
@@ -97,7 +108,7 @@
       ],
       "path": "docs/asr-leaderboard-refresh-report.md",
       "purpose": "Human-readable coverage, score, source-file, and command report.",
-      "sha256": "08b0ba4f0a73f7a1a9616b1dbc4ef3fd664d0207da17fd8b83d3d6fc9d4d5a3a"
+      "sha256": "f705946dc84f4fb684b9d6895c0d184a6bed8a092fe9872d63db19753fba9b3a"
     },
     {
       "bytes": 14587,
@@ -164,7 +175,7 @@
       "sha256": "2ad6e90312c9b30098ae226e75f273334be31140e4cf7e9a5c8dca11942020c1"
     },
     {
-      "bytes": 37116,
+      "bytes": 37338,
       "digest_status": "ok",
       "exists": true,
       "hosted_paths": [
@@ -172,7 +183,7 @@
       ],
       "path": "docs/asr-leaderboard-summary.json",
       "purpose": "Machine-readable leaderboard summary and reproducible refresh workflow.",
-      "sha256": "eb7eb9d33511ce049ea83763b6db5af163f3b64e839b79c4b08560d285d7d07e"
+      "sha256": "2ad4900370a86d0d3574469fe2a5dea10b95e0fac320d05c34b7f7c27f251d41"
     },
     {
       "bytes": 1634,

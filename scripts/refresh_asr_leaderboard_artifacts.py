@@ -36,6 +36,7 @@ from scripts.update_asr_leaderboard_demo import (  # noqa: E402
     DEFAULT_HOSTED_MANIFEST,
     DEFAULT_RUNTIME_STATUS,
     DEFAULT_NEXT_RUNS,
+    DEFAULT_NEXT_ACTION,
     END_MARKER,
     GEMINI_SECRET_ENV,
     HOSTED_BASE_PATH,
@@ -190,6 +191,12 @@ def main() -> None:
         type=Path,
         default=DEFAULT_REFRESH_DECISION,
         help="Write a runtime-gated next-action decision for cron refresh automation.",
+    )
+    parser.add_argument(
+        "--next-action-out",
+        type=Path,
+        default=DEFAULT_NEXT_ACTION,
+        help="Write a Telegram-ready Markdown summary of the runtime-gated ASR next action.",
     )
     parser.add_argument(
         "--check-mlx-runtime",
@@ -366,6 +373,7 @@ def main() -> None:
                 expected_cases_per_model=args.expected_cases_per_model,
             )
             write_refresh_decision_data(args.refresh_decision_out, refresh_decision)
+            write_next_action_artifact(args.next_action_out, refresh_decision)
             enrich_check_summary_with_runtime_status(
                 check_summary,
                 runtime_status=runtime_status,
@@ -375,6 +383,7 @@ def main() -> None:
                 args.refresh_decision_out
             )
             check_summary["refresh_decision"] = refresh_decision
+            check_summary["next_action_path"] = _repo_relative(args.next_action_out)
             if args.require_runtime_ready:
                 _validate_runtime_ready(runtime_status)
         write_optional_source_selection_summary(
@@ -422,6 +431,7 @@ def main() -> None:
         artifact_index_out=args.artifact_index_out,
         runtime_status_out=args.runtime_status_out,
         refresh_decision_out=args.refresh_decision_out,
+        next_action_out=args.next_action_out,
         source_selection_summary_out=args.source_selection_summary_out,
         run_manifest=args.run_manifest,
         update_run_manifest=args.update_run_manifest,
@@ -744,6 +754,7 @@ def _validate_generated_artifacts_fresh(
     artifact_index_out: Path | None = None,
     runtime_status_out: Path | None = None,
     refresh_decision_out: Path | None = None,
+    next_action_out: Path | None = None,
     source_selection_summary_out: Path | None = None,
     generated: str,
     expected_cases_per_model: int,
@@ -751,6 +762,8 @@ def _validate_generated_artifacts_fresh(
 ) -> None:
     if refresh_decision_out is None and artifact_index_out is not None:
         refresh_decision_out = artifact_index_out.with_name(DEFAULT_REFRESH_DECISION.name)
+    if next_action_out is None and artifact_index_out is not None:
+        next_action_out = artifact_index_out.with_name(DEFAULT_NEXT_ACTION.name)
     existing_generated = _extract_generated_block(page)
     if existing_generated != generated:
         raise ValueError(
@@ -863,6 +876,7 @@ def _validate_generated_artifacts_fresh(
                 artifact_index_out=artifact_index_out or DEFAULT_ARTIFACT_INDEX,
                 runtime_status_out=runtime_status_out,
                 refresh_decision_out=refresh_decision_out or DEFAULT_REFRESH_DECISION,
+                next_action_out=next_action_out or DEFAULT_NEXT_ACTION,
                 source_selection_summary_out=(
                     source_selection_summary_out or DEFAULT_SOURCE_SELECTION_SUMMARY
                 ),
@@ -906,6 +920,7 @@ def _validate_generated_artifacts_fresh(
                         hosted_manifest_out=hosted_manifest_out or DEFAULT_HOSTED_MANIFEST,
                         runtime_status_out=runtime_status_out or DEFAULT_RUNTIME_STATUS,
                         refresh_decision_out=refresh_decision_out or DEFAULT_REFRESH_DECISION,
+                        next_action_out=next_action_out or DEFAULT_NEXT_ACTION,
                         source_selection_summary_out=(
                             source_selection_summary_out or DEFAULT_SOURCE_SELECTION_SUMMARY
                         ),
@@ -955,8 +970,7 @@ def _validate_generated_artifacts_fresh(
             _compare_runtime_status_artifact(runtime_status_out, expected_runtime_status)
         if refresh_decision_out is not None:
             expected_refresh_decision = tmp_dir / refresh_decision_out.name
-            write_refresh_decision_artifact(
-                expected_refresh_decision,
+            expected_refresh_decision_data = build_refresh_decision_artifact_data(
                 results=combined_results,
                 runtime_status=build_runtime_status_artifact_data(
                     results=combined_results,
@@ -965,7 +979,17 @@ def _validate_generated_artifacts_fresh(
                 ),
                 expected_cases_per_model=expected_cases_per_model,
             )
+            write_refresh_decision_artifact(
+                expected_refresh_decision,
+                results=combined_results,
+                runtime_status=expected_refresh_decision_data["runtime_status"],
+                expected_cases_per_model=expected_cases_per_model,
+            )
             _compare_refresh_decision_artifact(refresh_decision_out, expected_refresh_decision)
+            if next_action_out is not None:
+                expected_next_action = tmp_dir / next_action_out.name
+                write_next_action_artifact(expected_next_action, expected_refresh_decision_data)
+                _compare_generated_text_artifact(next_action_out, expected_next_action)
 
 
 def _compare_generated_text_artifact(actual_path: Path, expected_path: Path) -> None:
@@ -1041,6 +1065,7 @@ def refresh_asr_leaderboard_artifacts(
     artifact_index_out: Path = DEFAULT_ARTIFACT_INDEX,
     runtime_status_out: Path | None = None,
     refresh_decision_out: Path | None = None,
+    next_action_out: Path | None = None,
     source_selection_summary_out: Path = DEFAULT_SOURCE_SELECTION_SUMMARY,
     refresh_workflow_out: Path | None = None,
     hosted_dir: Path | None = None,
@@ -1052,6 +1077,7 @@ def refresh_asr_leaderboard_artifacts(
     refresh_decision_out = refresh_decision_out or artifact_index_out.with_name(
         DEFAULT_REFRESH_DECISION.name
     )
+    next_action_out = next_action_out or artifact_index_out.with_name(DEFAULT_NEXT_ACTION.name)
     refresh_workflow_out = refresh_workflow_out or refresh_commands_out.with_name(
         DEFAULT_REFRESH_WORKFLOW.name
     )
@@ -1155,6 +1181,8 @@ def refresh_asr_leaderboard_artifacts(
         runtime_status=runtime_status,
         expected_cases_per_model=expected_cases_per_model,
     )
+    refresh_decision = json.loads(refresh_decision_out.read_text(encoding="utf-8"))
+    write_next_action_artifact(next_action_out, refresh_decision)
     write_artifact_index(
         artifact_index_out,
         results=combined_results,
@@ -1175,6 +1203,7 @@ def refresh_asr_leaderboard_artifacts(
         hosted_manifest_out=hosted_manifest_out,
         runtime_status_out=runtime_status_out,
         refresh_decision_out=refresh_decision_out,
+        next_action_out=next_action_out,
         source_selection_summary_out=source_selection_summary_out,
         expected_cases_per_model=expected_cases_per_model,
         source_result_paths=result_paths,
@@ -1196,6 +1225,7 @@ def refresh_asr_leaderboard_artifacts(
         artifact_index_out=artifact_index_out,
         runtime_status_out=runtime_status_out,
         refresh_decision_out=refresh_decision_out,
+        next_action_out=next_action_out,
         source_selection_summary_out=source_selection_summary_out,
         combined_results_path=combined_results_path,
         combined_report_path=combined_report_path,
@@ -1220,6 +1250,7 @@ def refresh_asr_leaderboard_artifacts(
             artifact_index_out=artifact_index_out,
             runtime_status_out=runtime_status_out,
             refresh_decision_out=refresh_decision_out,
+            next_action_out=next_action_out,
             source_selection_summary_out=source_selection_summary_out,
             combined_results_path=combined_results_path,
             combined_report_path=combined_report_path,
@@ -1257,6 +1288,7 @@ def refresh_asr_leaderboard_artifacts(
     print(f"Artifact index: {artifact_index_out}")
     print(f"Runtime status: {runtime_status_out}")
     print(f"Refresh decision: {refresh_decision_out}")
+    print(f"Next action: {next_action_out}")
     for copied_path in copied_hosted_paths:
         print(f"Hosted:  {copied_path}")
 
@@ -1346,6 +1378,7 @@ def copy_hosted_asr_artifacts(
     artifact_index_out: Path = DEFAULT_ARTIFACT_INDEX,
     runtime_status_out: Path = DEFAULT_RUNTIME_STATUS,
     refresh_decision_out: Path = DEFAULT_REFRESH_DECISION,
+    next_action_out: Path = DEFAULT_NEXT_ACTION,
     source_selection_summary_out: Path = DEFAULT_SOURCE_SELECTION_SUMMARY,
     combined_results_path: Path | None = None,
     combined_report_path: Path | None = None,
@@ -1370,6 +1403,7 @@ def copy_hosted_asr_artifacts(
         (artifact_index_out, {artifact_index_out.name, DEFAULT_ARTIFACT_INDEX.name}),
         (runtime_status_out, {runtime_status_out.name, DEFAULT_RUNTIME_STATUS.name}),
         (refresh_decision_out, {refresh_decision_out.name, DEFAULT_REFRESH_DECISION.name}),
+        (next_action_out, {next_action_out.name, DEFAULT_NEXT_ACTION.name}),
         (
             source_selection_summary_out,
             {source_selection_summary_out.name, DEFAULT_SOURCE_SELECTION_SUMMARY.name},
@@ -1425,6 +1459,7 @@ def write_hosted_manifest_artifact(
     artifact_index_out: Path = DEFAULT_ARTIFACT_INDEX,
     runtime_status_out: Path = DEFAULT_RUNTIME_STATUS,
     refresh_decision_out: Path = DEFAULT_REFRESH_DECISION,
+    next_action_out: Path = DEFAULT_NEXT_ACTION,
     source_selection_summary_out: Path = DEFAULT_SOURCE_SELECTION_SUMMARY,
     combined_results_path: Path,
     combined_report_path: Path,
@@ -1447,6 +1482,7 @@ def write_hosted_manifest_artifact(
         (artifact_index_out, {artifact_index_out.name, DEFAULT_ARTIFACT_INDEX.name}),
         (runtime_status_out, {runtime_status_out.name, DEFAULT_RUNTIME_STATUS.name}),
         (refresh_decision_out, {refresh_decision_out.name, DEFAULT_REFRESH_DECISION.name}),
+        (next_action_out, {next_action_out.name, DEFAULT_NEXT_ACTION.name}),
         (
             source_selection_summary_out,
             {source_selection_summary_out.name, DEFAULT_SOURCE_SELECTION_SUMMARY.name},
@@ -1527,6 +1563,7 @@ def write_artifact_index(
     report_links_out: Path | None = None,
     runtime_status_out: Path | None = None,
     refresh_decision_out: Path | None = None,
+    next_action_out: Path | None = None,
     live_refresh_script_out: Path | None = None,
     refresh_workflow_out: Path | None = None,
     source_selection_summary_out: Path | None = None,
@@ -1556,6 +1593,7 @@ def write_artifact_index(
                 report_links_out=report_links_out,
                 runtime_status_out=runtime_status_out,
                 refresh_decision_out=refresh_decision_out,
+                next_action_out=next_action_out,
                 source_selection_summary_out=source_selection_summary_out,
                 source_result_paths=source_result_paths,
             ),
@@ -1588,6 +1626,7 @@ def build_artifact_index_data(
     report_links_out: Path | None = None,
     runtime_status_out: Path | None = None,
     refresh_decision_out: Path | None = None,
+    next_action_out: Path | None = None,
     live_refresh_script_out: Path | None = None,
     source_selection_summary_out: Path | None = None,
     source_result_paths: list[Path] | None = None,
@@ -1598,6 +1637,7 @@ def build_artifact_index_data(
     refresh_decision_out = refresh_decision_out or output_path.with_name(
         DEFAULT_REFRESH_DECISION.name
     )
+    next_action_out = next_action_out or output_path.with_name(DEFAULT_NEXT_ACTION.name)
     live_refresh_script_out = live_refresh_script_out or refresh_commands_out.with_name(
         DEFAULT_LIVE_REFRESH_SCRIPT.name
     )
@@ -1625,6 +1665,7 @@ def build_artifact_index_data(
         _repo_relative(hosted_manifest_out): hosted_manifest_out,
         _repo_relative(runtime_status_out): runtime_status_out,
         _repo_relative(refresh_decision_out): refresh_decision_out,
+        _repo_relative(next_action_out): next_action_out,
         _repo_relative(source_selection_summary_out): source_selection_summary_out,
         _repo_relative(output_path): output_path,
         _repo_relative(DEFAULT_SUMMARY): summary_out,
@@ -1642,6 +1683,7 @@ def build_artifact_index_data(
         _repo_relative(DEFAULT_ARTIFACT_INDEX): output_path,
         _repo_relative(DEFAULT_RUNTIME_STATUS): runtime_status_out,
         _repo_relative(DEFAULT_REFRESH_DECISION): refresh_decision_out,
+        _repo_relative(DEFAULT_NEXT_ACTION): next_action_out,
         _repo_relative(DEFAULT_SOURCE_SELECTION_SUMMARY): source_selection_summary_out,
     }
     for source_result_path in source_result_paths or []:
@@ -1805,6 +1847,7 @@ def _hosted_paths_for_artifact(
         "docs/asr-leaderboard-refresh-decision.json": [
             "asr-leaderboard-refresh-decision.json"
         ],
+        "docs/asr-leaderboard-next-action.md": ["asr-leaderboard-next-action.md"],
         _repo_relative(results_path): ["asr-leaderboard/full-35-combined/results.jsonl"],
         _repo_relative(report_path): ["asr-leaderboard/full-35-combined/report.html"],
     }
@@ -2267,6 +2310,56 @@ def write_refresh_decision_data(output_path: Path, data: dict[str, object]) -> N
         + "\n",
         encoding="utf-8",
     )
+
+
+def write_next_action_artifact(output_path: Path, decision: dict[str, object]) -> None:
+    lines = ["# ASR Leaderboard Next Action", ""]
+    summary_lines = decision.get("telegram_summary_lines")
+    if isinstance(summary_lines, list) and all(isinstance(line, str) for line in summary_lines):
+        lines.extend(f"- {line}" for line in summary_lines)
+    else:
+        lines.append(f"- {decision.get('summary', 'No refresh decision summary available.')}")
+
+    rationale = decision.get("rationale")
+    if isinstance(rationale, list) and rationale:
+        lines.extend(["", "## Rationale", ""])
+        lines.extend(f"- {line}" for line in rationale if isinstance(line, str))
+
+    recommended_command = decision.get("recommended_command")
+    if (
+        isinstance(recommended_command, list)
+        and recommended_command
+        and all(isinstance(part, str) for part in recommended_command)
+    ):
+        lines.extend(["", "## Recommended Command", "", f"`{shlex.join(recommended_command)}`"])
+
+    fallback_model_ids = decision.get("fallback_model_ids")
+    if isinstance(fallback_model_ids, list) and fallback_model_ids:
+        lines.extend(["", "## Fallback Policy", ""])
+        fallback_models = ", ".join(
+            f"`{model}`" for model in fallback_model_ids if isinstance(model, str)
+        )
+        if fallback_models:
+            lines.append(f"- Fallback models: {fallback_models}")
+        fallback_handling = decision.get("fallback_handling")
+        if isinstance(fallback_handling, str):
+            lines.append(f"- {fallback_handling}")
+
+    lines.extend(
+        [
+            "",
+            "## Source",
+            "",
+            f"- Decision JSON: `{_repo_relative(DEFAULT_REFRESH_DECISION)}`",
+            f"- Runtime status: `{_repo_relative(DEFAULT_RUNTIME_STATUS)}`",
+            f"- Next-run plan: `{_repo_relative(DEFAULT_NEXT_RUNS)}`",
+            "",
+            "Gemini secrets must be loaded only at runtime from the local secret file.",
+            "",
+        ]
+    )
+    output_path.parent.mkdir(parents=True, exist_ok=True)
+    output_path.write_text("\n".join(lines), encoding="utf-8")
 
 
 def build_refresh_decision_artifact_data(

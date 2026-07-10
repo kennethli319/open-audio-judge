@@ -31,6 +31,7 @@ DEFAULT_HOSTED_MANIFEST = ROOT / "docs" / "asr-leaderboard-hosted-manifest.json"
 DEFAULT_ARTIFACT_INDEX = ROOT / "docs" / "asr-leaderboard-artifacts.json"
 DEFAULT_RUNTIME_STATUS = ROOT / "docs" / "asr-leaderboard-runtime-status.json"
 DEFAULT_REFRESH_DECISION = ROOT / "docs" / "asr-leaderboard-refresh-decision.json"
+DEFAULT_NEXT_ACTION = ROOT / "docs" / "asr-leaderboard-next-action.md"
 DEFAULT_SOURCE_SELECTION_SUMMARY = ROOT / "docs" / "asr-leaderboard-source-selection.json"
 DEFAULT_AUDIO_CASES = ROOT / "runs" / "asr-research-audio" / "tts_audio_cases.jsonl"
 DEFAULT_SEED_CASES = ROOT / "examples" / "asr_research_cases.jsonl"
@@ -297,6 +298,7 @@ def render_generated_sections(
     artifact_index_label = html.escape(_repo_relative(DEFAULT_ARTIFACT_INDEX))
     runtime_status_label = html.escape(_repo_relative(DEFAULT_RUNTIME_STATUS))
     refresh_decision_label = html.escape(_repo_relative(DEFAULT_REFRESH_DECISION))
+    next_action_label = html.escape(_repo_relative(DEFAULT_NEXT_ACTION))
     source_selection_label = html.escape(_repo_relative(DEFAULT_SOURCE_SELECTION_SUMMARY))
     workflow = _refresh_workflow([])
     workflow_commands = [
@@ -375,7 +377,8 @@ def render_generated_sections(
                 f"<code>{hosted_manifest_label}</code>. The artifact bundle index is "
                 f"<code>{artifact_index_label}</code>. Runtime readiness is tracked in "
                 f"<code>{runtime_status_label}</code>, the cron refresh decision is recorded in "
-                f"<code>{refresh_decision_label}</code>, and source selection is recorded in "
+                f"<code>{refresh_decision_label}</code>, the Telegram-ready next-action note is "
+                f"<code>{next_action_label}</code>, and source selection is recorded in "
                 f"<code>{source_selection_label}</code>; together they include the source result files, "
                 "complete model/category matrix, missing-cell guidance, runtime-gated next action, hosted copy map, and reproducible refresh workflow. Pass "
                 f"<code>{DEFAULT_HOSTED_DIR_ENV}</code> with "
@@ -498,6 +501,7 @@ def write_summary_artifact(
                 "artifact_index_path": _repo_relative(DEFAULT_ARTIFACT_INDEX),
                 "runtime_status_path": _repo_relative(DEFAULT_RUNTIME_STATUS),
                 "refresh_decision_path": _repo_relative(DEFAULT_REFRESH_DECISION),
+                "next_action_path": _repo_relative(DEFAULT_NEXT_ACTION),
                 "output_artifacts": output_artifacts,
                 "refresh_workflow": _refresh_workflow(source_result_paths or []),
                 "refresh_runtime_status": runtime_status,
@@ -1452,6 +1456,10 @@ def build_output_artifact_index(*, results_path: Path) -> list[dict[str, str]]:
         {
             "path": _repo_relative(DEFAULT_REFRESH_DECISION),
             "purpose": "Machine-readable runtime-gated decision for the next ASR refresh action.",
+        },
+        {
+            "path": _repo_relative(DEFAULT_NEXT_ACTION),
+            "purpose": "Telegram-ready Markdown note summarizing the runtime-gated next ASR action.",
         },
         {
             "path": _repo_relative(DEFAULT_SOURCE_SELECTION_SUMMARY),

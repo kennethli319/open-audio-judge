@@ -380,6 +380,7 @@ def test_write_summary_artifact_records_models_and_categories(tmp_path: Path) ->
     assert summary["artifact_index_path"] == "docs/asr-leaderboard-artifacts.json"
     assert summary["runtime_status_path"] == "docs/asr-leaderboard-runtime-status.json"
     assert summary["refresh_decision_path"] == "docs/asr-leaderboard-refresh-decision.json"
+    assert summary["next_action_path"] == "docs/asr-leaderboard-next-action.md"
     assert summary["report_index_path"] == "docs/asr-leaderboard-report-index.md"
     assert summary["report_links_path"] == "docs/asr-leaderboard-report-links.json"
     assert summary["next_run_plan"]["status"] == "complete"
@@ -455,6 +456,12 @@ def test_write_summary_artifact_records_models_and_categories(tmp_path: Path) ->
         {
             "path": "docs/asr-leaderboard-refresh-decision.json",
             "purpose": "Machine-readable runtime-gated decision for the next ASR refresh action.",
+        },
+        {
+            "path": "docs/asr-leaderboard-next-action.md",
+            "purpose": (
+                "Telegram-ready Markdown note summarizing the runtime-gated next ASR action."
+            ),
         },
         {
             "path": "docs/asr-leaderboard-source-selection.json",
@@ -1250,6 +1257,7 @@ def test_refresh_asr_leaderboard_artifacts_combines_report_and_page(tmp_path: Pa
     hosted_manifest = tmp_path / "hosted-manifest.json"
     artifact_index = tmp_path / "artifact-index.json"
     runtime_status = tmp_path / "runtime-status.json"
+    next_action = tmp_path / "next-action.md"
     hosted_dir = tmp_path / "hosted" / "open-audio-judge"
     records_a = [
         result_record(
@@ -1314,6 +1322,7 @@ def test_refresh_asr_leaderboard_artifacts_combines_report_and_page(tmp_path: Pa
         hosted_manifest_out=hosted_manifest,
         artifact_index_out=artifact_index,
         runtime_status_out=runtime_status,
+        next_action_out=next_action,
         hosted_dir=hosted_dir,
         expected_cases_per_model=2,
     )
@@ -1443,9 +1452,13 @@ def test_refresh_asr_leaderboard_artifacts_combines_report_and_page(tmp_path: Pa
     )
     assert hosted_current == {
         "status": "complete",
-        "hosted_artifact_count": 20,
-        "hosted_path_count": 31,
+        "hosted_artifact_count": 21,
+        "hosted_path_count": 33,
     }
+    assert "Action: skip_live_refresh." in next_action.read_text(encoding="utf-8")
+    assert (hosted_dir / "asr-leaderboard-next-action.md").read_text(
+        encoding="utf-8"
+    ) == next_action.read_text(encoding="utf-8")
     assert (hosted_dir / "asr-leaderboard-run-manifest.json").exists()
     assert (hosted_dir / "manifest-validation.json").read_text(
         encoding="utf-8"
@@ -1571,7 +1584,7 @@ def test_refresh_asr_leaderboard_artifacts_combines_report_and_page(tmp_path: Pa
         f"asr-leaderboard/source-reports/{tmp_path.name}/report.html"
     ]
     hosted_manifest_data = json.loads(hosted_manifest.read_text(encoding="utf-8"))
-    assert hosted_manifest_data["artifact_count"] == 20
+    assert hosted_manifest_data["artifact_count"] == 21
     assert {"asr-leaderboard/full-35-combined/results.jsonl"} in [
         set(artifact["hosted_paths"]) for artifact in hosted_manifest_data["artifacts"]
     ]
@@ -1582,6 +1595,9 @@ def test_refresh_asr_leaderboard_artifacts_combines_report_and_page(tmp_path: Pa
         set(artifact["hosted_paths"]) for artifact in hosted_manifest_data["artifacts"]
     ]
     assert {"asr-leaderboard-report-links.json"} in [
+        set(artifact["hosted_paths"]) for artifact in hosted_manifest_data["artifacts"]
+    ]
+    assert {"asr-leaderboard-next-action.md", "next-action.md"} in [
         set(artifact["hosted_paths"]) for artifact in hosted_manifest_data["artifacts"]
     ]
     assert (hosted_dir / "asr-leaderboard-hosted-manifest.json").read_text(
@@ -1629,6 +1645,7 @@ def test_refresh_asr_leaderboard_artifacts_combines_report_and_page(tmp_path: Pa
         hosted_manifest_out=hosted_manifest,
         artifact_index_out=artifact_index,
         runtime_status_out=runtime_status,
+        next_action_out=next_action,
         generated=generated,
         expected_cases_per_model=2,
         combined_results_path=out / "results.jsonl",
@@ -1661,6 +1678,7 @@ def test_refresh_asr_leaderboard_artifacts_combines_report_and_page(tmp_path: Pa
             hosted_manifest_out=hosted_manifest,
             artifact_index_out=artifact_index,
             runtime_status_out=runtime_status,
+            next_action_out=next_action,
             generated=generated,
             expected_cases_per_model=2,
             combined_results_path=out / "results.jsonl",
@@ -1695,6 +1713,7 @@ def test_refresh_asr_leaderboard_artifacts_combines_report_and_page(tmp_path: Pa
             hosted_manifest_out=hosted_manifest,
             artifact_index_out=artifact_index,
             runtime_status_out=runtime_status,
+            next_action_out=next_action,
             generated=generated,
             expected_cases_per_model=2,
             combined_results_path=combined_results_path,
@@ -1724,6 +1743,7 @@ def test_refresh_asr_leaderboard_artifacts_combines_report_and_page(tmp_path: Pa
             hosted_manifest_out=hosted_manifest,
             artifact_index_out=artifact_index,
             runtime_status_out=runtime_status,
+            next_action_out=next_action,
             generated=generated,
             expected_cases_per_model=2,
             combined_results_path=combined_results_path,
@@ -1756,6 +1776,7 @@ def test_refresh_asr_leaderboard_artifacts_combines_report_and_page(tmp_path: Pa
             hosted_manifest_out=None,
             artifact_index_out=artifact_index,
             runtime_status_out=runtime_status,
+            next_action_out=next_action,
             generated=generated,
             expected_cases_per_model=2,
             combined_results_path=out / "results.jsonl",
@@ -1786,6 +1807,7 @@ def test_refresh_asr_leaderboard_artifacts_combines_report_and_page(tmp_path: Pa
             hosted_manifest_out=hosted_manifest,
             artifact_index_out=artifact_index,
             runtime_status_out=runtime_status,
+            next_action_out=next_action,
             generated=generated,
             expected_cases_per_model=2,
             combined_results_path=out / "results.jsonl",
@@ -1912,6 +1934,7 @@ def test_check_only_runtime_preflight_writes_refresh_decision(
     refresh_module = load_refresh_module()
     runtime_status_out = tmp_path / "runtime-status.json"
     refresh_decision_out = tmp_path / "refresh-decision.json"
+    next_action_out = tmp_path / "next-action.md"
     check_summary_out = tmp_path / "preflight-summary.json"
     monkeypatch.setattr(
         refresh_module,
@@ -1935,6 +1958,8 @@ def test_check_only_runtime_preflight_writes_refresh_decision(
             str(runtime_status_out),
             "--refresh-decision-out",
             str(refresh_decision_out),
+            "--next-action-out",
+            str(next_action_out),
             "--check-summary-out",
             str(check_summary_out),
         ],
@@ -1959,6 +1984,8 @@ def test_check_only_runtime_preflight_writes_refresh_decision(
     assert check_summary["refresh_decision_path"] == str(refresh_decision_out)
     assert check_summary["refresh_decision"] == refresh_decision
     assert check_summary["refresh_decision"]["action"] == "skip_live_refresh"
+    assert check_summary["next_action_path"] == str(next_action_out)
+    assert "Action: skip_live_refresh." in next_action_out.read_text(encoding="utf-8")
     assert "Decision: skip_live_refresh." in refresh_module.format_check_summary_message(
         check_summary
     )
@@ -2911,6 +2938,7 @@ def test_check_asr_leaderboard_page_validates_generated_artifacts(tmp_path: Path
     artifact_index = tmp_path / "artifact-index.json"
     runtime_status = tmp_path / "runtime-status.json"
     refresh_decision = tmp_path / "refresh-decision.json"
+    next_action = tmp_path / "next-action.md"
     records = [
         result_record(
             case_id="asr-a-model-a",
@@ -3062,6 +3090,7 @@ def test_check_asr_leaderboard_page_validates_generated_artifacts(tmp_path: Path
     summary_data["artifact_index_path"] = str(artifact_index)
     summary_data["runtime_status_path"] = str(runtime_status)
     summary_data["refresh_decision_path"] = str(refresh_decision)
+    summary_data["next_action_path"] = str(next_action)
     summary.write_text(json.dumps(summary_data), encoding="utf-8")
     refresh_report = tmp_path / "refresh-report.md"
     refresh_report.write_text("# report\n", encoding="utf-8")
@@ -3091,6 +3120,10 @@ def test_check_asr_leaderboard_page_validates_generated_artifacts(tmp_path: Path
         runtime_status=runtime_status_data,
         expected_cases_per_model=2,
     )
+    refresh_module.write_next_action_artifact(
+        next_action,
+        json.loads(refresh_decision.read_text(encoding="utf-8")),
+    )
     summary_data = json.loads(summary.read_text(encoding="utf-8"))
     summary_data["refresh_commands_path"] = str(refresh_commands)
     summary_data["refresh_workflow_path"] = str(refresh_workflow)
@@ -3115,11 +3148,12 @@ def test_check_asr_leaderboard_page_validates_generated_artifacts(tmp_path: Path
         manifest_validation_out=manifest_validation,
         seed_manifest_validation_out=seed_manifest_validation,
         next_runs_out=next_runs,
-            hosted_manifest_out=hosted_manifest,
-            runtime_status_out=runtime_status,
-            refresh_decision_out=refresh_decision,
-            expected_cases_per_model=2,
-        )
+        hosted_manifest_out=hosted_manifest,
+        runtime_status_out=runtime_status,
+        refresh_decision_out=refresh_decision,
+        next_action_out=next_action,
+        expected_cases_per_model=2,
+    )
 
     validation = check_module.check_asr_leaderboard_page(page, summary_path=summary)
 
@@ -3165,6 +3199,7 @@ def test_check_asr_leaderboard_page_validates_generated_artifacts(tmp_path: Path
         hosted_manifest_out=hosted_manifest,
         runtime_status_out=runtime_status,
         refresh_decision_out=refresh_decision,
+        next_action_out=next_action,
         expected_cases_per_model=2,
     )
 
@@ -3476,6 +3511,7 @@ def test_check_asr_leaderboard_page_validates_hosted_artifact_layout(tmp_path: P
     artifact_index = hosted / "asr-leaderboard-artifacts.json"
     runtime_status = hosted / "asr-leaderboard-runtime-status.json"
     refresh_decision = hosted / "asr-leaderboard-refresh-decision.json"
+    next_action = hosted / "asr-leaderboard-next-action.md"
     results_path = hosted / "asr-leaderboard" / "full-35-combined" / "results.jsonl"
     report_path = hosted / "asr-leaderboard" / "full-35-combined" / "report.html"
 
@@ -3689,6 +3725,10 @@ def test_check_asr_leaderboard_page_validates_hosted_artifact_layout(tmp_path: P
         + "\n",
         encoding="utf-8",
     )
+    next_action.write_text(
+        "# ASR Leaderboard Next Action\n\n- Action: skip_live_refresh.\n",
+        encoding="utf-8",
+    )
     hosted_manifest.write_text(
         json.dumps(
             hosted_manifest_record(
@@ -3702,6 +3742,7 @@ def test_check_asr_leaderboard_page_validates_hosted_artifact_layout(tmp_path: P
                     ("asr-leaderboard-report-links.json", report_links),
                     ("asr-leaderboard-runtime-status.json", runtime_status),
                     ("asr-leaderboard-refresh-decision.json", refresh_decision),
+                    ("asr-leaderboard-next-action.md", next_action),
                 ]
             )
         )
@@ -3786,6 +3827,10 @@ def test_check_asr_leaderboard_page_validates_hosted_artifact_layout(tmp_path: P
                         refresh_decision,
                     ),
                     artifact_index_record(
+                        "docs/asr-leaderboard-next-action.md",
+                        next_action,
+                    ),
+                    artifact_index_record(
                         "docs/asr-leaderboard-hosted-manifest.json",
                         hosted_manifest,
                         digest_status="deferred_circular_reference",
@@ -3818,6 +3863,7 @@ def test_check_asr_leaderboard_page_validates_hosted_artifact_layout(tmp_path: P
                 "artifact_index_path": "docs/asr-leaderboard-artifacts.json",
                 "runtime_status_path": "docs/asr-leaderboard-runtime-status.json",
                 "refresh_decision_path": "docs/asr-leaderboard-refresh-decision.json",
+                "next_action_path": "docs/asr-leaderboard-next-action.md",
                 "source_result_paths": [
                     "runs/asr-leaderboard/model-a/judge-report/results.jsonl",
                     "runs/asr-leaderboard/model-b/judge-report/results.jsonl",
@@ -3870,6 +3916,12 @@ def test_check_asr_leaderboard_page_validates_hosted_artifact_layout(tmp_path: P
                     {
                         "path": "docs/asr-leaderboard-refresh-decision.json",
                         "purpose": "Machine-readable runtime-gated decision for the next ASR refresh action.",
+                    },
+                    {
+                        "path": "docs/asr-leaderboard-next-action.md",
+                        "purpose": (
+                            "Telegram-ready Markdown note summarizing the runtime-gated next ASR action."
+                        ),
                     },
                 ],
                 "refresh_workflow": update_module._refresh_workflow([]),
@@ -3960,6 +4012,8 @@ def test_check_asr_leaderboard_page_validates_hosted_artifact_layout(tmp_path: P
                 "Machine-readable MLX ASR and Gemini readiness status for refresh automation.",
                 "docs/asr-leaderboard-refresh-decision.json",
                 "Machine-readable runtime-gated decision for the next ASR refresh action.",
+                "docs/asr-leaderboard-next-action.md",
+                "Telegram-ready Markdown note summarizing the runtime-gated next ASR action.",
                 "<!-- ASR_LEADERBOARD_GENERATED_END -->",
                 "</body></html>",
             ]
@@ -3979,12 +4033,12 @@ def test_check_asr_leaderboard_page_validates_hosted_artifact_layout(tmp_path: P
     )
 
     assert validation["status"] == "complete"
-    assert validation["hosted_artifact_count"] == 9
-    assert validation["hosted_path_count"] == 9
-    assert validation["hosted_digest_verified_artifact_count"] == 9
-    assert validation["hosted_digest_verified_path_count"] == 9
+    assert validation["hosted_artifact_count"] == 10
+    assert validation["hosted_path_count"] == 10
+    assert validation["hosted_digest_verified_artifact_count"] == 10
+    assert validation["hosted_digest_verified_path_count"] == 10
     assert check_module._format_hosted_validation_fragment(validation) == (
-        ", 9/9 hosted paths digest-verified"
+        ", 10/10 hosted paths digest-verified"
     )
 
 

@@ -125,6 +125,7 @@ This generated report summarizes the verified ASR leaderboard artifact set.
 | `docs/asr-leaderboard-artifacts.json` | Single machine-readable index for the ASR leaderboard artifact bundle. |
 | `docs/asr-leaderboard-runtime-status.json` | Machine-readable MLX ASR and Gemini readiness status for refresh automation. |
 | `docs/asr-leaderboard-refresh-decision.json` | Machine-readable runtime-gated decision for the next ASR refresh action. |
+| `docs/asr-leaderboard-next-action.md` | Telegram-ready Markdown note summarizing the runtime-gated next ASR action. |
 | `docs/asr-leaderboard-source-selection.json` | Machine-readable record of selected ASR source result files for the last refresh. |
 
 ## Refresh Commands

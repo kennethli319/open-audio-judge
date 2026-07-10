@@ -179,6 +179,7 @@
       "result_count": 35
     }
   ],
+  "next_action_path": "docs/asr-leaderboard-next-action.md",
   "next_run_plan": {
     "category_count": 7,
     "expected_cases_per_category": 5,
@@ -265,6 +266,10 @@
     {
       "path": "docs/asr-leaderboard-refresh-decision.json",
       "purpose": "Machine-readable runtime-gated decision for the next ASR refresh action."
+    },
+    {
+      "path": "docs/asr-leaderboard-next-action.md",
+      "purpose": "Telegram-ready Markdown note summarizing the runtime-gated next ASR action."
     },
     {
       "path": "docs/asr-leaderboard-source-selection.json",
