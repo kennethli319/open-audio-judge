@@ -2944,6 +2944,42 @@ def test_check_asr_leaderboard_page_validates_generated_artifacts(tmp_path: Path
         check_module.check_asr_leaderboard_page(page, summary_path=summary)
 
 
+def test_check_asr_leaderboard_page_requires_hosted_manifest_source_path(
+    tmp_path: Path,
+) -> None:
+    check_module = load_check_module()
+    summary = tmp_path / "summary.json"
+    hosted_manifest = tmp_path / "hosted-manifest.json"
+    hosted_copy = tmp_path / "hosted-copy.json"
+    hosted_copy.write_text("{}\n", encoding="utf-8")
+    hosted_manifest.write_text(
+        json.dumps(
+            {
+                "hosted_base_path": "open-audio-judge",
+                "artifact_count": 1,
+                "artifacts": [
+                    {
+                        "source_path": str(tmp_path / "missing-source.json"),
+                        "hosted_paths": [hosted_copy.name],
+                        "bytes": hosted_copy.stat().st_size,
+                        "sha256": file_sha256(hosted_copy),
+                    }
+                ],
+            }
+        )
+        + "\n",
+        encoding="utf-8",
+    )
+
+    with pytest.raises(ValueError, match="references missing source_path"):
+        check_module._validate_hosted_manifest_artifact(
+            {"hosted_manifest_path": str(hosted_manifest)},
+            summary_path=summary,
+            artifact_root=tmp_path,
+            path_maps=[],
+        )
+
+
 def test_check_asr_leaderboard_page_rejects_stale_refresh_commands(tmp_path: Path) -> None:
     update_module = load_script_module()
     check_module = load_check_module()

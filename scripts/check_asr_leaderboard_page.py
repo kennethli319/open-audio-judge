@@ -744,16 +744,20 @@ def _validate_hosted_manifest_artifact(
         ):
             raise ValueError(f"{path} artifacts[{index}] has invalid sha256: {expected_sha256!r}")
 
+        resolved_source = _resolve_summary_path(
+            source_path,
+            artifact_root=artifact_root,
+            path_maps=path_maps,
+        )
+        if not resolved_source.exists():
+            raise ValueError(
+                f"{path} artifacts[{index}] references missing source_path: {source_path}"
+            )
         candidates = [
-            _resolve_summary_path(source_path, artifact_root=artifact_root, path_maps=path_maps),
+            resolved_source,
             *[artifact_root / hosted_path for hosted_path in hosted_paths],
         ]
         existing_candidates = [candidate for candidate in candidates if candidate.exists()]
-        if not existing_candidates:
-            raise ValueError(
-                f"{path} artifacts[{index}] references no existing source or hosted path: "
-                f"{source_path}, {hosted_paths}"
-            )
         for candidate in existing_candidates:
             if candidate.stat().st_size != expected_bytes:
                 raise ValueError(
