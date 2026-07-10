@@ -3,18 +3,19 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Open Audio Judge Demo: TTS Model Leaderboard + Gemini Judge</title>
+  <title>Open Audio Judge: Illustrative TTS Leaderboard Preview</title>
   <style>
     :root {
       --ink: #172026;
       --muted: #5d6975;
       --line: #d8dee5;
-      --bg: #f7f8fa;
+      --bg: #f3f6f8;
       --panel: #ffffff;
-      --good: #0f8a5f;
-      --warn: #b36b00;
-      --bad: #c93535;
-      --accent: #2864b4;
+      --good: #087a55;
+      --warn: #9a5800;
+      --bad: #b4232d;
+      --accent: #1859a9;
+      --accent-soft: #eaf2fb;
     }
     * {
       box-sizing: border-box;
@@ -25,19 +26,82 @@
       color: var(--ink);
       font-family: ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
       line-height: 1.55;
+      overflow-wrap: anywhere;
+    }
+    .skip-link {
+      position: fixed;
+      top: 8px;
+      left: 8px;
+      z-index: 20;
+      padding: 9px 12px;
+      border-radius: 8px;
+      background: var(--ink);
+      color: #ffffff;
+      font-weight: 700;
+      transform: translateY(-150%);
+    }
+    .skip-link:focus {
+      transform: translateY(0);
+    }
+    .site-nav {
+      background: var(--panel);
+      border-bottom: 1px solid var(--line);
+    }
+    .site-nav-inner {
+      align-items: center;
+      display: flex;
+      gap: 20px;
+      justify-content: space-between;
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 12px 24px;
+    }
+    .brand {
+      color: var(--ink);
+      font-weight: 800;
+      letter-spacing: -.01em;
+      text-decoration: none;
+      white-space: nowrap;
+    }
+    .board-links {
+      align-items: center;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      justify-content: flex-end;
+    }
+    .board-links a {
+      border-radius: 8px;
+      color: var(--ink);
+      font-size: 14px;
+      font-weight: 650;
+      padding: 7px 10px;
+      text-decoration: none;
+    }
+    .board-links a:hover {
+      background: var(--accent-soft);
+      color: var(--accent);
+    }
+    .board-links a[aria-current="page"] {
+      background: var(--accent-soft);
+      color: var(--accent);
+    }
+    .board-links .repo-link {
+      border: 1px solid var(--line);
     }
     header {
       background: var(--panel);
       border-bottom: 1px solid var(--line);
-      padding: 28px 24px 22px;
+      padding: 34px 24px 28px;
     }
     main,
     .header-inner {
-      max-width: 1120px;
+      max-width: 1200px;
       margin: 0 auto;
     }
     main {
-      padding: 24px 24px 44px;
+      min-width: 0;
+      padding: 24px 24px 56px;
     }
     .control-bar {
       position: sticky;
@@ -67,7 +131,7 @@
     input,
     select {
       border: 1px solid var(--line);
-      border-radius: 6px;
+      border-radius: 8px;
       background: var(--panel);
       min-height: 38px;
       padding: 8px 10px;
@@ -95,13 +159,14 @@
     }
     h1 {
       margin: 0 0 8px;
-      font-size: 28px;
-      letter-spacing: 0;
+      font-size: clamp(30px, 5vw, 46px);
+      line-height: 1.1;
+      letter-spacing: -.03em;
     }
     h2 {
-      margin: 30px 0 12px;
-      font-size: 19px;
-      letter-spacing: 0;
+      margin: 34px 0 10px;
+      font-size: 23px;
+      letter-spacing: -.015em;
     }
     h3 {
       margin: 0 0 8px;
@@ -112,6 +177,11 @@
     }
     a {
       color: var(--accent);
+      text-underline-offset: 2px;
+    }
+    :focus-visible {
+      outline: 3px solid #8bb7e8;
+      outline-offset: 3px;
     }
     code {
       background: #edf1f5;
@@ -120,7 +190,7 @@
     }
     pre {
       background: #172026;
-      border-radius: 8px;
+      border-radius: 12px;
       color: #f7f8fa;
       overflow-x: auto;
       padding: 14px 16px;
@@ -132,6 +202,18 @@
     .muted {
       color: var(--muted);
     }
+    .eyebrow {
+      color: var(--accent);
+      font-size: 12px;
+      font-weight: 800;
+      letter-spacing: .08em;
+      text-transform: uppercase;
+    }
+    .lede {
+      color: #394957;
+      font-size: 18px;
+      max-width: 74ch;
+    }
     .grid {
       display: grid;
       gap: 12px;
@@ -141,7 +223,8 @@
     .panel {
       background: var(--panel);
       border: 1px solid var(--line);
-      border-radius: 8px;
+      border-radius: 12px;
+      min-width: 0;
       padding: 14px 16px;
     }
     .metric span {
@@ -163,7 +246,7 @@
     .flow div {
       background: var(--panel);
       border: 1px solid var(--line);
-      border-radius: 8px;
+      border-radius: 12px;
       padding: 12px;
     }
     .sample-groups {
@@ -173,7 +256,7 @@
     .sample-group {
       background: var(--panel);
       border: 1px solid var(--line);
-      border-radius: 8px;
+      border-radius: 12px;
       overflow: hidden;
     }
     .sample-group summary {
@@ -228,7 +311,7 @@
       border-collapse: collapse;
       background: var(--panel);
       border: 1px solid var(--line);
-      border-radius: 8px;
+      border-radius: 12px;
       overflow: hidden;
     }
     th,
@@ -258,9 +341,49 @@
       color: var(--bad);
       font-weight: 700;
     }
+    .preview-note {
+      border-color: #8bb7e8;
+      background: linear-gradient(145deg, #f7fbff, #edf5fd);
+      margin: 0 0 20px;
+    }
+    .preview-note strong {
+      display: block;
+      margin-bottom: 4px;
+    }
+    footer {
+      border-top: 1px solid var(--line);
+      background: var(--panel);
+    }
+    .footer-inner {
+      align-items: center;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px 24px;
+      justify-content: space-between;
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 22px 24px;
+    }
+    .footer-inner p {
+      margin: 0;
+    }
+    .footer-links {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 14px;
+    }
     @media (max-width: 720px) {
+      .site-nav-inner {
+        align-items: flex-start;
+        flex-direction: column;
+        gap: 8px;
+        padding: 10px 16px;
+      }
+      .board-links {
+        justify-content: flex-start;
+      }
       header {
-        padding: 22px 16px 18px;
+        padding: 26px 18px 22px;
       }
       main {
         padding: 18px 12px 34px;
@@ -294,26 +417,47 @@
         display: block;
         font-size: 12px;
       }
+      .footer-inner {
+        align-items: flex-start;
+        flex-direction: column;
+        padding: 20px 16px;
+      }
     }
   </style>
 </head>
 <body>
+  <a class="skip-link" href="#main-content">Skip to TTS leaderboard content</a>
+  <nav class="site-nav" aria-label="Open Audio Judge">
+    <div class="site-nav-inner">
+      <a class="brand" href="index.html">Open Audio Judge</a>
+      <div class="board-links">
+        <a href="tts-leaderboard-demo.html" aria-current="page">TTS leaderboard</a>
+        <a href="asr-leaderboard-demo.html">ASR leaderboard</a>
+        <a class="repo-link" href="https://github.com/kennethli319/open-audio-judge">GitHub repository</a>
+      </div>
+    </div>
+  </nav>
   <header>
     <div class="header-inner">
-      <h1>Open Audio Judge TTS Leaderboard</h1>
-      <p class="muted">Multiple MLX Community TTS models generate the same eval set, then Gemini scores every sample.</p>
+      <span class="eyebrow">Illustrative report preview</span>
+      <h1>TTS Leaderboard</h1>
+      <p class="lede">Explore how an Open Audio Judge comparison can surface TTS quality, weak categories, and sample-level evidence across multiple MLX Community models.</p>
     </div>
   </header>
 
-  <main>
+  <main id="main-content" tabindex="-1">
+    <section class="panel preview-note" aria-label="Preview status">
+      <strong>Illustrative preview, not a verified benchmark.</strong>
+      <p>This page demonstrates the TTS leaderboard format with representative example scores. Use it to explore the workflow and report controls, not to make production model-selection claims.</p>
+    </section>
     <section class="panel control-bar" aria-label="Demo controls">
       <div class="view-tabs" aria-label="Report views">
-        <button type="button" class="active" data-view="demo">Demo Run</button>
-        <button type="button" data-view="usage">Usage</button>
-        <button type="button" data-view="eval">Eval Set</button>
-        <button type="button" data-view="samples">Sample Rows</button>
-        <button type="button" data-view="reference">Reference</button>
-        <button type="button" data-view="all">All</button>
+        <button type="button" class="active" data-view="demo" aria-pressed="true">Demo Run</button>
+        <button type="button" data-view="usage" aria-pressed="false">Usage</button>
+        <button type="button" data-view="eval" aria-pressed="false">Eval Set</button>
+        <button type="button" data-view="samples" aria-pressed="false">Sample Rows</button>
+        <button type="button" data-view="reference" aria-pressed="false">Reference</button>
+        <button type="button" data-view="all" aria-pressed="false">All</button>
       </div>
       <div class="control-grid">
         <input id="report-search" type="search" placeholder="Search cases, models, categories, reasons" aria-label="Search report">
@@ -428,7 +572,7 @@
         </select>
         <button type="button" id="reset-controls">Reset</button>
       </div>
-      <p id="filter-status" class="filter-status">Demo Run view is selected.</p>
+      <p id="filter-status" class="filter-status" role="status" aria-live="polite">Demo Run view is selected.</p>
     </section>
 
     <section class="panel">
@@ -529,14 +673,17 @@
       </tbody>
     </table>
 
-    <h2>Sample Report Preview</h2>
+    <h2>Illustrative Report Preview</h2>
+    <p class="muted">The preview samples 300 cases per model from the 440-case evaluation library: 900 model-case evaluations, with three judge attempts per evaluation producing 2,700 illustrative judgments.</p>
     <section class="grid" aria-label="Sample report metrics">
       <div class="metric"><span>Models</span><strong>3</strong></div>
-      <div class="metric"><span>Shared Eval Cases</span><strong>440</strong></div>
-      <div class="metric"><span>Judge Samples</span><strong>3x</strong></div>
+      <div class="metric"><span>Eval Library</span><strong>440 cases</strong></div>
+      <div class="metric"><span>Illustrative Coverage</span><strong>300 / model</strong></div>
+      <div class="metric"><span>Model-Case Evaluations</span><strong>900</strong></div>
+      <div class="metric"><span>Judge Attempts</span><strong>3 / evaluation</strong></div>
+      <div class="metric"><span>Illustrative Judgments</span><strong>2,700</strong></div>
       <div class="metric"><span>Top Avg</span><strong>91.2</strong></div>
       <div class="metric"><span>Lowest Avg</span><strong>84.7</strong></div>
-      <div class="metric"><span>Total Judgments</span><strong>3960</strong></div>
     </section>
 
     <h2>Eval Set Samples</h2>
@@ -3628,7 +3775,7 @@
       </details>
     </section>
 
-    <h2>Model Leaderboard</h2>
+    <h2>Illustrative Model Ranking</h2>
     <table>
       <thead>
         <tr>
@@ -3716,21 +3863,21 @@
       </div>
       <div class="panel">
         <h3>Scores By Model</h3>
-        <p><code>mlx-community/chatterbox-turbo-6bit</code><br>avg 90.1 / n 300 / 78-97</p>
-        <p><code>mlx-community/Kokoro-82M-4bit</code><br>avg 87.2 / n 300 / 73-95</p>
-        <p><code>mlx-community/Qwen3-TTS-12Hz-0.6B-Base-4bit</code><br>avg 83.6 / n 300 / 70-93</p>
+        <p><code>mlx-community/chatterbox-turbo-6bit</code><br>avg 91.2 / n 300 / 78-97</p>
+        <p><code>mlx-community/Kokoro-82M-4bit</code><br>avg 88.6 / n 300 / 73-95</p>
+        <p><code>mlx-community/Qwen3-TTS-12Hz-0.6B-Base-4bit</code><br>avg 84.7 / n 300 / 70-93</p>
       </div>
       <div class="panel">
         <h3>Scores By Voice</h3>
-        <p><code>af_heart</code><br>avg 87.0 / n 855 / 70-97</p>
+        <p><code>af_heart</code><br>avg 88.2 / n 900 / 70-97</p>
       </div>
       <div class="panel">
         <h3>Scores By Language</h3>
-        <p><code>en</code><br>avg 87.0 / n 855 / 70-97</p>
+        <p><code>en</code><br>avg 88.2 / n 900 / 70-97</p>
       </div>
     </section>
 
-    <h2>Category Leaderboard</h2>
+    <h2>Selected Category Comparison</h2>
     <table>
       <thead>
         <tr>
@@ -3908,7 +4055,7 @@
           <td data-label="Baseline"><code>mlx-community/chatterbox-turbo-6bit</code></td>
           <td data-label="Matched Cases">300</td>
           <td data-label="Avg Delta">-2.6</td>
-          <td data-label="Wins / Ties / Losses">42 / 31 / 222</td>
+          <td data-label="Wins / Ties / Losses">42 / 31 / 227</td>
           <td data-label="Largest Regressions">speech pace, conditional-logic, and escalation-priority cases where style control trails the baseline.</td>
         </tr>
         <tr>
@@ -3916,7 +4063,7 @@
           <td data-label="Baseline"><code>mlx-community/chatterbox-turbo-6bit</code></td>
           <td data-label="Matched Cases">300</td>
           <td data-label="Avg Delta">-6.5</td>
-          <td data-label="Wins / Ties / Losses">25 / 22 / 248</td>
+          <td data-label="Wins / Ties / Losses">25 / 22 / 253</td>
           <td data-label="Largest Regressions">emotion, dense-fact, conditional-rule, and critical-alert cases with lower naturalness or intelligibility.</td>
         </tr>
       </tbody>
@@ -3940,7 +4087,7 @@
       </div>
       <div class="panel">
         <h3>Synthesis Model</h3>
-        <p><code>mlx-community/Qwen3-TTS-12Hz-0.6B-Base-4bit</code><br>avg 83.6 / n 300 / range 70-93</p>
+        <p><code>mlx-community/Qwen3-TTS-12Hz-0.6B-Base-4bit</code><br>avg 84.7 / n 300 / range 70-93</p>
         <p class="muted">Compare model-level weak spots before changing prompts, voices, wrappers, or model settings.</p>
       </div>
     </section>
@@ -3992,8 +4139,8 @@
     <h2>Sample-By-Sample Breakdown</h2>
     <p>
       The real combined report contains one row per synthesized model/case pair. This preview shows
-      representative rows across models, categories, slices, and score bands from the 960 generated
-      samples.
+      representative rows across models, categories, slices, and score bands from 900 illustrative
+      model-case evaluations.
     </p>
     <table id="sample-breakdown-table">
       <thead>
@@ -4140,18 +4287,27 @@
     </p>
 
     <p class="muted">
-      This page is a committed sample artifact. Real run outputs should stay under
+      This page is a committed illustrative artifact, not verified benchmark results. Real run outputs should stay under
       ignored <code>runs/</code> directories unless the audio, text, and metadata are
       explicitly safe to publish.
     </p>
   </main>
+  <footer>
+    <div class="footer-inner">
+      <p><strong>Open Audio Judge</strong><br><span class="muted">Focused audio-model evaluation with inspectable evidence.</span></p>
+      <nav class="footer-links" aria-label="Related Open Audio Judge links">
+        <a href="asr-leaderboard-demo.html">Explore the ASR leaderboard</a>
+        <a href="https://github.com/kennethli319/open-audio-judge">Learn more in the GitHub repository</a>
+      </nav>
+    </div>
+  </footer>
   <script>
     const sectionViews = {
       demo: new Set([
-        "Sample Report Preview",
-        "Model Leaderboard",
+        "Illustrative Report Preview",
+        "Illustrative Model Ranking",
         "Top Diagnostics",
-        "Category Leaderboard",
+        "Selected Category Comparison",
         "Baseline Model Deltas",
         "Weakest Segments",
         "Model-Category Action Matrix",
@@ -4177,7 +4333,7 @@
       status: document.querySelector("#filter-status"),
       viewButtons: Array.from(document.querySelectorAll("[data-view]")),
     };
-    const mainChildren = Array.from(document.querySelectorAll("main > :not(.control-bar)"));
+    const mainChildren = Array.from(document.querySelectorAll("main > :not(.control-bar):not(.preview-note)"));
     const evalGroups = Array.from(document.querySelectorAll(".sample-group"));
     const sampleRows = Array.from(document.querySelectorAll("#sample-breakdown-table tbody tr"));
     const sampleBody = document.querySelector("#sample-breakdown-table tbody");
@@ -4206,7 +4362,9 @@
         node.hidden = allowed ? !allowed.has(currentTitle) : false;
       });
       controls.viewButtons.forEach((button) => {
-        button.classList.toggle("active", button.dataset.view === activeView);
+        const isActive = button.dataset.view === activeView;
+        button.classList.toggle("active", isActive);
+        button.setAttribute("aria-pressed", String(isActive));
       });
     }
 
@@ -4273,7 +4431,15 @@
         }
       });
       sortRows();
-      controls.status.textContent = `${viewLabel()} view. Showing ${visibleRows} sample rows and ${visibleCards} eval-set cases.`;
+      if (activeView === "eval") {
+        controls.status.textContent = `${viewLabel()} view. Showing ${visibleCards} of 440 eval-library cases.`;
+      } else if (activeView === "samples") {
+        controls.status.textContent = `${viewLabel()} view. Showing ${visibleRows} of 9 representative sample rows.`;
+      } else if (activeView === "all") {
+        controls.status.textContent = `${viewLabel()} view. Showing ${visibleRows} representative rows and ${visibleCards} eval-library cases.`;
+      } else {
+        controls.status.textContent = `${viewLabel()} view. Filters apply in the Eval Set and Sample Rows views.`;
+      }
     }
 
     function resetControls() {

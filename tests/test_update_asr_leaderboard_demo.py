@@ -223,6 +223,7 @@ def test_render_generated_sections_summarizes_verified_asr_results(tmp_path: Pat
 
     assert "Verified Leaderboard Results" in html
     assert "2 MLX Community ASR models" in html
+    assert html.count("the same research-guided eval set.") == 1
     assert "over 1 case" in html
     assert "The 2 research categories" in html
     assert "Combined 2-clip report" in html
@@ -279,6 +280,8 @@ def test_render_generated_sections_summarizes_verified_asr_results(tmp_path: Pat
     )
     assert "Generated report index" in html
     assert "Machine-readable report map" in html
+    assert "Open Audio Judge repository" in html
+    assert "https://github.com/kennethli319/open-audio-judge" in html
     assert "--discover-complete-model-runs" in html
     assert "scripts/validate_asr_seed_manifest.py" in html
     assert "Check generated page" in html
@@ -2442,6 +2445,7 @@ def test_runtime_status_freshness_allows_live_preflight_output(tmp_path: Path) -
     base_status = {
         "status": "complete",
         "gemini_judge": "verified_from_loaded_results",
+        "gemini_secret": {"status": "missing"},
         "result_bundle": {"total_results": 2, "source_result_file_count": 1},
         "mlx_runtime_preflight": {
             "status": "not_checked",
@@ -2453,6 +2457,7 @@ def test_runtime_status_freshness_allows_live_preflight_output(tmp_path: Path) -
         json.dumps(
             {
                 **base_status,
+                "gemini_secret": {"status": "present"},
                 "mlx_runtime_preflight": {
                     "status": "ok",
                     "command": ["check-runtime"],
@@ -2474,6 +2479,42 @@ def test_runtime_status_freshness_allows_live_preflight_output(tmp_path: Path) -
     )
     with pytest.raises(ValueError, match="runtime-status.json.*stale"):
         refresh_module._compare_runtime_status_artifact(actual, expected)
+
+
+def test_refresh_decision_freshness_allows_local_runtime_state(tmp_path: Path) -> None:
+    refresh_module = load_refresh_module()
+    actual = tmp_path / "refresh-decision.json"
+    expected = tmp_path / "expected-refresh-decision.json"
+    base_decision = {
+        "status": "complete",
+        "action": "skip_live_refresh",
+        "runtime_status": {
+            "status": "complete",
+            "gemini_secret": {"status": "missing"},
+            "mlx_runtime_preflight": {"status": "not_checked"},
+        },
+    }
+    expected.write_text(json.dumps(base_decision) + "\n", encoding="utf-8")
+    actual.write_text(
+        json.dumps(
+            {
+                **base_decision,
+                "runtime_status": {
+                    **base_decision["runtime_status"],
+                    "gemini_secret": {"status": "present"},
+                    "mlx_runtime_preflight": {"status": "ok"},
+                },
+            }
+        )
+        + "\n",
+        encoding="utf-8",
+    )
+
+    refresh_module._compare_refresh_decision_artifact(actual, expected)
+
+    actual.write_text(json.dumps({**base_decision, "action": "blocked_runtime"}), encoding="utf-8")
+    with pytest.raises(ValueError, match="refresh-decision.json.*stale"):
+        refresh_module._compare_refresh_decision_artifact(actual, expected)
 
 
 def test_validate_runtime_ready_requires_audio_secret_and_mlx_preflight() -> None:

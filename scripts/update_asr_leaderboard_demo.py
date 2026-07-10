@@ -43,6 +43,7 @@ DEFAULT_SEED_CASES = ROOT / "examples" / "asr_research_cases.jsonl"
 DEFAULT_HOSTED_DIR_ENV = "ASR_LEADERBOARD_HOSTED_DIR"
 HOSTED_BASE_PATH = "open-audio-judge"
 HOSTED_BASE_URL = "https://kennethli319.github.io/open-audio-judge"
+REPOSITORY_URL = "https://github.com/kennethli319/open-audio-judge"
 START_MARKER = "<!-- ASR_LEADERBOARD_GENERATED_START -->"
 END_MARKER = "<!-- ASR_LEADERBOARD_GENERATED_END -->"
 
@@ -370,11 +371,6 @@ def render_generated_sections(
         model_count=len(model_summaries),
         report_url=hosted_combined_report_url,
     )
-    model_count_sentence = (
-        "Three MLX Community ASR models transcribe the same research-guided eval set. "
-        if model_count == 3
-        else ""
-    )
     best_category_scores = _best_category_scores(results)
     limitations_text = _benchmark_limitations_text(results)
     judge_score_policy_markup = _render_judge_score_policy(
@@ -396,7 +392,6 @@ def render_generated_sections(
                 '      <p class="lede">Which model best preserves meaning on this small, controlled ASR set? '
                 f"{model_count} MLX Community ASR {_pluralize('model', model_count)} {model_verb} "
                 "the same research-guided eval set. "
-                f"{model_count_sentence}"
                 "Scores below are Gemini semantic-judge scores (higher is better), not word error rate.</p>"
             ),
             "    </section>",
@@ -477,6 +472,7 @@ def render_generated_sections(
             f'      <a class="link-card" href="{hosted_combined_report_url}"><strong>Combined {case_count}-clip report</strong><span>Explore all {evaluation_count} model-case {_pluralize("evaluation", evaluation_count)} by model, category, slice, score, and issue.</span></a>',
             f'      <a class="link-card" href="{hosted_report_index_url}"><strong>Generated report index</strong><span>Browse source reports generated for each contributing run.</span></a>',
             f'      <a class="link-card" href="{hosted_report_links_url}"><strong>Machine-readable report map</strong><span>Use the JSON links and provenance index.</span></a>',
+            f'      <a class="link-card" href="{REPOSITORY_URL}"><strong>Open Audio Judge repository</strong><span>Read the methodology, run the tools, and inspect the source behind this benchmark.</span></a>',
             "    </div>",
             "",
             '    <details class="technical-details">',

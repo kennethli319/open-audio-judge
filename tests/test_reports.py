@@ -32,6 +32,9 @@ def test_write_html_report(tmp_path: Path) -> None:
     html = output.read_text(encoding="utf-8")
 
     assert "Open Audio Judge ASR Report" in html
+    assert 'href="/open-audio-judge/asr-leaderboard-demo.html"' in html
+    assert 'href="/open-audio-judge/tts-leaderboard-demo.html"' in html
+    assert 'href="https://github.com/kennethli319/open-audio-judge"' in html
     assert "Decision brief" in html
     assert 'class="case-list"' in html
     assert 'class="case-card' in html
@@ -186,6 +189,10 @@ def test_write_html_report_aggregates_tts_candidate_metadata(tmp_path: Path) -> 
     output = write_html_report(results, tmp_path / "report.html")
     html = output.read_text(encoding="utf-8")
 
+    assert "Open Audio Judge TTS Report" in html
+    assert 'href="/open-audio-judge/tts-leaderboard-demo.html"' in html
+    assert 'href="/open-audio-judge/asr-leaderboard-demo.html"' in html
+    assert 'href="https://github.com/kennethli319/open-audio-judge"' in html
     assert "Candidate Metadata" in html
     assert "TTS Slice" in html
     assert "dates times" in html

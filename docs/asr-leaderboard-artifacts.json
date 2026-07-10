@@ -23,7 +23,7 @@
       "sha256": "dedaa42d5cd0631a33155b44e77e835175187f38094ac9e8cef4ba2ab20d8439"
     },
     {
-      "bytes": 57190,
+      "bytes": 60300,
       "digest_status": "ok",
       "exists": true,
       "hosted_paths": [
@@ -31,7 +31,7 @@
       ],
       "path": "docs/asr-leaderboard-demo.html",
       "purpose": "Generated ASR leaderboard demo HTML page.",
-      "sha256": "c632439ea43eddaea01df9ef5ca37646c195d492326d1076f05ae148dec1bee3"
+      "sha256": "ff036713a169efec8af8bb900660ca4198874a4ce9d87c52593a7baee60124ea"
     },
     {
       "bytes": null,
@@ -141,7 +141,7 @@
       ],
       "path": "docs/asr-leaderboard-report-index.md",
       "purpose": "Human-readable index linking the demo page, combined report, and source run reports.",
-      "sha256": "9aa7539a6be6cd8fc07226e6d99584b4057f6c3925d87f34864cf70c7fa513af"
+      "sha256": "87c2114abf3b46d71b01495c1d8a428fbf9e26227a28949c577e83ca2b820b78"
     },
     {
       "bytes": 47573,
@@ -152,7 +152,7 @@
       ],
       "path": "docs/asr-leaderboard-report-links.json",
       "purpose": "Machine-readable map linking the demo page to combined and source ASR reports.",
-      "sha256": "052ae5d41d0557c615aeb5735856dbd0619a073e38fadd4eef0116b944f8fed9"
+      "sha256": "60ad708856e1530bb6267cd61a895e2a91ce8698224d22e484659c65094c8476"
     },
     {
       "bytes": 10460,
@@ -194,7 +194,7 @@
       ],
       "path": "docs/asr-leaderboard-summary.json",
       "purpose": "Machine-readable leaderboard summary and reproducible refresh workflow.",
-      "sha256": "70ac494150152f68154693540527ac213f68b4979fb32bfac4875282fbb5cc80"
+      "sha256": "fe48eadbd012a3323730401927efa3c50277296c972afa5214124be67d915523"
     },
     {
       "bytes": 1634,
@@ -208,7 +208,7 @@
       "sha256": "abbc54c696de3f52693ab26213e19f16eb01014034724e2b87a58a25a4ab2f24"
     },
     {
-      "bytes": 547988,
+      "bytes": 548646,
       "digest_status": "ok",
       "exists": true,
       "hosted_paths": [
@@ -216,7 +216,7 @@
       ],
       "path": "runs/asr-leaderboard/full-35-combined/report.html",
       "purpose": "Local combined HTML report with per-case judge details.",
-      "sha256": "051245e138659e17ced1f556e45bdeb39b249d4d4bb4b5de3ff33422844a454c"
+      "sha256": "7816e7113843acd30b2f74a5b75f3e94b13c8593339e4f8e62b261583bdd14a1"
     },
     {
       "bytes": 420028,
@@ -230,7 +230,7 @@
       "sha256": "8bff4dff3a4b3e9bd9436e10efc28ea57649ac64ab8b82e337fda43d75992dfb"
     },
     {
-      "bytes": 56765,
+      "bytes": 57423,
       "digest_status": "ok",
       "exists": true,
       "hosted_paths": [
@@ -238,10 +238,10 @@
       ],
       "path": "runs/asr-leaderboard/qwen3-asr-1.7b-entity-smoke/judge-report/report.html",
       "purpose": "Hosted source run HTML report linked from the ASR report index.",
-      "sha256": "996801b6f86c23ba97f9bd6f7b1ebd863e1232703ab100ea5f7937b90157733d"
+      "sha256": "df3cf3cb02d08f0afa0169c59e47b10e78a329b030a7ae69a03ac55866769185"
     },
     {
-      "bytes": 101209,
+      "bytes": 101867,
       "digest_status": "ok",
       "exists": true,
       "hosted_paths": [
@@ -249,10 +249,10 @@
       ],
       "path": "runs/asr-leaderboard/qwen3-asr-1.7b-full-gap/judge-report/report.html",
       "purpose": "Hosted source run HTML report linked from the ASR report index.",
-      "sha256": "e325c7b69d42c67b4bc25bd2135ab79ce5f2b52b5f29b5d20c65c1cd4c433e24"
+      "sha256": "34306e9292986aa7ce97f0bc972c9547b725b96230ec69588645d9ffe17569d3"
     },
     {
-      "bytes": 54825,
+      "bytes": 55483,
       "digest_status": "ok",
       "exists": true,
       "hosted_paths": [
@@ -260,10 +260,10 @@
       ],
       "path": "runs/asr-leaderboard/qwen3-asr-1.7b-noise-smoke/judge-report/report.html",
       "purpose": "Hosted source run HTML report linked from the ASR report index.",
-      "sha256": "ed899c0cd759798abbfb9240ecbd33865944a009f298c3d232b17e25561981a0"
+      "sha256": "01e4ae83885b0d9e10a8da71d751765b2705bdf4bfc8ba1768c451c9404a103f"
     },
     {
-      "bytes": 50410,
+      "bytes": 51068,
       "digest_status": "ok",
       "exists": true,
       "hosted_paths": [
@@ -271,10 +271,10 @@
       ],
       "path": "runs/asr-leaderboard/qwen3-asr-1.7b-paraphrase-smoke/judge-report/report.html",
       "purpose": "Hosted source run HTML report linked from the ASR report index.",
-      "sha256": "9c8f615fb2ace98e85f4101e90316496a5e44db12693d7912ec7cc5bd5c028c8"
+      "sha256": "8f48aba791d54993fc009125a65eb87e3de331f0a6c4e06608413ef81714785f"
     },
     {
-      "bytes": 58803,
+      "bytes": 59461,
       "digest_status": "ok",
       "exists": true,
       "hosted_paths": [
@@ -282,10 +282,10 @@
       ],
       "path": "runs/asr-leaderboard/qwen3-asr-1.7b-semantic-smoke/judge-report/report.html",
       "purpose": "Hosted source run HTML report linked from the ASR report index.",
-      "sha256": "98409f1b77c2c526618176aee43bb1bd2f34962b8020a9202b403bc14059b024"
+      "sha256": "942b37c19a5c873ae9e9d836f8d1df30038b896170e2cf28e1049038c76483d5"
     },
     {
-      "bytes": 45788,
+      "bytes": 46446,
       "digest_status": "ok",
       "exists": true,
       "hosted_paths": [
@@ -293,10 +293,10 @@
       ],
       "path": "runs/asr-leaderboard/qwen3-asr-1.7b-smoke/judge-report/report.html",
       "purpose": "Hosted source run HTML report linked from the ASR report index.",
-      "sha256": "1358c92b7a1f272560f10cddf41b661b6432682b8b6bd9bbc0a1b89d16fe4eae"
+      "sha256": "ac0323e6fbe58aa53f3a6b98a1c6f8cf4db094a0786db41937a81f4dfac14929"
     },
     {
-      "bytes": 56274,
+      "bytes": 56932,
       "digest_status": "ok",
       "exists": true,
       "hosted_paths": [
@@ -304,10 +304,10 @@
       ],
       "path": "runs/asr-leaderboard/vibevoice-asr-entity-smoke/judge-report/report.html",
       "purpose": "Hosted source run HTML report linked from the ASR report index.",
-      "sha256": "476e1dee71027d9b857eaaad5004bc87499eb943693b0b0135808dd0e2b00309"
+      "sha256": "328a585702ba6ce8e1af97d693fbce321bcb701e26b1c06eba8b4e401651bf18"
     },
     {
-      "bytes": 96684,
+      "bytes": 97342,
       "digest_status": "ok",
       "exists": true,
       "hosted_paths": [
@@ -315,10 +315,10 @@
       ],
       "path": "runs/asr-leaderboard/vibevoice-asr-full-gap/judge-report/report.html",
       "purpose": "Hosted source run HTML report linked from the ASR report index.",
-      "sha256": "84a34229f885029cccc93ee2bb6ea338fb3b7529dbb12aefd23fa90bf7064f2c"
+      "sha256": "0e7f6c0e1695eddc365db8b1c7007c242d66b7ca0648d2e9ad77e6983c8cc74a"
     },
     {
-      "bytes": 55870,
+      "bytes": 56528,
       "digest_status": "ok",
       "exists": true,
       "hosted_paths": [
@@ -326,10 +326,10 @@
       ],
       "path": "runs/asr-leaderboard/vibevoice-asr-noise-smoke/judge-report/report.html",
       "purpose": "Hosted source run HTML report linked from the ASR report index.",
-      "sha256": "e21dbae2a10a0c95880a03a97a7aa1742c804d2596fd14327337235c9edab457"
+      "sha256": "b5a929f95474a4a85f4882e92abb68ee7c9b58e2095c1ee3e144c0b9d785b1d4"
     },
     {
-      "bytes": 53804,
+      "bytes": 54462,
       "digest_status": "ok",
       "exists": true,
       "hosted_paths": [
@@ -337,10 +337,10 @@
       ],
       "path": "runs/asr-leaderboard/vibevoice-asr-paraphrase-smoke/judge-report/report.html",
       "purpose": "Hosted source run HTML report linked from the ASR report index.",
-      "sha256": "9c314c29420c5c2ac3daaa3a5e864f04bba049dd8b1d059c19a1033f991eba4a"
+      "sha256": "e0d96f509504e71a1b1a19645f740aec5e6ac1193b0113971e2f8bd3c672bc1b"
     },
     {
-      "bytes": 60736,
+      "bytes": 61394,
       "digest_status": "ok",
       "exists": true,
       "hosted_paths": [
@@ -348,10 +348,10 @@
       ],
       "path": "runs/asr-leaderboard/vibevoice-asr-semantic-smoke/judge-report/report.html",
       "purpose": "Hosted source run HTML report linked from the ASR report index.",
-      "sha256": "a4793291ac5d40bfce8be37cba19829f3073318e2d6519c42fa28446b8735495"
+      "sha256": "6ed47f1eb78b8a233706c2fd1cfe92c9df010240d24b3962c34b7a19fb8baf12"
     },
     {
-      "bytes": 41714,
+      "bytes": 42372,
       "digest_status": "ok",
       "exists": true,
       "hosted_paths": [
@@ -359,10 +359,10 @@
       ],
       "path": "runs/asr-leaderboard/vibevoice-asr-smoke/judge-report/report.html",
       "purpose": "Hosted source run HTML report linked from the ASR report index.",
-      "sha256": "52c712586439b12b6b40dfb9ac2970db7786e941e3b63f2b267c4c40de827aba"
+      "sha256": "b79c16d73e731333a8f599fdb783342d8f5149d02fcbe7ae3290fb2e23e213a5"
     },
     {
-      "bytes": 57157,
+      "bytes": 57815,
       "digest_status": "ok",
       "exists": true,
       "hosted_paths": [
@@ -370,10 +370,10 @@
       ],
       "path": "runs/asr-leaderboard/whisper-large-v3-turbo-entity-smoke/judge-report/report.html",
       "purpose": "Hosted source run HTML report linked from the ASR report index.",
-      "sha256": "6332f49567e4ad2989af9e773f11c33e45c4385c28a9ac29bd6bfca61ab73341"
+      "sha256": "f75cf61c922affb9ead8910448c2e53fb60197f9a147cef62cc472574fe7109d"
     },
     {
-      "bytes": 102670,
+      "bytes": 103328,
       "digest_status": "ok",
       "exists": true,
       "hosted_paths": [
@@ -381,10 +381,10 @@
       ],
       "path": "runs/asr-leaderboard/whisper-large-v3-turbo-full-gap/judge-report/report.html",
       "purpose": "Hosted source run HTML report linked from the ASR report index.",
-      "sha256": "e4d01278bdf722e9135e34d1bb413bc09209a547b8db03ae4bea75e913d02ab1"
+      "sha256": "243301fb4d9cf9a007488389e933f34b70a384c33b74dedf0ddaf5bf6c674a26"
     },
     {
-      "bytes": 52045,
+      "bytes": 52703,
       "digest_status": "ok",
       "exists": true,
       "hosted_paths": [
@@ -392,10 +392,10 @@
       ],
       "path": "runs/asr-leaderboard/whisper-large-v3-turbo-noise-smoke/judge-report/report.html",
       "purpose": "Hosted source run HTML report linked from the ASR report index.",
-      "sha256": "cab16af6f4053bb49e02d889377dd20b6ae4751b56dd575b3c2c435f08f1358a"
+      "sha256": "88397489492dfe14ff8758e6b2326fcec6c4b835990a810531fe5d1e027c9973"
     },
     {
-      "bytes": 52864,
+      "bytes": 53522,
       "digest_status": "ok",
       "exists": true,
       "hosted_paths": [
@@ -403,10 +403,10 @@
       ],
       "path": "runs/asr-leaderboard/whisper-large-v3-turbo-paraphrase-smoke/judge-report/report.html",
       "purpose": "Hosted source run HTML report linked from the ASR report index.",
-      "sha256": "51febd51232b756acfc1beb0b8c7236f9f4e79ba55ba9b4ed9472fb42de60ded"
+      "sha256": "d09ae3ebd414526e0e450b5cdd942b6947834f35135d731d58eafcf98f9249e2"
     },
     {
-      "bytes": 62466,
+      "bytes": 63124,
       "digest_status": "ok",
       "exists": true,
       "hosted_paths": [
@@ -414,10 +414,10 @@
       ],
       "path": "runs/asr-leaderboard/whisper-large-v3-turbo-semantic-smoke/judge-report/report.html",
       "purpose": "Hosted source run HTML report linked from the ASR report index.",
-      "sha256": "39135f0dd8102aa54992e630de05345bf99397f65a9f1e46c0124fd8ec40894f"
+      "sha256": "5a8d7b2f475f8bb2e3e6f774a0142d226c4bba2ff5549b6099a6e4f27fed200a"
     },
     {
-      "bytes": 45929,
+      "bytes": 46587,
       "digest_status": "ok",
       "exists": true,
       "hosted_paths": [
@@ -425,7 +425,7 @@
       ],
       "path": "runs/asr-leaderboard/whisper-large-v3-turbo-smoke/judge-report/report.html",
       "purpose": "Hosted source run HTML report linked from the ASR report index.",
-      "sha256": "857670c787c395806d12d23a126c8237e58b9292fad4af59d04e9d85bd1a1251"
+      "sha256": "22ceba42ac1bbde50dc0d5f1164c40ad8c8ad9dbb44ed88cafe4b60a86075d66"
     }
   ],
   "category_count": 7,
@@ -480,10 +480,10 @@
         ],
         "ok_count": 3,
         "path": "runs/asr-leaderboard/whisper-large-v3-turbo-smoke/judge-report/results.jsonl",
-        "report_bytes": 45929,
+        "report_bytes": 46587,
         "report_exists": true,
         "report_path": "runs/asr-leaderboard/whisper-large-v3-turbo-smoke/judge-report/report.html",
-        "report_sha256": "857670c787c395806d12d23a126c8237e58b9292fad4af59d04e9d85bd1a1251",
+        "report_sha256": "22ceba42ac1bbde50dc0d5f1164c40ad8c8ad9dbb44ed88cafe4b60a86075d66",
         "result_bytes": 12279,
         "result_count": 3,
         "result_sha256": "c19589553bdfe3a279cde6c17ae8c25abcfd10f163efeb7ea866e03fbac57b4d"
@@ -510,10 +510,10 @@
         ],
         "ok_count": 12,
         "path": "runs/asr-leaderboard/whisper-large-v3-turbo-full-gap/judge-report/results.jsonl",
-        "report_bytes": 102670,
+        "report_bytes": 103328,
         "report_exists": true,
         "report_path": "runs/asr-leaderboard/whisper-large-v3-turbo-full-gap/judge-report/report.html",
-        "report_sha256": "e4d01278bdf722e9135e34d1bb413bc09209a547b8db03ae4bea75e913d02ab1",
+        "report_sha256": "243301fb4d9cf9a007488389e933f34b70a384c33b74dedf0ddaf5bf6c674a26",
         "result_bytes": 47947,
         "result_count": 12,
         "result_sha256": "e7bebb2d053d787aa9fe1cab549eee6d253a69363fa6721951f7f879f31d6322"
@@ -537,10 +537,10 @@
         ],
         "ok_count": 5,
         "path": "runs/asr-leaderboard/whisper-large-v3-turbo-semantic-smoke/judge-report/results.jsonl",
-        "report_bytes": 62466,
+        "report_bytes": 63124,
         "report_exists": true,
         "report_path": "runs/asr-leaderboard/whisper-large-v3-turbo-semantic-smoke/judge-report/report.html",
-        "report_sha256": "39135f0dd8102aa54992e630de05345bf99397f65a9f1e46c0124fd8ec40894f",
+        "report_sha256": "5a8d7b2f475f8bb2e3e6f774a0142d226c4bba2ff5549b6099a6e4f27fed200a",
         "result_bytes": 19622,
         "result_count": 5,
         "result_sha256": "3189bda2eae5e1b65fa82f76a4024f41b156fff96633e05eedc743de73f3f6da"
@@ -563,10 +563,10 @@
         ],
         "ok_count": 5,
         "path": "runs/asr-leaderboard/whisper-large-v3-turbo-entity-smoke/judge-report/results.jsonl",
-        "report_bytes": 57157,
+        "report_bytes": 57815,
         "report_exists": true,
         "report_path": "runs/asr-leaderboard/whisper-large-v3-turbo-entity-smoke/judge-report/report.html",
-        "report_sha256": "6332f49567e4ad2989af9e773f11c33e45c4385c28a9ac29bd6bfca61ab73341",
+        "report_sha256": "f75cf61c922affb9ead8910448c2e53fb60197f9a147cef62cc472574fe7109d",
         "result_bytes": 19779,
         "result_count": 5,
         "result_sha256": "1802d7c7888e4b50a937e8b0f4116e36e48ed7ad7883700b47e0feee9193b6c3"
@@ -588,10 +588,10 @@
         ],
         "ok_count": 5,
         "path": "runs/asr-leaderboard/whisper-large-v3-turbo-paraphrase-smoke/judge-report/results.jsonl",
-        "report_bytes": 52864,
+        "report_bytes": 53522,
         "report_exists": true,
         "report_path": "runs/asr-leaderboard/whisper-large-v3-turbo-paraphrase-smoke/judge-report/report.html",
-        "report_sha256": "51febd51232b756acfc1beb0b8c7236f9f4e79ba55ba9b4ed9472fb42de60ded",
+        "report_sha256": "d09ae3ebd414526e0e450b5cdd942b6947834f35135d731d58eafcf98f9249e2",
         "result_bytes": 19283,
         "result_count": 5,
         "result_sha256": "ea3c7b9fece942fae17acfd4cf4d07d19ab04fb381474deabf8c0302bc193864"
@@ -613,10 +613,10 @@
         ],
         "ok_count": 5,
         "path": "runs/asr-leaderboard/whisper-large-v3-turbo-noise-smoke/judge-report/results.jsonl",
-        "report_bytes": 52045,
+        "report_bytes": 52703,
         "report_exists": true,
         "report_path": "runs/asr-leaderboard/whisper-large-v3-turbo-noise-smoke/judge-report/report.html",
-        "report_sha256": "cab16af6f4053bb49e02d889377dd20b6ae4751b56dd575b3c2c435f08f1358a",
+        "report_sha256": "88397489492dfe14ff8758e6b2326fcec6c4b835990a810531fe5d1e027c9973",
         "result_bytes": 19088,
         "result_count": 5,
         "result_sha256": "9758e1e06e23c4ff600c46f95f9a5018fc1ce125d782e48e1c7396cf02a75949"
@@ -639,10 +639,10 @@
         ],
         "ok_count": 3,
         "path": "runs/asr-leaderboard/qwen3-asr-1.7b-smoke/judge-report/results.jsonl",
-        "report_bytes": 45788,
+        "report_bytes": 46446,
         "report_exists": true,
         "report_path": "runs/asr-leaderboard/qwen3-asr-1.7b-smoke/judge-report/report.html",
-        "report_sha256": "1358c92b7a1f272560f10cddf41b661b6432682b8b6bd9bbc0a1b89d16fe4eae",
+        "report_sha256": "ac0323e6fbe58aa53f3a6b98a1c6f8cf4db094a0786db41937a81f4dfac14929",
         "result_bytes": 12467,
         "result_count": 3,
         "result_sha256": "da790e5afb80a39064e177424503518466ce918adbffb090895cc90d67bb2161"
@@ -668,10 +668,10 @@
         ],
         "ok_count": 12,
         "path": "runs/asr-leaderboard/qwen3-asr-1.7b-full-gap/judge-report/results.jsonl",
-        "report_bytes": 101209,
+        "report_bytes": 101867,
         "report_exists": true,
         "report_path": "runs/asr-leaderboard/qwen3-asr-1.7b-full-gap/judge-report/report.html",
-        "report_sha256": "e325c7b69d42c67b4bc25bd2135ab79ce5f2b52b5f29b5d20c65c1cd4c433e24",
+        "report_sha256": "34306e9292986aa7ce97f0bc972c9547b725b96230ec69588645d9ffe17569d3",
         "result_bytes": 47770,
         "result_count": 12,
         "result_sha256": "2ff034ef89f5e2b94b3648fb8f34f809a573840f3f6767785b61243ed6ebc4c2"
@@ -695,10 +695,10 @@
         ],
         "ok_count": 5,
         "path": "runs/asr-leaderboard/qwen3-asr-1.7b-semantic-smoke/judge-report/results.jsonl",
-        "report_bytes": 58803,
+        "report_bytes": 59461,
         "report_exists": true,
         "report_path": "runs/asr-leaderboard/qwen3-asr-1.7b-semantic-smoke/judge-report/report.html",
-        "report_sha256": "98409f1b77c2c526618176aee43bb1bd2f34962b8020a9202b403bc14059b024",
+        "report_sha256": "942b37c19a5c873ae9e9d836f8d1df30038b896170e2cf28e1049038c76483d5",
         "result_bytes": 18112,
         "result_count": 5,
         "result_sha256": "5386712d72a1b7443fd974e810c2716243e74a4e61c9f49f6eecec63b3862af7"
@@ -721,10 +721,10 @@
         ],
         "ok_count": 5,
         "path": "runs/asr-leaderboard/qwen3-asr-1.7b-entity-smoke/judge-report/results.jsonl",
-        "report_bytes": 56765,
+        "report_bytes": 57423,
         "report_exists": true,
         "report_path": "runs/asr-leaderboard/qwen3-asr-1.7b-entity-smoke/judge-report/report.html",
-        "report_sha256": "996801b6f86c23ba97f9bd6f7b1ebd863e1232703ab100ea5f7937b90157733d",
+        "report_sha256": "df3cf3cb02d08f0afa0169c59e47b10e78a329b030a7ae69a03ac55866769185",
         "result_bytes": 20285,
         "result_count": 5,
         "result_sha256": "c33bbefa5573baeb7d92fae9638d7aab3f2a7047e53b2b82aac32401d3f0e3c6"
@@ -746,10 +746,10 @@
         ],
         "ok_count": 5,
         "path": "runs/asr-leaderboard/qwen3-asr-1.7b-paraphrase-smoke/judge-report/results.jsonl",
-        "report_bytes": 50410,
+        "report_bytes": 51068,
         "report_exists": true,
         "report_path": "runs/asr-leaderboard/qwen3-asr-1.7b-paraphrase-smoke/judge-report/report.html",
-        "report_sha256": "9c8f615fb2ace98e85f4101e90316496a5e44db12693d7912ec7cc5bd5c028c8",
+        "report_sha256": "8f48aba791d54993fc009125a65eb87e3de331f0a6c4e06608413ef81714785f",
         "result_bytes": 17991,
         "result_count": 5,
         "result_sha256": "b618d9cc01f7f85b19fc400843f48c9ac7686a0d75e30bfff92c5b47f7880816"
@@ -772,10 +772,10 @@
         ],
         "ok_count": 5,
         "path": "runs/asr-leaderboard/qwen3-asr-1.7b-noise-smoke/judge-report/results.jsonl",
-        "report_bytes": 54825,
+        "report_bytes": 55483,
         "report_exists": true,
         "report_path": "runs/asr-leaderboard/qwen3-asr-1.7b-noise-smoke/judge-report/report.html",
-        "report_sha256": "ed899c0cd759798abbfb9240ecbd33865944a009f298c3d232b17e25561981a0",
+        "report_sha256": "01e4ae83885b0d9e10a8da71d751765b2705bdf4bfc8ba1768c451c9404a103f",
         "result_bytes": 19368,
         "result_count": 5,
         "result_sha256": "0d2f2f5644753dd4cb79fcb318a5d43401785cef8b04c95b1a1516876db98bd7"
@@ -797,10 +797,10 @@
         ],
         "ok_count": 3,
         "path": "runs/asr-leaderboard/vibevoice-asr-smoke/judge-report/results.jsonl",
-        "report_bytes": 41714,
+        "report_bytes": 42372,
         "report_exists": true,
         "report_path": "runs/asr-leaderboard/vibevoice-asr-smoke/judge-report/report.html",
-        "report_sha256": "52c712586439b12b6b40dfb9ac2970db7786e941e3b63f2b267c4c40de827aba",
+        "report_sha256": "b79c16d73e731333a8f599fdb783342d8f5149d02fcbe7ae3290fb2e23e213a5",
         "result_bytes": 11394,
         "result_count": 3,
         "result_sha256": "4c883cf2ae204becf1b498d24e5189ed06191a59320d64a068bc6cc0dee09f2c"
@@ -825,10 +825,10 @@
         ],
         "ok_count": 12,
         "path": "runs/asr-leaderboard/vibevoice-asr-full-gap/judge-report/results.jsonl",
-        "report_bytes": 96684,
+        "report_bytes": 97342,
         "report_exists": true,
         "report_path": "runs/asr-leaderboard/vibevoice-asr-full-gap/judge-report/report.html",
-        "report_sha256": "84a34229f885029cccc93ee2bb6ea338fb3b7529dbb12aefd23fa90bf7064f2c",
+        "report_sha256": "0e7f6c0e1695eddc365db8b1c7007c242d66b7ca0648d2e9ad77e6983c8cc74a",
         "result_bytes": 46335,
         "result_count": 12,
         "result_sha256": "18dcfb75b9a165f026f3d8e30e31a7dba78d71b4552ece0db95fe772dad15f5d"
@@ -852,10 +852,10 @@
         ],
         "ok_count": 5,
         "path": "runs/asr-leaderboard/vibevoice-asr-semantic-smoke/judge-report/results.jsonl",
-        "report_bytes": 60736,
+        "report_bytes": 61394,
         "report_exists": true,
         "report_path": "runs/asr-leaderboard/vibevoice-asr-semantic-smoke/judge-report/report.html",
-        "report_sha256": "a4793291ac5d40bfce8be37cba19829f3073318e2d6519c42fa28446b8735495",
+        "report_sha256": "6ed47f1eb78b8a233706c2fd1cfe92c9df010240d24b3962c34b7a19fb8baf12",
         "result_bytes": 19314,
         "result_count": 5,
         "result_sha256": "566a04bdd182d0b97a7bf0df2601f162ca18885dcdc592572e0406b95c716dc7"
@@ -878,10 +878,10 @@
         ],
         "ok_count": 5,
         "path": "runs/asr-leaderboard/vibevoice-asr-entity-smoke/judge-report/results.jsonl",
-        "report_bytes": 56274,
+        "report_bytes": 56932,
         "report_exists": true,
         "report_path": "runs/asr-leaderboard/vibevoice-asr-entity-smoke/judge-report/report.html",
-        "report_sha256": "476e1dee71027d9b857eaaad5004bc87499eb943693b0b0135808dd0e2b00309",
+        "report_sha256": "328a585702ba6ce8e1af97d693fbce321bcb701e26b1c06eba8b4e401651bf18",
         "result_bytes": 20082,
         "result_count": 5,
         "result_sha256": "29295d6874abfac306d656503001586dbaeab62531333113b7f3deed7dda4291"
@@ -903,10 +903,10 @@
         ],
         "ok_count": 5,
         "path": "runs/asr-leaderboard/vibevoice-asr-paraphrase-smoke/judge-report/results.jsonl",
-        "report_bytes": 53804,
+        "report_bytes": 54462,
         "report_exists": true,
         "report_path": "runs/asr-leaderboard/vibevoice-asr-paraphrase-smoke/judge-report/report.html",
-        "report_sha256": "9c314c29420c5c2ac3daaa3a5e864f04bba049dd8b1d059c19a1033f991eba4a",
+        "report_sha256": "e0d96f509504e71a1b1a19645f740aec5e6ac1193b0113971e2f8bd3c672bc1b",
         "result_bytes": 20199,
         "result_count": 5,
         "result_sha256": "77bdc4b49fc30a36df6da414c506f5a173e930530115d5589d1edb2c94e63260"
@@ -929,10 +929,10 @@
         ],
         "ok_count": 5,
         "path": "runs/asr-leaderboard/vibevoice-asr-noise-smoke/judge-report/results.jsonl",
-        "report_bytes": 55870,
+        "report_bytes": 56528,
         "report_exists": true,
         "report_path": "runs/asr-leaderboard/vibevoice-asr-noise-smoke/judge-report/report.html",
-        "report_sha256": "e21dbae2a10a0c95880a03a97a7aa1742c804d2596fd14327337235c9edab457",
+        "report_sha256": "b5a929f95474a4a85f4882e92abb68ee7c9b58e2095c1ee3e144c0b9d785b1d4",
         "result_bytes": 19873,
         "result_count": 5,
         "result_sha256": "325f307fcb4a18ef1334623ebfefeb203c0fdc0a70fb8f82d6db6769628398cc"

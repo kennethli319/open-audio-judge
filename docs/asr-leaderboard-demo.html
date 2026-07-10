@@ -18,6 +18,7 @@
       --accent-soft: #eaf2fb;
     }
     * { box-sizing: border-box; }
+    html { overflow-x: hidden; scroll-behavior: smooth; }
     body {
       margin: 0;
       background: var(--bg);
@@ -26,6 +27,34 @@
       line-height: 1.55;
       overflow-wrap: anywhere;
     }
+    .skip-link {
+      position: absolute;
+      left: 18px;
+      top: -80px;
+      z-index: 20;
+      border-radius: 8px;
+      background: var(--ink);
+      color: #ffffff;
+      padding: 9px 12px;
+    }
+    .skip-link:focus { top: 12px; }
+    :focus-visible { outline: 3px solid #79aee5; outline-offset: 3px; }
+    .site-nav { background: var(--panel); border-bottom: 1px solid var(--line); }
+    .site-nav-inner {
+      align-items: center;
+      display: flex;
+      gap: 20px;
+      justify-content: space-between;
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 12px 24px;
+    }
+    .brand { color: var(--ink); font-weight: 800; letter-spacing: -.01em; text-decoration: none; white-space: nowrap; }
+    .board-links { align-items: center; display: flex; flex-wrap: wrap; gap: 6px; justify-content: flex-end; }
+    .board-links a { border-radius: 8px; color: var(--ink); font-size: 14px; font-weight: 650; padding: 7px 10px; text-decoration: none; }
+    .board-links a:hover { background: var(--accent-soft); color: var(--accent); }
+    .board-links a[aria-current="page"] { background: var(--accent-soft); color: var(--accent); }
+    .board-links .repo-link { border: 1px solid var(--line); }
     header {
       background: var(--panel);
       border-bottom: 1px solid var(--line);
@@ -160,6 +189,10 @@
     .technical-details-body { max-width: 100%; overflow-x: auto; padding: 2px 17px 20px; border-top: 1px solid var(--line); }
     .technical-details-body table { min-width: 720px; border: 1px solid var(--line); }
     .sr-only { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0,0,0,0); white-space: nowrap; border: 0; }
+    footer { border-top: 1px solid var(--line); background: var(--panel); }
+    .footer-inner { align-items: center; display: flex; flex-wrap: wrap; gap: 12px 24px; justify-content: space-between; max-width: 1200px; margin: 0 auto; padding: 22px 24px; }
+    .footer-inner p { margin: 0; }
+    .footer-links { display: flex; flex-wrap: wrap; gap: 14px; }
     @media (max-width: 720px) {
       header { padding: 26px 18px 22px; }
       main { padding: 18px 12px 34px; }
@@ -167,17 +200,32 @@
       th, td { padding: 10px; }
       .scope-strip { grid-template-columns: repeat(2, minmax(0, 1fr)); }
       .preamble-details { margin-top: 0; }
+      .site-nav-inner { align-items: flex-start; flex-direction: column; gap: 8px; padding: 10px 16px; }
+      .board-links { justify-content: flex-start; }
+      .footer-inner { align-items: flex-start; flex-direction: column; padding: 20px 16px; }
     }
   </style>
 </head>
 <body>
+  <a class="skip-link" href="#main-content">Skip to ASR leaderboard</a>
+  <nav class="site-nav" aria-label="Open Audio Judge">
+    <div class="site-nav-inner">
+      <a class="brand" href="index.html">Open Audio Judge</a>
+      <div class="board-links">
+        <a href="tts-leaderboard-demo.html">TTS leaderboard</a>
+        <a href="asr-leaderboard-demo.html" aria-current="page">ASR leaderboard</a>
+        <a class="repo-link" href="https://github.com/kennethli319/open-audio-judge">GitHub repository</a>
+      </div>
+    </div>
+  </nav>
   <header>
     <div class="header-inner">
-      <h1>Open Audio Judge ASR Leaderboard</h1>
+      <span class="eyebrow">Verified benchmark</span>
+      <h1>ASR Leaderboard</h1>
       <p class="lede">Compare three MLX ASR models by semantic accuracy, understand where each one fails, and open the exact transcript evidence behind every score.</p>
     </div>
   </header>
-  <main>
+  <main id="main-content" tabindex="-1">
     <details class="technical-details preamble-details">
       <summary>How this benchmark was built</summary>
       <div class="technical-details-body">
@@ -213,7 +261,7 @@
     <section id="ranking" class="section-heading">
       <span class="eyebrow">Benchmark snapshot</span>
       <h2>Verified Leaderboard Results</h2>
-      <p class="lede">Which model best preserves meaning on this small, controlled ASR set? 3 MLX Community ASR models transcribe the same research-guided eval set. Three MLX Community ASR models transcribe the same research-guided eval set. Scores below are Gemini semantic-judge scores (higher is better), not word error rate.</p>
+      <p class="lede">Which model best preserves meaning on this small, controlled ASR set? 3 MLX Community ASR models transcribe the same research-guided eval set. Scores below are Gemini semantic-judge scores (higher is better), not word error rate.</p>
     </section>
     <section class="scope-strip" aria-label="Benchmark scope">
       <div class="scope-item"><span>Clips</span><strong>35 synthetic</strong></div>
@@ -272,6 +320,7 @@
       <a class="link-card" href="https://kennethli319.github.io/open-audio-judge/asr-leaderboard/full-35-combined/report.html"><strong>Combined 35-clip report</strong><span>Explore all 105 model-case evaluations by model, category, slice, score, and issue.</span></a>
       <a class="link-card" href="https://kennethli319.github.io/open-audio-judge/asr-leaderboard-report-index.md"><strong>Generated report index</strong><span>Browse source reports generated for each contributing run.</span></a>
       <a class="link-card" href="https://kennethli319.github.io/open-audio-judge/asr-leaderboard-report-links.json"><strong>Machine-readable report map</strong><span>Use the JSON links and provenance index.</span></a>
+      <a class="link-card" href="https://github.com/kennethli319/open-audio-judge"><strong>Open Audio Judge repository</strong><span>Read the methodology, run the tools, and inspect the source behind this benchmark.</span></a>
     </div>
 
     <details class="technical-details">
@@ -465,5 +514,14 @@ oaj autojudge-mlx-asr \
       </div>
     </details>
   </main>
+  <footer>
+    <div class="footer-inner">
+      <p><strong>Open Audio Judge</strong><br><span class="muted">Focused audio-model evaluation with inspectable evidence.</span></p>
+      <nav class="footer-links" aria-label="Related Open Audio Judge links">
+        <a href="tts-leaderboard-demo.html">Explore the TTS leaderboard</a>
+        <a href="https://github.com/kennethli319/open-audio-judge">Repository, methodology, and setup</a>
+      </nav>
+    </div>
+  </footer>
 </body>
 </html>

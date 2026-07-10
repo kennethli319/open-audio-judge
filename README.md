@@ -2,8 +2,9 @@
 
 Open Audio Judge is a prompt-based evaluation harness for audio LLM judges. The goal is to make ASR, TTS, VAD, diarization, speech translation, and speech-event evaluations comparable even when teams run the judge on private datasets.
 
-**Live demos:** [TTS model leaderboard judged by Gemini](https://kennethli319.github.io/open-audio-judge/tts-leaderboard-demo.html)
-and [ASR model leaderboard judged by Gemini](https://kennethli319.github.io/open-audio-judge/asr-leaderboard-demo.html)
+**Live demos:** [leaderboard hub](https://kennethli319.github.io/open-audio-judge/),
+[TTS evaluation preview](https://kennethli319.github.io/open-audio-judge/tts-leaderboard-demo.html),
+and [verified ASR leaderboard](https://kennethli319.github.io/open-audio-judge/asr-leaderboard-demo.html).
 
 The first MVP focuses on:
 

@@ -1065,6 +1065,8 @@ def _compare_runtime_status_artifact(actual_path: Path, expected_path: Path) -> 
     expected = json.loads(expected_path.read_text(encoding="utf-8"))
     actual.pop("mlx_runtime_preflight", None)
     expected.pop("mlx_runtime_preflight", None)
+    actual.pop("gemini_secret", None)
+    expected.pop("gemini_secret", None)
     if actual != expected:
         raise ValueError(
             f"{_repo_relative(actual_path)} is stale for selected ASR result sources; "
@@ -1081,6 +1083,7 @@ def _compare_refresh_decision_artifact(actual_path: Path, expected_path: Path) -
         runtime_status = data.get("runtime_status")
         if isinstance(runtime_status, dict):
             runtime_status.pop("mlx_runtime_preflight", None)
+            runtime_status.pop("gemini_secret", None)
     if actual != expected:
         raise ValueError(
             f"{_repo_relative(actual_path)} is stale for selected ASR result sources; "

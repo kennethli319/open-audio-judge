@@ -11,6 +11,9 @@ from open_audio_judge.models import EvaluationResult
 
 
 BASELINE_SYNTHESIS_MODEL = "mlx-community/chatterbox-turbo-6bit"
+PROJECT_REPOSITORY_URL = "https://github.com/kennethli319/open-audio-judge"
+ASR_LEADERBOARD_PATH = "/open-audio-judge/asr-leaderboard-demo.html"
+TTS_LEADERBOARD_PATH = "/open-audio-judge/tts-leaderboard-demo.html"
 
 
 def label_for_score(score: int, accurate_threshold: int = 81, review_threshold: int = 60) -> str:
@@ -209,7 +212,13 @@ def render_html_report(
         <h3>Baseline Regression Slices</h3>
         {baseline_segment_deltas_markup}
         """
-    document_title = "Open Audio Judge ASR Report" if is_asr_report else "Open Audio Judge Report"
+    document_title = (
+        "Open Audio Judge ASR Report" if is_asr_report else "Open Audio Judge TTS Report"
+    )
+    current_board_path = ASR_LEADERBOARD_PATH if is_asr_report else TTS_LEADERBOARD_PATH
+    current_board_label = "ASR leaderboard" if is_asr_report else "TTS leaderboard"
+    other_board_path = TTS_LEADERBOARD_PATH if is_asr_report else ASR_LEADERBOARD_PATH
+    other_board_label = "TTS leaderboard" if is_asr_report else "ASR leaderboard"
 
     return f"""<!doctype html>
 <html lang="en">
@@ -246,6 +255,9 @@ def render_html_report(
       border-bottom: 1px solid var(--line);
     }}
     .header-inner {{ max-width: 1180px; margin: 0 auto; }}
+    .report-nav {{ display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 14px; }}
+    .report-nav a {{ border: 1px solid var(--line); border-radius: 999px; padding: 6px 10px; color: var(--ink); font-size: 13px; font-weight: 700; text-decoration: none; }}
+    .report-nav a:hover {{ border-color: #8bb7e8; background: var(--accent-soft); }}
     .eyebrow {{ color: var(--accent); font-size: 12px; font-weight: 750; letter-spacing: .08em; text-transform: uppercase; }}
     h1 {{ margin: 5px 0 8px; font-size: clamp(26px, 4vw, 38px); line-height: 1.15; letter-spacing: -.025em; }}
     h2 {{ margin: 32px 0 6px; font-size: 22px; letter-spacing: -.015em; }}
@@ -429,7 +441,12 @@ def render_html_report(
 <body>
   <header>
     <div class="header-inner">
-      {'<a href="/open-audio-judge/asr-leaderboard-demo.html">&larr; ASR leaderboard</a>' if is_asr_report else '<span class="eyebrow">Open Audio Judge Report</span>'}
+      <nav class="report-nav" aria-label="Open Audio Judge navigation">
+        <a href="{current_board_path}">&larr; {current_board_label}</a>
+        <a href="{other_board_path}">{other_board_label}</a>
+        <a href="{PROJECT_REPOSITORY_URL}">GitHub repository</a>
+      </nav>
+      <span class="eyebrow">Open Audio Judge {"ASR" if is_asr_report else "TTS"} report</span>
       <h1>{html.escape(report_title)}</h1>
       <div class="muted">{html.escape(report_subtitle)}</div>
     </div>

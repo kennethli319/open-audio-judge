@@ -1751,7 +1751,8 @@ def _required_page_text(summary: dict[str, Any]) -> list[str]:
                     artifact_text.append(purpose)
 
     return [
-        "Open Audio Judge ASR Leaderboard",
+        "ASR Leaderboard",
+        "Open Audio Judge",
         "Verified Leaderboard Results",
         "Category Breakdown",
         "Generated Refresh Workflow",

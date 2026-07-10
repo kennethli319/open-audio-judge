@@ -17,8 +17,11 @@ def test_tts_leaderboard_demo_page_documents_workflow() -> None:
     parser.close()
 
     required_text = [
-        "Open Audio Judge TTS Leaderboard",
-        "Multiple MLX Community TTS models generate the same eval set",
+        "TTS Leaderboard",
+        "Illustrative preview, not a verified benchmark.",
+        "What This Demonstrates",
+        "GitHub repository",
+        "ASR leaderboard",
         "oaj autojudge-local-tts",
         "--judge-provider gemini",
         "--judge-samples 3",
@@ -27,11 +30,16 @@ def test_tts_leaderboard_demo_page_documents_workflow() -> None:
         "model_summary.json",
         "judge-report/results.jsonl",
         "judge-report/report.html",
-        "Sample Report Preview",
+        "Illustrative Report Preview",
+        "900 model-case evaluations",
+        "2,700 illustrative judgments",
         "Demo controls",
         'data-view="demo"',
         'data-view="usage"',
         'data-view="reference"',
+        'aria-pressed="true"',
+        'role="status" aria-live="polite"',
+        'button.setAttribute("aria-pressed", String(isActive))',
         "Demo Run view is selected.",
         'let activeView = Object.prototype.hasOwnProperty.call(sectionViews, requestedView) ? requestedView : "demo"',
         'id="report-search"',
@@ -91,21 +99,20 @@ def test_tts_leaderboard_demo_page_documents_workflow() -> None:
         "tts-tool-result-state-delivery-success-warning-001",
         "tts-status-code-delivery-http-429-001",
         "tts-locale-format-disambiguation-us-date-001",
-        "Model Leaderboard",
-        "Category Leaderboard",
+        "Illustrative Model Ranking",
+        "Selected Category Comparison",
         "no error: 167",
         "style/instruction mismatch: 11",
         "voice drift: 3",
         "Scores By Category",
         "Baseline Model Deltas",
         "Wins / Ties / Losses",
-        "42 / 31 / 222",
+        "42 / 31 / 227",
         "Weakest Segments",
         "conditional_logic_delivery",
         "critical_alert_room_action_escalation",
         "Likely fix areas",
         "priority_escalation_delivery",
-        "960 generated",
         "Category Guidance",
         "Focus: unless, only-if, if/otherwise, nested conditions, and exception boundaries.",
         "Source basis: VoiceBench safety/robustness behavior and Seed-TTS-Eval intelligibility checks",
@@ -135,7 +142,10 @@ def test_asr_leaderboard_demo_page_documents_workflow() -> None:
     parser.close()
 
     required_text = [
-        "Open Audio Judge ASR Leaderboard",
+        "ASR Leaderboard",
+        "Skip to ASR leaderboard",
+        "GitHub repository",
+        "Open Audio Judge repository",
         "3 MLX Community ASR models transcribe the same research-guided eval set",
         "oaj autojudge-mlx-asr",
         "--judge-provider gemini",
@@ -165,6 +175,48 @@ def test_asr_leaderboard_demo_page_documents_workflow() -> None:
     ]
     for text in required_text:
         assert text in html
+
+    assert html.count("the same research-guided eval set.") == 1
+
+
+def test_leaderboard_pages_share_navigation_and_project_context() -> None:
+    pages = {
+        "tts": Path("docs/tts-leaderboard-demo.html").read_text(encoding="utf-8"),
+        "asr": Path("docs/asr-leaderboard-demo.html").read_text(encoding="utf-8"),
+    }
+
+    for current_board, html in pages.items():
+        assert 'href="index.html"' in html
+        assert 'href="tts-leaderboard-demo.html"' in html
+        assert 'href="asr-leaderboard-demo.html"' in html
+        assert 'href="https://github.com/kennethli319/open-audio-judge"' in html
+        assert 'class="skip-link"' in html
+        assert 'id="main-content"' in html
+        assert "<footer" in html
+        expected_current = f'href="{current_board}-leaderboard-demo.html" aria-current="page"'
+        assert html.count(' aria-current="page"') == 1
+        assert expected_current in html
+
+    assert "Illustrative preview, not a verified benchmark." in pages["tts"]
+    assert "3960" not in pages["tts"]
+    assert "960 generated" not in pages["tts"]
+    assert "n 855" not in pages["tts"]
+    assert "Verified benchmark" in pages["asr"]
+
+
+def test_docs_index_links_both_focused_leaderboards_and_repository() -> None:
+    html = Path("docs/index.html").read_text(encoding="utf-8")
+
+    parser = StrictEnoughHtmlParser()
+    parser.feed(html)
+    parser.close()
+
+    assert "Two focused leaderboards, one evaluation toolkit" in html
+    assert 'href="tts-leaderboard-demo.html"' in html
+    assert 'href="asr-leaderboard-demo.html"' in html
+    assert 'href="https://github.com/kennethli319/open-audio-judge"' in html
+    assert "Illustrative preview" in html
+    assert "Verified benchmark" in html
 
 
 def test_asr_research_docs_list_categories() -> None:
@@ -317,6 +369,9 @@ def test_readme_links_chatterbox_gemini_sample_page() -> None:
     readme = Path("README.md").read_text(encoding="utf-8")
 
     assert "docs/tts-leaderboard-demo.html" in readme
+    assert "https://kennethli319.github.io/open-audio-judge/" in readme
     assert "https://kennethli319.github.io/open-audio-judge/tts-leaderboard-demo.html" in readme
-    assert "TTS model leaderboard judged by Gemini" in readme
+    assert "TTS evaluation preview" in readme
+    assert "https://kennethli319.github.io/open-audio-judge/asr-leaderboard-demo.html" in readme
+    assert "verified ASR leaderboard" in readme
     assert "docs/tts-eval-taxonomy.md" in readme
