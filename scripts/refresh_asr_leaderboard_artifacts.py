@@ -2515,13 +2515,15 @@ def write_cron_status_artifact(
 
     artifact_provenance = _cron_artifact_provenance(result_bundle)
     artifact_digest = _cron_artifact_digest(artifact_provenance)
+    next_best_task = _cron_next_best_task(decision)
     data = {
         "description": "Compact generated cron handoff for ASR leaderboard refresh automation.",
-        "version": 2,
+        "version": 3,
         "status": decision.get("status", "complete"),
         "action": decision.get("action"),
         "reason": decision.get("reason"),
         "summary": decision.get("summary"),
+        "next_best_task": next_best_task,
         "coverage_complete": decision.get("coverage_complete"),
         "live_refresh_required": decision.get("live_refresh_required"),
         "runtime_ready": decision.get("runtime_ready"),
@@ -2575,6 +2577,7 @@ def write_cron_handoff_artifact(
     else:
         result_bundle = {}
     artifact_digest = _cron_artifact_digest(_cron_artifact_provenance(result_bundle))
+    next_best_task = _cron_next_best_task(decision)
     lines = [
         "# ASR Leaderboard Cron Handoff",
         "",
@@ -2590,6 +2593,7 @@ def write_cron_handoff_artifact(
         f"- Next run commands: {decision.get('next_run_command_count')}",
         f"- Artifact digest: `{artifact_digest}`",
         f"- Reason: {decision.get('reason')}",
+        f"- Next best task: {next_best_task}",
         "",
         "## Public Links",
         "",
@@ -2733,6 +2737,34 @@ def _compact_cron_preflight_summary(summary: dict[str, object]) -> dict[str, obj
         "runtime_ready_issue",
     )
     return {field: summary[field] for field in fields if field in summary}
+
+
+def _cron_next_best_task(decision: dict[str, object]) -> str:
+    action = decision.get("action")
+    recommended_command = decision.get("recommended_command")
+    if (
+        action == "run_live_refresh"
+        and isinstance(recommended_command, list)
+        and recommended_command
+        and all(isinstance(part, str) for part in recommended_command)
+    ):
+        return (
+            "Run the recommended MLX ASR/Gemini refresh command, then regenerate "
+            "and verify leaderboard artifacts."
+        )
+    if action == "blocked_runtime":
+        issue = decision.get("runtime_ready_issue")
+        issue_text = f" Current blocker: {issue}" if isinstance(issue, str) and issue else ""
+        return (
+            "Resolve the runtime gate or record unsupported model states before trying "
+            f"fallback models.{issue_text}"
+        )
+    if action == "skip_live_refresh":
+        return (
+            "Keep the verified 35-case artifacts fresh; run preflight and hosted checks, "
+            "then improve report automation or eval-set quality."
+        )
+    return "Inspect the refresh decision, run preflight checks, and update the ASR handoff."
 
 
 def _cron_handoff_commands() -> dict[str, list[str]]:

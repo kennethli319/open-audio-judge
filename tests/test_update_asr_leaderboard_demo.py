@@ -1641,8 +1641,12 @@ def test_refresh_asr_leaderboard_artifacts_combines_report_and_page(tmp_path: Pa
         encoding="utf-8"
     ) == next_action.read_text(encoding="utf-8")
     cron_status_data = json.loads(cron_status.read_text(encoding="utf-8"))
-    assert cron_status_data["version"] == 2
+    assert cron_status_data["version"] == 3
     assert cron_status_data["action"] == "skip_live_refresh"
+    assert cron_status_data["next_best_task"] == (
+        "Keep the verified 35-case artifacts fresh; run preflight and hosted checks, "
+        "then improve report automation or eval-set quality."
+    )
     assert cron_status_data["coverage_complete"] is True
     assert cron_status_data["total_results"] == 4
     assert cron_status_data["source_report_count"] == 2
@@ -1684,6 +1688,9 @@ def test_refresh_asr_leaderboard_artifacts_combines_report_and_page(tmp_path: Pa
         encoding="utf-8"
     ) == cron_status.read_text(encoding="utf-8")
     assert "ASR Leaderboard Cron Handoff" in cron_handoff.read_text(encoding="utf-8")
+    assert "Next best task: Keep the verified 35-case artifacts fresh" in cron_handoff.read_text(
+        encoding="utf-8"
+    )
     assert (hosted_dir / "asr-leaderboard-cron-handoff.md").read_text(
         encoding="utf-8"
     ) == cron_handoff.read_text(encoding="utf-8")
@@ -2284,8 +2291,12 @@ def test_check_only_runtime_preflight_writes_refresh_decision(
     assert check_summary["cron_status_path"] == str(cron_status_out)
     assert check_summary["cron_handoff_path"] == str(cron_handoff_out)
     cron_status = json.loads(cron_status_out.read_text(encoding="utf-8"))
-    assert cron_status["version"] == 2
+    assert cron_status["version"] == 3
     assert cron_status["action"] == "skip_live_refresh"
+    assert cron_status["next_best_task"] == (
+        "Keep the verified 35-case artifacts fresh; run preflight and hosted checks, "
+        "then improve report automation or eval-set quality."
+    )
     assert cron_status["coverage_complete"] is True
     assert cron_status["runtime_ready"] == "not_required"
     assert cron_status["artifact_digest"] == refresh_module._cron_artifact_digest(
@@ -2318,6 +2329,7 @@ def test_check_only_runtime_preflight_writes_refresh_decision(
     cron_handoff_text = cron_handoff_out.read_text(encoding="utf-8")
     assert "ASR Leaderboard Cron Handoff" in cron_handoff_text
     assert f"Artifact digest: `{cron_status['artifact_digest']}`" in cron_handoff_text
+    assert "Next best task: Keep the verified 35-case artifacts fresh" in cron_handoff_text
     assert cron_status["commands"]["verify_commit"] == [
         ".venv/bin/python",
         "scripts/verify_asr_leaderboard_commit.py",

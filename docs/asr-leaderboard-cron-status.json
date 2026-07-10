@@ -327,6 +327,7 @@
   "live_refresh_required": false,
   "missing_cell_count": 0,
   "model_count": 3,
+  "next_best_task": "Keep the verified 35-case artifacts fresh; run preflight and hosted checks, then improve report automation or eval-set quality.",
   "next_run_command_count": 0,
   "public_urls": {
     "combined_report": "https://kennethli319.github.io/open-audio-judge/asr-leaderboard/full-35-combined/report.html",
@@ -357,5 +358,5 @@
     "Reason: The selected ASR result bundle already covers every model/category cell."
   ],
   "total_results": 105,
-  "version": 2
+  "version": 3
 }
