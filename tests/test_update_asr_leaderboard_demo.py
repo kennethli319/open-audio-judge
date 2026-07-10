@@ -2063,6 +2063,67 @@ def test_validate_runtime_ready_requires_audio_secret_and_mlx_preflight() -> Non
                 "mlx_runtime_preflight": {"status": "blocked"},
             }
         )
+    with pytest.raises(ValueError, match="primary_model_checks"):
+        refresh_module._validate_runtime_ready(
+            {
+                **status,
+                "mlx_runtime_preflight": {
+                    "status": "ok",
+                    "primary_model_checks": [
+                        {"model": "mlx-community/working", "status": "ok"},
+                        {"model": "mlx-community/blocked", "status": "blocked"},
+                    ],
+                },
+            }
+        )
+
+
+def test_run_mlx_runtime_preflight_records_primary_and_fallback_models(monkeypatch: pytest.MonkeyPatch) -> None:
+    refresh_module = load_refresh_module()
+    seen_models = []
+
+    def fake_run_for_model(model: str) -> dict[str, object]:
+        seen_models.append(model)
+        return {
+            "model": model,
+            "status": "ok" if "blocked" not in model else "blocked",
+            "command": ["check-runtime", "--model", model],
+        }
+
+    monkeypatch.setattr(
+        refresh_module,
+        "ASR_LEADERBOARD_MODELS",
+        [
+            ("mlx-community/primary-ok", "primary-ok-refresh"),
+            ("mlx-community/primary-blocked", "primary-blocked-refresh"),
+        ],
+    )
+    monkeypatch.setattr(
+        refresh_module,
+        "ASR_FALLBACK_MODELS",
+        ["mlx-community/fallback-ok"],
+    )
+    monkeypatch.setattr(refresh_module, "_run_mlx_runtime_preflight_for_model", fake_run_for_model)
+
+    status = refresh_module._run_mlx_runtime_preflight()
+
+    assert seen_models == [
+        "mlx-community/primary-ok",
+        "mlx-community/primary-blocked",
+        "mlx-community/fallback-ok",
+    ]
+    assert status["status"] == "blocked"
+    assert status["primary_model_count"] == 2
+    assert status["primary_model_ok_count"] == 1
+    assert status["fallback_model_count"] == 1
+    assert status["fallback_model_ok_count"] == 1
+    assert [check["model"] for check in status["primary_model_checks"]] == [
+        "mlx-community/primary-ok",
+        "mlx-community/primary-blocked",
+    ]
+    assert [check["model"] for check in status["fallback_model_checks"]] == [
+        "mlx-community/fallback-ok",
+    ]
 
 
 def test_enrich_check_summary_with_runtime_status_records_readiness(tmp_path: Path) -> None:
@@ -2677,6 +2738,21 @@ def test_check_asr_leaderboard_page_validates_generated_artifacts(tmp_path: Path
     )
     refresh_module = load_refresh_module()
     refresh_module.write_runtime_status_artifact(runtime_status, results=results)
+    runtime_status_data = json.loads(runtime_status.read_text(encoding="utf-8"))
+    mlx_preflight = runtime_status_data["mlx_runtime_preflight"]
+    assert mlx_preflight["status"] == "not_checked"
+    assert mlx_preflight["primary_model_count"] == 3
+    assert mlx_preflight["fallback_model_count"] == 3
+    assert len(mlx_preflight["primary_model_commands"]) == 3
+    assert len(mlx_preflight["fallback_model_commands"]) == 3
+    assert (
+        mlx_preflight["primary_model_commands"][0]["model"]
+        == "mlx-community/whisper-large-v3-turbo-asr-fp16"
+    )
+    assert (
+        mlx_preflight["fallback_model_commands"][0]["model"]
+        == "mlx-community/whisper-small.en-asr-4bit"
+    )
     summary_data = json.loads(summary.read_text(encoding="utf-8"))
     summary_data["run_manifest_path"] = str(run_manifest)
     summary_data["manifest_validation_path"] = str(manifest_validation)

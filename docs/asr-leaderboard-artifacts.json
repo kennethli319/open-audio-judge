@@ -133,7 +133,7 @@
       "sha256": "af02532d0b8837c14c34b0fd71a6def65e5afa5e3baa187acdbf56c82e611ea4"
     },
     {
-      "bytes": 6909,
+      "bytes": 9114,
       "digest_status": "ok",
       "exists": true,
       "hosted_paths": [
@@ -141,7 +141,7 @@
       ],
       "path": "docs/asr-leaderboard-runtime-status.json",
       "purpose": "Machine-readable MLX ASR and Gemini readiness status for refresh automation.",
-      "sha256": "e8e830755dfbce3545e74384a29286f7fcfdc852ac9c07b20867649eba9963a0"
+      "sha256": "dc4a1792e8bf98e8b4b9bc0cb26425ad86f636a42d787c7d07b6656df767f8c5"
     },
     {
       "bytes": 33781,

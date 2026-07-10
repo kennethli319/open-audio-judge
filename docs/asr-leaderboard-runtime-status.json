@@ -44,10 +44,97 @@
       "--model",
       "mlx-community/whisper-large-v3-turbo-asr-fp16"
     ],
-    "returncode": 0,
-    "status": "ok",
-    "stderr": "",
-    "stdout": "MLX ASR runtime OK\nPython: .venv/bin/python\nModule: mlx_audio.stt.generate\nModel:  mlx-community/whisper-large-v3-turbo-asr-fp16"
+    "fallback_model_commands": [
+      {
+        "command": [
+          "PYTHONPATH=src",
+          ".venv/bin/python",
+          "-m",
+          "open_audio_judge.cli",
+          "check-mlx-asr-runtime",
+          "--python-bin",
+          ".venv/bin/python",
+          "--model",
+          "mlx-community/whisper-small.en-asr-4bit"
+        ],
+        "model": "mlx-community/whisper-small.en-asr-4bit"
+      },
+      {
+        "command": [
+          "PYTHONPATH=src",
+          ".venv/bin/python",
+          "-m",
+          "open_audio_judge.cli",
+          "check-mlx-asr-runtime",
+          "--python-bin",
+          ".venv/bin/python",
+          "--model",
+          "mlx-community/parakeet-rnnt-0.6b"
+        ],
+        "model": "mlx-community/parakeet-rnnt-0.6b"
+      },
+      {
+        "command": [
+          "PYTHONPATH=src",
+          ".venv/bin/python",
+          "-m",
+          "open_audio_judge.cli",
+          "check-mlx-asr-runtime",
+          "--python-bin",
+          ".venv/bin/python",
+          "--model",
+          "mlx-community/GLM-ASR-Nano-2512-4bit"
+        ],
+        "model": "mlx-community/GLM-ASR-Nano-2512-4bit"
+      }
+    ],
+    "fallback_model_count": 3,
+    "primary_model_commands": [
+      {
+        "command": [
+          "PYTHONPATH=src",
+          ".venv/bin/python",
+          "-m",
+          "open_audio_judge.cli",
+          "check-mlx-asr-runtime",
+          "--python-bin",
+          ".venv/bin/python",
+          "--model",
+          "mlx-community/whisper-large-v3-turbo-asr-fp16"
+        ],
+        "model": "mlx-community/whisper-large-v3-turbo-asr-fp16"
+      },
+      {
+        "command": [
+          "PYTHONPATH=src",
+          ".venv/bin/python",
+          "-m",
+          "open_audio_judge.cli",
+          "check-mlx-asr-runtime",
+          "--python-bin",
+          ".venv/bin/python",
+          "--model",
+          "mlx-community/Qwen3-ASR-1.7B-8bit"
+        ],
+        "model": "mlx-community/Qwen3-ASR-1.7B-8bit"
+      },
+      {
+        "command": [
+          "PYTHONPATH=src",
+          ".venv/bin/python",
+          "-m",
+          "open_audio_judge.cli",
+          "check-mlx-asr-runtime",
+          "--python-bin",
+          ".venv/bin/python",
+          "--model",
+          "mlx-community/VibeVoice-ASR-4bit"
+        ],
+        "model": "mlx-community/VibeVoice-ASR-4bit"
+      }
+    ],
+    "primary_model_count": 3,
+    "status": "not_checked"
   },
   "result_bundle": {
     "categories": [

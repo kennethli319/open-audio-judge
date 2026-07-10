@@ -18,6 +18,7 @@ from open_audio_judge.reports import write_html_report  # noqa: E402
 from open_audio_judge.runner import load_cases, load_results_jsonl, write_results_jsonl  # noqa: E402
 from scripts.check_asr_leaderboard_page import check_asr_leaderboard_page  # noqa: E402
 from scripts.update_asr_leaderboard_demo import (  # noqa: E402
+    ASR_FALLBACK_MODELS,
     ASR_LEADERBOARD_MODELS,
     DEFAULT_PAGE,
     DEFAULT_ARTIFACT_INDEX,
@@ -2144,6 +2145,22 @@ def build_runtime_status_artifact_data(
         else {
             "status": "not_checked",
             "command": _mlx_runtime_preflight_command(),
+            "primary_model_count": len(ASR_LEADERBOARD_MODELS),
+            "fallback_model_count": len(ASR_FALLBACK_MODELS),
+            "primary_model_commands": [
+                {
+                    "model": model,
+                    "command": _mlx_runtime_preflight_command(model),
+                }
+                for model, _ in ASR_LEADERBOARD_MODELS
+            ],
+            "fallback_model_commands": [
+                {
+                    "model": model,
+                    "command": _mlx_runtime_preflight_command(model),
+                }
+                for model in ASR_FALLBACK_MODELS
+            ],
         }
     )
     status["gemini_secret"] = _gemini_secret_status()
@@ -2174,11 +2191,25 @@ def _validate_runtime_ready(status: dict[str, object]) -> None:
     mlx_preflight = status.get("mlx_runtime_preflight")
     if not isinstance(mlx_preflight, dict) or mlx_preflight.get("status") != "ok":
         failures.append("mlx_runtime_preflight")
+    elif not _primary_mlx_preflight_ready(mlx_preflight):
+        failures.append("mlx_runtime_preflight.primary_model_checks")
     if failures:
         raise ValueError(
             "ASR runtime is not ready for live MLX/Gemini refresh: "
             + ", ".join(failures)
         )
+
+
+def _primary_mlx_preflight_ready(mlx_preflight: dict[str, object]) -> bool:
+    raw_checks = mlx_preflight.get("primary_model_checks")
+    if raw_checks is None:
+        return True
+    if not isinstance(raw_checks, list) or not raw_checks:
+        return False
+    return all(
+        isinstance(check, dict) and check.get("status") == "ok"
+        for check in raw_checks
+    )
 
 
 def build_runtime_result_bundle_status(
@@ -2286,8 +2317,8 @@ def build_audio_manifest_status(
     }
 
 
-def _run_mlx_runtime_preflight() -> dict[str, object]:
-    command = _mlx_runtime_preflight_command()
+def _run_mlx_runtime_preflight_for_model(model: str) -> dict[str, object]:
+    command = _mlx_runtime_preflight_command(model)
     env = os.environ.copy()
     env["PYTHONPATH"] = "src"
     completed = subprocess.run(
@@ -2308,7 +2339,30 @@ def _run_mlx_runtime_preflight() -> dict[str, object]:
     }
 
 
-def _mlx_runtime_preflight_command() -> list[str]:
+def _run_mlx_runtime_preflight() -> dict[str, object]:
+    primary_checks = [
+        _run_mlx_runtime_preflight_for_model(model)
+        for model, _ in ASR_LEADERBOARD_MODELS
+    ]
+    fallback_checks = [
+        _run_mlx_runtime_preflight_for_model(model)
+        for model in ASR_FALLBACK_MODELS
+    ]
+    ok_count = sum(1 for check in primary_checks if check["status"] == "ok")
+    return {
+        "status": "ok" if ok_count == len(primary_checks) else "blocked",
+        "primary_model_count": len(primary_checks),
+        "primary_model_ok_count": ok_count,
+        "fallback_model_count": len(fallback_checks),
+        "fallback_model_ok_count": sum(1 for check in fallback_checks if check["status"] == "ok"),
+        "command": _mlx_runtime_preflight_command(ASR_LEADERBOARD_MODELS[0][0]),
+        "primary_model_checks": primary_checks,
+        "fallback_model_checks": fallback_checks,
+    }
+
+
+def _mlx_runtime_preflight_command(model: str | None = None) -> list[str]:
+    model = model or ASR_LEADERBOARD_MODELS[0][0]
     return [
         "PYTHONPATH=src",
         ".venv/bin/python",
@@ -2318,7 +2372,7 @@ def _mlx_runtime_preflight_command() -> list[str]:
         "--python-bin",
         ".venv/bin/python",
         "--model",
-        ASR_LEADERBOARD_MODELS[0][0],
+        model,
     ]
 
 
