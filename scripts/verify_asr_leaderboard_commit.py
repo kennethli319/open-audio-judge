@@ -19,6 +19,7 @@ COMMANDS = (
         "scripts/refresh_asr_leaderboard_artifacts.py",
         "--check-only",
         "--require-generated-fresh",
+        "--require-audio-ready",
     ),
     ("bash", "-n", "docs/asr-leaderboard-refresh-commands.sh"),
     ("bash", "-n", "docs/asr-leaderboard-live-refresh.sh"),
