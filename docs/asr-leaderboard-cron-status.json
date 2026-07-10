@@ -8,6 +8,12 @@
   "missing_cell_count": 0,
   "model_count": 3,
   "next_run_command_count": 0,
+  "public_urls": {
+    "combined_report": "https://kennethli319.github.io/open-audio-judge/asr-leaderboard/full-35-combined/report.html",
+    "demo": "https://kennethli319.github.io/open-audio-judge/asr-leaderboard-demo.html",
+    "report_index": "https://kennethli319.github.io/open-audio-judge/asr-leaderboard-report-index.md",
+    "report_links": "https://kennethli319.github.io/open-audio-judge/asr-leaderboard-report-links.json"
+  },
   "reason": "The selected ASR result bundle already covers every model/category cell.",
   "recommended_command": null,
   "result_file_count": 18,
@@ -17,8 +23,11 @@
     "next_action": "docs/asr-leaderboard-next-action.md",
     "next_runs": "docs/asr-leaderboard-next-runs.json",
     "refresh_decision": "docs/asr-leaderboard-refresh-decision.json",
+    "report_index": "docs/asr-leaderboard-report-index.md",
+    "report_links": "docs/asr-leaderboard-report-links.json",
     "runtime_status": "docs/asr-leaderboard-runtime-status.json"
   },
+  "source_report_count": 18,
   "status": "complete",
   "summary": "Action: skip_live_refresh. Coverage complete: true (0 missing cells). Runtime ready: not_required. Reason: The selected ASR result bundle already covers every model/category cell.",
   "telegram_summary_lines": [
@@ -28,5 +37,5 @@
     "Reason: The selected ASR result bundle already covers every model/category cell."
   ],
   "total_results": 105,
-  "version": 1
+  "version": 2
 }

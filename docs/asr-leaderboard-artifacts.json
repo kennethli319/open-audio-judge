@@ -12,7 +12,7 @@
       "sha256": null
     },
     {
-      "bytes": 1318,
+      "bytes": 1908,
       "digest_status": "ok",
       "exists": true,
       "hosted_paths": [
@@ -20,7 +20,7 @@
       ],
       "path": "docs/asr-leaderboard-cron-status.json",
       "purpose": "Compact machine-readable cron handoff with action, coverage, and runtime gate status.",
-      "sha256": "dedaa42d5cd0631a33155b44e77e835175187f38094ac9e8cef4ba2ab20d8439"
+      "sha256": "e8ddb8e2436f928cc4debae5fecbf4a3e7771648b61f8ebd30444a59492d7a68"
     },
     {
       "bytes": 61424,

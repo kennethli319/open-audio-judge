@@ -2458,10 +2458,14 @@ def write_cron_status_artifact(
     audio_manifest = runtime_status.get("audio_manifest")
     if not isinstance(audio_manifest, dict):
         audio_manifest = {}
+    source_result_files = result_bundle.get("source_result_files")
+    if not isinstance(source_result_files, list):
+        source_result_files = []
+    source_report_count = _cron_source_report_count(source_result_files)
 
     data = {
         "description": "Compact generated cron handoff for ASR leaderboard refresh automation.",
-        "version": 1,
+        "version": 2,
         "status": decision.get("status", "complete"),
         "action": decision.get("action"),
         "reason": decision.get("reason"),
@@ -2477,19 +2481,44 @@ def write_cron_status_artifact(
         "model_count": result_bundle.get("model_count"),
         "category_count": result_bundle.get("category_count"),
         "result_file_count": result_bundle.get("source_result_file_count"),
+        "source_report_count": source_report_count,
         "audio_manifest_status": audio_manifest.get("status"),
+        "public_urls": {
+            "demo": f"{HOSTED_BASE_URL}/asr-leaderboard-demo.html",
+            "combined_report": f"{HOSTED_BASE_URL}/asr-leaderboard/full-35-combined/report.html",
+            "report_index": f"{HOSTED_BASE_URL}/{DEFAULT_REPORT_INDEX.name}",
+            "report_links": f"{HOSTED_BASE_URL}/{DEFAULT_REPORT_LINKS.name}",
+        },
         "telegram_summary_lines": decision.get("telegram_summary_lines", []),
         "source_paths": {
             "refresh_decision": _repo_relative(DEFAULT_REFRESH_DECISION),
             "runtime_status": _repo_relative(DEFAULT_RUNTIME_STATUS),
             "next_runs": _repo_relative(DEFAULT_NEXT_RUNS),
             "next_action": _repo_relative(DEFAULT_NEXT_ACTION),
+            "report_index": _repo_relative(DEFAULT_REPORT_INDEX),
+            "report_links": _repo_relative(DEFAULT_REPORT_LINKS),
         },
     }
     if check_summary is not None:
         data["preflight_summary"] = _compact_cron_preflight_summary(check_summary)
     output_path.parent.mkdir(parents=True, exist_ok=True)
     output_path.write_text(json.dumps(data, indent=2, sort_keys=True) + "\n", encoding="utf-8")
+
+
+def _cron_source_report_count(source_result_files: list[object]) -> int:
+    count = 0
+    for source in source_result_files:
+        if not isinstance(source, dict):
+            continue
+        raw_path = source.get("path")
+        if not isinstance(raw_path, str) or not raw_path:
+            continue
+        results_path = Path(raw_path)
+        if not results_path.is_absolute():
+            results_path = ROOT / results_path
+        if results_path.with_name("report.html").exists():
+            count += 1
+    return count
 
 
 def _compact_cron_preflight_summary(summary: dict[str, object]) -> dict[str, object]:

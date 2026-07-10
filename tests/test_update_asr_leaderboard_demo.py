@@ -1634,9 +1634,30 @@ def test_refresh_asr_leaderboard_artifacts_combines_report_and_page(tmp_path: Pa
         encoding="utf-8"
     ) == next_action.read_text(encoding="utf-8")
     cron_status_data = json.loads(cron_status.read_text(encoding="utf-8"))
+    assert cron_status_data["version"] == 2
     assert cron_status_data["action"] == "skip_live_refresh"
     assert cron_status_data["coverage_complete"] is True
     assert cron_status_data["total_results"] == 4
+    assert cron_status_data["source_report_count"] == 2
+    assert cron_status_data["public_urls"] == {
+        "combined_report": (
+            "https://kennethli319.github.io/open-audio-judge/"
+            "asr-leaderboard/full-35-combined/report.html"
+        ),
+        "demo": "https://kennethli319.github.io/open-audio-judge/asr-leaderboard-demo.html",
+        "report_index": (
+            "https://kennethli319.github.io/open-audio-judge/asr-leaderboard-report-index.md"
+        ),
+        "report_links": (
+            "https://kennethli319.github.io/open-audio-judge/asr-leaderboard-report-links.json"
+        ),
+    }
+    assert cron_status_data["source_paths"]["report_index"] == (
+        "docs/asr-leaderboard-report-index.md"
+    )
+    assert cron_status_data["source_paths"]["report_links"] == (
+        "docs/asr-leaderboard-report-links.json"
+    )
     assert (hosted_dir / "asr-leaderboard-cron-status.json").read_text(
         encoding="utf-8"
     ) == cron_status.read_text(encoding="utf-8")
@@ -2221,9 +2242,16 @@ def test_check_only_runtime_preflight_writes_refresh_decision(
     assert check_summary["next_action_path"] == str(next_action_out)
     assert check_summary["cron_status_path"] == str(cron_status_out)
     cron_status = json.loads(cron_status_out.read_text(encoding="utf-8"))
+    assert cron_status["version"] == 2
     assert cron_status["action"] == "skip_live_refresh"
     assert cron_status["coverage_complete"] is True
     assert cron_status["runtime_ready"] == "not_required"
+    assert cron_status["public_urls"]["demo"] == (
+        "https://kennethli319.github.io/open-audio-judge/asr-leaderboard-demo.html"
+    )
+    assert cron_status["source_paths"]["report_links"] == (
+        "docs/asr-leaderboard-report-links.json"
+    )
     assert cron_status["preflight_summary"] == {
         "status": "complete",
         "total_results": 105,
