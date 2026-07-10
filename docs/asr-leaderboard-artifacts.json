@@ -12,7 +12,7 @@
       "sha256": null
     },
     {
-      "bytes": 3356,
+      "bytes": 13793,
       "digest_status": "ok",
       "exists": true,
       "hosted_paths": [
@@ -20,7 +20,7 @@
       ],
       "path": "docs/asr-leaderboard-cron-status.json",
       "purpose": "Compact machine-readable cron handoff with action, coverage, and runtime gate status.",
-      "sha256": "26c741bea860d89cb2c484d1824aae15c6e52c2d1b00072cf4aa9eeaa3464ac1"
+      "sha256": "6097cb378cc381a2754b23e4abbde65c5a275d23643cce6ba39bce43da49be6b"
     },
     {
       "bytes": 61424,
@@ -108,7 +108,7 @@
       ],
       "path": "docs/asr-leaderboard-refresh-decision.json",
       "purpose": "Machine-readable runtime-gated decision for the next ASR refresh action.",
-      "sha256": "6965ccb8205f256ee4d8bb6b7915f9ed1af249f1780c1e463472af8ba50af4b8"
+      "sha256": "40e47efca441bf3b5fdbe989ac13b01b4825a57157e74c3b7ebd055764512e09"
     },
     {
       "bytes": 20185,
@@ -174,7 +174,7 @@
       ],
       "path": "docs/asr-leaderboard-runtime-status.json",
       "purpose": "Machine-readable MLX ASR and Gemini readiness status for refresh automation.",
-      "sha256": "8a9f0ea49f7458a2a212390c179146eab201563dcc730bf1fbe70a6a81205479"
+      "sha256": "bea98735600318feae9a0d04ea716399a468e14f1e2819b8759e74e098aa4282"
     },
     {
       "bytes": 12183,

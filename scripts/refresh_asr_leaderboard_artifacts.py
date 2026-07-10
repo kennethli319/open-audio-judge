@@ -2483,6 +2483,7 @@ def write_cron_status_artifact(
         "result_file_count": result_bundle.get("source_result_file_count"),
         "source_report_count": source_report_count,
         "audio_manifest_status": audio_manifest.get("status"),
+        "artifact_provenance": _cron_artifact_provenance(result_bundle),
         "public_urls": {
             "demo": f"{HOSTED_BASE_URL}/asr-leaderboard-demo.html",
             "combined_report": f"{HOSTED_BASE_URL}/asr-leaderboard/full-35-combined/report.html",
@@ -2504,6 +2505,64 @@ def write_cron_status_artifact(
         data["preflight_summary"] = _compact_cron_preflight_summary(check_summary)
     output_path.parent.mkdir(parents=True, exist_ok=True)
     output_path.write_text(json.dumps(data, indent=2, sort_keys=True) + "\n", encoding="utf-8")
+
+
+def _cron_artifact_provenance(result_bundle: dict[str, object]) -> dict[str, object]:
+    results_path = _cron_path_from_bundle(result_bundle.get("results_path"))
+    report_path = results_path.with_name("report.html") if results_path is not None else None
+    source_result_files = result_bundle.get("source_result_files")
+    if not isinstance(source_result_files, list):
+        source_result_files = []
+    return {
+        "combined_results": _cron_file_digest(results_path),
+        "combined_report": _cron_file_digest(report_path),
+        "source_result_files": [
+            _cron_source_result_file_digest(source)
+            for source in source_result_files
+            if isinstance(source, dict)
+        ],
+    }
+
+
+def _cron_source_result_file_digest(source: dict[str, object]) -> dict[str, object]:
+    raw_path = source.get("path")
+    result_path = _cron_path_from_bundle(raw_path)
+    report_path = _cron_path_from_bundle(source.get("report_path"))
+    if report_path is None and result_path is not None:
+        report_path = result_path.with_name("report.html")
+    result = _cron_file_digest(result_path)
+    if source.get("result_sha256") is not None:
+        result["sha256"] = source.get("result_sha256")
+        result["bytes"] = source.get("result_bytes")
+        result["exists"] = True
+    elif source.get("sha256") is not None:
+        result["sha256"] = source.get("sha256")
+        result["bytes"] = source.get("bytes")
+        result["exists"] = bool(source.get("exists", True))
+    return {
+        "result": result,
+        "report": _cron_file_digest(report_path),
+    }
+
+
+def _cron_file_digest(path: Path | None) -> dict[str, object]:
+    if path is None:
+        return {"path": None, "exists": False, "bytes": None, "sha256": None}
+    return {
+        "path": _repo_relative(path),
+        "exists": path.exists(),
+        "bytes": path.stat().st_size if path.exists() else None,
+        "sha256": _sha256_file(path) if path.exists() else None,
+    }
+
+
+def _cron_path_from_bundle(raw_path: object) -> Path | None:
+    if not isinstance(raw_path, str) or not raw_path:
+        return None
+    path = Path(raw_path)
+    if not path.is_absolute():
+        path = ROOT / path
+    return path
 
 
 def _cron_source_report_count(source_result_files: list[object]) -> int:

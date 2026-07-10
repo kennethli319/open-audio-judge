@@ -25,7 +25,7 @@
   "gemini_judge": "verified_from_loaded_results",
   "gemini_secret": {
     "path_env_var": "OPEN_AUDIO_JUDGE_GEMINI_ENV_FILE",
-    "status": "missing"
+    "status": "present"
   },
   "live_model_calls": "none",
   "loaded_result_providers": [
