@@ -1796,37 +1796,43 @@ def test_check_asr_leaderboard_refresh_inputs_validates_default_artifacts() -> N
         expected_cases_per_model=35,
     )
 
-    assert check_summary == {
-        "status": "complete",
-        "result_file_count": 18,
-        "total_results": 105,
-        "model_count": 3,
-        "category_count": 7,
-        "seed_manifest_status": "complete",
-        "audio_manifest_status": "complete",
-        "audio_cases_path": "runs/asr-research-audio/tts_audio_cases.jsonl",
-        "page_status": "complete",
-        "source_result_paths": [
-            "runs/asr-leaderboard/whisper-large-v3-turbo-smoke/judge-report/results.jsonl",
-            "runs/asr-leaderboard/whisper-large-v3-turbo-full-gap/judge-report/results.jsonl",
-            "runs/asr-leaderboard/whisper-large-v3-turbo-semantic-smoke/judge-report/results.jsonl",
-            "runs/asr-leaderboard/whisper-large-v3-turbo-entity-smoke/judge-report/results.jsonl",
-            "runs/asr-leaderboard/whisper-large-v3-turbo-paraphrase-smoke/judge-report/results.jsonl",
-            "runs/asr-leaderboard/whisper-large-v3-turbo-noise-smoke/judge-report/results.jsonl",
-            "runs/asr-leaderboard/qwen3-asr-1.7b-smoke/judge-report/results.jsonl",
-            "runs/asr-leaderboard/qwen3-asr-1.7b-full-gap/judge-report/results.jsonl",
-            "runs/asr-leaderboard/qwen3-asr-1.7b-semantic-smoke/judge-report/results.jsonl",
-            "runs/asr-leaderboard/qwen3-asr-1.7b-entity-smoke/judge-report/results.jsonl",
-            "runs/asr-leaderboard/qwen3-asr-1.7b-paraphrase-smoke/judge-report/results.jsonl",
-            "runs/asr-leaderboard/qwen3-asr-1.7b-noise-smoke/judge-report/results.jsonl",
-            "runs/asr-leaderboard/vibevoice-asr-smoke/judge-report/results.jsonl",
-            "runs/asr-leaderboard/vibevoice-asr-full-gap/judge-report/results.jsonl",
-            "runs/asr-leaderboard/vibevoice-asr-semantic-smoke/judge-report/results.jsonl",
-            "runs/asr-leaderboard/vibevoice-asr-entity-smoke/judge-report/results.jsonl",
-            "runs/asr-leaderboard/vibevoice-asr-paraphrase-smoke/judge-report/results.jsonl",
-            "runs/asr-leaderboard/vibevoice-asr-noise-smoke/judge-report/results.jsonl",
-        ],
-    }
+    assert check_summary["status"] == "complete"
+    assert check_summary["result_file_count"] == 18
+    assert check_summary["total_results"] == 105
+    assert check_summary["model_count"] == 3
+    assert check_summary["category_count"] == 7
+    assert check_summary["seed_manifest_status"] == "complete"
+    assert check_summary["audio_manifest_status"] == "complete"
+    assert check_summary["audio_cases_path"] == "runs/asr-research-audio/tts_audio_cases.jsonl"
+    assert check_summary["page_status"] == "complete"
+    assert check_summary["source_result_paths"] == [
+        "runs/asr-leaderboard/whisper-large-v3-turbo-smoke/judge-report/results.jsonl",
+        "runs/asr-leaderboard/whisper-large-v3-turbo-full-gap/judge-report/results.jsonl",
+        "runs/asr-leaderboard/whisper-large-v3-turbo-semantic-smoke/judge-report/results.jsonl",
+        "runs/asr-leaderboard/whisper-large-v3-turbo-entity-smoke/judge-report/results.jsonl",
+        "runs/asr-leaderboard/whisper-large-v3-turbo-paraphrase-smoke/judge-report/results.jsonl",
+        "runs/asr-leaderboard/whisper-large-v3-turbo-noise-smoke/judge-report/results.jsonl",
+        "runs/asr-leaderboard/qwen3-asr-1.7b-smoke/judge-report/results.jsonl",
+        "runs/asr-leaderboard/qwen3-asr-1.7b-full-gap/judge-report/results.jsonl",
+        "runs/asr-leaderboard/qwen3-asr-1.7b-semantic-smoke/judge-report/results.jsonl",
+        "runs/asr-leaderboard/qwen3-asr-1.7b-entity-smoke/judge-report/results.jsonl",
+        "runs/asr-leaderboard/qwen3-asr-1.7b-paraphrase-smoke/judge-report/results.jsonl",
+        "runs/asr-leaderboard/qwen3-asr-1.7b-noise-smoke/judge-report/results.jsonl",
+        "runs/asr-leaderboard/vibevoice-asr-smoke/judge-report/results.jsonl",
+        "runs/asr-leaderboard/vibevoice-asr-full-gap/judge-report/results.jsonl",
+        "runs/asr-leaderboard/vibevoice-asr-semantic-smoke/judge-report/results.jsonl",
+        "runs/asr-leaderboard/vibevoice-asr-entity-smoke/judge-report/results.jsonl",
+        "runs/asr-leaderboard/vibevoice-asr-paraphrase-smoke/judge-report/results.jsonl",
+        "runs/asr-leaderboard/vibevoice-asr-noise-smoke/judge-report/results.jsonl",
+    ]
+    assert check_summary["next_run_plan"]["status"] == "complete"
+    assert check_summary["next_run_plan"]["missing_cell_count"] == 0
+    assert len(check_summary["model_category_matrix"]) == 3
+    assert all(
+        row["total_results"] == 35
+        and set(row["category_counts"].values()) == {5}
+        for row in check_summary["model_category_matrix"]
+    )
 
 
 def test_check_only_can_write_machine_readable_preflight_summary(
@@ -1860,6 +1866,9 @@ def test_check_only_can_write_machine_readable_preflight_summary(
     ]
     assert written["total_results"] == 105
     assert written["audio_manifest_status"] == "complete"
+    assert written["next_run_plan"]["status"] == "complete"
+    assert written["next_run_plan"]["missing_cell_count"] == 0
+    assert len(written["model_category_matrix"]) == 3
 
 
 def test_check_only_runtime_preflight_writes_refresh_decision(

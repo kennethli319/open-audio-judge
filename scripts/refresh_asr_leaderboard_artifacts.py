@@ -41,6 +41,7 @@ from scripts.update_asr_leaderboard_demo import (  # noqa: E402
     HOSTED_BASE_URL,
     START_MARKER,
     build_next_run_plan,
+    build_model_category_matrix,
     build_output_artifact_index,
     build_refresh_runtime_status,
     render_generated_sections,
@@ -557,6 +558,11 @@ def check_asr_leaderboard_refresh_inputs(
         "audio_cases_path": audio_manifest["audio_cases_path"],
         "page_status": page_validation["status"],
         "source_result_paths": [_repo_relative(path) for path in result_paths],
+        "model_category_matrix": build_model_category_matrix(combined_results),
+        "next_run_plan": build_next_run_plan(
+            combined_results,
+            expected_cases_per_model=expected_cases_per_model,
+        ),
     }
     if hosted_dir:
         hosted_validation = check_asr_leaderboard_page(
