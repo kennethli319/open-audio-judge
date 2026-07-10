@@ -49,6 +49,8 @@ def test_commit_verification_can_include_runtime_preflight_summary() -> None:
         "runs/asr-leaderboard/preflight-next-action.md",
         "--cron-status-out",
         "runs/asr-leaderboard/preflight-cron-status.json",
+        "--cron-handoff-out",
+        "runs/asr-leaderboard/preflight-cron-handoff.md",
         "--check-summary-out",
         "runs/asr-leaderboard/preflight-summary.json",
     )

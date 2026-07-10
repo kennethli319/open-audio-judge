@@ -25,6 +25,7 @@ DEFAULT_RUNTIME_STATUS = Path("runs/asr-leaderboard/preflight-runtime-status.jso
 DEFAULT_REFRESH_DECISION = Path("runs/asr-leaderboard/preflight-refresh-decision.json")
 DEFAULT_NEXT_ACTION = Path("runs/asr-leaderboard/preflight-next-action.md")
 DEFAULT_CRON_STATUS = Path("runs/asr-leaderboard/preflight-cron-status.json")
+DEFAULT_CRON_HANDOFF = Path("runs/asr-leaderboard/preflight-cron-handoff.md")
 
 
 def _refresh_preflight_command(
@@ -46,6 +47,7 @@ def _refresh_preflight_command(
         command.extend(("--refresh-decision-out", str(DEFAULT_REFRESH_DECISION)))
         command.extend(("--next-action-out", str(DEFAULT_NEXT_ACTION)))
         command.extend(("--cron-status-out", str(DEFAULT_CRON_STATUS)))
+        command.extend(("--cron-handoff-out", str(DEFAULT_CRON_HANDOFF)))
     if require_runtime_ready:
         command.append("--require-runtime-ready")
     if check_summary_out is not None:
