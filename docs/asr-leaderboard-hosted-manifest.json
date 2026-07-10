@@ -2,27 +2,27 @@
   "artifact_count": 41,
   "artifacts": [
     {
-      "bytes": 62848,
+      "bytes": 62890,
       "hosted_paths": [
         "asr-leaderboard-demo.html"
       ],
-      "sha256": "aa65524d568029d4d0f9fafe5d1755cd8069ab7316607c295431d4e200cb9cb5",
+      "sha256": "4b3bdfb3ebaafd9027d7da413dc03cb86d365de80ac44942c1357e4e4268c5cc",
       "source_path": "docs/asr-leaderboard-demo.html"
     },
     {
-      "bytes": 39460,
+      "bytes": 39614,
       "hosted_paths": [
         "asr-leaderboard-summary.json"
       ],
-      "sha256": "a266af7f5e62235535fb60846fbc1dd49f9ea7ded7ea33cbd053b366a97b93f1",
+      "sha256": "e74db8b47d20dbb8c9360e1137706c990d36d1ecaa582642b6d33f9cd1389190",
       "source_path": "docs/asr-leaderboard-summary.json"
     },
     {
-      "bytes": 20894,
+      "bytes": 20925,
       "hosted_paths": [
         "asr-leaderboard-refresh-report.md"
       ],
-      "sha256": "f0e9ee011218dcc3784eba13853907856e4cb7cf414af1cafdaece34ece369ae",
+      "sha256": "c716d2a7ecda3649dca47bb30ecb91bbebe267a2521fda580340247cc0c315ca",
       "source_path": "docs/asr-leaderboard-refresh-report.md"
     },
     {
@@ -42,27 +42,27 @@
       "source_path": "docs/asr-leaderboard-report-links.json"
     },
     {
-      "bytes": 23629,
+      "bytes": 23670,
       "hosted_paths": [
         "asr-leaderboard-report-bundle.json"
       ],
-      "sha256": "da045962613af3fbbcfbcb231b604d983b386093f80af628b5f45ab9bdf2d620",
+      "sha256": "e69bd8960d7b3c57c722558c771ccebe65c17e9c0862607459046d6a995a90db",
       "source_path": "docs/asr-leaderboard-report-bundle.json"
     },
     {
-      "bytes": 6183,
+      "bytes": 6235,
       "hosted_paths": [
         "asr-leaderboard-refresh-commands.sh"
       ],
-      "sha256": "4181c543d2605e90534c76b597ddb386c9eff83f5e8e682823a36787b37f6858",
+      "sha256": "9ed341e86007326616f4c9a14c85331ca35225619d923b3041f3b9c2b211da71",
       "source_path": "docs/asr-leaderboard-refresh-commands.sh"
     },
     {
-      "bytes": 15553,
+      "bytes": 15781,
       "hosted_paths": [
         "asr-leaderboard-refresh-workflow.json"
       ],
-      "sha256": "a5778b6eae4dde59aae0c1af281c880c2940904739b2f11e6f0e7ac45f78d9dc",
+      "sha256": "8ef3497989686d351be3ebc62f6a2e5154718ff5fb95348e34a5515a2633f221",
       "source_path": "docs/asr-leaderboard-refresh-workflow.json"
     },
     {
@@ -106,11 +106,11 @@
       "source_path": "docs/asr-leaderboard-next-runs.json"
     },
     {
-      "bytes": 38122,
+      "bytes": 38212,
       "hosted_paths": [
         "asr-leaderboard-artifacts.json"
       ],
-      "sha256": "3ad0c3bc238c45db682e7bb859105796583d0ad3c1e3e59081066d554faaf2dc",
+      "sha256": "50fd0dfd632cdf201b59714392ac8949e6ef7b5178fd4a3a445102a6ecb987f2",
       "source_path": "docs/asr-leaderboard-artifacts.json"
     },
     {
@@ -154,11 +154,11 @@
       "source_path": "docs/asr-leaderboard-cron-handoff.md"
     },
     {
-      "bytes": 2257,
+      "bytes": 2339,
       "hosted_paths": [
         "asr-leaderboard-bundle-status.json"
       ],
-      "sha256": "5981fae30a6f872e191b48e330c9f8ed587eff593aa4b34c1c378c7cba017612",
+      "sha256": "0d0d9e7242cb9d6ea8e63b5100833cb9a9934420c950120a350d9535dd136f7a",
       "source_path": "docs/asr-leaderboard-bundle-status.json"
     },
     {

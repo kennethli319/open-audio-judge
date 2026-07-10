@@ -45,7 +45,7 @@
       "sha256": "0e1691d1eed24ce6f7825bf66819c7644868dbb3e155fba95d61fa1320f278c7"
     },
     {
-      "bytes": 62848,
+      "bytes": 62890,
       "digest_status": "ok",
       "exists": true,
       "hosted_paths": [
@@ -53,7 +53,7 @@
       ],
       "path": "docs/asr-leaderboard-demo.html",
       "purpose": "Generated ASR leaderboard demo HTML page.",
-      "sha256": "aa65524d568029d4d0f9fafe5d1755cd8069ab7316607c295431d4e200cb9cb5"
+      "sha256": "4b3bdfb3ebaafd9027d7da413dc03cb86d365de80ac44942c1357e4e4268c5cc"
     },
     {
       "bytes": null,
@@ -111,7 +111,7 @@
       "sha256": "cc918bbaa552b7099e89e2084aff8590d960456dee407eb318d26442488f93e7"
     },
     {
-      "bytes": 6183,
+      "bytes": 6235,
       "digest_status": "ok",
       "exists": true,
       "hosted_paths": [
@@ -119,7 +119,7 @@
       ],
       "path": "docs/asr-leaderboard-refresh-commands.sh",
       "purpose": "Generated shell playbook for repeatable ASR leaderboard refreshes.",
-      "sha256": "4181c543d2605e90534c76b597ddb386c9eff83f5e8e682823a36787b37f6858"
+      "sha256": "9ed341e86007326616f4c9a14c85331ca35225619d923b3041f3b9c2b211da71"
     },
     {
       "bytes": 12188,
@@ -133,7 +133,7 @@
       "sha256": "6965ccb8205f256ee4d8bb6b7915f9ed1af249f1780c1e463472af8ba50af4b8"
     },
     {
-      "bytes": 20894,
+      "bytes": 20925,
       "digest_status": "ok",
       "exists": true,
       "hosted_paths": [
@@ -141,10 +141,10 @@
       ],
       "path": "docs/asr-leaderboard-refresh-report.md",
       "purpose": "Human-readable coverage, score, source-file, and command report.",
-      "sha256": "f0e9ee011218dcc3784eba13853907856e4cb7cf414af1cafdaece34ece369ae"
+      "sha256": "c716d2a7ecda3649dca47bb30ecb91bbebe267a2521fda580340247cc0c315ca"
     },
     {
-      "bytes": 15553,
+      "bytes": 15781,
       "digest_status": "ok",
       "exists": true,
       "hosted_paths": [
@@ -152,10 +152,10 @@
       ],
       "path": "docs/asr-leaderboard-refresh-workflow.json",
       "purpose": "Machine-readable generated workflow for ASR refresh automation.",
-      "sha256": "a5778b6eae4dde59aae0c1af281c880c2940904739b2f11e6f0e7ac45f78d9dc"
+      "sha256": "8ef3497989686d351be3ebc62f6a2e5154718ff5fb95348e34a5515a2633f221"
     },
     {
-      "bytes": 23629,
+      "bytes": 23670,
       "digest_status": "ok",
       "exists": true,
       "hosted_paths": [
@@ -163,7 +163,7 @@
       ],
       "path": "docs/asr-leaderboard-report-bundle.json",
       "purpose": "Single machine-readable entry point for ASR report URLs, source reports, and refresh provenance.",
-      "sha256": "da045962613af3fbbcfbcb231b604d983b386093f80af628b5f45ab9bdf2d620"
+      "sha256": "e69bd8960d7b3c57c722558c771ccebe65c17e9c0862607459046d6a995a90db"
     },
     {
       "bytes": 11105,
@@ -219,7 +219,7 @@
       "sha256": "2811817767ebc0a9e1d85809fb45eaa8324dda8f2fc3f0ccfb06b8f1a565db4a"
     },
     {
-      "bytes": 39460,
+      "bytes": 39614,
       "digest_status": "ok",
       "exists": true,
       "hosted_paths": [
@@ -227,7 +227,7 @@
       ],
       "path": "docs/asr-leaderboard-summary.json",
       "purpose": "Machine-readable leaderboard summary and reproducible refresh workflow.",
-      "sha256": "a266af7f5e62235535fb60846fbc1dd49f9ea7ded7ea33cbd053b366a97b93f1"
+      "sha256": "e74db8b47d20dbb8c9360e1137706c990d36d1ecaa582642b6d33f9cd1389190"
     },
     {
       "bytes": 1634,
@@ -1010,6 +1010,10 @@
         ".venv/bin/python",
         "-m",
         "pytest"
+      ],
+      [
+        ".venv/bin/python",
+        "scripts/check_asr_report_bundle.py"
       ],
       [
         "git",

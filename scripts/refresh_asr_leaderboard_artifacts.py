@@ -2371,6 +2371,7 @@ def build_artifact_index_data(
         "non_secret_verification_commands": [
             [".venv/bin/ruff", "check", "."],
             [".venv/bin/python", "-m", "pytest"],
+            [".venv/bin/python", "scripts/check_asr_report_bundle.py"],
             ["git", "diff", "--check"],
             [".venv/bin/python", "scripts/verify_asr_leaderboard_commit.py"],
         ],

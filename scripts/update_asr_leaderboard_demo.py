@@ -1081,6 +1081,7 @@ def write_refresh_commands_script(
         _shell_join(workflow["cron_rehearsal_command"]),
         _shell_join(workflow["combine_refresh_command"]),
         _shell_join(workflow["page_validation_command"]),
+        _shell_join(workflow["report_bundle_check_command"]),
         _shell_join(workflow["freshness_check_command"]),
         "",
         "# Optional hosted sync; export ASR_SYNC_HOSTED=1 and set ASR_LEADERBOARD_HOSTED_DIR first.",
@@ -1380,6 +1381,10 @@ def _refresh_workflow(source_result_paths: list[Path]) -> dict[str, object]:
             ".venv/bin/python",
             "scripts/verify_asr_leaderboard_commit.py",
         ],
+        "report_bundle_check_command": [
+            ".venv/bin/python",
+            "scripts/check_asr_report_bundle.py",
+        ],
         "cron_commit_verification_command": [
             ".venv/bin/python",
             "scripts/verify_asr_leaderboard_commit.py",
@@ -1502,6 +1507,7 @@ def _automation_stages() -> list[dict[str, object]]:
             "description": "Check page structure, generated freshness, test suite, and non-secret commit readiness before pushing.",
             "command_keys": [
                 "page_validation_command",
+                "report_bundle_check_command",
                 "freshness_check_command",
                 "commit_verification_command",
                 "cron_commit_verification_command",

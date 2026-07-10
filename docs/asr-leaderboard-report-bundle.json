@@ -35,6 +35,7 @@
       {
         "command_keys": [
           "page_validation_command",
+          "report_bundle_check_command",
           "freshness_check_command",
           "commit_verification_command",
           "cron_commit_verification_command"

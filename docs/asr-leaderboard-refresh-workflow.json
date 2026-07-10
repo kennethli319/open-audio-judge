@@ -34,6 +34,7 @@
     {
       "command_keys": [
         "page_validation_command",
+        "report_bundle_check_command",
         "freshness_check_command",
         "commit_verification_command",
         "cron_commit_verification_command"
@@ -78,6 +79,7 @@
     "page_validation_command",
     "preflight_summary_command",
     "refresh_check_command",
+    "report_bundle_check_command",
     "runtime_ready_check_command",
     "runtime_status_check_command",
     "seed_manifest_validation_command"
@@ -141,6 +143,7 @@
       {
         "command_keys": [
           "page_validation_command",
+          "report_bundle_check_command",
           "freshness_check_command",
           "commit_verification_command",
           "cron_commit_verification_command"
@@ -424,6 +427,10 @@
     ],
     "refresh_commands_path": "docs/asr-leaderboard-refresh-commands.sh",
     "refresh_workflow_path": "docs/asr-leaderboard-refresh-workflow.json",
+    "report_bundle_check_command": [
+      ".venv/bin/python",
+      "scripts/check_asr_report_bundle.py"
+    ],
     "runtime_ready_check_command": [
       ".venv/bin/python",
       "scripts/refresh_asr_leaderboard_artifacts.py",

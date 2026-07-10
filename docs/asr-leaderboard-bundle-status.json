@@ -47,6 +47,10 @@
       "pytest"
     ],
     [
+      ".venv/bin/python",
+      "scripts/check_asr_report_bundle.py"
+    ],
+    [
       "git",
       "diff",
       "--check"

@@ -14,6 +14,7 @@ COMMANDS = (
     (".venv/bin/ruff", "check", "."),
     (".venv/bin/python", "-m", "pytest"),
     (".venv/bin/python", "scripts/check_asr_leaderboard_page.py"),
+    (".venv/bin/python", "scripts/check_asr_report_bundle.py"),
     ("bash", "-n", "docs/asr-leaderboard-refresh-commands.sh"),
     ("bash", "-n", "docs/asr-leaderboard-live-refresh.sh"),
     ("git", "diff", "--check"),
