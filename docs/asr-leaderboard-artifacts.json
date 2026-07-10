@@ -12,7 +12,7 @@
       "sha256": null
     },
     {
-      "bytes": 30666,
+      "bytes": 30907,
       "digest_status": "ok",
       "exists": true,
       "hosted_paths": [
@@ -20,7 +20,7 @@
       ],
       "path": "docs/asr-leaderboard-demo.html",
       "purpose": "Generated ASR leaderboard demo HTML page.",
-      "sha256": "38717ddd2224115080128ea05ad657dc0f475d460d1158649087ef0755714ac5"
+      "sha256": "484fc006dda12808fa2671c715ee062995b33f30c81babdad93e612f18776bae"
     },
     {
       "bytes": null,
@@ -34,7 +34,7 @@
       "sha256": null
     },
     {
-      "bytes": 3621,
+      "bytes": 3695,
       "digest_status": "ok",
       "exists": true,
       "hosted_paths": [
@@ -42,7 +42,7 @@
       ],
       "path": "docs/asr-leaderboard-live-refresh.sh",
       "purpose": "Opt-in generated shell script for live MLX ASR/Gemini refreshes.",
-      "sha256": "a978ad6da132dfdcf2e744ce46aa1486372007ac9589837f3963cf847f3b7f2f"
+      "sha256": "63a4f1ba7e9acae8b0bab951ce6fd35633ae77dfafcb3122da8fd57ecbc2257c"
     },
     {
       "bytes": 13545,
@@ -67,7 +67,7 @@
       "sha256": "cc918bbaa552b7099e89e2084aff8590d960456dee407eb318d26442488f93e7"
     },
     {
-      "bytes": 5662,
+      "bytes": 5810,
       "digest_status": "ok",
       "exists": true,
       "hosted_paths": [
@@ -75,10 +75,10 @@
       ],
       "path": "docs/asr-leaderboard-refresh-commands.sh",
       "purpose": "Generated shell playbook for repeatable ASR leaderboard refreshes.",
-      "sha256": "c558ecfb101b9e32168a58f16952b522b19dd8820a12341e3b3a7ac94d3c0b23"
+      "sha256": "887b346f6e31c9a181b1f2e92c6d27e0b1ae8fbf425a24662a11cab502e41024"
     },
     {
-      "bytes": 18401,
+      "bytes": 18623,
       "digest_status": "ok",
       "exists": true,
       "hosted_paths": [
@@ -86,10 +86,10 @@
       ],
       "path": "docs/asr-leaderboard-refresh-report.md",
       "purpose": "Human-readable coverage, score, source-file, and command report.",
-      "sha256": "28ce410b4aeb0d2365c8967b4bd6af4296cde5e30e62231eecf9942847044c97"
+      "sha256": "fd51544b3d88bfa10bb3f79fe523fb03ad77b19613babfe2d54a451083d4c4a2"
     },
     {
-      "bytes": 9689,
+      "bytes": 9965,
       "digest_status": "ok",
       "exists": true,
       "hosted_paths": [
@@ -97,7 +97,7 @@
       ],
       "path": "docs/asr-leaderboard-refresh-workflow.json",
       "purpose": "Machine-readable generated workflow for ASR refresh automation.",
-      "sha256": "81c7c30aed86a16d1b3cd6a6528bfdb20069551ed3369136a8d5742e0adb0079"
+      "sha256": "c525dd0e952e7f86947cbbe531279e5109b2b4720007d3e280ccd8a56b4beb2c"
     },
     {
       "bytes": 11110,
@@ -144,7 +144,7 @@
       "sha256": "84c2baf3f4855b2cdbe134365aa02079a03acb94a20d981e732315f489b710ea"
     },
     {
-      "bytes": 33781,
+      "bytes": 34057,
       "digest_status": "ok",
       "exists": true,
       "hosted_paths": [
@@ -152,7 +152,7 @@
       ],
       "path": "docs/asr-leaderboard-summary.json",
       "purpose": "Machine-readable leaderboard summary and reproducible refresh workflow.",
-      "sha256": "bc5e654cba6024271b7a3854f5110f6b92eedb496cc36fb1399f6c248c4c14fe"
+      "sha256": "5560c5acb78ff487aba749c001a3cdab7992c2d97f265584d70878ac46b06d9c"
     },
     {
       "bytes": 1634,

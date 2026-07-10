@@ -564,12 +564,16 @@ def test_write_summary_artifact_records_models_and_categories(tmp_path: Path) ->
         "--results",
         str(source_results_path),
         "--update-run-manifest",
+        "--source-selection-summary-out",
+        "docs/asr-leaderboard-source-selection.json",
     ]
     assert summary["refresh_workflow"]["discover_refresh_command"] == [
         ".venv/bin/python",
         "scripts/refresh_asr_leaderboard_artifacts.py",
         "--discover-complete-model-runs",
         "--update-run-manifest",
+        "--source-selection-summary-out",
+        "docs/asr-leaderboard-source-selection.json",
     ]
     assert summary["refresh_workflow"]["refresh_check_command"] == [
         ".venv/bin/python",
@@ -632,6 +636,8 @@ def test_write_summary_artifact_records_models_and_categories(tmp_path: Path) ->
     assert summary["refresh_workflow"]["manifest_refresh_command"] == [
         ".venv/bin/python",
         "scripts/refresh_asr_leaderboard_artifacts.py",
+        "--source-selection-summary-out",
+        "docs/asr-leaderboard-source-selection.json",
     ]
     assert summary["refresh_workflow"]["refresh_commands_path"] == (
         "docs/asr-leaderboard-refresh-commands.sh"
@@ -3563,6 +3569,7 @@ def test_check_asr_leaderboard_page_validates_hosted_artifact_layout(tmp_path: P
                 ".venv/bin/python scripts/synthesize_tts_cases.py --cases examples/asr_research_cases.jsonl --out runs/asr-research-audio --discard-text-sidecars --summary-out runs/asr-research-audio/summary.json",
                 ".venv/bin/oaj autojudge-mlx-asr --python-bin .venv/bin/python --cases runs/asr-research-audio/tts_audio_cases.jsonl --model &lt;mlx-community/model-id&gt; --judge-provider gemini --judge-samples 3 --out runs/asr-leaderboard/&lt;run-name&gt;",
                 ".venv/bin/python scripts/refresh_asr_leaderboard_artifacts.py",
+                ".venv/bin/python scripts/refresh_asr_leaderboard_artifacts.py --source-selection-summary-out docs/asr-leaderboard-source-selection.json",
                 ".venv/bin/python scripts/check_asr_leaderboard_page.py",
                 ".venv/bin/python scripts/verify_asr_leaderboard_commit.py",
                 ".venv/bin/python scripts/refresh_asr_leaderboard_artifacts.py --hosted-dir-from-env",

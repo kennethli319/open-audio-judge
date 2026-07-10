@@ -52,7 +52,7 @@ if [[ ${blocked_model_count} -ne 0 ]]; then
 fi
 
 # Rebuild committed artifacts from the newest complete primary-model runs.
-.venv/bin/python scripts/refresh_asr_leaderboard_artifacts.py --discover-complete-model-runs --update-run-manifest
+.venv/bin/python scripts/refresh_asr_leaderboard_artifacts.py --discover-complete-model-runs --update-run-manifest --source-selection-summary-out docs/asr-leaderboard-source-selection.json
 .venv/bin/python scripts/check_asr_leaderboard_page.py
 .venv/bin/python scripts/refresh_asr_leaderboard_artifacts.py --check-only --require-generated-fresh
 

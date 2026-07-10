@@ -367,6 +367,15 @@ def main() -> None:
             )
         print(format_check_summary_message(check_summary))
         return
+    write_optional_source_selection_summary(
+        args.source_selection_summary_out,
+        result_paths=result_paths,
+        runs_root=args.runs_root,
+        run_manifest=args.run_manifest,
+        expected_cases_per_model=args.expected_cases_per_model,
+        discovery_requested=args.discover_complete_model_runs,
+        check_only=False,
+    )
     refresh_asr_leaderboard_artifacts(
         result_paths,
         out=args.out,
@@ -390,15 +399,6 @@ def main() -> None:
         hosted_dir=hosted_dir,
         check_mlx_runtime=args.check_mlx_runtime,
         expected_cases_per_model=args.expected_cases_per_model,
-    )
-    write_optional_source_selection_summary(
-        args.source_selection_summary_out,
-        result_paths=result_paths,
-        runs_root=args.runs_root,
-        run_manifest=args.run_manifest,
-        expected_cases_per_model=args.expected_cases_per_model,
-        discovery_requested=args.discover_complete_model_runs,
-        check_only=False,
     )
 
 

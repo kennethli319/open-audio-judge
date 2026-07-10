@@ -337,7 +337,9 @@
       "runs/asr-leaderboard/vibevoice-asr-paraphrase-smoke/judge-report/results.jsonl",
       "--results",
       "runs/asr-leaderboard/vibevoice-asr-noise-smoke/judge-report/results.jsonl",
-      "--update-run-manifest"
+      "--update-run-manifest",
+      "--source-selection-summary-out",
+      "docs/asr-leaderboard-source-selection.json"
     ],
     "commit_verification_command": [
       ".venv/bin/python",
@@ -347,7 +349,9 @@
       ".venv/bin/python",
       "scripts/refresh_asr_leaderboard_artifacts.py",
       "--discover-complete-model-runs",
-      "--update-run-manifest"
+      "--update-run-manifest",
+      "--source-selection-summary-out",
+      "docs/asr-leaderboard-source-selection.json"
     ],
     "fallback_handling": "If a primary MLX ASR model is blocked or unsupported, record the unsupported state explicitly before trying the fallback model list; do not substitute silently.",
     "fallback_model_ids": [
@@ -397,7 +401,9 @@
     ],
     "manifest_refresh_command": [
       ".venv/bin/python",
-      "scripts/refresh_asr_leaderboard_artifacts.py"
+      "scripts/refresh_asr_leaderboard_artifacts.py",
+      "--source-selection-summary-out",
+      "docs/asr-leaderboard-source-selection.json"
     ],
     "mlx_runtime_check_command": [
       "PYTHONPATH=src",
