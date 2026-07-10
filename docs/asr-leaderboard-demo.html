@@ -188,6 +188,15 @@
     .technical-details > summary { cursor: pointer; padding: 15px 17px; color: var(--accent); font-weight: 700; }
     .technical-details-body { max-width: 100%; overflow-x: auto; padding: 2px 17px 20px; border-top: 1px solid var(--line); }
     .technical-details-body table { min-width: 720px; border: 1px solid var(--line); }
+    .workflow-extension {
+      margin-top: 34px;
+      border: 1px solid #8bb7e8;
+      border-radius: 12px;
+      background: linear-gradient(145deg, #f7fbff, #edf5fd);
+      padding: 18px 20px;
+    }
+    .workflow-extension h2 { margin: 4px 0 8px; }
+    .workflow-extension p { margin: 0; max-width: 82ch; }
     .sr-only { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0,0,0,0); white-space: nowrap; border: 0; }
     footer { border-top: 1px solid var(--line); background: var(--panel); }
     .footer-inner { align-items: center; display: flex; flex-wrap: wrap; gap: 12px 24px; justify-content: space-between; max-width: 1200px; margin: 0 auto; padding: 22px 24px; }
@@ -321,6 +330,7 @@
       <a class="link-card" href="https://kennethli319.github.io/open-audio-judge/asr-leaderboard-report-index.md"><strong>Generated report index</strong><span>Browse source reports generated for each contributing run.</span></a>
       <a class="link-card" href="https://kennethli319.github.io/open-audio-judge/asr-leaderboard-report-links.json"><strong>Machine-readable report map</strong><span>Use the JSON links and provenance index.</span></a>
       <a class="link-card" href="https://github.com/kennethli319/open-audio-judge"><strong>Open Audio Judge repository</strong><span>Read the methodology, run the tools, and inspect the source behind this benchmark.</span></a>
+      <a class="link-card" href="https://github.com/kennethli319/audio-benchmark-index"><strong>Audio Benchmark Index</strong><span>Pick another compatible speech benchmark and reuse the generated case-to-report workflow with a task-specific adapter and rubric.</span></a>
     </div>
 
     <details class="technical-details">
@@ -513,6 +523,12 @@ oaj autojudge-mlx-asr \
     <p>See <code>docs/asr-eval-taxonomy.md</code> for the category rationale and <code>examples/asr_research_cases.jsonl</code> for the seed manifest. These leaderboard results are verified local artifacts from all seven categories, with private/generated audio kept out of the repository.</p>
       </div>
     </details>
+
+    <section class="workflow-extension" aria-labelledby="asr-benchmark-extension-heading">
+      <span class="eyebrow">Extend the workflow</span>
+      <h2 id="asr-benchmark-extension-heading">Evaluate another speech benchmark</h2>
+      <p>Choose a compatible benchmark from the <a href="https://github.com/kennethli319/audio-benchmark-index">Audio Benchmark Index</a>, then reuse Open Audio Judge's case-to-report workflow to rate speech models with small task-specific changes to the case adapter and scoring rubric.</p>
+    </section>
   </main>
   <footer>
     <div class="footer-inner">

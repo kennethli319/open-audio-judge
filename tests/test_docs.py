@@ -40,6 +40,7 @@ def test_tts_leaderboard_demo_page_documents_workflow() -> None:
         'aria-pressed="true"',
         'role="status" aria-live="polite"',
         'button.setAttribute("aria-pressed", String(isActive))',
+        'main > :not(.control-bar):not(.preview-note):not(.workflow-extension)',
         "Demo Run view is selected.",
         'let activeView = Object.prototype.hasOwnProperty.call(sectionViews, requestedView) ? requestedView : "demo"',
         'id="report-search"',
@@ -190,6 +191,9 @@ def test_leaderboard_pages_share_navigation_and_project_context() -> None:
         assert 'href="tts-leaderboard-demo.html"' in html
         assert 'href="asr-leaderboard-demo.html"' in html
         assert 'href="https://github.com/kennethli319/open-audio-judge"' in html
+        assert 'href="https://github.com/kennethli319/audio-benchmark-index"' in html
+        assert "Evaluate another speech benchmark" in html
+        assert "small task-specific changes to the case adapter and scoring rubric" in html
         assert 'class="skip-link"' in html
         assert 'id="main-content"' in html
         assert "<footer" in html
@@ -215,6 +219,9 @@ def test_docs_index_links_both_focused_leaderboards_and_repository() -> None:
     assert 'href="tts-leaderboard-demo.html"' in html
     assert 'href="asr-leaderboard-demo.html"' in html
     assert 'href="https://github.com/kennethli319/open-audio-judge"' in html
+    assert 'href="https://github.com/kennethli319/audio-benchmark-index"' in html
+    assert "Take this workflow to another benchmark" in html
+    assert "small task-specific changes to the case adapter and scoring rubric" in html
     assert "Illustrative preview" in html
     assert "Verified benchmark" in html
 

@@ -2,27 +2,27 @@
   "artifact_count": 38,
   "artifacts": [
     {
-      "bytes": 60300,
+      "bytes": 61424,
       "hosted_paths": [
         "asr-leaderboard-demo.html"
       ],
-      "sha256": "ff036713a169efec8af8bb900660ca4198874a4ce9d87c52593a7baee60124ea",
+      "sha256": "e0f23be16a240e53482c17321d830406fdbb94293d2a8e28dada72cb36ac9a61",
       "source_path": "docs/asr-leaderboard-demo.html"
     },
     {
-      "bytes": 38385,
+      "bytes": 38467,
       "hosted_paths": [
         "asr-leaderboard-summary.json"
       ],
-      "sha256": "fe48eadbd012a3323730401927efa3c50277296c972afa5214124be67d915523",
+      "sha256": "3deaca9e1d244777e0410fb8849b2e515ef9f4bd73e8f2d6984aa12a1653ba04",
       "source_path": "docs/asr-leaderboard-summary.json"
     },
     {
-      "bytes": 20099,
+      "bytes": 20185,
       "hosted_paths": [
         "asr-leaderboard-refresh-report.md"
       ],
-      "sha256": "30d7ffedcfa148be643040b9ec64c5f7b5b14ad8069e14cea90ffcd634944fe9",
+      "sha256": "eca304aad31cfaafff7ba8cbf73c56ad2055e78ddaa241219c0ea08e7224d3b7",
       "source_path": "docs/asr-leaderboard-refresh-report.md"
     },
     {
@@ -102,7 +102,7 @@
       "hosted_paths": [
         "asr-leaderboard-artifacts.json"
       ],
-      "sha256": "f78e4249ea502dc6bc03e2f69a6d6e0cdc923cffbd349a23c2bfef13aeddd98d",
+      "sha256": "d41aaa651dbe1ecd1349662c59313d06b6a77433fe4440ef940dabc6ff186a96",
       "source_path": "docs/asr-leaderboard-artifacts.json"
     },
     {

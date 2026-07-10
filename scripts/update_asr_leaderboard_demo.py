@@ -44,6 +44,7 @@ DEFAULT_HOSTED_DIR_ENV = "ASR_LEADERBOARD_HOSTED_DIR"
 HOSTED_BASE_PATH = "open-audio-judge"
 HOSTED_BASE_URL = "https://kennethli319.github.io/open-audio-judge"
 REPOSITORY_URL = "https://github.com/kennethli319/open-audio-judge"
+BENCHMARK_INDEX_URL = "https://github.com/kennethli319/audio-benchmark-index"
 START_MARKER = "<!-- ASR_LEADERBOARD_GENERATED_START -->"
 END_MARKER = "<!-- ASR_LEADERBOARD_GENERATED_END -->"
 
@@ -473,6 +474,7 @@ def render_generated_sections(
             f'      <a class="link-card" href="{hosted_report_index_url}"><strong>Generated report index</strong><span>Browse source reports generated for each contributing run.</span></a>',
             f'      <a class="link-card" href="{hosted_report_links_url}"><strong>Machine-readable report map</strong><span>Use the JSON links and provenance index.</span></a>',
             f'      <a class="link-card" href="{REPOSITORY_URL}"><strong>Open Audio Judge repository</strong><span>Read the methodology, run the tools, and inspect the source behind this benchmark.</span></a>',
+            f'      <a class="link-card" href="{BENCHMARK_INDEX_URL}"><strong>Audio Benchmark Index</strong><span>Pick another compatible speech benchmark and reuse the generated case-to-report workflow with a task-specific adapter and rubric.</span></a>',
             "    </div>",
             "",
             '    <details class="technical-details">',
@@ -612,6 +614,7 @@ def write_summary_artifact(
                 "live_refresh_script_path": _repo_relative(DEFAULT_LIVE_REFRESH_SCRIPT),
                 "report_index_path": _repo_relative(DEFAULT_REPORT_INDEX),
                 "report_links_path": _repo_relative(DEFAULT_REPORT_LINKS),
+                "benchmark_index_url": BENCHMARK_INDEX_URL,
                 "manifest_validation_path": _repo_relative(DEFAULT_MANIFEST_VALIDATION),
                 "seed_manifest_validation_path": _repo_relative(DEFAULT_SEED_MANIFEST_VALIDATION),
                 "next_runs_path": _repo_relative(DEFAULT_NEXT_RUNS),
@@ -724,6 +727,7 @@ def write_refresh_report(
                 f"- Hosted artifact manifest: `{_repo_relative(DEFAULT_HOSTED_MANIFEST)}`",
                 f"- Hosted demo URL: `{HOSTED_BASE_URL}/asr-leaderboard-demo.html`",
                 f"- Hosted combined report URL: `{HOSTED_BASE_URL}/asr-leaderboard/full-35-combined/report.html`",
+                f"- Compatible benchmark index: `{BENCHMARK_INDEX_URL}`",
                 f"- Artifact bundle index: `{_repo_relative(DEFAULT_ARTIFACT_INDEX)}`",
                 f"- Runtime status: `{_repo_relative(DEFAULT_RUNTIME_STATUS)}`",
                 f"- Cron status: `{_repo_relative(DEFAULT_CRON_STATUS)}`",

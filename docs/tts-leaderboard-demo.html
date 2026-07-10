@@ -350,6 +350,20 @@
       display: block;
       margin-bottom: 4px;
     }
+    .workflow-extension {
+      margin-top: 34px;
+      border: 1px solid #8bb7e8;
+      border-radius: 12px;
+      background: linear-gradient(145deg, #f7fbff, #edf5fd);
+      padding: 18px 20px;
+    }
+    .workflow-extension h2 {
+      margin: 4px 0 8px;
+    }
+    .workflow-extension p {
+      margin: 0;
+      max-width: 82ch;
+    }
     footer {
       border-top: 1px solid var(--line);
       background: var(--panel);
@@ -4291,6 +4305,12 @@
       ignored <code>runs/</code> directories unless the audio, text, and metadata are
       explicitly safe to publish.
     </p>
+
+    <section class="workflow-extension" aria-labelledby="tts-benchmark-extension-heading">
+      <span class="eyebrow">Extend the workflow</span>
+      <h2 id="tts-benchmark-extension-heading">Evaluate another speech benchmark</h2>
+      <p>Choose a compatible benchmark from the <a href="https://github.com/kennethli319/audio-benchmark-index">Audio Benchmark Index</a>, then reuse Open Audio Judge's case-to-report workflow to rate speech models with small task-specific changes to the case adapter and scoring rubric.</p>
+    </section>
   </main>
   <footer>
     <div class="footer-inner">
@@ -4333,7 +4353,7 @@
       status: document.querySelector("#filter-status"),
       viewButtons: Array.from(document.querySelectorAll("[data-view]")),
     };
-    const mainChildren = Array.from(document.querySelectorAll("main > :not(.control-bar):not(.preview-note)"));
+    const mainChildren = Array.from(document.querySelectorAll("main > :not(.control-bar):not(.preview-note):not(.workflow-extension)"));
     const evalGroups = Array.from(document.querySelectorAll(".sample-group"));
     const sampleRows = Array.from(document.querySelectorAll("#sample-breakdown-table tbody tr"));
     const sampleBody = document.querySelector("#sample-breakdown-table tbody");

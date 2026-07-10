@@ -282,6 +282,9 @@ def test_render_generated_sections_summarizes_verified_asr_results(tmp_path: Pat
     assert "Machine-readable report map" in html
     assert "Open Audio Judge repository" in html
     assert "https://github.com/kennethli319/open-audio-judge" in html
+    assert "Audio Benchmark Index" in html
+    assert "https://github.com/kennethli319/audio-benchmark-index" in html
+    assert "task-specific adapter and rubric" in html
     assert "--discover-complete-model-runs" in html
     assert "scripts/validate_asr_seed_manifest.py" in html
     assert "Check generated page" in html
@@ -519,6 +522,7 @@ def test_write_summary_artifact_records_models_and_categories(tmp_path: Path) ->
     assert summary["cron_status_path"] == "docs/asr-leaderboard-cron-status.json"
     assert summary["report_index_path"] == "docs/asr-leaderboard-report-index.md"
     assert summary["report_links_path"] == "docs/asr-leaderboard-report-links.json"
+    assert summary["benchmark_index_url"] == "https://github.com/kennethli319/audio-benchmark-index"
     assert summary["next_run_plan"]["status"] == "complete"
     assert summary["next_run_plan"]["missing_cell_count"] == 0
     assert summary["output_artifacts"] == [
