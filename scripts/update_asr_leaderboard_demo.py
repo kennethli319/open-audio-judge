@@ -44,7 +44,7 @@ DEFAULT_HOSTED_DIR_ENV = "ASR_LEADERBOARD_HOSTED_DIR"
 HOSTED_BASE_PATH = "open-audio-judge"
 HOSTED_BASE_URL = "https://kennethli319.github.io/open-audio-judge"
 REPOSITORY_URL = "https://github.com/kennethli319/open-audio-judge"
-BENCHMARK_INDEX_URL = "https://github.com/kennethli319/audio-benchmark-index"
+BENCHMARK_INDEX_URL = "https://kennethli319.github.io/audio-benchmark-index/"
 START_MARKER = "<!-- ASR_LEADERBOARD_GENERATED_START -->"
 END_MARKER = "<!-- ASR_LEADERBOARD_GENERATED_END -->"
 

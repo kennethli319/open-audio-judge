@@ -191,7 +191,7 @@ def test_leaderboard_pages_share_navigation_and_project_context() -> None:
         assert 'href="tts-leaderboard-demo.html"' in html
         assert 'href="asr-leaderboard-demo.html"' in html
         assert 'href="https://github.com/kennethli319/open-audio-judge"' in html
-        assert 'href="https://github.com/kennethli319/audio-benchmark-index"' in html
+        assert 'href="https://kennethli319.github.io/audio-benchmark-index/"' in html
         assert "Evaluate another speech benchmark" in html
         assert "small task-specific changes to the case adapter and scoring rubric" in html
         assert 'class="skip-link"' in html
@@ -219,7 +219,7 @@ def test_docs_index_links_both_focused_leaderboards_and_repository() -> None:
     assert 'href="tts-leaderboard-demo.html"' in html
     assert 'href="asr-leaderboard-demo.html"' in html
     assert 'href="https://github.com/kennethli319/open-audio-judge"' in html
-    assert 'href="https://github.com/kennethli319/audio-benchmark-index"' in html
+    assert 'href="https://kennethli319.github.io/audio-benchmark-index/"' in html
     assert "Take this workflow to another benchmark" in html
     assert "small task-specific changes to the case adapter and scoring rubric" in html
     assert "Illustrative preview" in html

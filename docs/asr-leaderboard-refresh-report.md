@@ -19,7 +19,7 @@ This generated report summarizes the verified ASR leaderboard artifact set.
 - Hosted artifact manifest: `docs/asr-leaderboard-hosted-manifest.json`
 - Hosted demo URL: `https://kennethli319.github.io/open-audio-judge/asr-leaderboard-demo.html`
 - Hosted combined report URL: `https://kennethli319.github.io/open-audio-judge/asr-leaderboard/full-35-combined/report.html`
-- Compatible benchmark index: `https://github.com/kennethli319/audio-benchmark-index`
+- Compatible benchmark index: `https://kennethli319.github.io/audio-benchmark-index/`
 - Artifact bundle index: `docs/asr-leaderboard-artifacts.json`
 - Runtime status: `docs/asr-leaderboard-runtime-status.json`
 - Cron status: `docs/asr-leaderboard-cron-status.json`

@@ -283,7 +283,7 @@ def test_render_generated_sections_summarizes_verified_asr_results(tmp_path: Pat
     assert "Open Audio Judge repository" in html
     assert "https://github.com/kennethli319/open-audio-judge" in html
     assert "Audio Benchmark Index" in html
-    assert "https://github.com/kennethli319/audio-benchmark-index" in html
+    assert "https://kennethli319.github.io/audio-benchmark-index/" in html
     assert "task-specific adapter and rubric" in html
     assert "--discover-complete-model-runs" in html
     assert "scripts/validate_asr_seed_manifest.py" in html
@@ -522,7 +522,7 @@ def test_write_summary_artifact_records_models_and_categories(tmp_path: Path) ->
     assert summary["cron_status_path"] == "docs/asr-leaderboard-cron-status.json"
     assert summary["report_index_path"] == "docs/asr-leaderboard-report-index.md"
     assert summary["report_links_path"] == "docs/asr-leaderboard-report-links.json"
-    assert summary["benchmark_index_url"] == "https://github.com/kennethli319/audio-benchmark-index"
+    assert summary["benchmark_index_url"] == "https://kennethli319.github.io/audio-benchmark-index/"
     assert summary["next_run_plan"]["status"] == "complete"
     assert summary["next_run_plan"]["missing_cell_count"] == 0
     assert summary["output_artifacts"] == [
@@ -1658,6 +1658,18 @@ def test_refresh_asr_leaderboard_artifacts_combines_report_and_page(tmp_path: Pa
     assert cron_status_data["source_paths"]["report_links"] == (
         "docs/asr-leaderboard-report-links.json"
     )
+    assert cron_status_data["commands"]["preflight"] == [
+        ".venv/bin/python",
+        "scripts/refresh_asr_leaderboard_artifacts.py",
+        "--check-only",
+        "--require-generated-fresh",
+        "--require-audio-ready",
+    ]
+    assert cron_status_data["commands"]["sync_hosted_artifacts"] == [
+        ".venv/bin/python",
+        "scripts/refresh_asr_leaderboard_artifacts.py",
+        "--hosted-dir-from-env",
+    ]
     assert (hosted_dir / "asr-leaderboard-cron-status.json").read_text(
         encoding="utf-8"
     ) == cron_status.read_text(encoding="utf-8")
@@ -2252,6 +2264,26 @@ def test_check_only_runtime_preflight_writes_refresh_decision(
     assert cron_status["source_paths"]["report_links"] == (
         "docs/asr-leaderboard-report-links.json"
     )
+    assert cron_status["commands"]["runtime_preflight"] == [
+        ".venv/bin/python",
+        "scripts/refresh_asr_leaderboard_artifacts.py",
+        "--check-only",
+        "--require-generated-fresh",
+        "--require-audio-ready",
+        "--check-mlx-runtime",
+        "--runtime-status-out",
+        "docs/asr-leaderboard-runtime-status.json",
+        "--refresh-decision-out",
+        "docs/asr-leaderboard-refresh-decision.json",
+        "--next-action-out",
+        "docs/asr-leaderboard-next-action.md",
+        "--cron-status-out",
+        "docs/asr-leaderboard-cron-status.json",
+    ]
+    assert cron_status["commands"]["verify_commit"] == [
+        ".venv/bin/python",
+        "scripts/verify_asr_leaderboard_commit.py",
+    ]
     assert cron_status["preflight_summary"] == {
         "status": "complete",
         "total_results": 105,

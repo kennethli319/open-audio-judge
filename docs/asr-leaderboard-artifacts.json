@@ -12,7 +12,7 @@
       "sha256": null
     },
     {
-      "bytes": 1908,
+      "bytes": 3356,
       "digest_status": "ok",
       "exists": true,
       "hosted_paths": [
@@ -20,7 +20,7 @@
       ],
       "path": "docs/asr-leaderboard-cron-status.json",
       "purpose": "Compact machine-readable cron handoff with action, coverage, and runtime gate status.",
-      "sha256": "e8ddb8e2436f928cc4debae5fecbf4a3e7771648b61f8ebd30444a59492d7a68"
+      "sha256": "26c741bea860d89cb2c484d1824aae15c6e52c2d1b00072cf4aa9eeaa3464ac1"
     },
     {
       "bytes": 61424,
@@ -31,7 +31,7 @@
       ],
       "path": "docs/asr-leaderboard-demo.html",
       "purpose": "Generated ASR leaderboard demo HTML page.",
-      "sha256": "e0f23be16a240e53482c17321d830406fdbb94293d2a8e28dada72cb36ac9a61"
+      "sha256": "1c97702ee56d4681466ab9ab9983a660d0a2597c69682ee0351b39b90f12a5d2"
     },
     {
       "bytes": null,
@@ -119,7 +119,7 @@
       ],
       "path": "docs/asr-leaderboard-refresh-report.md",
       "purpose": "Human-readable coverage, score, source-file, and command report.",
-      "sha256": "eca304aad31cfaafff7ba8cbf73c56ad2055e78ddaa241219c0ea08e7224d3b7"
+      "sha256": "35f60ec97889ee166941881d0e18f657e6a09f79fe6da0b52a69429c018b22e1"
     },
     {
       "bytes": 15072,
@@ -194,7 +194,7 @@
       ],
       "path": "docs/asr-leaderboard-summary.json",
       "purpose": "Machine-readable leaderboard summary and reproducible refresh workflow.",
-      "sha256": "3deaca9e1d244777e0410fb8849b2e515ef9f4bd73e8f2d6984aa12a1653ba04"
+      "sha256": "d89e821c100591df7002cf568126075462116eb4ede5a2e6b5d59b17862b0d31"
     },
     {
       "bytes": 1634,

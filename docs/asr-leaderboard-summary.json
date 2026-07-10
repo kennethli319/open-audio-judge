@@ -1,6 +1,6 @@
 {
   "artifact_index_path": "docs/asr-leaderboard-artifacts.json",
-  "benchmark_index_url": "https://github.com/kennethli319/audio-benchmark-index",
+  "benchmark_index_url": "https://kennethli319.github.io/audio-benchmark-index/",
   "categories": [
     {
       "average_score": 94.6,

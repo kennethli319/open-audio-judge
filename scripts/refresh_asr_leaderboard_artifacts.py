@@ -2498,6 +2498,7 @@ def write_cron_status_artifact(
             "report_index": _repo_relative(DEFAULT_REPORT_INDEX),
             "report_links": _repo_relative(DEFAULT_REPORT_LINKS),
         },
+        "commands": _cron_handoff_commands(),
     }
     if check_summary is not None:
         data["preflight_summary"] = _compact_cron_preflight_summary(check_summary)
@@ -2537,6 +2538,58 @@ def _compact_cron_preflight_summary(summary: dict[str, object]) -> dict[str, obj
         "runtime_ready_issue",
     )
     return {field: summary[field] for field in fields if field in summary}
+
+
+def _cron_handoff_commands() -> dict[str, list[str]]:
+    return {
+        "preflight": [
+            ".venv/bin/python",
+            "scripts/refresh_asr_leaderboard_artifacts.py",
+            "--check-only",
+            "--require-generated-fresh",
+            "--require-audio-ready",
+        ],
+        "runtime_preflight": [
+            ".venv/bin/python",
+            "scripts/refresh_asr_leaderboard_artifacts.py",
+            "--check-only",
+            "--require-generated-fresh",
+            "--require-audio-ready",
+            "--check-mlx-runtime",
+            "--runtime-status-out",
+            _repo_relative(DEFAULT_RUNTIME_STATUS),
+            "--refresh-decision-out",
+            _repo_relative(DEFAULT_REFRESH_DECISION),
+            "--next-action-out",
+            _repo_relative(DEFAULT_NEXT_ACTION),
+            "--cron-status-out",
+            _repo_relative(DEFAULT_CRON_STATUS),
+        ],
+        "refresh_artifacts": [
+            ".venv/bin/python",
+            "scripts/refresh_asr_leaderboard_artifacts.py",
+        ],
+        "discover_refresh_artifacts": [
+            ".venv/bin/python",
+            "scripts/refresh_asr_leaderboard_artifacts.py",
+            "--discover-complete-model-runs",
+            "--update-run-manifest",
+        ],
+        "sync_hosted_artifacts": [
+            ".venv/bin/python",
+            "scripts/refresh_asr_leaderboard_artifacts.py",
+            "--hosted-dir-from-env",
+        ],
+        "verify_commit": [
+            ".venv/bin/python",
+            "scripts/verify_asr_leaderboard_commit.py",
+        ],
+        "verify_hosted": [
+            ".venv/bin/python",
+            "scripts/verify_asr_leaderboard_commit.py",
+            "--hosted-dir-from-env",
+        ],
+    }
 
 
 def build_refresh_decision_artifact_data(

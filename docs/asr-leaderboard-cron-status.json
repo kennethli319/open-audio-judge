@@ -2,6 +2,55 @@
   "action": "skip_live_refresh",
   "audio_manifest_status": "complete",
   "category_count": 7,
+  "commands": {
+    "discover_refresh_artifacts": [
+      ".venv/bin/python",
+      "scripts/refresh_asr_leaderboard_artifacts.py",
+      "--discover-complete-model-runs",
+      "--update-run-manifest"
+    ],
+    "preflight": [
+      ".venv/bin/python",
+      "scripts/refresh_asr_leaderboard_artifacts.py",
+      "--check-only",
+      "--require-generated-fresh",
+      "--require-audio-ready"
+    ],
+    "refresh_artifacts": [
+      ".venv/bin/python",
+      "scripts/refresh_asr_leaderboard_artifacts.py"
+    ],
+    "runtime_preflight": [
+      ".venv/bin/python",
+      "scripts/refresh_asr_leaderboard_artifacts.py",
+      "--check-only",
+      "--require-generated-fresh",
+      "--require-audio-ready",
+      "--check-mlx-runtime",
+      "--runtime-status-out",
+      "docs/asr-leaderboard-runtime-status.json",
+      "--refresh-decision-out",
+      "docs/asr-leaderboard-refresh-decision.json",
+      "--next-action-out",
+      "docs/asr-leaderboard-next-action.md",
+      "--cron-status-out",
+      "docs/asr-leaderboard-cron-status.json"
+    ],
+    "sync_hosted_artifacts": [
+      ".venv/bin/python",
+      "scripts/refresh_asr_leaderboard_artifacts.py",
+      "--hosted-dir-from-env"
+    ],
+    "verify_commit": [
+      ".venv/bin/python",
+      "scripts/verify_asr_leaderboard_commit.py"
+    ],
+    "verify_hosted": [
+      ".venv/bin/python",
+      "scripts/verify_asr_leaderboard_commit.py",
+      "--hosted-dir-from-env"
+    ]
+  },
   "coverage_complete": true,
   "description": "Compact generated cron handoff for ASR leaderboard refresh automation.",
   "live_refresh_required": false,
