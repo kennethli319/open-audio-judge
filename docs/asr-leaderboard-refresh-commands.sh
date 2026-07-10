@@ -20,6 +20,7 @@ if [[ "${ASR_SYNC_HOSTED:-0}" == "1" ]]; then
   : "${ASR_LEADERBOARD_HOSTED_DIR:?Set ASR_LEADERBOARD_HOSTED_DIR to the Pages checkout open-audio-judge directory}"
   .venv/bin/python scripts/refresh_asr_leaderboard_artifacts.py --hosted-dir-from-env
   .venv/bin/python scripts/refresh_asr_leaderboard_artifacts.py --check-only --hosted-dir-from-env --require-hosted-current
+  .venv/bin/python scripts/refresh_asr_leaderboard_artifacts.py --check-only --hosted-dir-from-env --hosted-status-out runs/asr-leaderboard/hosted-status.json
 fi
 
 # Optional when seed cases change: materialize local audio under ignored runs/.

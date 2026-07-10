@@ -300,6 +300,8 @@ def test_render_generated_sections_summarizes_verified_asr_results(tmp_path: Pat
         ".venv/bin/python scripts/refresh_asr_leaderboard_artifacts.py --check-only --hosted-dir-from-env --require-hosted-current"
         in html
     )
+    assert "Write hosted drift report" in html
+    assert "--hosted-status-out runs/asr-leaderboard/hosted-status.json" in html
     assert "Run one MLX ASR model" in html
     assert "Check MLX ASR runtime" in html
     assert "PYTHONPATH=src .venv/bin/python -m open_audio_judge.cli check-mlx-asr-runtime" in html
@@ -858,6 +860,14 @@ def test_write_summary_artifact_records_models_and_categories(tmp_path: Path) ->
         "--hosted-dir-from-env",
         "--require-hosted-current",
     ]
+    assert summary["refresh_workflow"]["hosted_status_command"] == [
+        ".venv/bin/python",
+        "scripts/refresh_asr_leaderboard_artifacts.py",
+        "--check-only",
+        "--hosted-dir-from-env",
+        "--hosted-status-out",
+        "runs/asr-leaderboard/hosted-status.json",
+    ]
     assert summary["refresh_workflow"]["hosted_artifact_env_var"] == "ASR_LEADERBOARD_HOSTED_DIR"
     assert summary["refresh_workflow"]["blocked_model_log_path"] == (
         "runs/asr-leaderboard/blocked-models.jsonl"
@@ -1199,6 +1209,7 @@ def test_write_refresh_report_records_coverage_and_commands(tmp_path: Path) -> N
     assert "--discover-complete-model-runs" in text
     assert "Hosted artifact sync" in text
     assert "Hosted mirror validation" in text
+    assert "Hosted drift report" in text
     assert "Review blocked model log" in text
     assert "tail -n 20 runs/asr-leaderboard/blocked-models.jsonl" in text
     assert (
@@ -1606,6 +1617,10 @@ def test_refresh_asr_leaderboard_artifacts_combines_report_and_page(tmp_path: Pa
         in live_refresh_text
     )
     assert (
+        ".venv/bin/python scripts/refresh_asr_leaderboard_artifacts.py --check-only --hosted-dir-from-env --hosted-status-out runs/asr-leaderboard/hosted-status.json"
+        in live_refresh_text
+    )
+    assert (
         ".venv/bin/python scripts/refresh_asr_leaderboard_artifacts.py --check-only --require-generated-fresh --check-summary-out runs/asr-leaderboard/preflight-summary.json"
         in refresh_command_text
     )
@@ -1637,6 +1652,10 @@ def test_refresh_asr_leaderboard_artifacts_combines_report_and_page(tmp_path: Pa
         ".venv/bin/python scripts/refresh_asr_leaderboard_artifacts.py --check-only --hosted-dir-from-env --require-hosted-current"
         in refresh_command_text
     )
+    assert (
+        ".venv/bin/python scripts/refresh_asr_leaderboard_artifacts.py --check-only --hosted-dir-from-env --hosted-status-out runs/asr-leaderboard/hosted-status.json"
+        in refresh_command_text
+    )
     hosted_current = refresh_module.validate_hosted_artifacts_current(
         hosted_dir,
         hosted_manifest_out=hosted_manifest,
@@ -1646,10 +1665,24 @@ def test_refresh_asr_leaderboard_artifacts_combines_report_and_page(tmp_path: Pa
         "hosted_artifact_count": 26,
         "hosted_path_count": 41,
     }
+    hosted_status = refresh_module.build_hosted_artifacts_status(
+        hosted_dir,
+        hosted_manifest_out=hosted_manifest,
+    )
+    assert hosted_status["status"] == "complete"
+    assert hosted_status["issue_count"] == 0
+    assert hosted_status["issues"] == []
     hosted_manifest_copy = hosted_dir / hosted_manifest.name
     hosted_manifest_text = hosted_manifest_copy.read_text(encoding="utf-8")
     hosted_manifest_copy.write_text("{}\n", encoding="utf-8")
-    with pytest.raises(ValueError, match="Hosted Pages manifest .* stale"):
+    stale_status = refresh_module.build_hosted_artifacts_status(
+        hosted_dir,
+        hosted_manifest_out=hosted_manifest,
+    )
+    assert stale_status["status"] == "stale"
+    assert stale_status["issue_count"] == 1
+    assert stale_status["issues"][0]["kind"] == "stale_hosted_manifest_bytes"
+    with pytest.raises(ValueError, match="Hosted Pages artifacts are stale"):
         refresh_module.validate_hosted_artifacts_current(
             hosted_dir,
             hosted_manifest_out=hosted_manifest,

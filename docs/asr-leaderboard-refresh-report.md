@@ -166,6 +166,7 @@ This generated report summarizes the verified ASR leaderboard artifact set.
 - Commit verification with hosted mirror: `.venv/bin/python scripts/verify_asr_leaderboard_commit.py --hosted-dir-from-env`
 - Hosted artifact sync: `.venv/bin/python scripts/refresh_asr_leaderboard_artifacts.py --hosted-dir-from-env`
 - Hosted mirror validation: `.venv/bin/python scripts/refresh_asr_leaderboard_artifacts.py --check-only --hosted-dir-from-env --require-hosted-current`
+- Hosted drift report: `.venv/bin/python scripts/refresh_asr_leaderboard_artifacts.py --check-only --hosted-dir-from-env --hosted-status-out runs/asr-leaderboard/hosted-status.json`
 - Live model refresh script: `bash docs/asr-leaderboard-live-refresh.sh`
 - Review blocked model log: `tail -n 20 runs/asr-leaderboard/blocked-models.jsonl`
 
@@ -177,7 +178,7 @@ This generated report summarizes the verified ASR leaderboard artifact set.
 | `live_refresh` | `local_secret_env_command`, `model_run_commands` | False | True |
 | `artifact_refresh` | `discover_refresh_command`, `combine_refresh_command`, `manifest_refresh_command` | True | False |
 | `verification` | `page_validation_command`, `freshness_check_command`, `commit_verification_command`, `cron_commit_verification_command` | False | False |
-| `hosted_sync` | `hosted_artifact_command`, `hosted_validation_command`, `hosted_commit_verification_command` | False | False |
+| `hosted_sync` | `hosted_artifact_command`, `hosted_validation_command`, `hosted_status_command`, `hosted_commit_verification_command` | False | False |
 
 ## Runtime Status
 

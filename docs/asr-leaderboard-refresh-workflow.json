@@ -47,6 +47,7 @@
       "command_keys": [
         "hosted_artifact_command",
         "hosted_validation_command",
+        "hosted_status_command",
         "hosted_commit_verification_command"
       ],
       "description": "Copy verified generated artifacts into the Pages checkout only after local artifacts change.",
@@ -69,6 +70,7 @@
     "full_preflight_command",
     "hosted_artifact_command",
     "hosted_commit_verification_command",
+    "hosted_status_command",
     "hosted_validation_command",
     "local_secret_env_command",
     "manifest_refresh_command",
@@ -152,6 +154,7 @@
         "command_keys": [
           "hosted_artifact_command",
           "hosted_validation_command",
+          "hosted_status_command",
           "hosted_commit_verification_command"
         ],
         "description": "Copy verified generated artifacts into the Pages checkout only after local artifacts change.",
@@ -285,6 +288,14 @@
       ".venv/bin/python",
       "scripts/verify_asr_leaderboard_commit.py",
       "--hosted-dir-from-env"
+    ],
+    "hosted_status_command": [
+      ".venv/bin/python",
+      "scripts/refresh_asr_leaderboard_artifacts.py",
+      "--check-only",
+      "--hosted-dir-from-env",
+      "--hosted-status-out",
+      "runs/asr-leaderboard/hosted-status.json"
     ],
     "hosted_validation_command": [
       ".venv/bin/python",

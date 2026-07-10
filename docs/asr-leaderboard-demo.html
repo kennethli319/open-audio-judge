@@ -366,6 +366,7 @@
         <tr><td>Run hosted commit verification</td><td><code>.venv/bin/python scripts/verify_asr_leaderboard_commit.py --hosted-dir-from-env</code></td></tr>
         <tr><td>Sync hosted artifacts</td><td><code>.venv/bin/python scripts/refresh_asr_leaderboard_artifacts.py --hosted-dir-from-env</code></td></tr>
         <tr><td>Check hosted mirror</td><td><code>.venv/bin/python scripts/refresh_asr_leaderboard_artifacts.py --check-only --hosted-dir-from-env --require-hosted-current</code></td></tr>
+        <tr><td>Write hosted drift report</td><td><code>.venv/bin/python scripts/refresh_asr_leaderboard_artifacts.py --check-only --hosted-dir-from-env --hosted-status-out runs/asr-leaderboard/hosted-status.json</code></td></tr>
       </tbody>
     </table>
 
@@ -377,7 +378,7 @@
         <tr><td><code>live_refresh</code></td><td><code>local_secret_env_command</code>, <code>model_run_commands</code></td><td>runs live models; validation only</td></tr>
         <tr><td><code>artifact_refresh</code></td><td><code>discover_refresh_command</code>, <code>combine_refresh_command</code>, <code>manifest_refresh_command</code></td><td>no live model calls; writes committed artifacts</td></tr>
         <tr><td><code>verification</code></td><td><code>page_validation_command</code>, <code>freshness_check_command</code>, <code>commit_verification_command</code>, <code>cron_commit_verification_command</code></td><td>no live model calls; validation only</td></tr>
-        <tr><td><code>hosted_sync</code></td><td><code>hosted_artifact_command</code>, <code>hosted_validation_command</code>, <code>hosted_commit_verification_command</code></td><td>no live model calls; validation only; requires ASR_LEADERBOARD_HOSTED_DIR</td></tr>
+        <tr><td><code>hosted_sync</code></td><td><code>hosted_artifact_command</code>, <code>hosted_validation_command</code>, <code>hosted_status_command</code>, <code>hosted_commit_verification_command</code></td><td>no live model calls; validation only; requires ASR_LEADERBOARD_HOSTED_DIR</td></tr>
       </tbody>
     </table>
 

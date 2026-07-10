@@ -357,6 +357,7 @@ def render_generated_sections(
         ("Run hosted commit verification", workflow["hosted_commit_verification_command"]),
         ("Sync hosted artifacts", workflow["hosted_artifact_command"]),
         ("Check hosted mirror", workflow["hosted_validation_command"]),
+        ("Write hosted drift report", workflow["hosted_status_command"]),
     ]
     output_artifacts = build_output_artifact_index(results_path=results_path)
     source_file_summaries = summarize_source_result_files(source_result_paths or [])
@@ -833,9 +834,10 @@ def write_refresh_report(
                 f"- Generated artifact freshness check: `{_shell_join(workflow['freshness_check_command'])}`",
                 f"- Commit verification: `{_shell_join(workflow['commit_verification_command'])}`",
                 f"- Commit verification with hosted mirror: `{_shell_join(workflow['hosted_commit_verification_command'])}`",
-                f"- Hosted artifact sync: `{_shell_join(workflow['hosted_artifact_command'])}`",
-                f"- Hosted mirror validation: `{_shell_join(workflow['hosted_validation_command'])}`",
-                f"- Live model refresh script: `bash {workflow['live_refresh_script_path']}`",
+        f"- Hosted artifact sync: `{_shell_join(workflow['hosted_artifact_command'])}`",
+        f"- Hosted mirror validation: `{_shell_join(workflow['hosted_validation_command'])}`",
+        f"- Hosted drift report: `{_shell_join(workflow['hosted_status_command'])}`",
+        f"- Live model refresh script: `bash {workflow['live_refresh_script_path']}`",
                 f"- Review blocked model log: `{_shell_join(workflow['blocked_model_log_command'])}`",
                 "",
                 "## Automation Stages",
@@ -1086,6 +1088,7 @@ def write_refresh_commands_script(
         f'  : "${{{DEFAULT_HOSTED_DIR_ENV}:?Set {DEFAULT_HOSTED_DIR_ENV} to the Pages checkout open-audio-judge directory}}"',
         "  " + _shell_join(workflow["hosted_artifact_command"]),
         "  " + _shell_join(workflow["hosted_validation_command"]),
+        "  " + _shell_join(workflow["hosted_status_command"]),
         "fi",
         "",
         "# Optional when seed cases change: materialize local audio under ignored runs/.",
@@ -1229,6 +1232,7 @@ def write_live_refresh_script(output_path: Path) -> None:
         '  : "${ASR_LEADERBOARD_HOSTED_DIR:?Set ASR_LEADERBOARD_HOSTED_DIR to the Pages checkout open-audio-judge directory}"',
         "  " + _shell_join(workflow["hosted_artifact_command"]),
         "  " + _shell_join(workflow["hosted_validation_command"]),
+        "  " + _shell_join(workflow["hosted_status_command"]),
         "fi",
         "",
         "# If a primary model fails, record the unsupported/blocked state before trying fallbacks.",
@@ -1412,6 +1416,14 @@ def _refresh_workflow(source_result_paths: list[Path]) -> dict[str, object]:
             "--hosted-dir-from-env",
             "--require-hosted-current",
         ],
+        "hosted_status_command": [
+            ".venv/bin/python",
+            "scripts/refresh_asr_leaderboard_artifacts.py",
+            "--check-only",
+            "--hosted-dir-from-env",
+            "--hosted-status-out",
+            "runs/asr-leaderboard/hosted-status.json",
+        ],
         "hosted_artifact_env_var": DEFAULT_HOSTED_DIR_ENV,
         "blocked_model_log_path": "runs/asr-leaderboard/blocked-models.jsonl",
         "blocked_model_log_schema": {
@@ -1503,6 +1515,7 @@ def _automation_stages() -> list[dict[str, object]]:
             "command_keys": [
                 "hosted_artifact_command",
                 "hosted_validation_command",
+                "hosted_status_command",
                 "hosted_commit_verification_command",
             ],
             "writes_committed_artifacts": False,
