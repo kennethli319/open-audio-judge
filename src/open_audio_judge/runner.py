@@ -12,6 +12,9 @@ from open_audio_judge.providers.base import JudgeProvider
 from open_audio_judge.reports import label_for_score, write_html_report
 
 
+JUDGE_SAMPLE_SCORE_POLICY = "successful_attempts_only_with_all_failed_fallback_v1"
+
+
 def load_cases(path: Path) -> list[EvaluationCase]:
     suffix = path.suffix.lower()
     if suffix == ".jsonl":
@@ -78,6 +81,7 @@ def evaluate_case_with_sampling(
             "judge_sample_scores": scores,
             "judge_sample_average": average_score,
             "judge_sample_statuses": [attempt.status for attempt in attempts],
+            "judge_sample_score_policy": JUDGE_SAMPLE_SCORE_POLICY,
         }
     )
 
@@ -159,10 +163,19 @@ def write_results_jsonl(results: list[EvaluationResult], path: Path) -> Path:
 
 def load_results_jsonl(path: Path) -> list[EvaluationResult]:
     return [
-        _reconcile_sampled_result(EvaluationResult.model_validate(json.loads(line)))
+        _reconcile_loaded_result(EvaluationResult.model_validate(json.loads(line)))
         for line in path.read_text(encoding="utf-8").splitlines()
         if line.strip()
     ]
+
+
+def _reconcile_loaded_result(result: EvaluationResult) -> EvaluationResult:
+    """Apply score-policy and sampled-attempt migrations consistently on load."""
+    reconciled = _reconcile_sampled_result(result)
+    expected_label = label_for_score(reconciled.overall_score)
+    if reconciled.label == expected_label:
+        return reconciled
+    return reconciled.model_copy(update={"label": expected_label})
 
 
 def _reconcile_sampled_result(result: EvaluationResult) -> EvaluationResult:
@@ -195,6 +208,7 @@ def _reconcile_sampled_result(result: EvaluationResult) -> EvaluationResult:
             "judge_sample_failure_count": failure_count,
             "judge_sample_scores": successful_scores,
             "judge_sample_average": average_score,
+            "judge_sample_score_policy": JUDGE_SAMPLE_SCORE_POLICY,
         }
     )
     if failure_count:

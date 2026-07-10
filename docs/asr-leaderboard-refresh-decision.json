@@ -49,8 +49,8 @@
     },
     "gemini_judge": "verified_from_loaded_results",
     "gemini_secret": {
-      "path": "/Users/wangyauli/.openclaw/secrets/open-audio-judge-gemini.env",
-      "status": "present"
+      "path_env_var": "OPEN_AUDIO_JUDGE_GEMINI_ENV_FILE",
+      "status": "missing"
     },
     "live_model_calls": "none",
     "loaded_result_providers": [

@@ -45,8 +45,8 @@ All first-version prompts use `1` to `100`, where higher is better:
 
 Reports can map scores into labels with configurable thresholds:
 
-- `accurate`: score >= 80
-- `needs_review`: 60 <= score < 80
+- `accurate`: score >= 81
+- `needs_review`: 60 <= score < 81
 - `inaccurate`: score < 60
 
 These labels are deliberately generic and should be renamed per task in later report templates.

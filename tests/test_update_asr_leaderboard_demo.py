@@ -207,6 +207,8 @@ def test_render_generated_sections_summarizes_verified_asr_results(tmp_path: Pat
             label="inaccurate",
         ),
     ]
+    for record in records:
+        record["metadata"]["source_case_id"] = record["case_id"].rsplit("-model-", 1)[0]
     results_path.write_text(
         "".join(json.dumps(record) + "\n" for record in records),
         encoding="utf-8",
@@ -220,6 +222,11 @@ def test_render_generated_sections_summarizes_verified_asr_results(tmp_path: Pat
     )
 
     assert "Verified Leaderboard Results" in html
+    assert "2 MLX Community ASR models" in html
+    assert "over 1 case" in html
+    assert "The 2 research categories" in html
+    assert "Combined 2-clip report" in html
+    assert "Explore all 4 model-case evaluations" in html
     assert "Semantic score" in html
     assert "not word error rate" in html
     assert "Benchmark scope" in html
@@ -265,7 +272,7 @@ def test_render_generated_sections_summarizes_verified_asr_results(tmp_path: Pat
     assert "Validate seed manifest" in html
     assert "Discover latest complete runs" in html
     assert "Report Links" in html
-    assert "Combined full-35 report" in html
+    assert "Combined 2-clip report" in html
     assert (
         "https://kennethli319.github.io/open-audio-judge/asr-leaderboard/full-35-combined/report.html"
         in html
@@ -295,8 +302,117 @@ def test_render_generated_sections_summarizes_verified_asr_results(tmp_path: Pat
     assert "Generated Model Refresh Commands" in html
     assert "mlx-community/whisper-large-v3-turbo-asr-fp16" in html
     assert "qwen3-asr-1.7b-refresh" in html
-    assert "source /Users/wangyauli/.openclaw/secrets/open-audio-judge-gemini.env" in html
+    assert "OPEN_AUDIO_JUDGE_GEMINI_ENV_FILE" in html
+    assert "/Users/wangyauli" not in html
+    assert (
+        'aria-label="model a, Surface Transcription, semantic score 100.0, '
+        '1 of 1 accurate, 0 flagged, best in category"'
+    ) in html
+    assert (
+        'aria-label="model b, Surface Transcription, semantic score 60.0, '
+        '0 of 1 accurate, 1 flagged, not best in category"'
+    ) in html
     assert "Machine-readable leaderboard summary" in html
+
+
+def test_shared_risk_decision_reports_partial_model_impact(tmp_path: Path) -> None:
+    module = load_script_module()
+    results_path = tmp_path / "results.jsonl"
+    records = [
+        result_record(
+            case_id=f"asr-shared-{suffix}",
+            model=f"mlx-community/model-{suffix}",
+            category="numeric_unit_integrity",
+            score=score,
+            label=label,
+        )
+        for suffix, score, label in (
+            ("a", 55, "inaccurate"),
+            ("b", 70, "needs_review"),
+            ("c", 95, "accurate"),
+        )
+    ]
+    for record in records:
+        record["metadata"]["source_case_id"] = "asr-shared"
+        record["metadata"]["asr_slice"] = "alphanumeric_identifier"
+    results_path.write_text(
+        "".join(json.dumps(record) + "\n" for record in records),
+        encoding="utf-8",
+    )
+
+    generated = module.render_generated_sections(
+        module.load_results_jsonl(results_path),
+        results_path=results_path,
+        expected_cases_per_model=1,
+    )
+
+    assert '<span class="eyebrow">Shared risk</span>' in generated
+    assert "2 of 3 models need attention on this case." in generated
+    assert "All 3 models need attention" not in generated
+
+
+def test_methodology_links_partial_judge_failure_evidence(tmp_path: Path) -> None:
+    module = load_script_module()
+    results_path = tmp_path / "results.jsonl"
+    record = result_record(
+        case_id="asr-negation-refund-001-local-tts",
+        model="mlx-community/Qwen3-ASR-1.7B-8bit",
+        category="negation_modality_scope",
+        score=100,
+        label="accurate",
+    )
+    record["metadata"].update(
+        {
+            "source_case_id": "asr-negation-refund-001",
+            "judge_sample_success_count": 2,
+            "judge_sample_failure_count": 1,
+            "judge_sample_scores": [100, 100],
+            "judge_sample_statuses": ["ok", "ok", "provider_error"],
+        }
+    )
+    results_path.write_text(json.dumps(record) + "\n", encoding="utf-8")
+
+    generated = module.render_generated_sections(
+        module.load_results_jsonl(results_path),
+        results_path=results_path,
+        expected_cases_per_model=1,
+    )
+
+    assert "Failed attempts are excluded only when at least one attempt succeeds" in generated
+    assert "Partial judge failures affected 1 evaluation" in generated
+    assert "asr-negation-refund-001 — Qwen3 ASR 1.7B" in generated
+    assert "1 of 3 judge attempts failed and was excluded." in generated
+    assert (
+        "?model=mlx-community%2FQwen3-ASR-1.7B-8bit&amp;search=asr-negation-refund-001" in generated
+    )
+
+
+def test_heatmap_escapes_adversarial_category_in_accessible_name(tmp_path: Path) -> None:
+    module = load_script_module()
+    results_path = tmp_path / "results.jsonl"
+    dangerous_category = 'unsafe_" onfocus="alert(1)<script>'
+    record = result_record(
+        case_id="asr-adversarial",
+        model="mlx-community/model-a",
+        category=dangerous_category,
+        score=90,
+        label="accurate",
+    )
+    results_path.write_text(json.dumps(record) + "\n", encoding="utf-8")
+
+    generated = module.render_generated_sections(
+        module.load_results_jsonl(results_path),
+        results_path=results_path,
+        expected_cases_per_model=1,
+    )
+
+    assert 'onfocus="alert(1)' not in generated
+    assert "1 MLX Community ASR model transcribes" in generated
+    assert "The 1 research category is" in generated
+    assert (
+        'aria-label="model a, Unsafe &quot; onfocus=&quot;alert(1)&lt;script&gt;, '
+        'semantic score 90.0, 1 of 1 accurate, 0 flagged, best in category"'
+    ) in generated
 
 
 def test_write_summary_artifact_records_models_and_categories(tmp_path: Path) -> None:
@@ -358,6 +474,11 @@ def test_write_summary_artifact_records_models_and_categories(tmp_path: Path) ->
     assert summary["model_count"] == 2
     assert summary["category_count"] == 2
     assert summary["total_gemini_judge_samples"] == 12
+    assert summary["judge_score_aggregation"] == {
+        "method": "arithmetic_mean_of_successful_attempt_scores",
+        "partial_failure_handling": "exclude_failed_attempts_when_successful_attempts_exist",
+        "all_failed_fallback": "retain_failure_status_without_successful_attempt_average",
+    }
     assert summary["source_result_paths"] == [str(source_results_path)]
     assert summary["source_result_files"] == [
         {
@@ -373,7 +494,7 @@ def test_write_summary_artifact_records_models_and_categories(tmp_path: Path) ->
             "ok_count": 2,
             "judge_samples": 6,
             "average_score": 90,
-            "labels": {"accurate": 2},
+            "labels": {"accurate": 1, "needs_review": 1},
             "categories": {
                 "numeric_unit_integrity": 1,
                 "transcription_accuracy_wer": 1,
@@ -598,7 +719,7 @@ def test_write_summary_artifact_records_models_and_categories(tmp_path: Path) ->
         ".venv/bin/python",
         "scripts/refresh_asr_leaderboard_artifacts.py",
         "--results",
-        str(source_results_path),
+        '"${ASR_LEADERBOARD_SOURCE_RESULT_1:?Set_ASR_LEADERBOARD_SOURCE_RESULT_1_to_a_results_jsonl_path}"',
         "--update-run-manifest",
         "--source-selection-summary-out",
         "docs/asr-leaderboard-source-selection.json",
@@ -738,8 +859,10 @@ def test_write_summary_artifact_records_models_and_categories(tmp_path: Path) ->
     ]
     assert summary["refresh_workflow"]["local_secret_env_command"] == [
         "source",
-        "/Users/wangyauli/.openclaw/secrets/open-audio-judge-gemini.env",
+        '"${OPEN_AUDIO_JUDGE_GEMINI_ENV_FILE:?Set_OPEN_AUDIO_JUDGE_GEMINI_ENV_FILE_to_your_local_Gemini_environment_file}"',
     ]
+    assert summary["refresh_workflow"]["local_secret_env_var"] == "OPEN_AUDIO_JUDGE_GEMINI_ENV_FILE"
+    assert "/Users/wangyauli" not in json.dumps(summary["refresh_workflow"])
     assert "secret" in summary["refresh_workflow"]["secret_handling"].lower()
     assert summary["refresh_workflow"]["fallback_model_ids"] == [
         "mlx-community/whisper-small.en-asr-4bit",
@@ -784,7 +907,7 @@ def test_write_summary_artifact_records_models_and_categories(tmp_path: Path) ->
     ]
     assert summary["models"][0]["model"] == "mlx-community/model-a"
     assert summary["models"][0]["average_score"] == 90
-    assert summary["models"][0]["labels"] == {"accurate": 2}
+    assert summary["models"][0]["labels"] == {"accurate": 1, "needs_review": 1}
     assert summary["categories"][0]["category"] == "transcription_accuracy_wer"
     assert summary["categories"][1]["category"] == "numeric_unit_integrity"
 
@@ -1040,7 +1163,7 @@ def test_write_refresh_report_records_coverage_and_commands(tmp_path: Path) -> N
     assert ".venv/bin/python scripts/verify_asr_leaderboard_commit.py" in text
     assert "Commit verification with hosted mirror" in text
     assert ".venv/bin/python scripts/verify_asr_leaderboard_commit.py --hosted-dir-from-env" in text
-    assert "--results " + str(source_results_path) in text
+    assert '--results "${ASR_LEADERBOARD_SOURCE_RESULT_1' in text
     assert "--update-run-manifest" in text
     assert "Discover latest complete runs" in text
     assert "--discover-complete-model-runs" in text
@@ -1323,8 +1446,10 @@ def test_refresh_asr_leaderboard_artifacts_combines_report_and_page(tmp_path: Pa
     ]
     first.parent.mkdir(parents=True)
     second.parent.mkdir(parents=True)
-    first.write_text("".join(json.dumps(record) + "\n" for record in records_a), encoding="utf-8")
-    second.write_text("".join(json.dumps(record) + "\n" for record in records_b), encoding="utf-8")
+    first_source_text = "".join(json.dumps(record) + "\n" for record in records_a)
+    second_source_text = "".join(json.dumps(record) + "\n" for record in records_b)
+    first.write_text(first_source_text, encoding="utf-8")
+    second.write_text(second_source_text, encoding="utf-8")
     first.with_name("report.html").write_text("<html>model-a report</html>\n", encoding="utf-8")
     second.with_name("report.html").write_text("<html>model-b report</html>\n", encoding="utf-8")
     page.write_text(
@@ -1360,6 +1485,8 @@ def test_refresh_asr_leaderboard_artifacts_combines_report_and_page(tmp_path: Pa
 
     assert (out / "results.jsonl").exists()
     assert (out / "report.html").exists()
+    assert first.read_text(encoding="utf-8") == first_source_text
+    assert second.read_text(encoding="utf-8") == second_source_text
     assert len((out / "results.jsonl").read_text(encoding="utf-8").splitlines()) == 4
     html = page.read_text(encoding="utf-8")
     assert "Verified Leaderboard Results" in html
@@ -1406,10 +1533,8 @@ def test_refresh_asr_leaderboard_artifacts_combines_report_and_page(tmp_path: Pa
         ': "${ASR_LEADERBOARD_HOSTED_DIR:?Set ASR_LEADERBOARD_HOSTED_DIR '
         'to the Pages checkout open-audio-judge directory}"'
     ) in refresh_command_text
-    assert (
-        "source /Users/wangyauli/.openclaw/secrets/open-audio-judge-gemini.env"
-        in refresh_command_text
-    )
+    assert 'source "${OPEN_AUDIO_JUDGE_GEMINI_ENV_FILE:?' in refresh_command_text
+    assert "/Users/wangyauli" not in refresh_command_text
     assert (
         "PYTHONPATH=src .venv/bin/python -m open_audio_judge.cli check-mlx-asr-runtime"
         in refresh_command_text
@@ -1420,6 +1545,8 @@ def test_refresh_asr_leaderboard_artifacts_combines_report_and_page(tmp_path: Pa
     )
     live_refresh_text = live_refresh_script.read_text(encoding="utf-8")
     assert "Generated opt-in live ASR leaderboard refresh script." in live_refresh_text
+    assert '"${OPEN_AUDIO_JUDGE_GEMINI_ENV_FILE}"' in live_refresh_text
+    assert "/Users/wangyauli" not in live_refresh_text
     assert ".venv/bin/oaj autojudge-mlx-asr" in live_refresh_text
     assert "never printed" in live_refresh_text
     assert "runs/asr-leaderboard/blocked-models.jsonl" in live_refresh_text
@@ -1483,9 +1610,18 @@ def test_refresh_asr_leaderboard_artifacts_combines_report_and_page(tmp_path: Pa
     )
     assert hosted_current == {
         "status": "complete",
-        "hosted_artifact_count": 22,
-        "hosted_path_count": 35,
+        "hosted_artifact_count": 23,
+        "hosted_path_count": 37,
     }
+    hosted_manifest_copy = hosted_dir / hosted_manifest.name
+    hosted_manifest_text = hosted_manifest_copy.read_text(encoding="utf-8")
+    hosted_manifest_copy.write_text("{}\n", encoding="utf-8")
+    with pytest.raises(ValueError, match="Hosted Pages manifest .* stale"):
+        refresh_module.validate_hosted_artifacts_current(
+            hosted_dir,
+            hosted_manifest_out=hosted_manifest,
+        )
+    hosted_manifest_copy.write_text(hosted_manifest_text, encoding="utf-8")
     assert "Action: skip_live_refresh." in next_action.read_text(encoding="utf-8")
     assert (hosted_dir / "asr-leaderboard-next-action.md").read_text(
         encoding="utf-8"
@@ -1568,7 +1704,7 @@ def test_refresh_asr_leaderboard_artifacts_combines_report_and_page(tmp_path: Pa
                 "ok_count": 2,
                 "judge_samples": 6,
                 "average_score": 90,
-                "labels": {"accurate": 2},
+                "labels": {"accurate": 1, "needs_review": 1},
                 "categories": {
                     "numeric_unit_integrity": 1,
                     "transcription_accuracy_wer": 1,
@@ -1997,6 +2133,14 @@ def test_check_only_runtime_preflight_writes_refresh_decision(
         },
     )
     monkeypatch.setattr(
+        refresh_module,
+        "_gemini_secret_status",
+        lambda: {
+            "status": "present",
+            "path_env_var": "OPEN_AUDIO_JUDGE_GEMINI_ENV_FILE",
+        },
+    )
+    monkeypatch.setattr(
         sys,
         "argv",
         [
@@ -2056,6 +2200,68 @@ def test_check_only_runtime_preflight_writes_refresh_decision(
     assert "Decision: skip_live_refresh." in refresh_module.format_check_summary_message(
         check_summary
     )
+
+
+def test_check_only_runtime_preflight_does_not_mutate_default_artifacts(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    refresh_module = load_refresh_module()
+    default_artifacts = [
+        refresh_module.DEFAULT_SOURCE_SELECTION_SUMMARY,
+        refresh_module.DEFAULT_RUNTIME_STATUS,
+        refresh_module.DEFAULT_REFRESH_DECISION,
+        refresh_module.DEFAULT_NEXT_ACTION,
+        refresh_module.DEFAULT_CRON_STATUS,
+    ]
+    before = {path: path.read_bytes() if path.exists() else None for path in default_artifacts}
+    monkeypatch.setattr(
+        refresh_module,
+        "_run_mlx_runtime_preflight",
+        lambda: {
+            "status": "ok",
+            "primary_model_count": 3,
+            "primary_model_ok_count": 3,
+            "fallback_model_count": 3,
+            "fallback_model_ok_count": 3,
+        },
+    )
+    monkeypatch.setattr(
+        sys,
+        "argv",
+        [
+            "refresh_asr_leaderboard_artifacts.py",
+            "--check-only",
+            "--check-mlx-runtime",
+        ],
+    )
+
+    refresh_module.main()
+
+    after = {path: path.read_bytes() if path.exists() else None for path in default_artifacts}
+    assert after == before
+
+
+def test_gemini_secret_status_never_publishes_local_path(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    refresh_module = load_refresh_module()
+    env_var = "OPEN_AUDIO_JUDGE_GEMINI_ENV_FILE"
+    monkeypatch.delenv(env_var, raising=False)
+
+    assert refresh_module._gemini_secret_status() == {
+        "status": "missing",
+        "path_env_var": env_var,
+    }
+
+    secret_path = tmp_path / "private" / "gemini.env"
+    secret_path.parent.mkdir()
+    secret_path.write_text("GEMINI_API_KEY=test-only\n", encoding="utf-8")
+    monkeypatch.setenv(env_var, str(secret_path))
+    status = refresh_module._gemini_secret_status()
+
+    assert status == {"status": "present", "path_env_var": env_var}
+    assert str(secret_path) not in json.dumps(status)
 
 
 def test_check_only_can_require_audio_manifest_readiness(

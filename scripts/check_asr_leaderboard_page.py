@@ -347,8 +347,7 @@ def _validate_source_result_file_reports(
         raw_result_path = source_file.get("path")
         if not isinstance(raw_result_path, str) or not raw_result_path:
             raise ValueError(
-                f"{summary_path} source_result_files[{index}] has invalid path: "
-                f"{raw_result_path!r}"
+                f"{summary_path} source_result_files[{index}] has invalid path: {raw_result_path!r}"
             )
         result_path = _resolve_summary_path(
             raw_result_path,
@@ -364,10 +363,7 @@ def _validate_source_result_file_reports(
 
         expected_result_bytes = source_file.get("result_bytes")
         expected_result_sha256 = source_file.get("result_sha256")
-        has_result_digest_fields = (
-            "result_bytes" in source_file
-            or "result_sha256" in source_file
-        )
+        has_result_digest_fields = "result_bytes" in source_file or "result_sha256" in source_file
         if has_result_digest_fields:
             if not isinstance(expected_result_bytes, int) or expected_result_bytes < 0:
                 raise ValueError(
@@ -549,14 +545,16 @@ def _validate_run_manifest_artifact(
             path_maps=path_maps,
         )
         if resolved_results_path.exists():
-            if declared_bytes is not None and resolved_results_path.stat().st_size != declared_bytes:
-                raise ValueError(
-                    f"{path} runs[{index}] result bytes are stale: {results_path}"
-                )
-            if declared_sha256 is not None and _sha256_file(resolved_results_path) != declared_sha256:
-                raise ValueError(
-                    f"{path} runs[{index}] result sha256 is stale: {results_path}"
-                )
+            if (
+                declared_bytes is not None
+                and resolved_results_path.stat().st_size != declared_bytes
+            ):
+                raise ValueError(f"{path} runs[{index}] result bytes are stale: {results_path}")
+            if (
+                declared_sha256 is not None
+                and _sha256_file(resolved_results_path) != declared_sha256
+            ):
+                raise ValueError(f"{path} runs[{index}] result sha256 is stale: {results_path}")
 
         run_paths.append(results_path)
         counts_by_model[model] = counts_by_model.get(model, 0) + result_count
@@ -914,8 +912,7 @@ def _validate_summary_output_artifacts_match_index(
         purpose = artifact.get("purpose")
         if not isinstance(raw_path, str) or not raw_path:
             raise ValueError(
-                f"{summary_path} output_artifacts[{artifact_index}] has invalid path: "
-                f"{raw_path!r}"
+                f"{summary_path} output_artifacts[{artifact_index}] has invalid path: {raw_path!r}"
             )
         if not isinstance(purpose, str) or not purpose:
             raise ValueError(
@@ -925,9 +922,7 @@ def _validate_summary_output_artifacts_match_index(
 
         indexed_artifact = indexed_artifacts_by_path.get(raw_path)
         if indexed_artifact is None:
-            raise ValueError(
-                f"{index_path} is missing summary output_artifacts path: {raw_path}"
-            )
+            raise ValueError(f"{index_path} is missing summary output_artifacts path: {raw_path}")
         indexed_purpose = indexed_artifact.get("purpose")
         if (
             indexed_purpose != purpose
@@ -1054,8 +1049,7 @@ def _validate_report_links_artifact(
     for key, expected in expected_combined.items():
         if combined.get(key) != expected:
             raise ValueError(
-                f"{path} combined.{key}={combined.get(key)!r} does not match "
-                f"{summary_path}."
+                f"{path} combined.{key}={combined.get(key)!r} does not match {summary_path}."
             )
 
     _validate_report_links_source_reports(
@@ -1127,9 +1121,7 @@ def _validate_report_links_source_reports(
         }
         for key, expected in expected_fields.items():
             if source_report.get(key) != expected:
-                raise ValueError(
-                    f"{report_links_path} source_reports[{index}].{key} is stale."
-                )
+                raise ValueError(f"{report_links_path} source_reports[{index}].{key} is stale.")
 
         report_exists = source_report.get("report_exists")
         hosted_path = source_report.get("hosted_report_path")
@@ -1156,8 +1148,7 @@ def _validate_report_links_source_reports(
                     f"{report_links_path} source_reports[{index}].hosted_report_path is stale."
                 )
             if hosted_url != (
-                "https://kennethli319.github.io/open-audio-judge/"
-                + expected_hosted_report_path
+                "https://kennethli319.github.io/open-audio-judge/" + expected_hosted_report_path
             ):
                 raise ValueError(
                     f"{report_links_path} source_reports[{index}].hosted_report_url is stale."
@@ -1190,9 +1181,7 @@ def _validate_report_links_coverage_matrix(
         if isinstance(category, dict) and category.get("category")
     ]
     matrix_models = [
-        str(row.get("model"))
-        for row in matrix
-        if isinstance(row, dict) and row.get("model")
+        str(row.get("model")) for row in matrix if isinstance(row, dict) and row.get("model")
     ]
     if sorted(matrix_models) != sorted(expected_models):
         raise ValueError(
@@ -1206,7 +1195,9 @@ def _validate_report_links_coverage_matrix(
     }
     for row_index, row in enumerate(matrix):
         if not isinstance(row, dict):
-            raise ValueError(f"{report_links_path} source_coverage_matrix[{row_index}] must be an object.")
+            raise ValueError(
+                f"{report_links_path} source_coverage_matrix[{row_index}] must be an object."
+            )
         model = row.get("model")
         expected_row = expected_matrix.get(model)
         if not isinstance(model, str) or not isinstance(expected_row, dict):
@@ -1278,16 +1269,13 @@ def _validate_report_links_coverage_matrix(
                 expected_hosted_report_path = _expected_hosted_source_report_path(report_path)
                 if hosted_path != f"open-audio-judge/{expected_hosted_report_path}":
                     raise ValueError(
-                        f"{report_links_path} source_coverage_matrix has stale "
-                        f"hosted_report_path."
+                        f"{report_links_path} source_coverage_matrix has stale hosted_report_path."
                     )
                 if hosted_url != (
-                    "https://kennethli319.github.io/open-audio-judge/"
-                    + expected_hosted_report_path
+                    "https://kennethli319.github.io/open-audio-judge/" + expected_hosted_report_path
                 ):
                     raise ValueError(
-                        f"{report_links_path} source_coverage_matrix has stale "
-                        f"hosted_report_url."
+                        f"{report_links_path} source_coverage_matrix has stale hosted_report_url."
                     )
             if source_reports and linked_count != cell.get("case_count"):
                 raise ValueError(
@@ -1487,7 +1475,7 @@ def _validate_refresh_commands_script(
     for key in command_keys:
         command = workflow.get(key)
         if isinstance(command, list):
-            rendered = _rendered_command_text(command)
+            rendered = _shell_command_text(command)
             if rendered not in text:
                 missing.append(key)
 
@@ -1504,7 +1492,7 @@ def _validate_refresh_commands_script(
             raise ValueError(
                 f"{summary_path} refresh_workflow.model_run_commands[{index}].command must be a list."
             )
-        rendered = _rendered_command_text(command)
+        rendered = _shell_command_text(command)
         if rendered not in text:
             missing.append(f"model_run_commands[{index}]")
 
@@ -1566,8 +1554,7 @@ def _validate_refresh_workflow_artifact(
         automation_stages = artifact.get("automation_stages")
         if automation_stages != workflow.get("automation_stages"):
             raise ValueError(
-                f"{path} automation_stages do not match "
-                f"{summary_path} refresh_workflow."
+                f"{path} automation_stages do not match {summary_path} refresh_workflow."
             )
 
     expected_counts = {
@@ -1625,7 +1612,7 @@ def _validate_live_refresh_script(
     missing = []
     for key in command_keys:
         command = workflow.get(key)
-        if isinstance(command, list) and _rendered_command_text(command) not in text:
+        if isinstance(command, list) and _shell_command_text(command) not in text:
             missing.append(key)
 
     model_commands = workflow.get("model_run_commands", [])
@@ -1641,7 +1628,7 @@ def _validate_live_refresh_script(
             raise ValueError(
                 f"{summary_path} refresh_workflow.model_run_commands[{index}].command must be a list."
             )
-        if _rendered_command_text(command) not in text:
+        if _shell_command_text(command) not in text:
             missing.append(f"model_run_commands[{index}]")
 
     fallback_models = workflow.get("fallback_model_ids", [])
@@ -1759,7 +1746,7 @@ def _required_page_text(summary: dict[str, Any]) -> list[str]:
                 raw_path = artifact.get("path")
                 purpose = artifact.get("purpose")
                 if isinstance(raw_path, str) and raw_path:
-                    artifact_text.append(raw_path)
+                    artifact_text.append(_public_path_label(raw_path))
                 if isinstance(purpose, str) and purpose:
                     artifact_text.append(purpose)
 
@@ -1782,6 +1769,14 @@ def _repo_relative(path: Path) -> str:
         return path.resolve().relative_to(ROOT).as_posix()
     except ValueError:
         return path.as_posix()
+
+
+def _public_path_label(path: str) -> str:
+    raw_path = Path(path)
+    label = _repo_relative(raw_path)
+    if Path(label).is_absolute():
+        return raw_path.name
+    return label
 
 
 def parse_path_maps(raw_maps: list[str]) -> list[tuple[str, str]]:
@@ -1825,8 +1820,11 @@ def _sha256_file(path: Path) -> str:
 
 
 def _rendered_command_text(command: list[object]) -> str:
-    text = " ".join(str(part) for part in command)
-    return html.escape(text)
+    return html.escape(_shell_command_text(command))
+
+
+def _shell_command_text(command: list[object]) -> str:
+    return " ".join(str(part) for part in command)
 
 
 if __name__ == "__main__":

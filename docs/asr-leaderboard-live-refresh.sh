@@ -11,11 +11,12 @@ set -euo pipefail
 PYTHONPATH=src .venv/bin/python -m open_audio_judge.cli check-mlx-asr-runtime --python-bin .venv/bin/python --model mlx-community/whisper-large-v3-turbo-asr-fp16
 .venv/bin/python scripts/refresh_asr_leaderboard_artifacts.py --check-only --check-mlx-runtime --require-runtime-ready
 
-if [[ ! -f "/Users/wangyauli/.openclaw/secrets/open-audio-judge-gemini.env" ]]; then
-  echo "Missing Gemini secret file: /Users/wangyauli/.openclaw/secrets/open-audio-judge-gemini.env" >&2
+: "${OPEN_AUDIO_JUDGE_GEMINI_ENV_FILE:?Set OPEN_AUDIO_JUDGE_GEMINI_ENV_FILE to your local Gemini environment file}"
+if [[ ! -f "${OPEN_AUDIO_JUDGE_GEMINI_ENV_FILE}" ]]; then
+  echo "Missing Gemini secret file configured by OPEN_AUDIO_JUDGE_GEMINI_ENV_FILE" >&2
   exit 1
 fi
-source /Users/wangyauli/.openclaw/secrets/open-audio-judge-gemini.env
+source "${OPEN_AUDIO_JUDGE_GEMINI_ENV_FILE:?Set_OPEN_AUDIO_JUDGE_GEMINI_ENV_FILE_to_your_local_Gemini_environment_file}"
 
 BLOCKED_MODEL_LOG="runs/asr-leaderboard/blocked-models.jsonl"
 PRIMARY_CASES="runs/asr-research-audio/tts_audio_cases.jsonl"

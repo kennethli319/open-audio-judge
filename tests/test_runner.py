@@ -233,6 +233,10 @@ def test_evaluate_case_with_sampling_excludes_failed_attempts_from_score() -> No
     assert result.metadata["judge_sample_failure_count"] == 1
     assert result.metadata["judge_sample_scores"] == [100, 100]
     assert result.metadata["judge_sample_statuses"] == ["ok", "ok", "provider_error"]
+    assert (
+        result.metadata["judge_sample_score_policy"]
+        == "successful_attempts_only_with_all_failed_fallback_v1"
+    )
     assert "1 failed attempt excluded" in result.reason
     assert result.raw_response["judge_samples"][2]["status"] == "provider_error"
 
@@ -275,7 +279,52 @@ def test_load_results_reconciles_legacy_failed_sample_score(tmp_path: Path) -> N
     assert result.metadata["judge_sample_scores"] == [100, 100]
     assert result.metadata["judge_sample_success_count"] == 2
     assert result.metadata["judge_sample_failure_count"] == 1
+    assert (
+        result.metadata["judge_sample_score_policy"]
+        == "successful_attempts_only_with_all_failed_fallback_v1"
+    )
     assert "1 failed attempt excluded" in result.reason
+
+
+def test_load_results_applies_current_label_threshold_to_all_rows(tmp_path: Path) -> None:
+    path = tmp_path / "results.jsonl"
+    rows = [
+        {
+            "case_id": "legacy-unsampled-80",
+            "task": "asr_error",
+            "judge_id": "asr_error",
+            "judge_version": "0.2.0",
+            "provider": "gemini",
+            "overall_score": 80,
+            "reason": "Legacy threshold labeled this accurate.",
+            "label": "accurate",
+            "status": "ok",
+        },
+        {
+            "case_id": "legacy-sampled-80",
+            "task": "asr_error",
+            "judge_id": "asr_error",
+            "judge_version": "0.2.0",
+            "provider": "gemini",
+            "overall_score": 80,
+            "reason": "Average of 2 judge samples: 80.00.",
+            "label": "accurate",
+            "status": "ok",
+            "metadata": {
+                "judge_sample_count": 2,
+                "judge_sample_scores": [80, 80],
+                "judge_sample_statuses": ["ok", "ok"],
+            },
+        },
+    ]
+    path.write_text(
+        "\n".join(json.dumps(row) for row in rows) + "\n",
+        encoding="utf-8",
+    )
+
+    results = load_results_jsonl(path)
+
+    assert [result.label for result in results] == ["needs_review", "needs_review"]
 
 
 def test_evaluate_cases_accepts_judge_samples(tmp_path: Path) -> None:

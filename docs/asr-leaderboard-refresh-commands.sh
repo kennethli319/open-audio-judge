@@ -26,7 +26,7 @@ fi
 # .venv/bin/python scripts/synthesize_tts_cases.py --cases examples/asr_research_cases.jsonl --out runs/asr-research-audio --discard-text-sidecars --summary-out runs/asr-research-audio/summary.json
 
 # Optional live refresh: load the Gemini key only in your local shell before judge calls.
-# source /Users/wangyauli/.openclaw/secrets/open-audio-judge-gemini.env
+# source "${OPEN_AUDIO_JUDGE_GEMINI_ENV_FILE:?Set_OPEN_AUDIO_JUDGE_GEMINI_ENV_FILE_to_your_local_Gemini_environment_file}"
 
 # Optional live refresh: check the MLX ASR runtime before model jobs.
 # PYTHONPATH=src .venv/bin/python -m open_audio_judge.cli check-mlx-asr-runtime --python-bin .venv/bin/python --model mlx-community/whisper-large-v3-turbo-asr-fp16

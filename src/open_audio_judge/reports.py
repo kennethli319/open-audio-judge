@@ -448,7 +448,7 @@ def render_html_report(
     {judge_health_markup}
 
     <h2>Priority Cases</h2>
-    <p class="section-intro">Start here: these cases have the largest semantic impact, a high-impact error, or a non-accurate label.</p>
+    <p class="section-intro">Start here: these cases have the largest semantic impact, a high-impact error, a non-accurate label, or incomplete judge coverage.</p>
     {priority_markup}
 
     <h2>Score Distribution</h2>
@@ -472,7 +472,7 @@ def render_html_report(
     <h2>Case Results</h2>
     <p class="section-intro">Lowest scores appear first. Search the judge rationale, model, category, slice, or issue.</p>
     {case_table_controls}
-    <section id="case-results-table" class="case-list" aria-live="polite">
+    <section id="case-results-table" class="case-list">
       {rows}
     </section>
 
@@ -580,7 +580,22 @@ def render_html_report(
         sorted.forEach((row) => container.appendChild(row));
         rows.splice(0, rows.length, ...sorted);
         document.querySelectorAll("[data-sort]").forEach((button) => {{
-          button.setAttribute("aria-pressed", String(button.dataset.sort === key));
+          const active = button.dataset.sort === key;
+          button.setAttribute("aria-pressed", String(active));
+          if (!active) {{
+            button.textContent = button.dataset.baseLabel;
+            button.removeAttribute("aria-label");
+            return;
+          }}
+          const lowFirst = state.sortDir === "asc";
+          const current = key === "score"
+            ? `Score: ${{lowFirst ? "low to high" : "high to low"}}`
+            : `Case ID: ${{lowFirst ? "A to Z" : "Z to A"}}`;
+          const next = key === "score"
+            ? (lowFirst ? "high to low" : "low to high")
+            : (lowFirst ? "Z to A" : "A to Z");
+          button.textContent = current;
+          button.setAttribute("aria-label", `${{current}}; activate to sort ${{next}}`);
         }});
         applyFilters();
       }}
@@ -660,12 +675,29 @@ def _render_decision_brief(
 ) -> str:
     accurate_count = sum(result.label == "accurate" for result in results)
     flagged_count = len(results) - accurate_count
+    partial_failure_cases = sum(
+        result.status == "ok" and _judge_sample_failure_count(result) > 0 for result in results
+    )
     if flagged_count:
         headline = f"Review {flagged_count} of {len(results)} cases before relying on this model"
         summary = (
             f"{accurate_count}/{len(results)} cases are labeled accurate. "
             "Use the lowest-scoring evidence below to decide whether the remaining errors matter "
             "for your workload."
+        )
+        if partial_failure_cases:
+            summary += (
+                f" Also verify {partial_failure_cases} case"
+                f"{'s' if partial_failure_cases != 1 else ''} with incomplete judge coverage."
+            )
+    elif partial_failure_cases:
+        headline = (
+            f"All {len(results)} cases are labeled accurate; verify incomplete judge coverage"
+        )
+        summary = (
+            f"{partial_failure_cases} case{'s' if partial_failure_cases != 1 else ''} had "
+            "failed judge attempts excluded from the quality score. Inspect the vote details "
+            "before relying on the result."
         )
     else:
         headline = f"All {len(results)} evaluated cases are labeled accurate"
@@ -769,6 +801,16 @@ def _render_judge_health(results: list[EvaluationResult]) -> str:
       <span class="{health_class}">{html.escape(failure_text)}</span>
       <span class="health-chip">{html.escape(variance_text)}</span>
     </div>"""
+
+
+def _judge_sample_failure_count(result: EvaluationResult) -> int:
+    recorded_count = result.metadata.get("judge_sample_failure_count")
+    if isinstance(recorded_count, int) and not isinstance(recorded_count, bool):
+        return max(recorded_count, 0)
+    statuses = result.metadata.get("judge_sample_statuses")
+    if not isinstance(statuses, list):
+        return 0
+    return sum(isinstance(status, str) and status != "ok" for status in statuses)
 
 
 LABELS = ("accurate", "needs_review", "inaccurate")
@@ -1606,7 +1648,7 @@ def _render_row(result: EvaluationResult) -> str:
         else '<p class="muted">No model-specific action was recorded.</p>'
     )
     if result.judge_transcript:
-        evidence_heading = "Model transcript"
+        evidence_heading = "Judge transcript"
         transcript_markup = f"<blockquote>{html.escape(result.judge_transcript)}</blockquote>"
     else:
         evidence_heading = "Judge evidence"
@@ -1684,11 +1726,14 @@ def _render_case_table_controls(results: list[EvaluationResult]) -> str:
         label: str,
         all_label: str,
         values: list[str],
+        display_labels: dict[str, str] | None = None,
     ) -> str:
         if len(values) <= 1:
             return f'<input id="{control_id}" type="hidden" value="">'
         options = "".join(
-            f'<option value="{html.escape(value)}">{html.escape(value.replace("_", " ").title())}</option>'
+            f'<option value="{html.escape(value)}">'
+            f"{html.escape((display_labels or {}).get(value, value.replace('_', ' ').title()))}"
+            "</option>"
             for value in values
         )
         return f"""<label>{html.escape(label)}
@@ -1715,6 +1760,7 @@ def _render_case_table_controls(results: list[EvaluationResult]) -> str:
         label="Model",
         all_label="All models",
         values=models,
+        display_labels={value: _friendly_model_name(value) for value in models},
     )
     category_control = select_control(
         control_id="case-category-filter",
@@ -1738,8 +1784,8 @@ def _render_case_table_controls(results: list[EvaluationResult]) -> str:
       {category_control}
       {slice_control}
       <div class="sort-tools" aria-label="Sort cases">
-        <button class="sort-button" type="button" data-sort="score" aria-pressed="true">Lowest score</button>
-        <button class="sort-button" type="button" data-sort="case" aria-pressed="false">Case ID</button>
+        <button class="sort-button" type="button" data-sort="score" data-base-label="Score" aria-pressed="true">Score: low to high</button>
+        <button class="sort-button" type="button" data-sort="case" data-base-label="Case ID" aria-pressed="false">Case ID</button>
       </div>
       <div class="muted results-count" id="case-visible-count" role="status" aria-live="polite">{len(results)} / {len(results)} shown</div>
     </section>"""
@@ -2546,17 +2592,24 @@ def _priority_cases(results: list[EvaluationResult], limit: int = 5) -> list[Eva
         or HIGH_IMPACT_CATEGORIES.intersection(result.error_categories)
         or result.label != "accurate"
         or result.status != "ok"
+        or _judge_sample_failure_count(result) > 0
     ]
-    return sorted(
+    ordered = sorted(
         candidates,
         key=lambda result: (
             result.status == "ok",
             -_meaning_severity(result),
             -_high_impact_count(result),
+            result.label == "accurate",
             result.overall_score,
             result.case_id,
         ),
-    )[:limit]
+    )
+    selected = ordered[:limit]
+    coverage_cases = [result for result in ordered if _judge_sample_failure_count(result) > 0]
+    if coverage_cases and all(_judge_sample_failure_count(result) == 0 for result in selected):
+        selected.append(coverage_cases[0])
+    return selected
 
 
 def _render_priority_cases(results: list[EvaluationResult]) -> str:
@@ -2574,7 +2627,7 @@ def _render_priority_cases(results: list[EvaluationResult]) -> str:
         for result in results
     )
     return f"""<div class="table-region" role="region" aria-label="Priority cases" tabindex="0"><table class="priority-table">
-      <caption class="sr-only">Cases that need attention, ordered by semantic severity and score</caption>
+      <caption class="sr-only">Cases that need attention, ordered by judge status, semantic severity, score, and judge coverage</caption>
       <thead>
         <tr>
           <th scope="col">Case</th>
@@ -2667,6 +2720,9 @@ def _priority_reason(result: EvaluationResult) -> str:
         return ", ".join(high_impact)
     if result.status != "ok":
         return result.status.replace("_", " ")
+    judge_failures = _judge_sample_failure_count(result)
+    if judge_failures:
+        return f"{judge_failures} judge attempt{'s' if judge_failures != 1 else ''} failed"
     if result.error_categories:
         return ", ".join(category.replace("_", " ") for category in result.error_categories)
     return result.label.replace("_", " ")
@@ -2733,15 +2789,34 @@ def _render_provenance(result: EvaluationResult) -> str:
 def _render_judge_sample_scores(result: EvaluationResult) -> str:
     scores = result.metadata.get("judge_sample_scores")
     average = result.metadata.get("judge_sample_average")
-    if not isinstance(scores, list) or len(scores) <= 1:
+    failure_count = _judge_sample_failure_count(result)
+    sample_count = result.metadata.get("judge_sample_count")
+    success_count = result.metadata.get("judge_sample_success_count")
+    if not isinstance(scores, list):
+        return ""
+    if not isinstance(sample_count, int) or isinstance(sample_count, bool):
+        statuses = result.metadata.get("judge_sample_statuses")
+        sample_count = len(statuses) if isinstance(statuses, list) else len(scores)
+    if not isinstance(success_count, int) or isinstance(success_count, bool):
+        success_count = max(sample_count - failure_count, 0)
+    if len(scores) <= 1 and failure_count == 0:
         return ""
     score_text = ", ".join(str(score) for score in scores)
     average_text = (
         f"{average:.2f}" if isinstance(average, (int, float)) else str(result.overall_score)
     )
+    coverage_text = ""
+    if failure_count and success_count:
+        coverage_text = (
+            f"; {success_count}/{sample_count} attempts succeeded; "
+            f"{failure_count} failed attempt{'s' if failure_count != 1 else ''} excluded"
+        )
+    elif failure_count:
+        coverage_text = f"; all {sample_count} attempts failed; failure score retained"
     return (
         '<div class="muted" style="margin-top:6px">'
         f"judge samples: {html.escape(score_text)}; avg {html.escape(average_text)}"
+        f"{html.escape(coverage_text)}"
         "</div>"
     )
 

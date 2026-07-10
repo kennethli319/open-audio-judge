@@ -296,8 +296,9 @@
     "live_refresh_script_path": "docs/asr-leaderboard-live-refresh.sh",
     "local_secret_env_command": [
       "source",
-      "/Users/wangyauli/.openclaw/secrets/open-audio-judge-gemini.env"
+      "\"${OPEN_AUDIO_JUDGE_GEMINI_ENV_FILE:?Set_OPEN_AUDIO_JUDGE_GEMINI_ENV_FILE_to_your_local_Gemini_environment_file}\""
     ],
+    "local_secret_env_var": "OPEN_AUDIO_JUDGE_GEMINI_ENV_FILE",
     "manifest_refresh_command": [
       ".venv/bin/python",
       "scripts/refresh_asr_leaderboard_artifacts.py",
@@ -425,7 +426,7 @@
       "--check-only",
       "--check-mlx-runtime"
     ],
-    "secret_handling": "Load the Gemini API key from the local secret file only at runtime; do not commit or print secrets.",
+    "secret_handling": "Set OPEN_AUDIO_JUDGE_GEMINI_ENV_FILE to the local Gemini environment-file path, then load the API key only at runtime; do not commit or print secrets.",
     "seed_manifest_validation_command": [
       ".venv/bin/python",
       "scripts/validate_asr_seed_manifest.py",

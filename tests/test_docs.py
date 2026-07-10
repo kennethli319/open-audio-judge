@@ -29,14 +29,14 @@ def test_tts_leaderboard_demo_page_documents_workflow() -> None:
         "judge-report/report.html",
         "Sample Report Preview",
         "Demo controls",
-        "data-view=\"demo\"",
-        "data-view=\"usage\"",
-        "data-view=\"reference\"",
+        'data-view="demo"',
+        'data-view="usage"',
+        'data-view="reference"',
         "Demo Run view is selected.",
-        "let activeView = Object.prototype.hasOwnProperty.call(sectionViews, requestedView) ? requestedView : \"demo\"",
-        "id=\"report-search\"",
-        "id=\"model-filter\"",
-        "id=\"sample-breakdown-table\"",
+        'let activeView = Object.prototype.hasOwnProperty.call(sectionViews, requestedView) ? requestedView : "demo"',
+        'id="report-search"',
+        'id="model-filter"',
+        'id="sample-breakdown-table"',
         "function applyFilters()",
         "function sortRows()",
         "Eval Set Samples",
@@ -136,7 +136,7 @@ def test_asr_leaderboard_demo_page_documents_workflow() -> None:
 
     required_text = [
         "Open Audio Judge ASR Leaderboard",
-        "Three MLX Community ASR models transcribe the same research-guided eval set",
+        "3 MLX Community ASR models transcribe the same research-guided eval set",
         "oaj autojudge-mlx-asr",
         "--judge-provider gemini",
         "--judge-samples 3",
@@ -171,7 +171,9 @@ def test_asr_research_docs_list_categories() -> None:
     docs = Path("docs/asr-eval-taxonomy.md").read_text(encoding="utf-8")
     manifest = [
         json.loads(line)
-        for line in Path("examples/asr_research_cases.jsonl").read_text(encoding="utf-8").splitlines()
+        for line in Path("examples/asr_research_cases.jsonl")
+        .read_text(encoding="utf-8")
+        .splitlines()
         if line.strip()
     ]
     categories = {record["metadata"]["eval_category"] for record in manifest}
@@ -184,7 +186,9 @@ def test_asr_research_docs_list_categories() -> None:
 def test_tts_multiturn_examples_cover_requested_categories() -> None:
     records = [
         json.loads(line)
-        for line in Path("examples/tts_multiturn_cases.jsonl").read_text(encoding="utf-8").splitlines()
+        for line in Path("examples/tts_multiturn_cases.jsonl")
+        .read_text(encoding="utf-8")
+        .splitlines()
         if line.strip()
     ]
     categories: dict[str, int] = {}
@@ -297,7 +301,9 @@ def test_tts_leaderboard_demo_lists_every_eval_case() -> None:
     html = Path("docs/tts-leaderboard-demo.html").read_text(encoding="utf-8")
     records = [
         json.loads(line)
-        for line in Path("examples/tts_multiturn_cases.jsonl").read_text(encoding="utf-8").splitlines()
+        for line in Path("examples/tts_multiturn_cases.jsonl")
+        .read_text(encoding="utf-8")
+        .splitlines()
         if line.strip()
     ]
 

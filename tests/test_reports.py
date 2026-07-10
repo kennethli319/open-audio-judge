@@ -432,6 +432,61 @@ def test_write_html_report_highlights_priority_semantic_cases(tmp_path: Path) ->
     assert "The transcript reverses the operational instruction." in html
 
 
+def test_write_html_report_exposes_partial_judge_coverage_and_clear_controls(
+    tmp_path: Path,
+) -> None:
+    partial_outage = EvaluationResult(
+        case_id="partial-judge-outage",
+        task="asr_error",
+        judge_id="asr_error",
+        judge_version="0.2.0",
+        provider="gemini",
+        overall_score=95,
+        reason="The successful judge attempt found the transcript accurate.",
+        judge_transcript="The judge reconstructed this transcript.",
+        meaning_preservation="preserved",
+        semantic_error_summary="Meaning is preserved.",
+        error_categories=["no_error"],
+        label="accurate",
+        status="ok",
+        metadata={
+            "synthesis_model": "mlx-community/Qwen3-ASR-1.7B-8bit",
+            "evaluation_category": "acoustic_noise_robustness",
+            "judge_sample_count": 3,
+            "judge_sample_success_count": 1,
+            "judge_sample_failure_count": 2,
+            "judge_sample_scores": [95],
+            "judge_sample_average": 95.0,
+            "judge_sample_statuses": ["ok", "provider_error", "parse_error"],
+        },
+    )
+    comparison = partial_outage.model_copy(
+        update={
+            "case_id": "fully-judged",
+            "metadata": {
+                "synthesis_model": "mlx-community/whisper-large-v3-turbo-asr-fp16",
+                "evaluation_category": "acoustic_noise_robustness",
+            },
+        }
+    )
+
+    output = write_html_report([partial_outage, comparison], tmp_path / "report.html")
+    html = output.read_text(encoding="utf-8")
+
+    assert "incomplete judge coverage" in html
+    assert "2 judge attempts failed" in html
+    assert "1/3 attempts succeeded; 2 failed attempts excluded" in html
+    assert "Judge transcript" in html
+    assert "Model transcript" not in html
+    assert (
+        '<option value="mlx-community/Qwen3-ASR-1.7B-8bit">Qwen3 ASR 1.7B (8-bit)</option>' in html
+    )
+    assert 'id="case-results-table" class="case-list" aria-live=' not in html
+    assert 'data-base-label="Score"' in html
+    assert "Score: low to high" in html
+    assert '"high to low"' in html
+
+
 def test_write_html_report_flags_calibration_mismatches(tmp_path: Path) -> None:
     result = EvaluationResult(
         case_id="calibration-number",

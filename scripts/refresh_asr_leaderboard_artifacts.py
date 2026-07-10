@@ -40,7 +40,7 @@ from scripts.update_asr_leaderboard_demo import (  # noqa: E402
     DEFAULT_NEXT_ACTION,
     DEFAULT_CRON_STATUS,
     END_MARKER,
-    GEMINI_SECRET_ENV,
+    GEMINI_SECRET_ENV_VAR,
     HOSTED_BASE_PATH,
     HOSTED_BASE_URL,
     START_MARKER,
@@ -68,9 +68,6 @@ from scripts.validate_asr_seed_manifest import (  # noqa: E402
 
 DEFAULT_COMBINED_OUT = ROOT / "runs" / "asr-leaderboard" / "full-35-combined"
 DEFAULT_SOURCE_SELECTION_SUMMARY = ROOT / "docs" / "asr-leaderboard-source-selection.json"
-DEFAULT_CHECK_ONLY_SOURCE_SELECTION_SUMMARY = (
-    ROOT / "runs" / "asr-leaderboard" / "source-selection-summary.json"
-)
 DEFAULT_RUN_MANIFEST = ROOT / "docs" / "asr-leaderboard-run-manifest.json"
 DEFAULT_MANIFEST_VALIDATION = ROOT / "docs" / "asr-leaderboard-manifest-validation.json"
 DEFAULT_HOSTED_DIR_ENV = "ASR_LEADERBOARD_HOSTED_DIR"
@@ -319,8 +316,9 @@ def main() -> None:
         help="Fail unless every model has this many ok judged results.",
     )
     args = parser.parse_args()
-    if args.check_only and not _source_selection_summary_arg_was_provided(sys.argv[1:]):
-        args.source_selection_summary_out = DEFAULT_CHECK_ONLY_SOURCE_SELECTION_SUMMARY
+    cli_args = sys.argv[1:]
+    if args.check_only and not _source_selection_summary_arg_was_provided(cli_args):
+        args.source_selection_summary_out = None
     hosted_dir = args.hosted_dir
     if hosted_dir is None and args.hosted_dir_from_env:
         hosted_dir = _hosted_dir_from_env(args.hosted_dir_env)
@@ -366,28 +364,54 @@ def main() -> None:
                 source_result_paths=result_paths,
                 check_mlx_runtime=True,
             )
-            write_runtime_status_data(args.runtime_status_out, runtime_status)
+            runtime_status_out = (
+                args.runtime_status_out
+                if _cli_arg_was_provided(cli_args, "--runtime-status-out")
+                else None
+            )
+            if runtime_status_out is not None:
+                write_runtime_status_data(runtime_status_out, runtime_status)
             refresh_decision = build_refresh_decision_artifact_data(
                 results=combined_results,
                 runtime_status=runtime_status,
                 expected_cases_per_model=args.expected_cases_per_model,
             )
-            write_refresh_decision_data(args.refresh_decision_out, refresh_decision)
-            write_next_action_artifact(args.next_action_out, refresh_decision)
+            refresh_decision_out = (
+                args.refresh_decision_out
+                if _cli_arg_was_provided(cli_args, "--refresh-decision-out")
+                else None
+            )
+            next_action_out = (
+                args.next_action_out
+                if _cli_arg_was_provided(cli_args, "--next-action-out")
+                else None
+            )
+            cron_status_out = (
+                args.cron_status_out
+                if _cli_arg_was_provided(cli_args, "--cron-status-out")
+                else None
+            )
+            if refresh_decision_out is not None:
+                write_refresh_decision_data(refresh_decision_out, refresh_decision)
+            if next_action_out is not None:
+                write_next_action_artifact(next_action_out, refresh_decision)
             enrich_check_summary_with_runtime_status(
                 check_summary,
                 runtime_status=runtime_status,
-                runtime_status_out=args.runtime_status_out,
+                runtime_status_out=runtime_status_out,
             )
-            check_summary["refresh_decision_path"] = _repo_relative(args.refresh_decision_out)
             check_summary["refresh_decision"] = refresh_decision
-            check_summary["next_action_path"] = _repo_relative(args.next_action_out)
-            check_summary["cron_status_path"] = _repo_relative(args.cron_status_out)
-            write_cron_status_artifact(
-                args.cron_status_out,
-                decision=refresh_decision,
-                check_summary=check_summary,
-            )
+            if refresh_decision_out is not None:
+                check_summary["refresh_decision_path"] = _repo_relative(refresh_decision_out)
+            if next_action_out is not None:
+                check_summary["next_action_path"] = _repo_relative(next_action_out)
+            if cron_status_out is not None:
+                check_summary["cron_status_path"] = _repo_relative(cron_status_out)
+                write_cron_status_artifact(
+                    cron_status_out,
+                    decision=refresh_decision,
+                    check_summary=check_summary,
+                )
             if args.require_runtime_ready:
                 _validate_runtime_ready(runtime_status)
         write_optional_source_selection_summary(
@@ -457,10 +481,11 @@ def _hosted_dir_from_env(env_var: str) -> Path:
 
 
 def _source_selection_summary_arg_was_provided(argv: list[str]) -> bool:
-    return any(
-        arg == "--source-selection-summary-out" or arg.startswith("--source-selection-summary-out=")
-        for arg in argv
-    )
+    return _cli_arg_was_provided(argv, "--source-selection-summary-out")
+
+
+def _cli_arg_was_provided(argv: list[str], option: str) -> bool:
+    return any(arg == option or arg.startswith(f"{option}=") for arg in argv)
 
 
 def check_asr_leaderboard_refresh_inputs(
@@ -600,9 +625,10 @@ def enrich_check_summary_with_runtime_status(
     summary: dict[str, object],
     *,
     runtime_status: dict[str, object],
-    runtime_status_out: Path,
+    runtime_status_out: Path | None,
 ) -> dict[str, object]:
-    summary["runtime_status_path"] = _repo_relative(runtime_status_out)
+    if runtime_status_out is not None:
+        summary["runtime_status_path"] = _repo_relative(runtime_status_out)
     summary["runtime_status"] = runtime_status
     try:
         _validate_runtime_ready(runtime_status)
@@ -708,9 +734,25 @@ def validate_hosted_artifacts_current(
                 raise ValueError(f"Hosted Pages artifact sha256 is stale: {destination}")
             checked_paths += 1
 
+    manifest_destination_names = {
+        hosted_manifest_out.name,
+        DEFAULT_HOSTED_MANIFEST.name,
+    }
+    manifest_bytes = hosted_manifest_out.stat().st_size
+    manifest_sha256 = _sha256_file(hosted_manifest_out)
+    for destination_name in sorted(manifest_destination_names):
+        destination = hosted_dir / destination_name
+        if not destination.exists():
+            raise FileNotFoundError(f"Hosted Pages manifest is missing: {destination}")
+        if destination.stat().st_size != manifest_bytes:
+            raise ValueError(f"Hosted Pages manifest byte size is stale: {destination}")
+        if _sha256_file(destination) != manifest_sha256:
+            raise ValueError(f"Hosted Pages manifest sha256 is stale: {destination}")
+        checked_paths += 1
+
     return {
         "status": "complete",
-        "hosted_artifact_count": len(artifacts),
+        "hosted_artifact_count": len(artifacts) + 1,
         "hosted_path_count": checked_paths,
     }
 
@@ -1091,7 +1133,6 @@ def refresh_asr_leaderboard_artifacts(
 
     for path in result_paths:
         source_results = load_results_jsonl(path)
-        write_results_jsonl(source_results, path)
         write_html_report(source_results, path.with_name("report.html"))
 
     combined_results = [result for path in result_paths for result in load_results_jsonl(path)]
@@ -2835,12 +2876,13 @@ def _mlx_runtime_preflight_command(model: str | None = None) -> list[str]:
 
 
 def _gemini_secret_status() -> dict[str, object]:
-    secret_path = Path(GEMINI_SECRET_ENV)
+    configured_path = os.environ.get(GEMINI_SECRET_ENV_VAR, "").strip()
+    secret_path = Path(configured_path).expanduser() if configured_path else None
     return {
         "status": "present"
-        if secret_path.exists() and secret_path.stat().st_size > 0
+        if secret_path is not None and secret_path.is_file() and secret_path.stat().st_size > 0
         else "missing",
-        "path": GEMINI_SECRET_ENV,
+        "path_env_var": GEMINI_SECRET_ENV_VAR,
     }
 
 

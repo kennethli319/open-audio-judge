@@ -66,7 +66,14 @@ ASR_FALLBACK_MODELS = [
     "mlx-community/parakeet-rnnt-0.6b",
     "mlx-community/GLM-ASR-Nano-2512-4bit",
 ]
-GEMINI_SECRET_ENV = "/Users/wangyauli/.openclaw/secrets/open-audio-judge-gemini.env"
+GEMINI_SECRET_ENV_VAR = "OPEN_AUDIO_JUDGE_GEMINI_ENV_FILE"
+GEMINI_SECRET_ENV_REFERENCE = (
+    '"${'
+    + GEMINI_SECRET_ENV_VAR
+    + ":?Set_"
+    + GEMINI_SECRET_ENV_VAR
+    + '_to_your_local_Gemini_environment_file}"'
+)
 
 
 @dataclass(frozen=True)
@@ -284,9 +291,16 @@ def render_generated_sections(
     validate_coverage(results, model_summaries, expected_cases_per_model=expected_cases_per_model)
     total_judge_samples = sum(summary.judge_samples for summary in model_summaries)
     categories = sorted({str(result.metadata.get("eval_category", "")) for result in results})
+    model_count = len(model_summaries)
+    category_count = len(categories)
+    case_count = len({_source_case_id(result) for result in results})
+    evaluation_count = len(results)
+    cell_case_scope = _model_category_case_scope(results)
+    model_verb = "transcribes" if model_count == 1 else "transcribe"
+    category_verb = "is" if category_count == 1 else "are"
     category_list = ", ".join(f"<code>{html.escape(category)}</code>" for category in categories)
     category_columns = category_columns_for_results(results)
-    report_label = html.escape(_repo_relative(results_path.with_name("report.html")))
+    report_label = html.escape(_public_path_label(results_path.with_name("report.html")))
     hosted_combined_report_url = html.escape(
         f"{HOSTED_BASE_URL}/asr-leaderboard/full-35-combined/report.html"
     )
@@ -356,8 +370,17 @@ def render_generated_sections(
         model_count=len(model_summaries),
         report_url=hosted_combined_report_url,
     )
+    model_count_sentence = (
+        "Three MLX Community ASR models transcribe the same research-guided eval set. "
+        if model_count == 3
+        else ""
+    )
     best_category_scores = _best_category_scores(results)
     limitations_text = _benchmark_limitations_text(results)
+    judge_score_policy_markup = _render_judge_score_policy(
+        results,
+        report_url=hosted_combined_report_url,
+    )
 
     return "\n".join(
         [
@@ -371,7 +394,9 @@ def render_generated_sections(
             "      <h2>Verified Leaderboard Results</h2>",
             (
                 '      <p class="lede">Which model best preserves meaning on this small, controlled ASR set? '
-                "Three MLX Community ASR models transcribe the same research-guided eval set. "
+                f"{model_count} MLX Community ASR {_pluralize('model', model_count)} {model_verb} "
+                "the same research-guided eval set. "
+                f"{model_count_sentence}"
                 "Scores below are Gemini semantic-judge scores (higher is better), not word error rate.</p>"
             ),
             "    </section>",
@@ -400,7 +425,11 @@ def render_generated_sections(
             "",
             '    <section id="category-breakdown" class="section-heading">',
             "    <h2>Category Breakdown</h2>",
-            '    <p class="muted">Use this matrix to choose for a workload. Every cell is a semantic score over five cases; it is not WER. Best-in-column cells are marked.</p>',
+            (
+                '    <p class="muted">Use this matrix to choose for a workload. Each populated '
+                f"cell averages semantic scores over {cell_case_scope}; it is not WER. "
+                "Best-in-column cells are marked.</p>"
+            ),
             '    <div class="heat-legend" aria-label="Score legend"><span class="heat heat-top">95–100 strong</span><span class="heat heat-good">81–94 solid</span><span class="heat heat-watch">60–80 review</span><span class="heat heat-risk">Below 60 risk</span></div>',
             "    </section>",
             '    <div class="table-region heatmap-region" role="region" aria-label="Scores by model and category" tabindex="0">',
@@ -435,15 +464,17 @@ def render_generated_sections(
             '    <section id="methodology" class="methodology-panel">',
             "      <h2>Methodology &amp; limitations</h2>",
             f"      <p>{html.escape(limitations_text)}</p>",
+            judge_score_policy_markup,
             (
-                '      <p class="muted">The seven research categories are '
+                f'      <p class="muted">The {category_count} research '
+                f"{_pluralize('category', category_count)} {category_verb} "
                 f"{category_list}. Results are directional evidence, not deployment proof.</p>"
             ),
             "    </section>",
             "",
             "    <h2>Report Links</h2>",
             '    <div class="report-links">',
-            f'      <a class="link-card" href="{hosted_combined_report_url}"><strong>Combined full-35 report</strong><span>Explore all 105 case results by model, category, slice, score, and issue.</span></a>',
+            f'      <a class="link-card" href="{hosted_combined_report_url}"><strong>Combined {case_count}-clip report</strong><span>Explore all {evaluation_count} model-case {_pluralize("evaluation", evaluation_count)} by model, category, slice, score, and issue.</span></a>',
             f'      <a class="link-card" href="{hosted_report_index_url}"><strong>Generated report index</strong><span>Browse source reports generated for each contributing run.</span></a>',
             f'      <a class="link-card" href="{hosted_report_links_url}"><strong>Machine-readable report map</strong><span>Use the JSON links and provenance index.</span></a>',
             "    </div>",
@@ -476,7 +507,7 @@ def render_generated_sections(
                 "complete model/category matrix, missing-cell guidance, runtime-gated next action, hosted copy map, and reproducible refresh workflow. Pass "
                 f"<code>{DEFAULT_HOSTED_DIR_ENV}</code> with "
                 "<code>--hosted-dir-from-env</code> to copy the same verified artifacts into the hosted Pages checkout. "
-                f"Use <code>{report_index_label}</code> as the generated map from the demo page to the combined full-35 report "
+                f"Use <code>{report_index_label}</code> as the generated map from the demo page to the combined benchmark report "
                 "and per-source run reports; use "
                 f"<code>{report_links_label}</code> for the same map in machine-readable form, including "
                 "the source artifact list behind each model/category cell.</p>"
@@ -536,7 +567,7 @@ def render_generated_sections(
             "      <tbody>",
             *(
                 "        <tr>"
-                f"<td><code>{html.escape(artifact['path'])}</code></td>"
+                f"<td><code>{html.escape(_public_path_label(artifact['path']))}</code></td>"
                 f"<td>{html.escape(artifact['purpose'])}</td>"
                 "</tr>"
                 for artifact in output_artifacts
@@ -614,6 +645,15 @@ def write_summary_artifact(
                     "Gemini semantic meaning-preservation score from 1 to 100; higher is better; "
                     "not word error rate"
                 ),
+                "judge_score_aggregation": {
+                    "method": "arithmetic_mean_of_successful_attempt_scores",
+                    "partial_failure_handling": (
+                        "exclude_failed_attempts_when_successful_attempts_exist"
+                    ),
+                    "all_failed_fallback": (
+                        "retain_failure_status_without_successful_attempt_average"
+                    ),
+                },
                 "model_category_matrix": coverage_matrix,
                 "models": [
                     {
@@ -910,7 +950,7 @@ def write_report_index(
             "## Hosted Layout",
             "",
             "- The demo page and generated docs are copied to `open-audio-judge/`.",
-            "- The combined full-35 results and report are copied to `open-audio-judge/asr-leaderboard/full-35-combined/`.",
+            "- The combined results and report are copied to `open-audio-judge/asr-leaderboard/full-35-combined/`.",
             "- Source run reports are copied to their matching `open-audio-judge/asr-leaderboard/.../report.html` paths when they live under `runs/asr-leaderboard/`.",
             "",
         ]
@@ -1123,8 +1163,9 @@ def write_live_refresh_script(output_path: Path) -> None:
         _shell_join(workflow["mlx_runtime_check_command"]),
         _shell_join(workflow["runtime_ready_check_command"]),
         "",
-        'if [[ ! -f "' + GEMINI_SECRET_ENV + '" ]]; then',
-        '  echo "Missing Gemini secret file: ' + GEMINI_SECRET_ENV + '" >&2',
+        f': "${{{GEMINI_SECRET_ENV_VAR}:?Set {GEMINI_SECRET_ENV_VAR} to your local Gemini environment file}}"',
+        f'if [[ ! -f "${{{GEMINI_SECRET_ENV_VAR}}}" ]]; then',
+        f'  echo "Missing Gemini secret file configured by {GEMINI_SECRET_ENV_VAR}" >&2',
         "  exit 1",
         "fi",
         _shell_join(workflow["local_secret_env_command"]),
@@ -1187,8 +1228,8 @@ def _refresh_workflow(source_result_paths: list[Path]) -> dict[str, object]:
         ".venv/bin/python",
         "scripts/refresh_asr_leaderboard_artifacts.py",
     ]
-    for path in source_result_paths:
-        refresh_command.extend(["--results", _repo_relative(path)])
+    for index, path in enumerate(source_result_paths, start=1):
+        refresh_command.extend(["--results", _workflow_result_path(path, index=index)])
     if source_result_paths:
         refresh_command.append("--update-run-manifest")
     refresh_command.extend(
@@ -1380,11 +1421,12 @@ def _refresh_workflow(source_result_paths: list[Path]) -> dict[str, object]:
         ],
         "local_secret_env_command": [
             "source",
-            GEMINI_SECRET_ENV,
+            GEMINI_SECRET_ENV_REFERENCE,
         ],
+        "local_secret_env_var": GEMINI_SECRET_ENV_VAR,
         "secret_handling": (
-            "Load the Gemini API key from the local secret file only at runtime; "
-            "do not commit or print secrets."
+            f"Set {GEMINI_SECRET_ENV_VAR} to the local Gemini environment-file path, then load "
+            "the API key only at runtime; do not commit or print secrets."
         ),
         "automation_stages": _automation_stages(),
     }
@@ -2114,11 +2156,22 @@ def _render_leaderboard_decision_brief(
         first_risk = risk_groups[0]
         case_id = _source_case_id(first_risk[0])
         slice_name = str(first_risk[0].metadata.get("asr_slice") or case_id).replace("_", " ")
+        affected_count = len(
+            {
+                str(result.metadata.get("candidate_model") or "")
+                for result in first_risk
+                if result.label != "accurate"
+            }
+        )
+        total_count = len(
+            {str(result.metadata.get("candidate_model") or "") for result in first_risk}
+        )
+        risk_label = "Shared blocker" if affected_count == total_count else "Shared risk"
         cards.append(
             '<article class="decision-card risk-card">'
-            '<span class="eyebrow">Shared blocker</span>'
+            f'<span class="eyebrow">{risk_label}</span>'
             f"<h3>{html.escape(slice_name.title())}</h3>"
-            f"<p>All {len(first_risk)} models need attention on this case.</p>"
+            f"<p>{affected_count} of {total_count} models need attention on this case.</p>"
             f'<a href="{_report_query_url(report_url, search=case_id)}">Inspect shared failure</a>'
             "</article>"
         )
@@ -2144,7 +2197,14 @@ def _render_shared_risks(
         case_id = _source_case_id(group[0])
         slice_name = str(group[0].metadata.get("asr_slice") or case_id).replace("_", " ")
         category = str(group[0].metadata.get("eval_category") or "").replace("_", " ")
-        affected_count = sum(result.label != "accurate" for result in group)
+        affected_count = len(
+            {
+                str(result.metadata.get("candidate_model") or "")
+                for result in group
+                if result.label != "accurate"
+            }
+        )
+        total_count = len({str(result.metadata.get("candidate_model") or "") for result in group})
         score_tags = "".join(
             f'<span class="pill">{html.escape(_display_model_name(str(result.metadata.get("candidate_model") or "")))} {result.overall_score}</span>'
             for result in sorted(group, key=lambda item: item.overall_score)
@@ -2154,13 +2214,81 @@ def _render_shared_risks(
             '<article class="risk-pattern">'
             f'<span class="eyebrow">{html.escape(category)}</span>'
             f"<h3>{html.escape(slice_name.title())}</h3>"
-            f"<p><strong>{affected_count}/{len(group)} models flagged.</strong> "
+            f"<p><strong>{affected_count}/{total_count} models flagged.</strong> "
             f"{html.escape(lowest.semantic_error_summary or lowest.reason)}</p>"
             f'<div class="risk-scores">{score_tags}</div>'
             f'<a href="{_report_query_url(report_url, search=case_id)}">Open case evidence</a>'
             "</article>"
         )
     return '    <section class="risk-grid">' + "".join(cards) + "</section>"
+
+
+def _render_judge_score_policy(
+    results: list[EvaluationResult],
+    *,
+    report_url: str,
+) -> str:
+    partial_failures: list[tuple[EvaluationResult, int, int]] = []
+    for result in results:
+        success_count, failure_count = _judge_attempt_counts(result)
+        if success_count and failure_count:
+            partial_failures.append((result, success_count, failure_count))
+
+    policy = (
+        "Semantic scores average successful judge attempts. Failed attempts are excluded only "
+        "when at least one attempt succeeds; an evaluation with no successful attempt retains "
+        "failure status instead of receiving a quality average."
+    )
+    if not partial_failures:
+        return (
+            '      <div class="judge-score-policy">'
+            f"<p><strong>Judge score policy:</strong> {policy}</p>"
+            '<p class="muted">No partial judge-attempt failures affected this snapshot.</p>'
+            "</div>"
+        )
+
+    evidence = []
+    for result, success_count, failure_count in partial_failures:
+        case_id = _source_case_id(result)
+        model = str(result.metadata.get("candidate_model") or "Unknown model")
+        attempt_count = success_count + failure_count
+        evidence.append(
+            "<li>"
+            f'<a href="{_report_query_url(report_url, model=model, search=case_id)}">'
+            f"{html.escape(case_id)} — {html.escape(_display_model_name(model))}</a>: "
+            f"{failure_count} of {attempt_count} judge {_pluralize('attempt', attempt_count)} "
+            f"failed and {_was_were(failure_count)} excluded."
+            "</li>"
+        )
+    evaluation_count = len(partial_failures)
+    return (
+        '      <div class="judge-score-policy">'
+        f"<p><strong>Judge score policy:</strong> {policy}</p>"
+        f'<p class="muted">Partial judge failures affected {evaluation_count} '
+        f"{_pluralize('evaluation', evaluation_count)}; inspect the linked evidence:</p>"
+        "<ul>" + "".join(evidence) + "</ul></div>"
+    )
+
+
+def _judge_attempt_counts(result: EvaluationResult) -> tuple[int, int]:
+    statuses = result.metadata.get("judge_sample_statuses")
+    if isinstance(statuses, list) and statuses:
+        normalized_statuses = [status for status in statuses if isinstance(status, str)]
+        success_count = sum(status == "ok" for status in normalized_statuses)
+        return success_count, len(normalized_statuses) - success_count
+
+    sample_count = int(result.metadata.get("judge_sample_count") or 1)
+    raw_success_count = result.metadata.get("judge_sample_success_count")
+    raw_failure_count = result.metadata.get("judge_sample_failure_count")
+    success_count = int(raw_success_count) if isinstance(raw_success_count, (int, float)) else None
+    failure_count = int(raw_failure_count) if isinstance(raw_failure_count, (int, float)) else None
+    if success_count is None and failure_count is not None:
+        success_count = max(sample_count - failure_count, 0) if result.status == "ok" else 0
+    elif success_count is None:
+        success_count = sample_count if result.status == "ok" else 0
+    if failure_count is None:
+        failure_count = max(sample_count - success_count, 0)
+    return success_count, failure_count
 
 
 def _best_category_scores(results: list[EvaluationResult]) -> dict[str, float]:
@@ -2374,7 +2502,7 @@ def _render_source_report_rows(summaries: list[SourceResultFileSummary]) -> list
         "    <h2>Source Run Reports</h2>",
         (
             '    <p class="muted">Each source run keeps its own local report alongside '
-            "the JSONL file that feeds the combined 35-case leaderboard; hosted refreshes "
+            "the JSONL file that feeds the combined leaderboard; hosted refreshes "
             "mirror available source reports under the same ASR leaderboard path.</p>"
         ),
         "    <table>",
@@ -2454,7 +2582,7 @@ def _render_category_row(
         by_category[str(result.metadata["eval_category"])].append(result)
 
     cells = []
-    for category, _ in category_columns or CATEGORY_COLUMNS:
+    for category, label in category_columns or CATEGORY_COLUMNS:
         category_results = by_category[category]
         if not category_results:
             cells.append("<td>0 cases</td>")
@@ -2477,9 +2605,18 @@ def _render_category_row(
         )
         accurate_count = labels["accurate"]
         attention_count = len(category_results) - accurate_count
+        display_category = (
+            "Surface Transcription" if category == "transcription_accuracy_wer" else label
+        )
+        best_status = "best in category" if best_class else "not best in category"
+        accessible_name = (
+            f"{_display_model_name(model)}, {display_category}, semantic score {average:.1f}, "
+            f"{accurate_count} of {len(category_results)} accurate, {attention_count} flagged, "
+            f"{best_status}"
+        )
         cells.append(
             f'<td class="{_heat_class(average)}{best_class}">'
-            f'{best_badge}<a href="{link_url}" aria-label="{html.escape(_display_model_name(model))}, {_titleize_category(category)}, score {average:.1f}">'
+            f'{best_badge}<a href="{link_url}" aria-label="{html.escape(accessible_name, quote=True)}">'
             f"<strong>{average:.1f}</strong><span>{accurate_count}/{len(category_results)} accurate"
             f"{f' · {attention_count} flagged' if attention_count else ''}</span></a>"
             f'<span class="sr-only">{html.escape(label_summary)}</span></td>'
@@ -2504,6 +2641,56 @@ def _heat_class(score: float) -> str:
 
 def _titleize_category(category: str) -> str:
     return " ".join(word.capitalize() for word in category.split("_") if word)
+
+
+def _model_category_case_scope(results: list[EvaluationResult]) -> str:
+    counts = Counter(
+        (
+            str(result.metadata.get("candidate_model") or ""),
+            str(result.metadata.get("eval_category") or ""),
+        )
+        for result in results
+    )
+    observed = sorted(counts.values())
+    if not observed:
+        return "0 cases"
+    if observed[0] == observed[-1]:
+        count = observed[0]
+        return f"{count} {_pluralize('case', count)}"
+    return f"{observed[0]}–{observed[-1]} cases"
+
+
+def _pluralize(word: str, count: int) -> str:
+    if count == 1:
+        return word
+    if word.endswith("y") and len(word) > 1 and word[-2].lower() not in "aeiou":
+        return f"{word[:-1]}ies"
+    return f"{word}s"
+
+
+def _was_were(count: int) -> str:
+    return "was" if count == 1 else "were"
+
+
+def _public_path_label(path: Path | str) -> str:
+    path = Path(path)
+    label = _repo_relative(path)
+    if Path(label).is_absolute():
+        return path.name
+    return label
+
+
+def _workflow_result_path(path: Path, *, index: int) -> str:
+    label = _repo_relative(path)
+    if Path(label).is_absolute():
+        return (
+            '"${ASR_LEADERBOARD_SOURCE_RESULT_'
+            + str(index)
+            + ":?Set_ASR_LEADERBOARD_SOURCE_RESULT_"
+            + str(index)
+            + '_to_a_results_jsonl_path}"'
+        )
+    return label
 
 
 def _repo_relative(path: Path) -> str:
