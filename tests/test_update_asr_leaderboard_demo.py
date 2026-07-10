@@ -1862,6 +1862,53 @@ def test_check_only_can_write_machine_readable_preflight_summary(
     assert written["audio_manifest_status"] == "complete"
 
 
+def test_check_only_runtime_preflight_writes_refresh_decision(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    refresh_module = load_refresh_module()
+    runtime_status_out = tmp_path / "runtime-status.json"
+    refresh_decision_out = tmp_path / "refresh-decision.json"
+    check_summary_out = tmp_path / "preflight-summary.json"
+    monkeypatch.setattr(
+        refresh_module,
+        "_run_mlx_runtime_preflight",
+        lambda: {
+            "status": "ok",
+            "primary_model_count": 3,
+            "primary_model_ok_count": 3,
+            "fallback_model_count": 3,
+            "fallback_model_ok_count": 3,
+        },
+    )
+    monkeypatch.setattr(
+        sys,
+        "argv",
+        [
+            "refresh_asr_leaderboard_artifacts.py",
+            "--check-only",
+            "--check-mlx-runtime",
+            "--runtime-status-out",
+            str(runtime_status_out),
+            "--refresh-decision-out",
+            str(refresh_decision_out),
+            "--check-summary-out",
+            str(check_summary_out),
+        ],
+    )
+
+    refresh_module.main()
+
+    runtime_status = json.loads(runtime_status_out.read_text(encoding="utf-8"))
+    refresh_decision = json.loads(refresh_decision_out.read_text(encoding="utf-8"))
+    check_summary = json.loads(check_summary_out.read_text(encoding="utf-8"))
+    assert runtime_status["mlx_runtime_preflight"]["status"] == "ok"
+    assert refresh_decision["status"] == "complete"
+    assert refresh_decision["action"] == "skip_live_refresh"
+    assert refresh_decision["runtime_status"] == runtime_status
+    assert check_summary["refresh_decision_path"] == str(refresh_decision_out)
+
+
 def test_check_only_can_require_audio_manifest_readiness(
     tmp_path: Path,
     monkeypatch: pytest.MonkeyPatch,

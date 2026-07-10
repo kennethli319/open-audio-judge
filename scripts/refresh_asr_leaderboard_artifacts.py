@@ -350,17 +350,27 @@ def main() -> None:
             source_selection_summary_out=args.source_selection_summary_out,
         )
         if args.check_mlx_runtime or args.require_runtime_ready:
+            combined_results = combined_results_from_paths(result_paths)
             runtime_status = build_runtime_status_artifact_data(
-                results=combined_results_from_paths(result_paths),
+                results=combined_results,
                 results_path=DEFAULT_COMBINED_OUT / "results.jsonl",
                 source_result_paths=result_paths,
                 check_mlx_runtime=True,
             )
             write_runtime_status_data(args.runtime_status_out, runtime_status)
+            write_refresh_decision_artifact(
+                args.refresh_decision_out,
+                results=combined_results,
+                runtime_status=runtime_status,
+                expected_cases_per_model=args.expected_cases_per_model,
+            )
             enrich_check_summary_with_runtime_status(
                 check_summary,
                 runtime_status=runtime_status,
                 runtime_status_out=args.runtime_status_out,
+            )
+            check_summary["refresh_decision_path"] = _repo_relative(
+                args.refresh_decision_out
             )
             if args.require_runtime_ready:
                 _validate_runtime_ready(runtime_status)
