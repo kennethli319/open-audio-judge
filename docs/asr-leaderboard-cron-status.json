@@ -1,0 +1,32 @@
+{
+  "action": "skip_live_refresh",
+  "audio_manifest_status": "complete",
+  "category_count": 7,
+  "coverage_complete": true,
+  "description": "Compact generated cron handoff for ASR leaderboard refresh automation.",
+  "live_refresh_required": false,
+  "missing_cell_count": 0,
+  "model_count": 3,
+  "next_run_command_count": 0,
+  "reason": "The selected ASR result bundle already covers every model/category cell.",
+  "recommended_command": null,
+  "result_file_count": 18,
+  "runtime_ready": "not_required",
+  "runtime_ready_issue": null,
+  "source_paths": {
+    "next_action": "docs/asr-leaderboard-next-action.md",
+    "next_runs": "docs/asr-leaderboard-next-runs.json",
+    "refresh_decision": "docs/asr-leaderboard-refresh-decision.json",
+    "runtime_status": "docs/asr-leaderboard-runtime-status.json"
+  },
+  "status": "complete",
+  "summary": "Action: skip_live_refresh. Coverage complete: true (0 missing cells). Runtime ready: not_required. Reason: The selected ASR result bundle already covers every model/category cell.",
+  "telegram_summary_lines": [
+    "Action: skip_live_refresh.",
+    "Coverage complete: true (0 missing cells).",
+    "Runtime ready: not_required.",
+    "Reason: The selected ASR result bundle already covers every model/category cell."
+  ],
+  "total_results": 105,
+  "version": 1
+}

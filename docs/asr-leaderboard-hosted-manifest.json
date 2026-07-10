@@ -1,28 +1,28 @@
 {
-  "artifact_count": 37,
+  "artifact_count": 38,
   "artifacts": [
     {
-      "bytes": 34235,
+      "bytes": 34485,
       "hosted_paths": [
         "asr-leaderboard-demo.html"
       ],
-      "sha256": "fbf557d38ef810375f83dddbd09310600bf580359b25b203ded6fe7c5cf3a615",
+      "sha256": "347e64920cd198e3488dd0813336b19c22af44f19ebf8a173ef0b7bbf6ead65d",
       "source_path": "docs/asr-leaderboard-demo.html"
     },
     {
-      "bytes": 37571,
+      "bytes": 37807,
       "hosted_paths": [
         "asr-leaderboard-summary.json"
       ],
-      "sha256": "3ac88e305f018060014fde621c943227e41b095e44bef1e2735d4b3555bd7f12",
+      "sha256": "fd5e7fef1f80dfc23cdd24e79c382e97d75c765204806ef7d7591f4b7132cdd0",
       "source_path": "docs/asr-leaderboard-summary.json"
     },
     {
-      "bytes": 19892,
+      "bytes": 20079,
       "hosted_paths": [
         "asr-leaderboard-refresh-report.md"
       ],
-      "sha256": "0355df35e62485e3183abcc197952a778df739e01bdcfb400443ac7406e78192",
+      "sha256": "4897ff4e70cc8de8d519c9b1b2beb6ae184433d1d10a80e1af4c530237b14f8e",
       "source_path": "docs/asr-leaderboard-refresh-report.md"
     },
     {
@@ -98,11 +98,11 @@
       "source_path": "docs/asr-leaderboard-next-runs.json"
     },
     {
-      "bytes": 35380,
+      "bytes": 35735,
       "hosted_paths": [
         "asr-leaderboard-artifacts.json"
       ],
-      "sha256": "4b9c6e5958eb3025539b682da792ec461f26b01a4c6b3a0548ae8cadc23388a1",
+      "sha256": "f2a43e22190cad064338f19f9ceb751a2435a2ee6206a921c1b6348fdf69a473",
       "source_path": "docs/asr-leaderboard-artifacts.json"
     },
     {
@@ -128,6 +128,14 @@
       ],
       "sha256": "dd80e18df8e8a90d162b72712a5821e0bb4000534b3c5d7e3be9866396b56126",
       "source_path": "docs/asr-leaderboard-next-action.md"
+    },
+    {
+      "bytes": 1318,
+      "hosted_paths": [
+        "asr-leaderboard-cron-status.json"
+      ],
+      "sha256": "dedaa42d5cd0631a33155b44e77e835175187f38094ac9e8cef4ba2ab20d8439",
+      "source_path": "docs/asr-leaderboard-cron-status.json"
     },
     {
       "bytes": 12183,

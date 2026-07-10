@@ -21,6 +21,7 @@ This generated report summarizes the verified ASR leaderboard artifact set.
 - Hosted combined report URL: `https://kennethli319.github.io/open-audio-judge/asr-leaderboard/full-35-combined/report.html`
 - Artifact bundle index: `docs/asr-leaderboard-artifacts.json`
 - Runtime status: `docs/asr-leaderboard-runtime-status.json`
+- Cron status: `docs/asr-leaderboard-cron-status.json`
 - Total judged transcripts: 105
 - Models: 3
 - Categories: 7
@@ -126,6 +127,7 @@ This generated report summarizes the verified ASR leaderboard artifact set.
 | `docs/asr-leaderboard-runtime-status.json` | Machine-readable MLX ASR and Gemini readiness status for refresh automation. |
 | `docs/asr-leaderboard-refresh-decision.json` | Machine-readable runtime-gated decision for the next ASR refresh action. |
 | `docs/asr-leaderboard-next-action.md` | Telegram-ready Markdown note summarizing the runtime-gated next ASR action. |
+| `docs/asr-leaderboard-cron-status.json` | Compact machine-readable cron handoff with action, coverage, and runtime gate status. |
 | `docs/asr-leaderboard-source-selection.json` | Machine-readable record of selected ASR source result files for the last refresh. |
 
 ## Refresh Commands

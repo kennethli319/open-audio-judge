@@ -386,6 +386,7 @@ def test_write_summary_artifact_records_models_and_categories(tmp_path: Path) ->
     assert summary["runtime_status_path"] == "docs/asr-leaderboard-runtime-status.json"
     assert summary["refresh_decision_path"] == "docs/asr-leaderboard-refresh-decision.json"
     assert summary["next_action_path"] == "docs/asr-leaderboard-next-action.md"
+    assert summary["cron_status_path"] == "docs/asr-leaderboard-cron-status.json"
     assert summary["report_index_path"] == "docs/asr-leaderboard-report-index.md"
     assert summary["report_links_path"] == "docs/asr-leaderboard-report-links.json"
     assert summary["next_run_plan"]["status"] == "complete"
@@ -466,6 +467,13 @@ def test_write_summary_artifact_records_models_and_categories(tmp_path: Path) ->
             "path": "docs/asr-leaderboard-next-action.md",
             "purpose": (
                 "Telegram-ready Markdown note summarizing the runtime-gated next ASR action."
+            ),
+        },
+        {
+            "path": "docs/asr-leaderboard-cron-status.json",
+            "purpose": (
+                "Compact machine-readable cron handoff with action, coverage, "
+                "and runtime gate status."
             ),
         },
         {
@@ -1269,6 +1277,7 @@ def test_refresh_asr_leaderboard_artifacts_combines_report_and_page(tmp_path: Pa
     artifact_index = tmp_path / "artifact-index.json"
     runtime_status = tmp_path / "runtime-status.json"
     next_action = tmp_path / "next-action.md"
+    cron_status = tmp_path / "cron-status.json"
     hosted_dir = tmp_path / "hosted" / "open-audio-judge"
     records_a = [
         result_record(
@@ -1334,6 +1343,7 @@ def test_refresh_asr_leaderboard_artifacts_combines_report_and_page(tmp_path: Pa
         artifact_index_out=artifact_index,
         runtime_status_out=runtime_status,
         next_action_out=next_action,
+        cron_status_out=cron_status,
         hosted_dir=hosted_dir,
         expected_cases_per_model=2,
     )
@@ -1463,13 +1473,20 @@ def test_refresh_asr_leaderboard_artifacts_combines_report_and_page(tmp_path: Pa
     )
     assert hosted_current == {
         "status": "complete",
-        "hosted_artifact_count": 21,
-        "hosted_path_count": 33,
+        "hosted_artifact_count": 22,
+        "hosted_path_count": 35,
     }
     assert "Action: skip_live_refresh." in next_action.read_text(encoding="utf-8")
     assert (hosted_dir / "asr-leaderboard-next-action.md").read_text(
         encoding="utf-8"
     ) == next_action.read_text(encoding="utf-8")
+    cron_status_data = json.loads(cron_status.read_text(encoding="utf-8"))
+    assert cron_status_data["action"] == "skip_live_refresh"
+    assert cron_status_data["coverage_complete"] is True
+    assert cron_status_data["total_results"] == 4
+    assert (hosted_dir / "asr-leaderboard-cron-status.json").read_text(
+        encoding="utf-8"
+    ) == cron_status.read_text(encoding="utf-8")
     assert (hosted_dir / "asr-leaderboard-run-manifest.json").exists()
     assert (hosted_dir / "manifest-validation.json").read_text(
         encoding="utf-8"
@@ -1595,7 +1612,7 @@ def test_refresh_asr_leaderboard_artifacts_combines_report_and_page(tmp_path: Pa
         f"asr-leaderboard/source-reports/{tmp_path.name}/report.html"
     ]
     hosted_manifest_data = json.loads(hosted_manifest.read_text(encoding="utf-8"))
-    assert hosted_manifest_data["artifact_count"] == 21
+    assert hosted_manifest_data["artifact_count"] == 22
     assert {"asr-leaderboard/full-35-combined/results.jsonl"} in [
         set(artifact["hosted_paths"]) for artifact in hosted_manifest_data["artifacts"]
     ]
@@ -1609,6 +1626,9 @@ def test_refresh_asr_leaderboard_artifacts_combines_report_and_page(tmp_path: Pa
         set(artifact["hosted_paths"]) for artifact in hosted_manifest_data["artifacts"]
     ]
     assert {"asr-leaderboard-next-action.md", "next-action.md"} in [
+        set(artifact["hosted_paths"]) for artifact in hosted_manifest_data["artifacts"]
+    ]
+    assert {"asr-leaderboard-cron-status.json", "cron-status.json"} in [
         set(artifact["hosted_paths"]) for artifact in hosted_manifest_data["artifacts"]
     ]
     assert (hosted_dir / "asr-leaderboard-hosted-manifest.json").read_text(
@@ -1657,6 +1677,7 @@ def test_refresh_asr_leaderboard_artifacts_combines_report_and_page(tmp_path: Pa
         artifact_index_out=artifact_index,
         runtime_status_out=runtime_status,
         next_action_out=next_action,
+        cron_status_out=cron_status,
         generated=generated,
         expected_cases_per_model=2,
         combined_results_path=out / "results.jsonl",
@@ -1690,6 +1711,7 @@ def test_refresh_asr_leaderboard_artifacts_combines_report_and_page(tmp_path: Pa
             artifact_index_out=artifact_index,
             runtime_status_out=runtime_status,
             next_action_out=next_action,
+            cron_status_out=cron_status,
             generated=generated,
             expected_cases_per_model=2,
             combined_results_path=out / "results.jsonl",
@@ -1725,6 +1747,7 @@ def test_refresh_asr_leaderboard_artifacts_combines_report_and_page(tmp_path: Pa
             artifact_index_out=artifact_index,
             runtime_status_out=runtime_status,
             next_action_out=next_action,
+            cron_status_out=cron_status,
             generated=generated,
             expected_cases_per_model=2,
             combined_results_path=combined_results_path,
@@ -1755,6 +1778,7 @@ def test_refresh_asr_leaderboard_artifacts_combines_report_and_page(tmp_path: Pa
             artifact_index_out=artifact_index,
             runtime_status_out=runtime_status,
             next_action_out=next_action,
+            cron_status_out=cron_status,
             generated=generated,
             expected_cases_per_model=2,
             combined_results_path=combined_results_path,
@@ -1788,6 +1812,7 @@ def test_refresh_asr_leaderboard_artifacts_combines_report_and_page(tmp_path: Pa
             artifact_index_out=artifact_index,
             runtime_status_out=runtime_status,
             next_action_out=next_action,
+            cron_status_out=cron_status,
             generated=generated,
             expected_cases_per_model=2,
             combined_results_path=out / "results.jsonl",
@@ -1796,7 +1821,7 @@ def test_refresh_asr_leaderboard_artifacts_combines_report_and_page(tmp_path: Pa
 
     hosted_manifest.write_text(
         hosted_manifest.read_text(encoding="utf-8").replace(
-            '"artifact_count": 14',
+            '"artifact_count": 22',
             '"artifact_count": 99',
         ),
         encoding="utf-8",
@@ -1819,6 +1844,7 @@ def test_refresh_asr_leaderboard_artifacts_combines_report_and_page(tmp_path: Pa
             artifact_index_out=artifact_index,
             runtime_status_out=runtime_status,
             next_action_out=next_action,
+            cron_status_out=cron_status,
             generated=generated,
             expected_cases_per_model=2,
             combined_results_path=out / "results.jsonl",
@@ -1946,6 +1972,7 @@ def test_check_only_runtime_preflight_writes_refresh_decision(
     runtime_status_out = tmp_path / "runtime-status.json"
     refresh_decision_out = tmp_path / "refresh-decision.json"
     next_action_out = tmp_path / "next-action.md"
+    cron_status_out = tmp_path / "cron-status.json"
     check_summary_out = tmp_path / "preflight-summary.json"
     monkeypatch.setattr(
         refresh_module,
@@ -1971,6 +1998,8 @@ def test_check_only_runtime_preflight_writes_refresh_decision(
             str(refresh_decision_out),
             "--next-action-out",
             str(next_action_out),
+            "--cron-status-out",
+            str(cron_status_out),
             "--check-summary-out",
             str(check_summary_out),
         ],
@@ -1996,6 +2025,11 @@ def test_check_only_runtime_preflight_writes_refresh_decision(
     assert check_summary["refresh_decision"] == refresh_decision
     assert check_summary["refresh_decision"]["action"] == "skip_live_refresh"
     assert check_summary["next_action_path"] == str(next_action_out)
+    assert check_summary["cron_status_path"] == str(cron_status_out)
+    cron_status = json.loads(cron_status_out.read_text(encoding="utf-8"))
+    assert cron_status["action"] == "skip_live_refresh"
+    assert cron_status["coverage_complete"] is True
+    assert cron_status["runtime_ready"] == "not_required"
     assert "Action: skip_live_refresh." in next_action_out.read_text(encoding="utf-8")
     assert "Decision: skip_live_refresh." in refresh_module.format_check_summary_message(
         check_summary
@@ -2950,6 +2984,7 @@ def test_check_asr_leaderboard_page_validates_generated_artifacts(tmp_path: Path
     runtime_status = tmp_path / "runtime-status.json"
     refresh_decision = tmp_path / "refresh-decision.json"
     next_action = tmp_path / "next-action.md"
+    cron_status = tmp_path / "cron-status.json"
     records = [
         result_record(
             case_id="asr-a-model-a",
@@ -3102,6 +3137,7 @@ def test_check_asr_leaderboard_page_validates_generated_artifacts(tmp_path: Path
     summary_data["runtime_status_path"] = str(runtime_status)
     summary_data["refresh_decision_path"] = str(refresh_decision)
     summary_data["next_action_path"] = str(next_action)
+    summary_data["cron_status_path"] = str(cron_status)
     summary.write_text(json.dumps(summary_data), encoding="utf-8")
     refresh_report = tmp_path / "refresh-report.md"
     refresh_report.write_text("# report\n", encoding="utf-8")
@@ -3135,6 +3171,10 @@ def test_check_asr_leaderboard_page_validates_generated_artifacts(tmp_path: Path
         next_action,
         json.loads(refresh_decision.read_text(encoding="utf-8")),
     )
+    refresh_module.write_cron_status_artifact(
+        cron_status,
+        decision=json.loads(refresh_decision.read_text(encoding="utf-8")),
+    )
     summary_data = json.loads(summary.read_text(encoding="utf-8"))
     summary_data["refresh_commands_path"] = str(refresh_commands)
     summary_data["refresh_workflow_path"] = str(refresh_workflow)
@@ -3163,6 +3203,7 @@ def test_check_asr_leaderboard_page_validates_generated_artifacts(tmp_path: Path
         runtime_status_out=runtime_status,
         refresh_decision_out=refresh_decision,
         next_action_out=next_action,
+        cron_status_out=cron_status,
         expected_cases_per_model=2,
     )
 
@@ -3211,6 +3252,7 @@ def test_check_asr_leaderboard_page_validates_generated_artifacts(tmp_path: Path
         runtime_status_out=runtime_status,
         refresh_decision_out=refresh_decision,
         next_action_out=next_action,
+        cron_status_out=cron_status,
         expected_cases_per_model=2,
     )
 

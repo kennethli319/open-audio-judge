@@ -37,6 +37,7 @@ from scripts.update_asr_leaderboard_demo import (  # noqa: E402
     DEFAULT_RUNTIME_STATUS,
     DEFAULT_NEXT_RUNS,
     DEFAULT_NEXT_ACTION,
+    DEFAULT_CRON_STATUS,
     END_MARKER,
     GEMINI_SECRET_ENV,
     HOSTED_BASE_PATH,
@@ -197,6 +198,12 @@ def main() -> None:
         type=Path,
         default=DEFAULT_NEXT_ACTION,
         help="Write a Telegram-ready Markdown summary of the runtime-gated ASR next action.",
+    )
+    parser.add_argument(
+        "--cron-status-out",
+        type=Path,
+        default=DEFAULT_CRON_STATUS,
+        help="Write a compact machine-readable cron handoff for scheduled ASR refreshes.",
     )
     parser.add_argument(
         "--check-mlx-runtime",
@@ -374,6 +381,11 @@ def main() -> None:
             )
             write_refresh_decision_data(args.refresh_decision_out, refresh_decision)
             write_next_action_artifact(args.next_action_out, refresh_decision)
+            write_cron_status_artifact(
+                args.cron_status_out,
+                decision=refresh_decision,
+                check_summary=check_summary,
+            )
             enrich_check_summary_with_runtime_status(
                 check_summary,
                 runtime_status=runtime_status,
@@ -384,6 +396,7 @@ def main() -> None:
             )
             check_summary["refresh_decision"] = refresh_decision
             check_summary["next_action_path"] = _repo_relative(args.next_action_out)
+            check_summary["cron_status_path"] = _repo_relative(args.cron_status_out)
             if args.require_runtime_ready:
                 _validate_runtime_ready(runtime_status)
         write_optional_source_selection_summary(
@@ -432,6 +445,7 @@ def main() -> None:
         runtime_status_out=args.runtime_status_out,
         refresh_decision_out=args.refresh_decision_out,
         next_action_out=args.next_action_out,
+        cron_status_out=args.cron_status_out,
         source_selection_summary_out=args.source_selection_summary_out,
         run_manifest=args.run_manifest,
         update_run_manifest=args.update_run_manifest,
@@ -755,6 +769,7 @@ def _validate_generated_artifacts_fresh(
     runtime_status_out: Path | None = None,
     refresh_decision_out: Path | None = None,
     next_action_out: Path | None = None,
+    cron_status_out: Path | None = None,
     source_selection_summary_out: Path | None = None,
     generated: str,
     expected_cases_per_model: int,
@@ -764,6 +779,8 @@ def _validate_generated_artifacts_fresh(
         refresh_decision_out = artifact_index_out.with_name(DEFAULT_REFRESH_DECISION.name)
     if next_action_out is None and artifact_index_out is not None:
         next_action_out = artifact_index_out.with_name(DEFAULT_NEXT_ACTION.name)
+    if cron_status_out is None and artifact_index_out is not None:
+        cron_status_out = artifact_index_out.with_name(DEFAULT_CRON_STATUS.name)
     existing_generated = _extract_generated_block(page)
     if existing_generated != generated:
         raise ValueError(
@@ -877,6 +894,7 @@ def _validate_generated_artifacts_fresh(
                 runtime_status_out=runtime_status_out,
                 refresh_decision_out=refresh_decision_out or DEFAULT_REFRESH_DECISION,
                 next_action_out=next_action_out or DEFAULT_NEXT_ACTION,
+                cron_status_out=cron_status_out or DEFAULT_CRON_STATUS,
                 source_selection_summary_out=(
                     source_selection_summary_out or DEFAULT_SOURCE_SELECTION_SUMMARY
                 ),
@@ -921,6 +939,7 @@ def _validate_generated_artifacts_fresh(
                         runtime_status_out=runtime_status_out or DEFAULT_RUNTIME_STATUS,
                         refresh_decision_out=refresh_decision_out or DEFAULT_REFRESH_DECISION,
                         next_action_out=next_action_out or DEFAULT_NEXT_ACTION,
+                        cron_status_out=cron_status_out or DEFAULT_CRON_STATUS,
                         source_selection_summary_out=(
                             source_selection_summary_out or DEFAULT_SOURCE_SELECTION_SUMMARY
                         ),
@@ -990,6 +1009,13 @@ def _validate_generated_artifacts_fresh(
                 expected_next_action = tmp_dir / next_action_out.name
                 write_next_action_artifact(expected_next_action, expected_refresh_decision_data)
                 _compare_generated_text_artifact(next_action_out, expected_next_action)
+            if cron_status_out is not None:
+                expected_cron_status = tmp_dir / cron_status_out.name
+                write_cron_status_artifact(
+                    expected_cron_status,
+                    decision=expected_refresh_decision_data,
+                )
+                _compare_generated_text_artifact(cron_status_out, expected_cron_status)
 
 
 def _compare_generated_text_artifact(actual_path: Path, expected_path: Path) -> None:
@@ -1066,6 +1092,7 @@ def refresh_asr_leaderboard_artifacts(
     runtime_status_out: Path | None = None,
     refresh_decision_out: Path | None = None,
     next_action_out: Path | None = None,
+    cron_status_out: Path | None = None,
     source_selection_summary_out: Path = DEFAULT_SOURCE_SELECTION_SUMMARY,
     refresh_workflow_out: Path | None = None,
     hosted_dir: Path | None = None,
@@ -1078,6 +1105,7 @@ def refresh_asr_leaderboard_artifacts(
         DEFAULT_REFRESH_DECISION.name
     )
     next_action_out = next_action_out or artifact_index_out.with_name(DEFAULT_NEXT_ACTION.name)
+    cron_status_out = cron_status_out or artifact_index_out.with_name(DEFAULT_CRON_STATUS.name)
     refresh_workflow_out = refresh_workflow_out or refresh_commands_out.with_name(
         DEFAULT_REFRESH_WORKFLOW.name
     )
@@ -1183,6 +1211,7 @@ def refresh_asr_leaderboard_artifacts(
     )
     refresh_decision = json.loads(refresh_decision_out.read_text(encoding="utf-8"))
     write_next_action_artifact(next_action_out, refresh_decision)
+    write_cron_status_artifact(cron_status_out, decision=refresh_decision)
     write_artifact_index(
         artifact_index_out,
         results=combined_results,
@@ -1204,6 +1233,7 @@ def refresh_asr_leaderboard_artifacts(
         runtime_status_out=runtime_status_out,
         refresh_decision_out=refresh_decision_out,
         next_action_out=next_action_out,
+        cron_status_out=cron_status_out,
         source_selection_summary_out=source_selection_summary_out,
         expected_cases_per_model=expected_cases_per_model,
         source_result_paths=result_paths,
@@ -1226,6 +1256,7 @@ def refresh_asr_leaderboard_artifacts(
         runtime_status_out=runtime_status_out,
         refresh_decision_out=refresh_decision_out,
         next_action_out=next_action_out,
+        cron_status_out=cron_status_out,
         source_selection_summary_out=source_selection_summary_out,
         combined_results_path=combined_results_path,
         combined_report_path=combined_report_path,
@@ -1251,6 +1282,7 @@ def refresh_asr_leaderboard_artifacts(
             runtime_status_out=runtime_status_out,
             refresh_decision_out=refresh_decision_out,
             next_action_out=next_action_out,
+            cron_status_out=cron_status_out,
             source_selection_summary_out=source_selection_summary_out,
             combined_results_path=combined_results_path,
             combined_report_path=combined_report_path,
@@ -1289,6 +1321,7 @@ def refresh_asr_leaderboard_artifacts(
     print(f"Runtime status: {runtime_status_out}")
     print(f"Refresh decision: {refresh_decision_out}")
     print(f"Next action: {next_action_out}")
+    print(f"Cron status: {cron_status_out}")
     for copied_path in copied_hosted_paths:
         print(f"Hosted:  {copied_path}")
 
@@ -1379,6 +1412,7 @@ def copy_hosted_asr_artifacts(
     runtime_status_out: Path = DEFAULT_RUNTIME_STATUS,
     refresh_decision_out: Path = DEFAULT_REFRESH_DECISION,
     next_action_out: Path = DEFAULT_NEXT_ACTION,
+    cron_status_out: Path = DEFAULT_CRON_STATUS,
     source_selection_summary_out: Path = DEFAULT_SOURCE_SELECTION_SUMMARY,
     combined_results_path: Path | None = None,
     combined_report_path: Path | None = None,
@@ -1404,6 +1438,7 @@ def copy_hosted_asr_artifacts(
         (runtime_status_out, {runtime_status_out.name, DEFAULT_RUNTIME_STATUS.name}),
         (refresh_decision_out, {refresh_decision_out.name, DEFAULT_REFRESH_DECISION.name}),
         (next_action_out, {next_action_out.name, DEFAULT_NEXT_ACTION.name}),
+        (cron_status_out, {cron_status_out.name, DEFAULT_CRON_STATUS.name}),
         (
             source_selection_summary_out,
             {source_selection_summary_out.name, DEFAULT_SOURCE_SELECTION_SUMMARY.name},
@@ -1460,6 +1495,7 @@ def write_hosted_manifest_artifact(
     runtime_status_out: Path = DEFAULT_RUNTIME_STATUS,
     refresh_decision_out: Path = DEFAULT_REFRESH_DECISION,
     next_action_out: Path = DEFAULT_NEXT_ACTION,
+    cron_status_out: Path = DEFAULT_CRON_STATUS,
     source_selection_summary_out: Path = DEFAULT_SOURCE_SELECTION_SUMMARY,
     combined_results_path: Path,
     combined_report_path: Path,
@@ -1483,6 +1519,7 @@ def write_hosted_manifest_artifact(
         (runtime_status_out, {runtime_status_out.name, DEFAULT_RUNTIME_STATUS.name}),
         (refresh_decision_out, {refresh_decision_out.name, DEFAULT_REFRESH_DECISION.name}),
         (next_action_out, {next_action_out.name, DEFAULT_NEXT_ACTION.name}),
+        (cron_status_out, {cron_status_out.name, DEFAULT_CRON_STATUS.name}),
         (
             source_selection_summary_out,
             {source_selection_summary_out.name, DEFAULT_SOURCE_SELECTION_SUMMARY.name},
@@ -1564,6 +1601,7 @@ def write_artifact_index(
     runtime_status_out: Path | None = None,
     refresh_decision_out: Path | None = None,
     next_action_out: Path | None = None,
+    cron_status_out: Path | None = None,
     live_refresh_script_out: Path | None = None,
     refresh_workflow_out: Path | None = None,
     source_selection_summary_out: Path | None = None,
@@ -1594,6 +1632,7 @@ def write_artifact_index(
                 runtime_status_out=runtime_status_out,
                 refresh_decision_out=refresh_decision_out,
                 next_action_out=next_action_out,
+                cron_status_out=cron_status_out,
                 source_selection_summary_out=source_selection_summary_out,
                 source_result_paths=source_result_paths,
             ),
@@ -1627,6 +1666,7 @@ def build_artifact_index_data(
     runtime_status_out: Path | None = None,
     refresh_decision_out: Path | None = None,
     next_action_out: Path | None = None,
+    cron_status_out: Path | None = None,
     live_refresh_script_out: Path | None = None,
     source_selection_summary_out: Path | None = None,
     source_result_paths: list[Path] | None = None,
@@ -1638,6 +1678,7 @@ def build_artifact_index_data(
         DEFAULT_REFRESH_DECISION.name
     )
     next_action_out = next_action_out or output_path.with_name(DEFAULT_NEXT_ACTION.name)
+    cron_status_out = cron_status_out or output_path.with_name(DEFAULT_CRON_STATUS.name)
     live_refresh_script_out = live_refresh_script_out or refresh_commands_out.with_name(
         DEFAULT_LIVE_REFRESH_SCRIPT.name
     )
@@ -1666,6 +1707,7 @@ def build_artifact_index_data(
         _repo_relative(runtime_status_out): runtime_status_out,
         _repo_relative(refresh_decision_out): refresh_decision_out,
         _repo_relative(next_action_out): next_action_out,
+        _repo_relative(cron_status_out): cron_status_out,
         _repo_relative(source_selection_summary_out): source_selection_summary_out,
         _repo_relative(output_path): output_path,
         _repo_relative(DEFAULT_SUMMARY): summary_out,
@@ -1684,6 +1726,7 @@ def build_artifact_index_data(
         _repo_relative(DEFAULT_RUNTIME_STATUS): runtime_status_out,
         _repo_relative(DEFAULT_REFRESH_DECISION): refresh_decision_out,
         _repo_relative(DEFAULT_NEXT_ACTION): next_action_out,
+        _repo_relative(DEFAULT_CRON_STATUS): cron_status_out,
         _repo_relative(DEFAULT_SOURCE_SELECTION_SUMMARY): source_selection_summary_out,
     }
     for source_result_path in source_result_paths or []:
@@ -2360,6 +2403,53 @@ def write_next_action_artifact(output_path: Path, decision: dict[str, object]) -
     )
     output_path.parent.mkdir(parents=True, exist_ok=True)
     output_path.write_text("\n".join(lines), encoding="utf-8")
+
+
+def write_cron_status_artifact(
+    output_path: Path,
+    *,
+    decision: dict[str, object],
+    check_summary: dict[str, object] | None = None,
+) -> None:
+    runtime_status = decision.get("runtime_status")
+    if not isinstance(runtime_status, dict):
+        runtime_status = {}
+    result_bundle = runtime_status.get("result_bundle")
+    if not isinstance(result_bundle, dict):
+        result_bundle = {}
+    audio_manifest = runtime_status.get("audio_manifest")
+    if not isinstance(audio_manifest, dict):
+        audio_manifest = {}
+
+    data = {
+        "description": "Compact generated cron handoff for ASR leaderboard refresh automation.",
+        "version": 1,
+        "status": decision.get("status", "complete"),
+        "action": decision.get("action"),
+        "reason": decision.get("reason"),
+        "summary": decision.get("summary"),
+        "coverage_complete": decision.get("coverage_complete"),
+        "live_refresh_required": decision.get("live_refresh_required"),
+        "runtime_ready": decision.get("runtime_ready"),
+        "runtime_ready_issue": decision.get("runtime_ready_issue"),
+        "missing_cell_count": decision.get("missing_cell_count"),
+        "next_run_command_count": decision.get("next_run_command_count"),
+        "recommended_command": decision.get("recommended_command"),
+        "total_results": result_bundle.get("total_results"),
+        "model_count": result_bundle.get("model_count"),
+        "category_count": result_bundle.get("category_count"),
+        "result_file_count": result_bundle.get("source_result_file_count"),
+        "audio_manifest_status": audio_manifest.get("status"),
+        "telegram_summary_lines": decision.get("telegram_summary_lines", []),
+        "source_paths": {
+            "refresh_decision": _repo_relative(DEFAULT_REFRESH_DECISION),
+            "runtime_status": _repo_relative(DEFAULT_RUNTIME_STATUS),
+            "next_runs": _repo_relative(DEFAULT_NEXT_RUNS),
+            "next_action": _repo_relative(DEFAULT_NEXT_ACTION),
+        },
+    }
+    output_path.parent.mkdir(parents=True, exist_ok=True)
+    output_path.write_text(json.dumps(data, indent=2, sort_keys=True) + "\n", encoding="utf-8")
 
 
 def build_refresh_decision_artifact_data(

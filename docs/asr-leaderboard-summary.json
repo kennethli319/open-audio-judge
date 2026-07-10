@@ -95,6 +95,7 @@
     }
   ],
   "category_count": 7,
+  "cron_status_path": "docs/asr-leaderboard-cron-status.json",
   "expected_cases_per_model": 35,
   "hosted_manifest_path": "docs/asr-leaderboard-hosted-manifest.json",
   "live_refresh_script_path": "docs/asr-leaderboard-live-refresh.sh",
@@ -270,6 +271,10 @@
     {
       "path": "docs/asr-leaderboard-next-action.md",
       "purpose": "Telegram-ready Markdown note summarizing the runtime-gated next ASR action."
+    },
+    {
+      "path": "docs/asr-leaderboard-cron-status.json",
+      "purpose": "Compact machine-readable cron handoff with action, coverage, and runtime gate status."
     },
     {
       "path": "docs/asr-leaderboard-source-selection.json",
