@@ -683,6 +683,21 @@ def test_write_summary_artifact_records_models_and_categories(tmp_path: Path) ->
     assert summary["refresh_workflow"]["blocked_model_log_path"] == (
         "runs/asr-leaderboard/blocked-models.jsonl"
     )
+    assert summary["refresh_workflow"]["blocked_model_log_schema"] == {
+        "schema_version": 1,
+        "required_fields": [
+            "model",
+            "run_name",
+            "status",
+            "exit_code",
+            "recorded_at_utc",
+            "cases_path",
+            "judge_provider",
+            "judge_samples",
+            "fallback_model_ids",
+            "fallback_policy",
+        ],
+    }
     assert summary["refresh_workflow"]["blocked_model_log_command"] == [
         "tail",
         "-n",
@@ -1369,6 +1384,13 @@ def test_refresh_asr_leaderboard_artifacts_combines_report_and_page(tmp_path: Pa
     assert "never printed" in live_refresh_text
     assert "runs/asr-leaderboard/blocked-models.jsonl" in live_refresh_text
     assert "run_primary_model" in live_refresh_text
+    assert '"schema_version":1' in live_refresh_text
+    assert '"fallback_model_ids":%s' in live_refresh_text
+    assert (
+        'FALLBACK_MODEL_IDS_JSON="[\\"mlx-community/whisper-small.en-asr-4bit\\"'
+        in live_refresh_text
+    )
+    assert 'PRIMARY_CASES="runs/asr-research-audio/tts_audio_cases.jsonl"' in live_refresh_text
     assert "record before fallback; do not silently substitute" in live_refresh_text
     assert "ASR_SYNC_HOSTED=1" in live_refresh_text
     assert (

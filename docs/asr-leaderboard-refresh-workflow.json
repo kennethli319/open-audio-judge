@@ -165,6 +165,21 @@
       "runs/asr-leaderboard/blocked-models.jsonl"
     ],
     "blocked_model_log_path": "runs/asr-leaderboard/blocked-models.jsonl",
+    "blocked_model_log_schema": {
+      "required_fields": [
+        "model",
+        "run_name",
+        "status",
+        "exit_code",
+        "recorded_at_utc",
+        "cases_path",
+        "judge_provider",
+        "judge_samples",
+        "fallback_model_ids",
+        "fallback_policy"
+      ],
+      "schema_version": 1
+    },
     "combine_refresh_command": [
       ".venv/bin/python",
       "scripts/refresh_asr_leaderboard_artifacts.py",

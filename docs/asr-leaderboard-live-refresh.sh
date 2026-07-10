@@ -18,6 +18,10 @@ fi
 source /Users/wangyauli/.openclaw/secrets/open-audio-judge-gemini.env
 
 BLOCKED_MODEL_LOG="runs/asr-leaderboard/blocked-models.jsonl"
+PRIMARY_CASES="runs/asr-research-audio/tts_audio_cases.jsonl"
+JUDGE_PROVIDER="gemini"
+JUDGE_SAMPLES="3"
+FALLBACK_MODEL_IDS_JSON="[\"mlx-community/whisper-small.en-asr-4bit\", \"mlx-community/parakeet-rnnt-0.6b\", \"mlx-community/GLM-ASR-Nano-2512-4bit\"]"
 blocked_model_count=0
 
 run_primary_model() {
@@ -32,8 +36,8 @@ run_primary_model() {
   if [[ ${exit_code} -ne 0 ]]; then
     mkdir -p "$(dirname "${BLOCKED_MODEL_LOG}")"
     blocked_model_count=$((blocked_model_count + 1))
-    printf '{"model":"%s","run_name":"%s","status":"blocked","exit_code":%s,"recorded_at_utc":"%s","fallback_policy":"record before fallback; do not silently substitute"}\n' \
-      "${model}" "${run_name}" "${exit_code}" "$(date -u +%Y-%m-%dT%H:%M:%SZ)" >> "${BLOCKED_MODEL_LOG}"
+    printf '{"schema_version":1,"model":"%s","run_name":"%s","status":"blocked","exit_code":%s,"recorded_at_utc":"%s","cases_path":"%s","judge_provider":"%s","judge_samples":%s,"fallback_model_ids":%s,"fallback_policy":"record before fallback; do not silently substitute"}\n' \
+      "${model}" "${run_name}" "${exit_code}" "$(date -u +%Y-%m-%dT%H:%M:%SZ)" "${PRIMARY_CASES}" "${JUDGE_PROVIDER}" "${JUDGE_SAMPLES}" "${FALLBACK_MODEL_IDS_JSON}" >> "${BLOCKED_MODEL_LOG}"
     echo "Recorded blocked primary ASR model in ${BLOCKED_MODEL_LOG}: ${model}" >&2
   fi
 }
