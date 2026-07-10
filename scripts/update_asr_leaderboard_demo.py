@@ -1173,8 +1173,6 @@ def _refresh_workflow(source_result_paths: list[Path]) -> dict[str, object]:
             "--check-only",
             "--require-generated-fresh",
             "--require-audio-ready",
-            "--check-mlx-runtime",
-            "--require-runtime-ready",
             "--check-summary-out",
             "runs/asr-leaderboard/preflight-summary.json",
         ],

@@ -2,27 +2,27 @@
   "artifact_count": 35,
   "artifacts": [
     {
-      "bytes": 31079,
+      "bytes": 31035,
       "hosted_paths": [
         "asr-leaderboard-demo.html"
       ],
-      "sha256": "a23c7a080ea6cb2adc652495182bdd57b0460da8a51e73defdd991e4cd267d10",
+      "sha256": "9cbcdd3db6a5350e1714fe13ae178cd8a04658b64d8b7d048a3cc062d562523c",
       "source_path": "docs/asr-leaderboard-demo.html"
     },
     {
-      "bytes": 34231,
+      "bytes": 34169,
       "hosted_paths": [
         "asr-leaderboard-summary.json"
       ],
-      "sha256": "3f4372e15398bd917201eb76b033d1ac979770142b6320606b45dda74cca2875",
+      "sha256": "55c9f276075a648353f9274bffa1d807a4e5fd0105b4e1be6fa29056868bc089",
       "source_path": "docs/asr-leaderboard-summary.json"
     },
     {
-      "bytes": 18756,
+      "bytes": 18712,
       "hosted_paths": [
         "asr-leaderboard-refresh-report.md"
       ],
-      "sha256": "9d11cddcf7cc35fa1ae322afd367013ab12bd0621292433a68745b267c9d5421",
+      "sha256": "a2a042359ddd3015ba6fcc16c10b7630b8fde7bfa06777b5402dce2ee8145c69",
       "source_path": "docs/asr-leaderboard-refresh-report.md"
     },
     {
@@ -42,19 +42,19 @@
       "source_path": "docs/asr-leaderboard-report-links.json"
     },
     {
-      "bytes": 5810,
+      "bytes": 5766,
       "hosted_paths": [
         "asr-leaderboard-refresh-commands.sh"
       ],
-      "sha256": "887b346f6e31c9a181b1f2e92c6d27e0b1ae8fbf425a24662a11cab502e41024",
+      "sha256": "c291e318632ebffde368d533a7ef8523177c59d31e9538f51b619f943473f3ba",
       "source_path": "docs/asr-leaderboard-refresh-commands.sh"
     },
     {
-      "bytes": 9965,
+      "bytes": 9903,
       "hosted_paths": [
         "asr-leaderboard-refresh-workflow.json"
       ],
-      "sha256": "c525dd0e952e7f86947cbbe531279e5109b2b4720007d3e280ccd8a56b4beb2c",
+      "sha256": "065a1f5f6abbd2c6e1f1614ba98de6271bb1f9741d77969c4222003f3da0b3c1",
       "source_path": "docs/asr-leaderboard-refresh-workflow.json"
     },
     {
@@ -102,7 +102,7 @@
       "hosted_paths": [
         "asr-leaderboard-artifacts.json"
       ],
-      "sha256": "5ec9851d504925accc932951ab9fd462850d1008ba3e81f064202a7071f2712f",
+      "sha256": "618462a41f0213b8857ae4cb3c3668ca15363aa8d705d6a2491435f4f0973768",
       "source_path": "docs/asr-leaderboard-artifacts.json"
     },
     {

@@ -617,8 +617,6 @@ def test_write_summary_artifact_records_models_and_categories(tmp_path: Path) ->
         "--check-only",
         "--require-generated-fresh",
         "--require-audio-ready",
-        "--check-mlx-runtime",
-        "--require-runtime-ready",
         "--check-summary-out",
         "runs/asr-leaderboard/preflight-summary.json",
     ]
