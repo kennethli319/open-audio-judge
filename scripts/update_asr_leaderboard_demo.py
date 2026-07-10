@@ -30,6 +30,7 @@ DEFAULT_NEXT_RUNS = ROOT / "docs" / "asr-leaderboard-next-runs.json"
 DEFAULT_HOSTED_MANIFEST = ROOT / "docs" / "asr-leaderboard-hosted-manifest.json"
 DEFAULT_ARTIFACT_INDEX = ROOT / "docs" / "asr-leaderboard-artifacts.json"
 DEFAULT_RUNTIME_STATUS = ROOT / "docs" / "asr-leaderboard-runtime-status.json"
+DEFAULT_REFRESH_DECISION = ROOT / "docs" / "asr-leaderboard-refresh-decision.json"
 DEFAULT_SOURCE_SELECTION_SUMMARY = ROOT / "docs" / "asr-leaderboard-source-selection.json"
 DEFAULT_AUDIO_CASES = ROOT / "runs" / "asr-research-audio" / "tts_audio_cases.jsonl"
 DEFAULT_SEED_CASES = ROOT / "examples" / "asr_research_cases.jsonl"
@@ -295,6 +296,7 @@ def render_generated_sections(
     hosted_manifest_label = html.escape(_repo_relative(DEFAULT_HOSTED_MANIFEST))
     artifact_index_label = html.escape(_repo_relative(DEFAULT_ARTIFACT_INDEX))
     runtime_status_label = html.escape(_repo_relative(DEFAULT_RUNTIME_STATUS))
+    refresh_decision_label = html.escape(_repo_relative(DEFAULT_REFRESH_DECISION))
     source_selection_label = html.escape(_repo_relative(DEFAULT_SOURCE_SELECTION_SUMMARY))
     workflow = _refresh_workflow([])
     workflow_commands = [
@@ -370,9 +372,10 @@ def render_generated_sections(
                 f"<code>{next_runs_label}</code>, and the hosted artifact manifest is "
                 f"<code>{hosted_manifest_label}</code>. The artifact bundle index is "
                 f"<code>{artifact_index_label}</code>. Runtime readiness is tracked in "
-                f"<code>{runtime_status_label}</code>, and source selection is recorded in "
+                f"<code>{runtime_status_label}</code>, the cron refresh decision is recorded in "
+                f"<code>{refresh_decision_label}</code>, and source selection is recorded in "
                 f"<code>{source_selection_label}</code>; together they include the source result files, "
-                "complete model/category matrix, missing-cell guidance, hosted copy map, and reproducible refresh workflow. Pass "
+                "complete model/category matrix, missing-cell guidance, runtime-gated next action, hosted copy map, and reproducible refresh workflow. Pass "
                 f"<code>{DEFAULT_HOSTED_DIR_ENV}</code> with "
                 "<code>--hosted-dir-from-env</code> to copy the same verified artifacts into the hosted Pages checkout. "
                 f"Use <code>{report_index_label}</code> as the generated map from the demo page to the combined full-35 report "
@@ -484,6 +487,7 @@ def write_summary_artifact(
                 "hosted_manifest_path": _repo_relative(DEFAULT_HOSTED_MANIFEST),
                 "artifact_index_path": _repo_relative(DEFAULT_ARTIFACT_INDEX),
                 "runtime_status_path": _repo_relative(DEFAULT_RUNTIME_STATUS),
+                "refresh_decision_path": _repo_relative(DEFAULT_REFRESH_DECISION),
                 "output_artifacts": output_artifacts,
                 "refresh_workflow": _refresh_workflow(source_result_paths or []),
                 "refresh_runtime_status": runtime_status,
@@ -1335,6 +1339,10 @@ def build_output_artifact_index(*, results_path: Path) -> list[dict[str, str]]:
         {
             "path": _repo_relative(DEFAULT_RUNTIME_STATUS),
             "purpose": "Machine-readable MLX ASR and Gemini readiness status for refresh automation.",
+        },
+        {
+            "path": _repo_relative(DEFAULT_REFRESH_DECISION),
+            "purpose": "Machine-readable runtime-gated decision for the next ASR refresh action.",
         },
         {
             "path": _repo_relative(DEFAULT_SOURCE_SELECTION_SUMMARY),

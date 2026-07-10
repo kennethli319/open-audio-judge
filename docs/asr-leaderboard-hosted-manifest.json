@@ -1,28 +1,28 @@
 {
-  "artifact_count": 35,
+  "artifact_count": 36,
   "artifacts": [
     {
-      "bytes": 31035,
+      "bytes": 31323,
       "hosted_paths": [
         "asr-leaderboard-demo.html"
       ],
-      "sha256": "9cbcdd3db6a5350e1714fe13ae178cd8a04658b64d8b7d048a3cc062d562523c",
+      "sha256": "f36e71a360e70394fc3da4d44bf8f875bcf8199f0d77ba152bb34f37023820b1",
       "source_path": "docs/asr-leaderboard-demo.html"
     },
     {
-      "bytes": 34169,
+      "bytes": 34407,
       "hosted_paths": [
         "asr-leaderboard-summary.json"
       ],
-      "sha256": "55c9f276075a648353f9274bffa1d807a4e5fd0105b4e1be6fa29056868bc089",
+      "sha256": "000d0d8b51ba84a856a93e3fbb9cfa48be3e0cb6c022de2b6908d3a821594c86",
       "source_path": "docs/asr-leaderboard-summary.json"
     },
     {
-      "bytes": 18712,
+      "bytes": 18836,
       "hosted_paths": [
         "asr-leaderboard-refresh-report.md"
       ],
-      "sha256": "a2a042359ddd3015ba6fcc16c10b7630b8fde7bfa06777b5402dce2ee8145c69",
+      "sha256": "4f3f264576b95a7635e2e80e77ad0a9e7b9a8d0c9a535a97e4b4c119442f1c46",
       "source_path": "docs/asr-leaderboard-refresh-report.md"
     },
     {
@@ -98,11 +98,11 @@
       "source_path": "docs/asr-leaderboard-next-runs.json"
     },
     {
-      "bytes": 34586,
+      "bytes": 34989,
       "hosted_paths": [
         "asr-leaderboard-artifacts.json"
       ],
-      "sha256": "618462a41f0213b8857ae4cb3c3668ca15363aa8d705d6a2491435f4f0973768",
+      "sha256": "c94ff80402aa94cd558b06e9e54f6a4b75bf9602bc8b549ee5a8cbfba0722bac",
       "source_path": "docs/asr-leaderboard-artifacts.json"
     },
     {
@@ -112,6 +112,14 @@
       ],
       "sha256": "84c2baf3f4855b2cdbe134365aa02079a03acb94a20d981e732315f489b710ea",
       "source_path": "docs/asr-leaderboard-runtime-status.json"
+    },
+    {
+      "bytes": 11488,
+      "hosted_paths": [
+        "asr-leaderboard-refresh-decision.json"
+      ],
+      "sha256": "3404d8af110c0af2b91c667369e6782e41bc7b3cb08ea331a3482e58c736ab6c",
+      "source_path": "docs/asr-leaderboard-refresh-decision.json"
     },
     {
       "bytes": 12183,

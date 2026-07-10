@@ -378,6 +378,7 @@ def test_write_summary_artifact_records_models_and_categories(tmp_path: Path) ->
     assert summary["hosted_manifest_path"] == "docs/asr-leaderboard-hosted-manifest.json"
     assert summary["artifact_index_path"] == "docs/asr-leaderboard-artifacts.json"
     assert summary["runtime_status_path"] == "docs/asr-leaderboard-runtime-status.json"
+    assert summary["refresh_decision_path"] == "docs/asr-leaderboard-refresh-decision.json"
     assert summary["report_index_path"] == "docs/asr-leaderboard-report-index.md"
     assert summary["report_links_path"] == "docs/asr-leaderboard-report-links.json"
     assert summary["next_run_plan"]["status"] == "complete"
@@ -449,6 +450,10 @@ def test_write_summary_artifact_records_models_and_categories(tmp_path: Path) ->
         {
             "path": "docs/asr-leaderboard-runtime-status.json",
             "purpose": "Machine-readable MLX ASR and Gemini readiness status for refresh automation.",
+        },
+        {
+            "path": "docs/asr-leaderboard-refresh-decision.json",
+            "purpose": "Machine-readable runtime-gated decision for the next ASR refresh action.",
         },
         {
             "path": "docs/asr-leaderboard-source-selection.json",
@@ -1404,8 +1409,8 @@ def test_refresh_asr_leaderboard_artifacts_combines_report_and_page(tmp_path: Pa
     )
     assert hosted_current == {
         "status": "complete",
-        "hosted_artifact_count": 19,
-        "hosted_path_count": 30,
+        "hosted_artifact_count": 20,
+        "hosted_path_count": 31,
     }
     assert (hosted_dir / "asr-leaderboard-run-manifest.json").exists()
     assert (hosted_dir / "manifest-validation.json").read_text(
@@ -1447,6 +1452,7 @@ def test_refresh_asr_leaderboard_artifacts_combines_report_and_page(tmp_path: Pa
     assert (hosted_dir / "asr-leaderboard-runtime-status.json").read_text(
         encoding="utf-8"
     ) == runtime_status.read_text(encoding="utf-8")
+    assert (hosted_dir / "asr-leaderboard-refresh-decision.json").exists()
     artifact_index_data = json.loads(artifact_index.read_text(encoding="utf-8"))
     assert artifact_index_data["status"] == "complete"
     assert artifact_index_data["total_results"] == 4
@@ -1531,7 +1537,7 @@ def test_refresh_asr_leaderboard_artifacts_combines_report_and_page(tmp_path: Pa
         f"asr-leaderboard/source-reports/{tmp_path.name}/report.html"
     ]
     hosted_manifest_data = json.loads(hosted_manifest.read_text(encoding="utf-8"))
-    assert hosted_manifest_data["artifact_count"] == 19
+    assert hosted_manifest_data["artifact_count"] == 20
     assert {"asr-leaderboard/full-35-combined/results.jsonl"} in [
         set(artifact["hosted_paths"]) for artifact in hosted_manifest_data["artifacts"]
     ]
@@ -2672,6 +2678,7 @@ def test_check_asr_leaderboard_page_validates_generated_artifacts(tmp_path: Path
     hosted_manifest = tmp_path / "hosted-manifest.json"
     artifact_index = tmp_path / "artifact-index.json"
     runtime_status = tmp_path / "runtime-status.json"
+    refresh_decision = tmp_path / "refresh-decision.json"
     records = [
         result_record(
             case_id="asr-a-model-a",
@@ -2822,6 +2829,7 @@ def test_check_asr_leaderboard_page_validates_generated_artifacts(tmp_path: Path
     summary_data["hosted_manifest_path"] = str(hosted_manifest)
     summary_data["artifact_index_path"] = str(artifact_index)
     summary_data["runtime_status_path"] = str(runtime_status)
+    summary_data["refresh_decision_path"] = str(refresh_decision)
     summary.write_text(json.dumps(summary_data), encoding="utf-8")
     refresh_report = tmp_path / "refresh-report.md"
     refresh_report.write_text("# report\n", encoding="utf-8")
@@ -2845,6 +2853,12 @@ def test_check_asr_leaderboard_page_validates_generated_artifacts(tmp_path: Path
     update_module.write_refresh_workflow_artifact(refresh_workflow)
     live_refresh_script = tmp_path / "live-refresh.sh"
     update_module.write_live_refresh_script(live_refresh_script)
+    refresh_module.write_refresh_decision_artifact(
+        refresh_decision,
+        results=results,
+        runtime_status=runtime_status_data,
+        expected_cases_per_model=2,
+    )
     summary_data = json.loads(summary.read_text(encoding="utf-8"))
     summary_data["refresh_commands_path"] = str(refresh_commands)
     summary_data["refresh_workflow_path"] = str(refresh_workflow)
@@ -2869,10 +2883,11 @@ def test_check_asr_leaderboard_page_validates_generated_artifacts(tmp_path: Path
         manifest_validation_out=manifest_validation,
         seed_manifest_validation_out=seed_manifest_validation,
         next_runs_out=next_runs,
-        hosted_manifest_out=hosted_manifest,
-        runtime_status_out=runtime_status,
-        expected_cases_per_model=2,
-    )
+            hosted_manifest_out=hosted_manifest,
+            runtime_status_out=runtime_status,
+            refresh_decision_out=refresh_decision,
+            expected_cases_per_model=2,
+        )
 
     validation = check_module.check_asr_leaderboard_page(page, summary_path=summary)
 
@@ -3196,6 +3211,7 @@ def test_check_asr_leaderboard_page_validates_hosted_artifact_layout(tmp_path: P
     hosted_manifest = hosted / "asr-leaderboard-hosted-manifest.json"
     artifact_index = hosted / "asr-leaderboard-artifacts.json"
     runtime_status = hosted / "asr-leaderboard-runtime-status.json"
+    refresh_decision = hosted / "asr-leaderboard-refresh-decision.json"
     results_path = hosted / "asr-leaderboard" / "full-35-combined" / "results.jsonl"
     report_path = hosted / "asr-leaderboard" / "full-35-combined" / "report.html"
 
@@ -3393,6 +3409,22 @@ def test_check_asr_leaderboard_page_validates_hosted_artifact_layout(tmp_path: P
         + "\n",
         encoding="utf-8",
     )
+    refresh_decision.write_text(
+        json.dumps(
+            {
+                "status": "complete",
+                "action": "skip_live_refresh",
+                "next_run_status": "complete",
+                "missing_cell_count": 0,
+                "next_run_command_count": 0,
+                "recommended_command": None,
+                "runtime_ready": "not_required",
+                "runtime_ready_issue": None,
+            }
+        )
+        + "\n",
+        encoding="utf-8",
+    )
     hosted_manifest.write_text(
         json.dumps(
             hosted_manifest_record(
@@ -3405,6 +3437,7 @@ def test_check_asr_leaderboard_page_validates_hosted_artifact_layout(tmp_path: P
                     ("asr-leaderboard-report-index.md", report_index),
                     ("asr-leaderboard-report-links.json", report_links),
                     ("asr-leaderboard-runtime-status.json", runtime_status),
+                    ("asr-leaderboard-refresh-decision.json", refresh_decision),
                 ]
             )
         )
@@ -3480,6 +3513,10 @@ def test_check_asr_leaderboard_page_validates_hosted_artifact_layout(tmp_path: P
                         runtime_status,
                     ),
                     artifact_index_record(
+                        "docs/asr-leaderboard-refresh-decision.json",
+                        refresh_decision,
+                    ),
+                    artifact_index_record(
                         "docs/asr-leaderboard-hosted-manifest.json",
                         hosted_manifest,
                         digest_status="deferred_circular_reference",
@@ -3511,6 +3548,7 @@ def test_check_asr_leaderboard_page_validates_hosted_artifact_layout(tmp_path: P
                 "hosted_manifest_path": "docs/asr-leaderboard-hosted-manifest.json",
                 "artifact_index_path": "docs/asr-leaderboard-artifacts.json",
                 "runtime_status_path": "docs/asr-leaderboard-runtime-status.json",
+                "refresh_decision_path": "docs/asr-leaderboard-refresh-decision.json",
                 "source_result_paths": [
                     "runs/asr-leaderboard/model-a/judge-report/results.jsonl",
                     "runs/asr-leaderboard/model-b/judge-report/results.jsonl",
@@ -3559,6 +3597,10 @@ def test_check_asr_leaderboard_page_validates_hosted_artifact_layout(tmp_path: P
                     {
                         "path": "docs/asr-leaderboard-runtime-status.json",
                         "purpose": "Machine-readable MLX ASR and Gemini readiness status for refresh automation.",
+                    },
+                    {
+                        "path": "docs/asr-leaderboard-refresh-decision.json",
+                        "purpose": "Machine-readable runtime-gated decision for the next ASR refresh action.",
                     },
                 ],
                 "refresh_workflow": update_module._refresh_workflow([]),
@@ -3647,6 +3689,8 @@ def test_check_asr_leaderboard_page_validates_hosted_artifact_layout(tmp_path: P
                 "Single machine-readable index for the ASR leaderboard artifact bundle.",
                 "docs/asr-leaderboard-runtime-status.json",
                 "Machine-readable MLX ASR and Gemini readiness status for refresh automation.",
+                "docs/asr-leaderboard-refresh-decision.json",
+                "Machine-readable runtime-gated decision for the next ASR refresh action.",
                 "<!-- ASR_LEADERBOARD_GENERATED_END -->",
                 "</body></html>",
             ]
@@ -3666,12 +3710,12 @@ def test_check_asr_leaderboard_page_validates_hosted_artifact_layout(tmp_path: P
     )
 
     assert validation["status"] == "complete"
-    assert validation["hosted_artifact_count"] == 8
-    assert validation["hosted_path_count"] == 8
-    assert validation["hosted_digest_verified_artifact_count"] == 8
-    assert validation["hosted_digest_verified_path_count"] == 8
+    assert validation["hosted_artifact_count"] == 9
+    assert validation["hosted_path_count"] == 9
+    assert validation["hosted_digest_verified_artifact_count"] == 9
+    assert validation["hosted_digest_verified_path_count"] == 9
     assert check_module._format_hosted_validation_fragment(validation) == (
-        ", 8/8 hosted paths digest-verified"
+        ", 9/9 hosted paths digest-verified"
     )
 
 

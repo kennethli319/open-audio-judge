@@ -1,0 +1,312 @@
+{
+  "action": "skip_live_refresh",
+  "description": "Generated runtime-gated next action for ASR leaderboard cron refreshes.",
+  "fallback_handling": "Record unsupported primary model states explicitly before trying fallbacks; do not silently substitute models.",
+  "fallback_model_ids": [
+    "mlx-community/whisper-small.en-asr-4bit",
+    "mlx-community/parakeet-rnnt-0.6b",
+    "mlx-community/GLM-ASR-Nano-2512-4bit"
+  ],
+  "missing_cell_count": 0,
+  "next_run_command_count": 0,
+  "next_run_commands": [],
+  "next_run_status": "complete",
+  "reason": "The selected ASR result bundle already covers every model/category cell.",
+  "recommended_command": null,
+  "runtime_ready": "not_required",
+  "runtime_ready_issue": null,
+  "runtime_status": {
+    "all_loaded_results_ok": true,
+    "audio_manifest": {
+      "audio_case_count": 35,
+      "audio_cases_path": "runs/asr-research-audio/tts_audio_cases.jsonl",
+      "audio_manifest_sha256": "2a3997f8801f69c05503f120dc81a78c1778be5e16c43c72d7cdded0a368b8ac",
+      "command": [
+        ".venv/bin/python",
+        "scripts/synthesize_tts_cases.py",
+        "--cases",
+        "examples/asr_research_cases.jsonl",
+        "--out",
+        "runs/asr-research-audio",
+        "--discard-text-sidecars",
+        "--summary-out",
+        "runs/asr-research-audio/summary.json"
+      ],
+      "extra_source_case_ids": [],
+      "missing_audio_file_case_ids": [],
+      "missing_source_case_ids": [],
+      "seed_case_count": 35,
+      "seed_cases_path": "examples/asr_research_cases.jsonl",
+      "status": "complete"
+    },
+    "gemini_judge": "verified_from_loaded_results",
+    "gemini_secret": {
+      "path": "/Users/wangyauli/.openclaw/secrets/open-audio-judge-gemini.env",
+      "status": "present"
+    },
+    "live_model_calls": "none",
+    "loaded_result_providers": [
+      "gemini"
+    ],
+    "mlx_asr": "not_executed_by_refresh; transcripts loaded from verified result artifacts",
+    "mlx_runtime_preflight": {
+      "command": [
+        "PYTHONPATH=src",
+        ".venv/bin/python",
+        "-m",
+        "open_audio_judge.cli",
+        "check-mlx-asr-runtime",
+        "--python-bin",
+        ".venv/bin/python",
+        "--model",
+        "mlx-community/whisper-large-v3-turbo-asr-fp16"
+      ],
+      "fallback_model_checks": [
+        {
+          "command": [
+            "PYTHONPATH=src",
+            ".venv/bin/python",
+            "-m",
+            "open_audio_judge.cli",
+            "check-mlx-asr-runtime",
+            "--python-bin",
+            ".venv/bin/python",
+            "--model",
+            "mlx-community/whisper-small.en-asr-4bit"
+          ],
+          "returncode": 0,
+          "status": "ok",
+          "stderr": "",
+          "stdout": "MLX ASR runtime OK\nPython: .venv/bin/python\nModule: mlx_audio.stt.generate\nModel:  mlx-community/whisper-small.en-asr-4bit"
+        },
+        {
+          "command": [
+            "PYTHONPATH=src",
+            ".venv/bin/python",
+            "-m",
+            "open_audio_judge.cli",
+            "check-mlx-asr-runtime",
+            "--python-bin",
+            ".venv/bin/python",
+            "--model",
+            "mlx-community/parakeet-rnnt-0.6b"
+          ],
+          "returncode": 0,
+          "status": "ok",
+          "stderr": "",
+          "stdout": "MLX ASR runtime OK\nPython: .venv/bin/python\nModule: mlx_audio.stt.generate\nModel:  mlx-community/parakeet-rnnt-0.6b"
+        },
+        {
+          "command": [
+            "PYTHONPATH=src",
+            ".venv/bin/python",
+            "-m",
+            "open_audio_judge.cli",
+            "check-mlx-asr-runtime",
+            "--python-bin",
+            ".venv/bin/python",
+            "--model",
+            "mlx-community/GLM-ASR-Nano-2512-4bit"
+          ],
+          "returncode": 0,
+          "status": "ok",
+          "stderr": "",
+          "stdout": "MLX ASR runtime OK\nPython: .venv/bin/python\nModule: mlx_audio.stt.generate\nModel:  mlx-community/GLM-ASR-Nano-2512-4bit"
+        }
+      ],
+      "fallback_model_count": 3,
+      "fallback_model_ok_count": 3,
+      "primary_model_checks": [
+        {
+          "command": [
+            "PYTHONPATH=src",
+            ".venv/bin/python",
+            "-m",
+            "open_audio_judge.cli",
+            "check-mlx-asr-runtime",
+            "--python-bin",
+            ".venv/bin/python",
+            "--model",
+            "mlx-community/whisper-large-v3-turbo-asr-fp16"
+          ],
+          "returncode": 0,
+          "status": "ok",
+          "stderr": "",
+          "stdout": "MLX ASR runtime OK\nPython: .venv/bin/python\nModule: mlx_audio.stt.generate\nModel:  mlx-community/whisper-large-v3-turbo-asr-fp16"
+        },
+        {
+          "command": [
+            "PYTHONPATH=src",
+            ".venv/bin/python",
+            "-m",
+            "open_audio_judge.cli",
+            "check-mlx-asr-runtime",
+            "--python-bin",
+            ".venv/bin/python",
+            "--model",
+            "mlx-community/Qwen3-ASR-1.7B-8bit"
+          ],
+          "returncode": 0,
+          "status": "ok",
+          "stderr": "",
+          "stdout": "MLX ASR runtime OK\nPython: .venv/bin/python\nModule: mlx_audio.stt.generate\nModel:  mlx-community/Qwen3-ASR-1.7B-8bit"
+        },
+        {
+          "command": [
+            "PYTHONPATH=src",
+            ".venv/bin/python",
+            "-m",
+            "open_audio_judge.cli",
+            "check-mlx-asr-runtime",
+            "--python-bin",
+            ".venv/bin/python",
+            "--model",
+            "mlx-community/VibeVoice-ASR-4bit"
+          ],
+          "returncode": 0,
+          "status": "ok",
+          "stderr": "",
+          "stdout": "MLX ASR runtime OK\nPython: .venv/bin/python\nModule: mlx_audio.stt.generate\nModel:  mlx-community/VibeVoice-ASR-4bit"
+        }
+      ],
+      "primary_model_count": 3,
+      "primary_model_ok_count": 3,
+      "status": "ok"
+    },
+    "result_bundle": {
+      "categories": [
+        "acoustic_noise_robustness",
+        "entity_factual_integrity",
+        "negation_modality_scope",
+        "numeric_unit_integrity",
+        "semantic_paraphrase_preservation",
+        "temporal_scheduling_accuracy",
+        "transcription_accuracy_wer"
+      ],
+      "category_count": 7,
+      "model_count": 3,
+      "models": [
+        "mlx-community/Qwen3-ASR-1.7B-8bit",
+        "mlx-community/VibeVoice-ASR-4bit",
+        "mlx-community/whisper-large-v3-turbo-asr-fp16"
+      ],
+      "results_path": "runs/asr-leaderboard/full-35-combined/results.jsonl",
+      "source_result_file_count": 18,
+      "source_result_files": [
+        {
+          "bytes": 12081,
+          "exists": true,
+          "path": "runs/asr-leaderboard/whisper-large-v3-turbo-smoke/judge-report/results.jsonl",
+          "sha256": "bbd88190b8993e094468890b9821d0805984b43d5219bc1fd6601ff9c32bbd82"
+        },
+        {
+          "bytes": 47155,
+          "exists": true,
+          "path": "runs/asr-leaderboard/whisper-large-v3-turbo-full-gap/judge-report/results.jsonl",
+          "sha256": "29514fa7ac55d1add005080261b6f6efc3b8249c76112689ca74d47907385302"
+        },
+        {
+          "bytes": 19260,
+          "exists": true,
+          "path": "runs/asr-leaderboard/whisper-large-v3-turbo-semantic-smoke/judge-report/results.jsonl",
+          "sha256": "1731a6bef87dee5500efdc5fdccd60c68cc2813696ae5d58126f889349118451"
+        },
+        {
+          "bytes": 19449,
+          "exists": true,
+          "path": "runs/asr-leaderboard/whisper-large-v3-turbo-entity-smoke/judge-report/results.jsonl",
+          "sha256": "68a3bd82f09c109a7e623c594ff639a36f467877a39943e859729d5d16bb776d"
+        },
+        {
+          "bytes": 18953,
+          "exists": true,
+          "path": "runs/asr-leaderboard/whisper-large-v3-turbo-paraphrase-smoke/judge-report/results.jsonl",
+          "sha256": "29c1777225f052e42f0d2028e30c9f14530259ebea2cf4ac5299bbd997239b4d"
+        },
+        {
+          "bytes": 18758,
+          "exists": true,
+          "path": "runs/asr-leaderboard/whisper-large-v3-turbo-noise-smoke/judge-report/results.jsonl",
+          "sha256": "ef1ecb77514c22e38c0efc097df7f5c4151749ebb7b99156d74ad976047b5ebb"
+        },
+        {
+          "bytes": 12269,
+          "exists": true,
+          "path": "runs/asr-leaderboard/qwen3-asr-1.7b-smoke/judge-report/results.jsonl",
+          "sha256": "c1b68dbc36a7025f0060bcc85f173a113d37841fb4c03b8308a62727274fff4c"
+        },
+        {
+          "bytes": 46978,
+          "exists": true,
+          "path": "runs/asr-leaderboard/qwen3-asr-1.7b-full-gap/judge-report/results.jsonl",
+          "sha256": "4fe693498472d0071b3cd2e24d6cf2c04f616f973f05f978d742d2eb5f935a25"
+        },
+        {
+          "bytes": 17782,
+          "exists": true,
+          "path": "runs/asr-leaderboard/qwen3-asr-1.7b-semantic-smoke/judge-report/results.jsonl",
+          "sha256": "13cf26a6451d2ecc5e53af0bf7719d8ad328d6b1608f179b9351ea1edcccc0dd"
+        },
+        {
+          "bytes": 19955,
+          "exists": true,
+          "path": "runs/asr-leaderboard/qwen3-asr-1.7b-entity-smoke/judge-report/results.jsonl",
+          "sha256": "fe06d5f677f8eb271a8f98e599d1063dfac4cf3bac6e7a5a6e9be4a50bb3bca8"
+        },
+        {
+          "bytes": 17661,
+          "exists": true,
+          "path": "runs/asr-leaderboard/qwen3-asr-1.7b-paraphrase-smoke/judge-report/results.jsonl",
+          "sha256": "31e3f291ff565d63a3d361bda80930ed9722bb6b5d9b7262c5996be547cfc125"
+        },
+        {
+          "bytes": 19038,
+          "exists": true,
+          "path": "runs/asr-leaderboard/qwen3-asr-1.7b-noise-smoke/judge-report/results.jsonl",
+          "sha256": "984f75e7a808b20f619805ecfa0405ea0d84787cb5fde7af62b8667bf313a0c5"
+        },
+        {
+          "bytes": 11196,
+          "exists": true,
+          "path": "runs/asr-leaderboard/vibevoice-asr-smoke/judge-report/results.jsonl",
+          "sha256": "ecfb6e2cade45368ba7320cf5e2e08e1b8a70015604f59506817ea5cd34018c0"
+        },
+        {
+          "bytes": 45543,
+          "exists": true,
+          "path": "runs/asr-leaderboard/vibevoice-asr-full-gap/judge-report/results.jsonl",
+          "sha256": "19a0905ab13fce72d669d5d0c8fc075963bd23a578a2f8c072f6f328998f041e"
+        },
+        {
+          "bytes": 18984,
+          "exists": true,
+          "path": "runs/asr-leaderboard/vibevoice-asr-semantic-smoke/judge-report/results.jsonl",
+          "sha256": "40e11be673f96ad4cf2cb57d7fbb51be3e02443a2d4fbc291971cd1d80a943ee"
+        },
+        {
+          "bytes": 19752,
+          "exists": true,
+          "path": "runs/asr-leaderboard/vibevoice-asr-entity-smoke/judge-report/results.jsonl",
+          "sha256": "0b30d9564cbc330e44d1994765412fadd65b2c5849d77d849bc4babd69a7a7c9"
+        },
+        {
+          "bytes": 19869,
+          "exists": true,
+          "path": "runs/asr-leaderboard/vibevoice-asr-paraphrase-smoke/judge-report/results.jsonl",
+          "sha256": "427cb36f67fc2f8fb468b66d3d56197fa5899c8318be9752dac76bf34b1313f7"
+        },
+        {
+          "bytes": 19543,
+          "exists": true,
+          "path": "runs/asr-leaderboard/vibevoice-asr-noise-smoke/judge-report/results.jsonl",
+          "sha256": "dea03c102fae8b37591eed82519ed54c489dfcff589b292c8eba50213bd5ab3f"
+        }
+      ],
+      "total_results": 105
+    },
+    "secret_handling": "Gemini secrets are checked only for file presence; secret values are never printed or written into artifacts.",
+    "status": "complete"
+  },
+  "status": "complete",
+  "version": 1
+}

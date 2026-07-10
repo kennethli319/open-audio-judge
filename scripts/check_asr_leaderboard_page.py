@@ -162,6 +162,7 @@ def _validate_summary(
         "hosted_manifest_path",
         "artifact_index_path",
         "runtime_status_path",
+        "refresh_decision_path",
     )
     missing_keys = [key for key in required_keys if key not in summary]
     if missing_keys:
@@ -298,6 +299,7 @@ def _validate_referenced_artifacts(
         "hosted_manifest_path",
         "artifact_index_path",
         "runtime_status_path",
+        "refresh_decision_path",
     )
     missing = []
     for key in artifact_keys:
