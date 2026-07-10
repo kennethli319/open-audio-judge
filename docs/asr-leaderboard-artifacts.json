@@ -942,5 +942,53 @@
   },
   "status": "complete",
   "total_results": 105,
-  "version": 2
+  "verification": {
+    "commit_verification_command": [
+      ".venv/bin/python",
+      "scripts/verify_asr_leaderboard_commit.py"
+    ],
+    "digest_checked_artifact_count": 37,
+    "digest_status_counts": {
+      "deferred_circular_reference": 2,
+      "ok": 37
+    },
+    "freshness_check_command": [
+      ".venv/bin/python",
+      "scripts/refresh_asr_leaderboard_artifacts.py",
+      "--check-only",
+      "--require-generated-fresh"
+    ],
+    "generated_after_index_count": 2,
+    "hosted_freshness_check_command": [
+      ".venv/bin/python",
+      "scripts/refresh_asr_leaderboard_artifacts.py",
+      "--check-only",
+      "--hosted-dir-from-env",
+      "--require-hosted-current"
+    ],
+    "missing_artifact_count": 0,
+    "non_secret_verification_commands": [
+      [
+        ".venv/bin/ruff",
+        "check",
+        "."
+      ],
+      [
+        ".venv/bin/python",
+        "-m",
+        "pytest"
+      ],
+      [
+        "git",
+        "diff",
+        "--check"
+      ],
+      [
+        ".venv/bin/python",
+        "scripts/verify_asr_leaderboard_commit.py"
+      ]
+    ],
+    "secret_policy": "Gemini secrets are runtime-only and must not be stored in artifacts."
+  },
+  "version": 3
 }

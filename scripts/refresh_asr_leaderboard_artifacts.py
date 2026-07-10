@@ -1864,9 +1864,44 @@ def build_artifact_index_data(
             for summary in summarize_source_result_files(source_result_paths or [])
         ],
     }
+    digest_status_counts = Counter(str(record["digest_status"]) for record in records)
+    missing_artifact_count = sum(1 for record in records if not record["exists"])
+    verification = {
+        "freshness_check_command": [
+            ".venv/bin/python",
+            "scripts/refresh_asr_leaderboard_artifacts.py",
+            "--check-only",
+            "--require-generated-fresh",
+        ],
+        "commit_verification_command": [
+            ".venv/bin/python",
+            "scripts/verify_asr_leaderboard_commit.py",
+        ],
+        "hosted_freshness_check_command": [
+            ".venv/bin/python",
+            "scripts/refresh_asr_leaderboard_artifacts.py",
+            "--check-only",
+            "--hosted-dir-from-env",
+            "--require-hosted-current",
+        ],
+        "non_secret_verification_commands": [
+            [".venv/bin/ruff", "check", "."],
+            [".venv/bin/python", "-m", "pytest"],
+            ["git", "diff", "--check"],
+            [".venv/bin/python", "scripts/verify_asr_leaderboard_commit.py"],
+        ],
+        "digest_status_counts": dict(sorted(digest_status_counts.items())),
+        "digest_checked_artifact_count": digest_status_counts.get("ok", 0),
+        "missing_artifact_count": missing_artifact_count,
+        "generated_after_index_count": digest_status_counts.get(
+            "deferred_circular_reference",
+            0,
+        ),
+        "secret_policy": "Gemini secrets are runtime-only and must not be stored in artifacts.",
+    }
     return {
         "description": "Generated index for the ASR leaderboard demo artifact bundle.",
-        "version": 2,
+        "version": 3,
         "hosted": {
             "base_path": HOSTED_BASE_PATH,
             "base_url": HOSTED_BASE_URL,
@@ -1879,6 +1914,7 @@ def build_artifact_index_data(
         "model_count": len(models),
         "category_count": len(categories),
         "expected_cases_per_model": expected_cases_per_model,
+        "verification": verification,
         "artifacts": records,
     }
 

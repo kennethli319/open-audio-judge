@@ -1679,6 +1679,7 @@ def test_refresh_asr_leaderboard_artifacts_combines_report_and_page(tmp_path: Pa
     assert (hosted_dir / "asr-leaderboard-refresh-decision.json").exists()
     artifact_index_data = json.loads(artifact_index.read_text(encoding="utf-8"))
     assert artifact_index_data["status"] == "complete"
+    assert artifact_index_data["version"] == 3
     assert artifact_index_data["total_results"] == 4
     assert artifact_index_data["result_bundle"] == {
         "results_path": str(out / "results.jsonl"),
@@ -1750,6 +1751,37 @@ def test_refresh_asr_leaderboard_artifacts_combines_report_and_page(tmp_path: Pa
     assert digest_statuses[str(artifact_index)] == "deferred_circular_reference"
     assert digest_statuses[str(hosted_manifest)] == "deferred_circular_reference"
     assert digest_statuses[str(out / "results.jsonl")] == "ok"
+    verification = artifact_index_data["verification"]
+    assert verification["freshness_check_command"] == [
+        ".venv/bin/python",
+        "scripts/refresh_asr_leaderboard_artifacts.py",
+        "--check-only",
+        "--require-generated-fresh",
+    ]
+    assert verification["commit_verification_command"] == [
+        ".venv/bin/python",
+        "scripts/verify_asr_leaderboard_commit.py",
+    ]
+    assert verification["hosted_freshness_check_command"] == [
+        ".venv/bin/python",
+        "scripts/refresh_asr_leaderboard_artifacts.py",
+        "--check-only",
+        "--hosted-dir-from-env",
+        "--require-hosted-current",
+    ]
+    assert [".venv/bin/python", "-m", "pytest"] in verification[
+        "non_secret_verification_commands"
+    ]
+    assert verification["digest_checked_artifact_count"] == sum(
+        1 for status in digest_statuses.values() if status == "ok"
+    )
+    assert verification["generated_after_index_count"] == sum(
+        1 for status in digest_statuses.values() if status == "deferred_circular_reference"
+    )
+    assert verification["missing_artifact_count"] == 0
+    assert verification["secret_policy"] == (
+        "Gemini secrets are runtime-only and must not be stored in artifacts."
+    )
     hosted_paths_by_artifact = {
         artifact["path"]: artifact["hosted_paths"] for artifact in artifact_index_data["artifacts"]
     }
