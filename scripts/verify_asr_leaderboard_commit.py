@@ -21,6 +21,10 @@ COMMANDS = (
 
 DEFAULT_HOSTED_DIR_ENV = "ASR_LEADERBOARD_HOSTED_DIR"
 DEFAULT_CHECK_SUMMARY = Path("runs/asr-leaderboard/preflight-summary.json")
+DEFAULT_RUNTIME_STATUS = Path("runs/asr-leaderboard/preflight-runtime-status.json")
+DEFAULT_REFRESH_DECISION = Path("runs/asr-leaderboard/preflight-refresh-decision.json")
+DEFAULT_NEXT_ACTION = Path("runs/asr-leaderboard/preflight-next-action.md")
+DEFAULT_CRON_STATUS = Path("runs/asr-leaderboard/preflight-cron-status.json")
 
 
 def _refresh_preflight_command(
@@ -38,6 +42,10 @@ def _refresh_preflight_command(
     ]
     if check_mlx_runtime or require_runtime_ready:
         command.append("--check-mlx-runtime")
+        command.extend(("--runtime-status-out", str(DEFAULT_RUNTIME_STATUS)))
+        command.extend(("--refresh-decision-out", str(DEFAULT_REFRESH_DECISION)))
+        command.extend(("--next-action-out", str(DEFAULT_NEXT_ACTION)))
+        command.extend(("--cron-status-out", str(DEFAULT_CRON_STATUS)))
     if require_runtime_ready:
         command.append("--require-runtime-ready")
     if check_summary_out is not None:
