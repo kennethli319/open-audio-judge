@@ -10,6 +10,7 @@ Generated summary for scheduled ASR leaderboard continuation turns.
 - Runtime ready: not_required
 - Missing model/category cells: 0
 - Next run commands: 0
+- Artifact digest: `296bf0550080eb0d676f351eee0db1ee41045342266b16ccdd44c7256058c7df`
 - Reason: The selected ASR result bundle already covers every model/category cell.
 
 ## Public Links

@@ -2513,6 +2513,8 @@ def write_cron_status_artifact(
         source_result_files = []
     source_report_count = _cron_source_report_count(source_result_files)
 
+    artifact_provenance = _cron_artifact_provenance(result_bundle)
+    artifact_digest = _cron_artifact_digest(artifact_provenance)
     data = {
         "description": "Compact generated cron handoff for ASR leaderboard refresh automation.",
         "version": 2,
@@ -2533,7 +2535,8 @@ def write_cron_status_artifact(
         "result_file_count": result_bundle.get("source_result_file_count"),
         "source_report_count": source_report_count,
         "audio_manifest_status": audio_manifest.get("status"),
-        "artifact_provenance": _cron_artifact_provenance(result_bundle),
+        "artifact_digest": artifact_digest,
+        "artifact_provenance": artifact_provenance,
         "public_urls": {
             "demo": f"{HOSTED_BASE_URL}/asr-leaderboard-demo.html",
             "combined_report": f"{HOSTED_BASE_URL}/asr-leaderboard/full-35-combined/report.html",
@@ -2564,6 +2567,14 @@ def write_cron_handoff_artifact(
     check_summary: dict[str, object] | None = None,
 ) -> None:
     commands = _cron_handoff_commands()
+    runtime_status = decision.get("runtime_status")
+    if isinstance(runtime_status, dict):
+        result_bundle = runtime_status.get("result_bundle")
+        if not isinstance(result_bundle, dict):
+            result_bundle = {}
+    else:
+        result_bundle = {}
+    artifact_digest = _cron_artifact_digest(_cron_artifact_provenance(result_bundle))
     lines = [
         "# ASR Leaderboard Cron Handoff",
         "",
@@ -2577,6 +2588,7 @@ def write_cron_handoff_artifact(
         f"- Runtime ready: {decision.get('runtime_ready')}",
         f"- Missing model/category cells: {decision.get('missing_cell_count')}",
         f"- Next run commands: {decision.get('next_run_command_count')}",
+        f"- Artifact digest: `{artifact_digest}`",
         f"- Reason: {decision.get('reason')}",
         "",
         "## Public Links",
@@ -2641,6 +2653,11 @@ def _cron_artifact_provenance(result_bundle: dict[str, object]) -> dict[str, obj
             if isinstance(source, dict)
         ],
     }
+
+
+def _cron_artifact_digest(provenance: dict[str, object]) -> str:
+    payload = json.dumps(provenance, sort_keys=True, separators=(",", ":")).encode("utf-8")
+    return hashlib.sha256(payload).hexdigest()
 
 
 def _cron_source_result_file_digest(source: dict[str, object]) -> dict[str, object]:

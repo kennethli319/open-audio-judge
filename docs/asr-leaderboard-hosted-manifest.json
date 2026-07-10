@@ -102,7 +102,7 @@
       "hosted_paths": [
         "asr-leaderboard-artifacts.json"
       ],
-      "sha256": "4df9ce84e5cd9e6c37020cf51c34760d5122b8a03c872bddeab30af6c9cf8a81",
+      "sha256": "da85dc313af1bb935cb3e558dcb397b0d68bb872817700a9eecf064c92676563",
       "source_path": "docs/asr-leaderboard-artifacts.json"
     },
     {
@@ -110,7 +110,7 @@
       "hosted_paths": [
         "asr-leaderboard-runtime-status.json"
       ],
-      "sha256": "8a9f0ea49f7458a2a212390c179146eab201563dcc730bf1fbe70a6a81205479",
+      "sha256": "bea98735600318feae9a0d04ea716399a468e14f1e2819b8759e74e098aa4282",
       "source_path": "docs/asr-leaderboard-runtime-status.json"
     },
     {
@@ -118,7 +118,7 @@
       "hosted_paths": [
         "asr-leaderboard-refresh-decision.json"
       ],
-      "sha256": "6965ccb8205f256ee4d8bb6b7915f9ed1af249f1780c1e463472af8ba50af4b8",
+      "sha256": "40e47efca441bf3b5fdbe989ac13b01b4825a57157e74c3b7ebd055764512e09",
       "source_path": "docs/asr-leaderboard-refresh-decision.json"
     },
     {
@@ -130,19 +130,19 @@
       "source_path": "docs/asr-leaderboard-next-action.md"
     },
     {
-      "bytes": 13867,
+      "bytes": 13956,
       "hosted_paths": [
         "asr-leaderboard-cron-status.json"
       ],
-      "sha256": "9987ded205fe05b6faec2713d713cb3cd650882420f0627e5ff0904cb9084a41",
+      "sha256": "a1cc3543dba1048cc1795bdee7b389f8bc27956b5910daf80c343c905f1b5d67",
       "source_path": "docs/asr-leaderboard-cron-status.json"
     },
     {
-      "bytes": 2119,
+      "bytes": 2205,
       "hosted_paths": [
         "asr-leaderboard-cron-handoff.md"
       ],
-      "sha256": "48d1da4062df03fb7e44a0ad352ae44ed93d9028bbcdee0c42d48b7cbe8d2201",
+      "sha256": "14d35b88454d8898afeeb5b38f2de88e565a8f7c467d5a4a9774b7a86e31fa87",
       "source_path": "docs/asr-leaderboard-cron-handoff.md"
     },
     {

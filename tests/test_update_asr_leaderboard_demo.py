@@ -1646,6 +1646,9 @@ def test_refresh_asr_leaderboard_artifacts_combines_report_and_page(tmp_path: Pa
     assert cron_status_data["coverage_complete"] is True
     assert cron_status_data["total_results"] == 4
     assert cron_status_data["source_report_count"] == 2
+    assert cron_status_data["artifact_digest"] == refresh_module._cron_artifact_digest(
+        cron_status_data["artifact_provenance"]
+    )
     assert cron_status_data["public_urls"] == {
         "combined_report": (
             "https://kennethli319.github.io/open-audio-judge/"
@@ -2285,6 +2288,9 @@ def test_check_only_runtime_preflight_writes_refresh_decision(
     assert cron_status["action"] == "skip_live_refresh"
     assert cron_status["coverage_complete"] is True
     assert cron_status["runtime_ready"] == "not_required"
+    assert cron_status["artifact_digest"] == refresh_module._cron_artifact_digest(
+        cron_status["artifact_provenance"]
+    )
     assert cron_status["public_urls"]["demo"] == (
         "https://kennethli319.github.io/open-audio-judge/asr-leaderboard-demo.html"
     )
@@ -2309,7 +2315,9 @@ def test_check_only_runtime_preflight_writes_refresh_decision(
         "--cron-handoff-out",
         "docs/asr-leaderboard-cron-handoff.md",
     ]
-    assert "ASR Leaderboard Cron Handoff" in cron_handoff_out.read_text(encoding="utf-8")
+    cron_handoff_text = cron_handoff_out.read_text(encoding="utf-8")
+    assert "ASR Leaderboard Cron Handoff" in cron_handoff_text
+    assert f"Artifact digest: `{cron_status['artifact_digest']}`" in cron_handoff_text
     assert cron_status["commands"]["verify_commit"] == [
         ".venv/bin/python",
         "scripts/verify_asr_leaderboard_commit.py",

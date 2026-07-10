@@ -1,5 +1,6 @@
 {
   "action": "skip_live_refresh",
+  "artifact_digest": "296bf0550080eb0d676f351eee0db1ee41045342266b16ccdd44c7256058c7df",
   "artifact_provenance": {
     "combined_report": {
       "bytes": 548646,
