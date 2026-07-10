@@ -160,6 +160,16 @@ This generated report summarizes the verified ASR leaderboard artifact set.
 - Live model refresh script: `bash docs/asr-leaderboard-live-refresh.sh`
 - Review blocked model log: `tail -n 20 runs/asr-leaderboard/blocked-models.jsonl`
 
+## Automation Stages
+
+| Stage | Commands | Writes committed artifacts | Runs live models |
+| --- | --- | --- | --- |
+| `preflight` | `cron_rehearsal_command`, `runtime_ready_check_command` | False | False |
+| `live_refresh` | `local_secret_env_command`, `model_run_commands` | False | True |
+| `artifact_refresh` | `discover_refresh_command`, `combine_refresh_command`, `manifest_refresh_command` | True | False |
+| `verification` | `page_validation_command`, `freshness_check_command`, `commit_verification_command` | False | False |
+| `hosted_sync` | `hosted_artifact_command`, `hosted_validation_command`, `hosted_commit_verification_command` | False | False |
+
 ## Runtime Status
 
 - MLX ASR: not_executed_by_refresh; transcripts loaded from verified result artifacts

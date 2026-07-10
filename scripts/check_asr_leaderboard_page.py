@@ -1484,7 +1484,7 @@ def _validate_refresh_workflow_artifact(
 
     if not isinstance(artifact, dict):
         raise ValueError(f"{path} must contain a JSON object.")
-    if artifact.get("version") != 1:
+    if artifact.get("version") not in {1, 2}:
         raise ValueError(f"{path} has unsupported version: {artifact.get('version')!r}")
 
     workflow = summary.get("refresh_workflow")
@@ -1503,6 +1503,14 @@ def _validate_refresh_workflow_artifact(
     )
     if command_keys != expected_command_keys:
         raise ValueError(f"{path} command_keys do not match the embedded refresh_workflow.")
+
+    if artifact.get("version") >= 2:
+        automation_stages = artifact.get("automation_stages")
+        if automation_stages != workflow.get("automation_stages"):
+            raise ValueError(
+                f"{path} automation_stages do not match "
+                f"{summary_path} refresh_workflow."
+            )
 
     expected_counts = {
         "primary_model_count": len(workflow.get("model_run_commands", [])),

@@ -326,6 +326,7 @@ def render_generated_sections(
     output_artifacts = build_output_artifact_index(results_path=results_path)
     source_file_summaries = summarize_source_result_files(source_result_paths or [])
     source_report_rows = _render_source_report_rows(source_file_summaries)
+    automation_stage_rows = _render_automation_stage_rows(workflow["automation_stages"])
 
     return "\n".join(
         [
@@ -398,6 +399,14 @@ def render_generated_sections(
                 "</tr>"
                 for label, command in workflow_commands
             ),
+            "      </tbody>",
+            "    </table>",
+            "",
+            "    <h2>Generated Automation Stages</h2>",
+            "    <table>",
+            "      <thead><tr><th>Stage</th><th>Commands</th><th>Behavior</th></tr></thead>",
+            "      <tbody>",
+            *automation_stage_rows,
             "      </tbody>",
             "    </table>",
             "",
@@ -550,6 +559,7 @@ def write_refresh_report(
     source_file_summaries = summarize_source_result_files(source_result_paths or [])
     output_artifacts = build_output_artifact_index(results_path=results_path)
     next_runs = build_next_run_plan(results, expected_cases_per_model=expected_cases_per_model)
+    automation_stages = workflow["automation_stages"]
     output_path.parent.mkdir(parents=True, exist_ok=True)
     output_path.write_text(
         "\n".join(
@@ -673,6 +683,12 @@ def write_refresh_report(
                 f"- Hosted mirror validation: `{_shell_join(workflow['hosted_validation_command'])}`",
                 f"- Live model refresh script: `bash {workflow['live_refresh_script_path']}`",
                 f"- Review blocked model log: `{_shell_join(workflow['blocked_model_log_command'])}`",
+                "",
+                "## Automation Stages",
+                "",
+                "| Stage | Commands | Writes committed artifacts | Runs live models |",
+                "| --- | --- | --- | --- |",
+                *(_automation_stage_markdown_row(stage) for stage in automation_stages),
                 "",
                 "## Runtime Status",
                 "",
@@ -969,10 +985,11 @@ def write_refresh_workflow_artifact(
         json.dumps(
             {
                 "description": "Generated machine-readable ASR leaderboard refresh workflow.",
-                "version": 1,
+                "version": 2,
                 "refresh_commands_path": _repo_relative(DEFAULT_REFRESH_COMMANDS),
                 "live_refresh_script_path": _repo_relative(DEFAULT_LIVE_REFRESH_SCRIPT),
                 "command_keys": command_keys,
+                "automation_stages": workflow["automation_stages"],
                 "primary_model_count": len(ASR_LEADERBOARD_MODELS),
                 "fallback_model_count": len(ASR_FALLBACK_MODELS),
                 "workflow": workflow,
@@ -1249,7 +1266,67 @@ def _refresh_workflow(source_result_paths: list[Path]) -> dict[str, object]:
             "Load the Gemini API key from the local secret file only at runtime; "
             "do not commit or print secrets."
         ),
+        "automation_stages": _automation_stages(),
     }
+
+
+def _automation_stages() -> list[dict[str, object]]:
+    return [
+        {
+            "stage": "preflight",
+            "description": "Validate committed result sources, generated artifacts, audio readiness, and MLX runtime status.",
+            "command_keys": [
+                "cron_rehearsal_command",
+                "runtime_ready_check_command",
+            ],
+            "writes_committed_artifacts": False,
+            "runs_live_models": False,
+        },
+        {
+            "stage": "live_refresh",
+            "description": "Run primary MLX ASR models with Gemini judging only when the runtime gate reports ready.",
+            "command_keys": [
+                "local_secret_env_command",
+                "model_run_commands",
+            ],
+            "writes_committed_artifacts": False,
+            "runs_live_models": True,
+        },
+        {
+            "stage": "artifact_refresh",
+            "description": "Rebuild the combined report, generated demo page block, summary JSON, report links, and source manifest from verified result files.",
+            "command_keys": [
+                "discover_refresh_command",
+                "combine_refresh_command",
+                "manifest_refresh_command",
+            ],
+            "writes_committed_artifacts": True,
+            "runs_live_models": False,
+        },
+        {
+            "stage": "verification",
+            "description": "Check page structure, generated freshness, test suite, and non-secret commit readiness before pushing.",
+            "command_keys": [
+                "page_validation_command",
+                "freshness_check_command",
+                "commit_verification_command",
+            ],
+            "writes_committed_artifacts": False,
+            "runs_live_models": False,
+        },
+        {
+            "stage": "hosted_sync",
+            "description": "Copy verified generated artifacts into the Pages checkout only after local artifacts change.",
+            "command_keys": [
+                "hosted_artifact_command",
+                "hosted_validation_command",
+                "hosted_commit_verification_command",
+            ],
+            "writes_committed_artifacts": False,
+            "runs_live_models": False,
+            "requires_env_var": DEFAULT_HOSTED_DIR_ENV,
+        },
+    ]
 
 
 def _model_run_commands() -> list[dict[str, object]]:
@@ -1754,6 +1831,16 @@ def _category_markdown_row(summary: CategorySummary) -> str:
     return f"| `{summary.category}` | {summary.result_count} | {summary.average_score:.1f} | {labels} |"
 
 
+def _automation_stage_markdown_row(stage: dict[str, object]) -> str:
+    commands = ", ".join(
+        f"`{command_key}`" for command_key in stage["command_keys"]
+    )
+    return (
+        f"| `{stage['stage']}` | {commands} | "
+        f"{stage['writes_committed_artifacts']} | {stage['runs_live_models']} |"
+    )
+
+
 def _format_category_counts(categories: Counter[str]) -> str:
     return ", ".join(
         f"`{category}`: {count}"
@@ -1873,6 +1960,38 @@ def _render_source_report_rows(summaries: list[SourceResultFileSummary]) -> list
             "</tr>"
         )
     rows.extend(["      </tbody>", "    </table>"])
+    return rows
+
+
+def _render_automation_stage_rows(stages: object) -> list[str]:
+    if not isinstance(stages, list):
+        raise TypeError("automation_stages must be a list")
+    rows: list[str] = []
+    for stage in stages:
+        if not isinstance(stage, dict):
+            raise TypeError("automation stage must be a dictionary")
+        commands = ", ".join(
+            f"<code>{html.escape(str(command_key))}</code>"
+            for command_key in stage["command_keys"]
+        )
+        behavior = []
+        if stage.get("runs_live_models"):
+            behavior.append("runs live models")
+        else:
+            behavior.append("no live model calls")
+        if stage.get("writes_committed_artifacts"):
+            behavior.append("writes committed artifacts")
+        else:
+            behavior.append("validation only")
+        if stage.get("requires_env_var"):
+            behavior.append(f"requires {stage['requires_env_var']}")
+        rows.append(
+            "        <tr>"
+            f"<td><code>{html.escape(str(stage['stage']))}</code></td>"
+            f"<td>{commands}</td>"
+            f"<td>{html.escape('; '.join(behavior))}</td>"
+            "</tr>"
+        )
     return rows
 
 

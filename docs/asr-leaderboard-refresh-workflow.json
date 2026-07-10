@@ -1,4 +1,60 @@
 {
+  "automation_stages": [
+    {
+      "command_keys": [
+        "cron_rehearsal_command",
+        "runtime_ready_check_command"
+      ],
+      "description": "Validate committed result sources, generated artifacts, audio readiness, and MLX runtime status.",
+      "runs_live_models": false,
+      "stage": "preflight",
+      "writes_committed_artifacts": false
+    },
+    {
+      "command_keys": [
+        "local_secret_env_command",
+        "model_run_commands"
+      ],
+      "description": "Run primary MLX ASR models with Gemini judging only when the runtime gate reports ready.",
+      "runs_live_models": true,
+      "stage": "live_refresh",
+      "writes_committed_artifacts": false
+    },
+    {
+      "command_keys": [
+        "discover_refresh_command",
+        "combine_refresh_command",
+        "manifest_refresh_command"
+      ],
+      "description": "Rebuild the combined report, generated demo page block, summary JSON, report links, and source manifest from verified result files.",
+      "runs_live_models": false,
+      "stage": "artifact_refresh",
+      "writes_committed_artifacts": true
+    },
+    {
+      "command_keys": [
+        "page_validation_command",
+        "freshness_check_command",
+        "commit_verification_command"
+      ],
+      "description": "Check page structure, generated freshness, test suite, and non-secret commit readiness before pushing.",
+      "runs_live_models": false,
+      "stage": "verification",
+      "writes_committed_artifacts": false
+    },
+    {
+      "command_keys": [
+        "hosted_artifact_command",
+        "hosted_validation_command",
+        "hosted_commit_verification_command"
+      ],
+      "description": "Copy verified generated artifacts into the Pages checkout only after local artifacts change.",
+      "requires_env_var": "ASR_LEADERBOARD_HOSTED_DIR",
+      "runs_live_models": false,
+      "stage": "hosted_sync",
+      "writes_committed_artifacts": false
+    }
+  ],
   "command_keys": [
     "audio_materialization_command",
     "audio_ready_check_command",
@@ -27,7 +83,7 @@
   "live_refresh_script_path": "docs/asr-leaderboard-live-refresh.sh",
   "primary_model_count": 3,
   "refresh_commands_path": "docs/asr-leaderboard-refresh-commands.sh",
-  "version": 1,
+  "version": 2,
   "workflow": {
     "audio_materialization_command": [
       ".venv/bin/python",
@@ -45,6 +101,62 @@
       "scripts/refresh_asr_leaderboard_artifacts.py",
       "--check-only",
       "--require-audio-ready"
+    ],
+    "automation_stages": [
+      {
+        "command_keys": [
+          "cron_rehearsal_command",
+          "runtime_ready_check_command"
+        ],
+        "description": "Validate committed result sources, generated artifacts, audio readiness, and MLX runtime status.",
+        "runs_live_models": false,
+        "stage": "preflight",
+        "writes_committed_artifacts": false
+      },
+      {
+        "command_keys": [
+          "local_secret_env_command",
+          "model_run_commands"
+        ],
+        "description": "Run primary MLX ASR models with Gemini judging only when the runtime gate reports ready.",
+        "runs_live_models": true,
+        "stage": "live_refresh",
+        "writes_committed_artifacts": false
+      },
+      {
+        "command_keys": [
+          "discover_refresh_command",
+          "combine_refresh_command",
+          "manifest_refresh_command"
+        ],
+        "description": "Rebuild the combined report, generated demo page block, summary JSON, report links, and source manifest from verified result files.",
+        "runs_live_models": false,
+        "stage": "artifact_refresh",
+        "writes_committed_artifacts": true
+      },
+      {
+        "command_keys": [
+          "page_validation_command",
+          "freshness_check_command",
+          "commit_verification_command"
+        ],
+        "description": "Check page structure, generated freshness, test suite, and non-secret commit readiness before pushing.",
+        "runs_live_models": false,
+        "stage": "verification",
+        "writes_committed_artifacts": false
+      },
+      {
+        "command_keys": [
+          "hosted_artifact_command",
+          "hosted_validation_command",
+          "hosted_commit_verification_command"
+        ],
+        "description": "Copy verified generated artifacts into the Pages checkout only after local artifacts change.",
+        "requires_env_var": "ASR_LEADERBOARD_HOSTED_DIR",
+        "runs_live_models": false,
+        "stage": "hosted_sync",
+        "writes_committed_artifacts": false
+      }
     ],
     "blocked_model_log_command": [
       "tail",
